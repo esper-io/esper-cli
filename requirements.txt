@@ -1,0 +1,9 @@
+cement==3.0.2
+jinja2
+pyyaml
+colorlog
+esperclient
+tinydb
+clint
+tabulate
+crayons

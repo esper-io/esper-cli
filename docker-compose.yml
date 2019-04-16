@@ -1,0 +1,13 @@
+version: "3"
+services:
+    esper:
+        image: "esper:dev"
+        build:
+            context: .
+            dockerfile: Dockerfile
+        hostname: esper
+        stdin_open: true
+        tty: true
+        working_dir: '/esper-dev'
+        volumes:
+            - ".:/esper-dev"
