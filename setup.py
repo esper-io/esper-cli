@@ -25,4 +25,15 @@ setup(
         [console_scripts]
         esper = esper.main:main
     """,
+    install_requires=[
+        'cement==3.0.2',
+        'jinja2',
+        'pyyaml',
+        'colorlog',
+        'esperclient',
+        'tinydb',
+        'clint',
+        'tabulate',
+        'crayons'
+    ],
 )
