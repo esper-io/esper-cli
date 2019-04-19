@@ -20,3 +20,8 @@ class DeviceState(BaseEnum):
     POLICY_APPLICATION_IN_PROGRESS = 50
 
     INACTIVE = 60  # This state is set by cloud, when device is unreachable
+
+
+class OutputFormat(BaseEnum):
+    TABULATED = 'tabulated'
+    JSON = 'json'

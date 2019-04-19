@@ -5,6 +5,7 @@ from esper.controllers.base import Base
 from esper.controllers.configure import Configure
 from esper.controllers.devices import Devices
 from esper.core.exc import EsperError
+from esper.core.output_handler import EsperOutputHandler
 from esper.ext.utils import extend_tinydb
 
 # configuration defaults
@@ -23,10 +24,10 @@ META['log.colorlog']['max_files'] = 4
 META['log.colorlog']['colorize_file_log'] = False
 META['log.colorlog']['colorize_console_log'] = True
 META['log.colorlog']['colors'] = {
-    'DEBUG':    'cyan',
-    'INFO':     'white',
-    'WARNING':  'yellow',
-    'ERROR':    'red',
+    'DEBUG': 'cyan',
+    'INFO': 'white',
+    'WARNING': 'yellow',
+    'ERROR': 'red',
     'CRITICAL': 'red,bg_white',
 }
 
@@ -61,16 +62,19 @@ class Esper(App):
         # load additional framework extensions
         extensions = [
             'yaml',
+            'json',
             'colorlog',
             'jinja2',
             'tabulate'
         ]
 
         # # set the output handler
-        output_handler = 'tabulate'
+        # output_handler = 'tabulate'
+        output_handler = 'esper_output_handler'
 
         # register handlers
         handlers = [
+            EsperOutputHandler,
             Base,
             Configure,
             Devices
