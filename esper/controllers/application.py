@@ -97,7 +97,7 @@ class Application(Controller):
                             label['version_count']: len(application.versions) if application.versions else 0
                         }
                     )
-                print(white(f"Total Number of Applications: {response.count}", bold=True))
+                print(white(f"\tTotal Number of Applications: {response.count}", bold=True))
                 self.app.render(applications, format=OutputFormat.TABULATED.value, headers="keys",
                                 tablefmt="fancy_grid")
             else:
@@ -204,3 +204,106 @@ class Application(Controller):
         except ApiException as e:
             self.app.log.debug(f"Failed to upload an application: {e}")
             self.app.log.error(f"Failed to upload an application, reason: {e.reason}")
+
+    @ex(
+        help='Versions command to list application versions',
+        arguments=[
+            (['-a', '--application'],
+             {'help': 'Filter versions by application id',
+              'action': 'store',
+              'dest': 'application_id'}),
+            (['-vc', '--versioncode'],
+             {'help': 'Filter versions by version code',
+              'action': 'store',
+              'dest': 'version_code'}),
+            (['-bn', '--build_number'],
+             {'help': 'Filter versions by build number',
+              'action': 'store',
+              'dest': 'build_number'}),
+            (['-j', '--json'],
+             {'help': 'Render result in Json format',
+              'action': 'store_true',
+              'dest': 'json'}),
+            (['-l', '--limit'],
+             {'help': 'Number of results to return per page',
+              'action': 'store',
+              'default': 20,
+              'dest': 'limit'}),
+            (['-i', '--offset'],
+             {'help': 'The initial index from which to return the results',
+              'action': 'store',
+              'default': 0,
+              'dest': 'offset'}),
+        ]
+    )
+    def versions(self):
+        """Command to list application versions"""
+        try:
+
+            validate_creds_exists(self.app)
+            config = get_client_config(self.app)
+            api_instance = get_application_api_instance(config)
+            enterprise_id = self.app.creds.all()[0].get("enterprise")
+
+            application_id = self.app.pargs.application_id
+            version_code = self.app.pargs.version_code
+            build_number = self.app.pargs.build_number
+            limit = self.app.pargs.limit
+            offset = self.app.pargs.offset
+
+            kwargs = {}
+            if version_code:
+                kwargs['version_code'] = version_code
+
+            if build_number:
+                kwargs['build_number'] = build_number
+
+            # Find applications in an enterprise
+            response = api_instance.get_app_versions(application_id, enterprise_id, limit=limit, offset=offset,
+                                                     **kwargs)
+
+            if not self.app.pargs.json:
+                versions = []
+
+                label = {
+                    'id': white("ID", bold=True),
+                    'version_code': white("VERSION CODE", bold=True),
+                    'build_number': white("BUILD NUMBER", bold=True),
+                    'size_in_mb': white("SIZE IN Mb", bold=True),
+                    'release_track': white("RELEASE TRACK", bold=True),
+                    'installed_count': white("INSTALLED COUNT", bold=True),
+                }
+
+                for version in response.results:
+                    versions.append(
+                        {
+                            label['id']: version.id,
+                            label['version_code']: version.version_code,
+                            label['build_number']: version.build_number,
+                            label['size_in_mb']: version.size_in_mb,
+                            label['release_track']: version.release_track,
+                            label['installed_count']: len(version.installed_count) if version.installed_count else 0
+                        }
+                    )
+                print(white(f"\tTotal Number of Versions: {response.count}", bold=True))
+                self.app.render(versions, format=OutputFormat.TABULATED.value, headers="keys",
+                                tablefmt="fancy_grid")
+            else:
+                versions = []
+                for version in response.results:
+                    versions.append(
+                        {
+                            'id': version.id,
+                            'version_code': version.version_code,
+                            'build_number': version.build_number,
+                            'size_in_mb': version.size_in_mb,
+                            'release_track': version.release_track,
+                            'installed_count': len(version.installed_count) if version.installed_count else 0
+                        }
+                    )
+                print(white(f"Total Number of Versions: {response.count}", bold=True))
+                self.app.render(versions, format=OutputFormat.JSON.value)
+
+        except ApiException as e:
+            self.app.log.debug(f"Failed to list applications: {e}")
+            self.app.log.error(f"Failed to list applications, reason: {e.reason}")

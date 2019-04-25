@@ -25,3 +25,7 @@ class DeviceState(BaseEnum):
 class OutputFormat(BaseEnum):
     TABULATED = 'tabulated'
     JSON = 'json'
+
+
+class DeviceCommandEnum(BaseEnum):
+    INSTALL = 210

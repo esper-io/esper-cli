@@ -5,6 +5,7 @@ from esper.controllers.base import Base
 from esper.controllers.configure import Configure
 from esper.controllers.devices import Devices
 from esper.controllers.application import Application
+from esper.controllers.command import Command
 from esper.core.exc import EsperError
 from esper.core.output_handler import EsperOutputHandler
 from esper.ext.utils import extend_tinydb
@@ -78,7 +79,8 @@ class Esper(App):
             Base,
             Configure,
             Devices,
-            Application
+            Application,
+            Command
         ]
 
         # hooks
