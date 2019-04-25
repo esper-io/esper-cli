@@ -282,7 +282,7 @@ class Application(Controller):
                             label['build_number']: version.build_number,
                             label['size_in_mb']: version.size_in_mb,
                             label['release_track']: version.release_track,
-                            label['installed_count']: len(version.installed_count) if version.installed_count else 0
+                            label['installed_count']: version.installed_count if version.installed_count else 0
                         }
                     )
                 print(white(f"\tTotal Number of Versions: {response.count}", bold=True))
@@ -298,7 +298,7 @@ class Application(Controller):
                             'build_number': version.build_number,
                             'size_in_mb': version.size_in_mb,
                             'release_track': version.release_track,
-                            'installed_count': len(version.installed_count) if version.installed_count else 0
+                            'installed_count': version.installed_count if version.installed_count else 0
                         }
                     )
                 print(white(f"Total Number of Versions: {response.count}", bold=True))
