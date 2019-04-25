@@ -1,16 +1,34 @@
-
 from cement import App, TestApp, init_defaults
 from cement.core.exc import CaughtSignal
-from .core.exc import EsperError
-from .controllers.base import Base
-from .controllers.configure import Configure
-from .controllers.devices import Devices
-from .ext.utils import extend_tinydb
+
+from esper.controllers.base import Base
+from esper.controllers.configure import Configure
+from esper.controllers.devices import Devices
+from esper.core.exc import EsperError
+from esper.core.output_handler import EsperOutputHandler
+from esper.ext.utils import extend_tinydb
 
 # configuration defaults
 CONFIG = init_defaults('esper')
-CONFIG['esper']['foo'] = 'bar'
-CONFIG['esper']['creds_file'] = '~/.esper/creds.json'
+CONFIG['esper']['creds_file'] = '~/.esper/db/creds.json'
+
+# meta defaults
+META = init_defaults('log.colorlog')
+META['log.colorlog']['file'] = '~/.esper/logs/esper.log'
+META['log.colorlog']['level'] = 'debug'
+META['log.colorlog']['to_console'] = True
+META['log.colorlog']['rotate'] = False
+META['log.colorlog']['max_bytes'] = 512000
+META['log.colorlog']['max_files'] = 4
+META['log.colorlog']['colorize_file_log'] = False
+META['log.colorlog']['colorize_console_log'] = True
+META['log.colorlog']['colors'] = {
+    'DEBUG': 'cyan',
+    'INFO': 'white',
+    'WARNING': 'yellow',
+    'ERROR': 'red',
+    'CRITICAL': 'red,bg_white',
+}
 
 
 class Esper(App):
@@ -19,34 +37,42 @@ class Esper(App):
     class Meta:
         label = 'esper'
 
-        # configuration defaults
-        config_defaults = CONFIG
-
         # call sys.exit() on close
-        close_on_exit = True
+        exit_on_close = True
+
+        # configuration settings
+        config_section = 'esper'
+        config_defaults = CONFIG
+        config_file_suffix = '.yml'
+        config_files = [
+            '~/.esper/config/esper.yml',
+            '/etc/esper/esper.yml',
+            '~/.config/esper/esper.yml',
+            '~/.config/esper.yml',
+            '~/.esper.yml'
+        ]
+        config_handler = 'yaml'
+
+        meta_defaults = META
+        # set the log handler
+        log_handler = 'colorlog'
 
         # load additional framework extensions
         extensions = [
             'yaml',
+            'json',
             'colorlog',
             'jinja2',
             'tabulate'
         ]
 
-        # configuration handler
-        config_handler = 'yaml'
-
-        # configuration file suffix
-        config_file_suffix = '.yml'
-
-        # set the log handler
-        log_handler = 'colorlog'
-
-        # set the output handler
-        output_handler = 'tabulate'
+        # # set the output handler
+        # output_handler = 'tabulate'
+        output_handler = 'esper_output_handler'
 
         # register handlers
         handlers = [
+            EsperOutputHandler,
             Base,
             Configure,
             Devices
@@ -71,7 +97,7 @@ def main():
             app.run()
 
         except AssertionError as e:
-            print('AssertionError > %s' % e.args[0])
+            app.log.error('AssertionError > %s' % e.args[0])
             app.exit_code = 1
 
             if app.debug is True:
@@ -79,7 +105,7 @@ def main():
                 traceback.print_exc()
 
         except EsperError as e:
-            print('EsperError > %s' % e.args[0])
+            app.log.error('EsperError > %s' % e.args[0])
             app.exit_code = 1
 
             if app.debug is True:
@@ -88,7 +114,7 @@ def main():
 
         except CaughtSignal as e:
             # Default Cement signals are SIGINT and SIGTERM, exit 0 (non-error)
-            print('\n%s' % e)
+            app.log.error('\n%s' % e)
             app.exit_code = 0
 
 

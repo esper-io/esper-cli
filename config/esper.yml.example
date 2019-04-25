@@ -7,22 +7,13 @@ esper:
 # debug: false
 
 ### Where external (third-party) plugins are loaded from
-# plugin_dir: /var/lib/esper/plugins/
+# plugin_dir: ~/.esper/plugins/
 
 ### Where all plugin configurations are loaded from
-# plugin_config_dir: /etc/esper/plugins.d/
+# plugin_config_dir: ~/.esper/plugins.d/
 
 ### Where external templates are loaded from
-# template_dir: /var/lib/esper/templates/
-
-### The log handler label
-# log_handler: colorlog
-
-### The output handler label
-# output_handler: tabulate
-
-### sample foo option
-# foo: bar
+# template_dir: ~/.esper/templates/
 
 ### Database
 # creds_file: ~/.esper/creds.json

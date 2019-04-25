@@ -1,9 +1,9 @@
 cement==3.0.2
-jinja2
-pyyaml
-colorlog
-esperclient
-tinydb
-clint
-tabulate
-crayons
+clint==0.5.1
+colorlog==4.0.2
+crayons==0.2.0
+esperclient==0.0.2
+jinja2==2.10.1
+pyyaml==5.1
+tabulate==0.8.3
+tinydb==3.13.0
