@@ -1,7 +1,9 @@
-from cement.utils import fs
-from tinydb import TinyDB
-from esperclient.configuration import Configuration
+import sys
+
 import esperclient as client
+from cement.utils import fs
+from esperclient.configuration import Configuration
+from tinydb import TinyDB
 
 
 def extend_tinydb(app):
@@ -21,17 +23,28 @@ def extend_tinydb(app):
     app.extend('creds', TinyDB(db_file))
 
 
-def get_client_config(app):
+def validate_creds_exists(app):
+    if len(app.creds.all()) == 0:
+        app.log.error("Credentials have not been set!")
+        app.log.info("Setup credentials by calling `configure` command.")
 
+        sys.exit(1)
+
+
+def get_client_config(app):
     creds = app.creds.all()[0]
 
     config = Configuration()
     config.username = creds["username"]
     config.password = creds["password"]
-    config.host = creds["host"]
+    config.host = get_api_endpoint(creds["host"])
 
     return config
 
 
 def get_device_api_instance(config):
     return client.DeviceApi(client.ApiClient(config))
+
+
+def get_api_endpoint(host):
+    return f'https://{host}-api.shoonyacloud.com/api'

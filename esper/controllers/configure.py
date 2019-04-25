@@ -1,9 +1,10 @@
-
 from cement import Controller, ex
 from cement.utils.version import get_version_banner
-from ..core.version import get_version
 from clint.textui import prompt, validators
 
+from esper.controllers.enums import OutputFormat
+from ..core.version import get_version
+from esper.ext.utils import validate_creds_exists
 
 VERSION_BANNER = """
 Esper CLI tool to manage resources on Esper.io API service %s
@@ -36,18 +37,22 @@ class Configure(Controller):
 
         # sub-command level arguments. ex: 'esper configure --foo bar'
         arguments=[
-            ### add a sample foo option under subcommand namespace
-            ( [ '-s', '--set' ],
-              { 'help': 'Create or Update credentials for Esper.io API Service',
-                'action': 'store_true',
-                'default': False,
-                'dest': 'set' } ),
+            (['-s', '--set'],
+             {'help': 'Create or Update credentials for Esper.io API Service',
+              'action': 'store_true',
+              'default': False,
+              'dest': 'set'}),
 
             (['-l', '--list'],
              {'help': 'List credentials for Esper.io API Service',
               'action': 'store_true',
               'default': False,
               'dest': 'list'}),
+
+            (['--json'],
+             {'help': 'Render result in Json format',
+              'action': 'store_true',
+              'dest': 'json'}),
         ],
     )
     def configure(self):
@@ -57,11 +62,13 @@ class Configure(Controller):
         if self.app.pargs.set or len(self.app.creds.all()) == 0:
             user = prompt.query("Enter your Username : ")
             password = prompt.query("Enter your Password : ")
-            host = prompt.query("Enter your Host Endpoint (optional) :",
-                                default="https://demo-api.shoonyacloud.com/api",
+            host = prompt.query("Enter your Host Endpoint:",
+                                default="demo",
                                 validators=[])
-            enterprise = prompt.query("Enter your Enterprise ID : ",
-                                      validators=[validators.RegexValidator(regex='[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}')])
+
+            enterprise = prompt.query("Enter your Enterprise Id: ",
+                                      validators=[validators.RegexValidator(
+                                          regex='[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}')])
 
             creds = [
                 ("username", user),
@@ -80,7 +87,12 @@ class Configure(Controller):
 
         # Trigger listing operation, if --list is given or Creds DB has content
         if self.app.pargs.list or len(self.app.creds.all()) == 1:
-            creds = [(k, v) for k, v in self.app.creds.all()[0].items()]
+            validate_creds_exists(self.app)
 
-        # Render the Credentials
-        self.app.render(creds, headers=["Title", "Details"], tablefmt="fancy_grid")
+            if not self.app.pargs.json:
+                creds = [(k, v) for k, v in self.app.creds.all()[0].items()]
+                # Render the Credentials
+                self.app.render(creds, format=OutputFormat.TABULATED.value, headers=["Title", "Details"],
+                                tablefmt="fancy_grid")
+            else:
+                self.app.render(self.app.creds.all()[0], format=OutputFormat.JSON.value)

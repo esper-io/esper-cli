@@ -1,69 +1,41 @@
-# Esper CLI tool to manage resources on Esper.io API service
+# esper
 
+This package provides a unified command line interface to Esper API Services. The esper package works on Python version 3.6.8.
 ## Installation
-
+The easiest way to install aws-cli is to use `pip` in a ``virtualenv``:
 ```
-$ pip install -r requirements.txt
-
-$ pip install setup.py
+$ pip install esper
 ```
-
-## Development
-
-This project includes a number of helpers in the `Makefile` to streamline common development tasks.
-
-### Environment Setup
-
-The following demonstrates setting up and working with a development environment:
-
+or, if you are not installing in a ``virtualenv``, to install globally:
 ```
-### create a virtualenv for development
-
-$ make virtualenv
-
-$ source env/bin/activate
-
-
-### run esper cli application
-
-$ esper --help
-
-
-### run pytest / coverage
-
-$ make test
+$ sudo pip install esper
+```
+or for your user:
+```
+$ pip install --user esper
+```
+If you have the esper installed and want to upgrade to the latest version
+you can run:
+```
+$ pip install --upgrade esper
+```
+This will install the esper package as well as all dependencies.  You can also just `download the tarball`.  Once you have the
+esper directory structure on your workstation, you can just run:
+```
+$ cd <path_to_esper>
+$ python setup.py install
 ```
 
+### Getting Started
 
-### Releasing to PyPi
-
-Before releasing to PyPi, you must configure your login credentials:
-
-**~/.pypirc**:
-
+Before using esper, you need to tell it about your Esper credentials. The way to get started is to run the esper configure command:
 ```
-[pypi]
-username = YOUR_USERNAME
-password = YOUR_PASSWORD
+$ esper configure
+$ Enter your Username: foo
+$ Enter your Password: bar
+$ Enter your Host Endpoint: develop
+$ Enter your Enterprise ID: <UUID for Enterprise>
 ```
 
-Then use the included helper function via the `Makefile`:
-
-```
-$ make dist
-
-$ make dist-upload
-```
-
-## Deployments
-
-### Docker
-
-Included is a basic `Dockerfile` for building and distributing `Esper CLI Tool`,
-and can be built with the included `make` helper:
-
-```
-$ make docker
-
-$ docker run -it esper --help
-```
+### Getting Help
+We use GitHub issues for tracking bugs and feature requests.

@@ -1,5 +1,3 @@
-import sys
-
 from cement import Controller, ex
 from cement.utils.version import get_version_banner
 from crayons import white, red, green, blue
@@ -7,7 +5,7 @@ from esperclient.rest import ApiException
 
 from .enums import DeviceState, OutputFormat
 from ..core.version import get_version
-from ..ext.utils import get_client_config, get_device_api_instance
+from ..ext.utils import validate_creds_exists, get_client_config, get_device_api_instance
 
 VERSION_BANNER = """
 Command Line Tool for Esper SDK %s
@@ -28,20 +26,6 @@ class Devices(Controller):
         stacked_type = 'embedded'
         stacked_on = 'base'
 
-        arguments = [
-            (['--json'],
-             {'help': 'Render result in Json format',
-              'action': 'store_true',
-              'dest': 'json'}),
-        ]
-
-    def validate_creds_exists(self):
-        if len(self.app.creds.all()) == 0:
-            print(red("Credentials have not been set!", bold=True))
-            print(white("Setup credentials by calling `configure` command."))
-
-            sys.exit(1)
-
     @ex(
         help='Devices command to list device details',
         arguments=[
@@ -50,14 +34,17 @@ class Devices(Controller):
               'action': 'store',
               'choices': ['active', 'inactive', 'disabled'],
               'dest': 'filter_state'}),
+            (['--json'],
+             {'help': 'Render result in Json format',
+              'action': 'store_true',
+              'dest': 'json'}),
         ]
     )
     def devices(self):
         """Command to list devices"""
         try:
 
-            self.validate_creds_exists()
-
+            validate_creds_exists(self.app)
             config = get_client_config(self.app)
             api_instance = get_device_api_instance(config)
             enterprise_id = self.app.creds.all()[0].get("enterprise")
@@ -124,13 +111,17 @@ class Devices(Controller):
             (['device_id'],
              {'help': 'Show details about the device',
               'action': 'store'}),
+            (['--json'],
+             {'help': 'Render result in Json format',
+              'action': 'store_true',
+              'dest': 'json'}),
         ]
     )
     def device(self):
         try:
             device_id = self.app.pargs.device_id
 
-            self.validate_creds_exists()
+            validate_creds_exists(self.app)
             config = get_client_config(self.app)
             api_instance = get_device_api_instance(config)
             enterprise_id = self.app.creds.all()[0].get("enterprise")

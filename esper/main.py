@@ -10,7 +10,6 @@ from esper.ext.utils import extend_tinydb
 
 # configuration defaults
 CONFIG = init_defaults('esper')
-CONFIG['esper']['foo'] = 'bar'
 CONFIG['esper']['creds_file'] = '~/.esper/db/creds.json'
 
 # meta defaults
@@ -37,7 +36,6 @@ class Esper(App):
 
     class Meta:
         label = 'esper'
-        debug = False
 
         # call sys.exit() on close
         exit_on_close = True
@@ -99,7 +97,7 @@ def main():
             app.run()
 
         except AssertionError as e:
-            print('AssertionError > %s' % e.args[0])
+            app.log.error('AssertionError > %s' % e.args[0])
             app.exit_code = 1
 
             if app.debug is True:
@@ -107,7 +105,7 @@ def main():
                 traceback.print_exc()
 
         except EsperError as e:
-            print('EsperError > %s' % e.args[0])
+            app.log.error('EsperError > %s' % e.args[0])
             app.exit_code = 1
 
             if app.debug is True:
@@ -116,7 +114,7 @@ def main():
 
         except CaughtSignal as e:
             # Default Cement signals are SIGINT and SIGTERM, exit 0 (non-error)
-            print('\n%s' % e)
+            app.log.error('\n%s' % e)
             app.exit_code = 0
 
 
