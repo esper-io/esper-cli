@@ -34,10 +34,20 @@ class Devices(Controller):
               'action': 'store',
               'choices': ['active', 'inactive', 'disabled'],
               'dest': 'filter_state'}),
-            (['--json'],
+            (['-j', '--json'],
              {'help': 'Render result in Json format',
               'action': 'store_true',
               'dest': 'json'}),
+            (['-l', '--limit'],
+             {'help': 'Number of results to return per page',
+              'action': 'store',
+              'default': 20,
+              'dest': 'limit'}),
+            (['-i', '--offset'],
+             {'help': 'The initial index from which to return the results',
+              'action': 'store',
+              'default': 0,
+              'dest': 'offset'}),
         ]
     )
     def devices(self):
@@ -50,16 +60,19 @@ class Devices(Controller):
             enterprise_id = self.app.creds.all()[0].get("enterprise")
 
             state = self.app.pargs.filter_state
+            limit = self.app.pargs.limit
+            offset = self.app.pargs.offset
 
             # Find devices in an enterprise
-            response = api_instance.get_all_devices(enterprise_id)
+            response = api_instance.get_all_devices(enterprise_id, limit=limit, offset=offset)
             print(white(f"Number of Devices: {response.count}", bold=True))
 
             if not self.app.pargs.json:
                 devices = []
 
                 label = {
-                    'device': white("DEVICE", bold=True),
+                    'id': white("ID", bold=True),
+                    'name': white("NAME", bold=True),
                     'model': white("MODEL", bold=True),
                     'state': white("CURRENT STATE", bold=True)
                 }
@@ -79,9 +92,14 @@ class Devices(Controller):
                     else:
                         current_state = DeviceState(device.status).name
 
-                    devices.append({label['device']: device.device_name,
-                                    label['model']: device.hardware_info.get("manufacturer"),
-                                    label['state']: current_state})
+                    devices.append(
+                        {
+                            label['id']: device.id,
+                            label['name']: device.device_name,
+                            label['model']: device.hardware_info.get("manufacturer"),
+                            label['state']: current_state
+                        }
+                    )
 
                 self.app.render(devices, format=OutputFormat.TABULATED.value, headers="keys", tablefmt="fancy_grid")
             else:
@@ -97,13 +115,19 @@ class Devices(Controller):
                         current_state = DeviceState.POLICY_APPLICATION_IN_PROGRESS.name
                     else:
                         current_state = DeviceState(device.status).name
-                    devices.append({'device': device.device_name,
-                                    'model': device.hardware_info.get("manufacturer"),
-                                    'state': current_state})
+                    devices.append(
+                        {
+                            'id': device.id,
+                            'device': device.device_name,
+                            'model': device.hardware_info.get("manufacturer"),
+                            'state': current_state
+                        }
+                    )
                 self.app.render(devices, format=OutputFormat.JSON.value)
 
         except ApiException as e:
-            self.app.log.error("Exception when calling DeviceApi->get_all_devices: %s\n" % e)
+            self.app.log.debug(f"Failed to list devices: {e}")
+            self.app.log.error(f"Failed to list devices, reason: {e.reason}")
 
     @ex(
         help='Show device-specific details',
@@ -111,7 +135,7 @@ class Devices(Controller):
             (['device_id'],
              {'help': 'Show details about the device',
               'action': 'store'}),
-            (['--json'],
+            (['-j', '--json'],
              {'help': 'Render result in Json format',
               'action': 'store_true',
               'dest': 'json'}),
@@ -130,7 +154,7 @@ class Devices(Controller):
 
             print(white(f"\tDEVICE DETAILS of {response.device_name}", bold=True))
 
-            valid_keys = ['device_name', 'status', 'state', 'suid', 'api_level', 'template_name', 'is_gms']
+            valid_keys = ['id', 'device_name', 'status', 'state', 'suid', 'api_level', 'template_name', 'is_gms']
 
             if not self.app.pargs.json:
                 title = white("TITLE", bold=True)
@@ -141,5 +165,6 @@ class Devices(Controller):
                 renderable = {k: v for k, v in response.to_dict().items() if k in valid_keys}
                 self.app.render(renderable, format=OutputFormat.JSON.value)
 
-        except ApiException:
-            self.app.log.error("Error when calling DeviceApi->get_device_by_id!")
+        except ApiException as e:
+            self.app.log.debug(f"Failed to show details of a device: {e}")
+            self.app.log.error(f"Failed to show details of a device, reason: {e.reason}")
