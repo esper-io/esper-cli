@@ -22,9 +22,9 @@ class Configure(Controller):
         description = 'Esper CLI tool to manage resources on Esper.io API service'
 
         # text displayed at the bottom of --help output
-        epilog = 'Usage: esper configure'
+        epilog = 'Usage: espercli configure'
 
-        # controller level arguments. ex: 'esper --version'
+        # controller level arguments. ex: 'espercli --version'
         arguments = [
             # ### add a version banner
             # ( [ '-v', '--version' ],
@@ -35,7 +35,7 @@ class Configure(Controller):
     @ex(
         help='Configure the credentials for `esper.io` API Service',
 
-        # sub-command level arguments. ex: 'esper configure --foo bar'
+        # sub-command level arguments. ex: 'espercli configure --foo bar'
         arguments=[
             (['-s', '--set'],
              {'help': 'Create or Update credentials for Esper.io API Service',

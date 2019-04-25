@@ -9,7 +9,7 @@ LONG_DESCRIPTION = f.read()
 f.close()
 
 setup(
-    name='esper',
+    name='espercli',
     version=VERSION,
     description='Esper CLI tool to manage resources on Esper.io API service',
     long_description=LONG_DESCRIPTION,
@@ -23,7 +23,7 @@ setup(
     include_package_data=True,
     entry_points="""
         [console_scripts]
-        esper = esper.main:main
+        espercli = esper.main:main
     """,
     install_requires=[
         'cement==3.0.2',

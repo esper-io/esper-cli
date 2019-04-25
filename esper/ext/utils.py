@@ -46,5 +46,13 @@ def get_device_api_instance(config):
     return client.DeviceApi(client.ApiClient(config))
 
 
+def get_application_api_instance(config):
+    return client.ApplicationApi(client.ApiClient(config))
+
+
+def get_application_upload_api_instance(config):
+    return client.EnterpriseApplicationApi(client.ApiClient(config))
+
+
 def get_api_endpoint(host):
     return f'https://{host}-api.shoonyacloud.com/api'
