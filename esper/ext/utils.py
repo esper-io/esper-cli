@@ -4,6 +4,7 @@ import esperclient as client
 from cement.utils import fs
 from esperclient.configuration import Configuration
 from tinydb import TinyDB
+from esper.ext.db_wrapper import DBWrapper
 
 
 def extend_tinydb(app):
@@ -24,7 +25,8 @@ def extend_tinydb(app):
 
 
 def validate_creds_exists(app):
-    if len(app.creds.all()) == 0:
+    db = DBWrapper(app.creds)
+    if not db.get_configure():
         app.log.error("Credentials have not been set!")
         app.log.info("Setup credentials by calling `configure` command.")
 
@@ -32,7 +34,8 @@ def validate_creds_exists(app):
 
 
 def get_client_config(app):
-    creds = app.creds.all()[0]
+    db = DBWrapper(app.creds)
+    creds = db.get_configure()
 
     config = Configuration()
     config.username = creds["username"]

@@ -4,7 +4,7 @@ from cement.core.exc import CaughtSignal
 from esper.controllers.base import Base
 from esper.controllers.configure import Configure
 from esper.controllers.devices import Devices
-from esper.controllers.application import Application
+from esper.controllers.application.application import Application
 from esper.controllers.command import Command
 from esper.core.exc import EsperError
 from esper.core.output_handler import EsperOutputHandler
