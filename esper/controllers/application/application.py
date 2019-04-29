@@ -17,19 +17,19 @@ Command Line Tool for Esper SDK %s
 
 class Application(Controller):
     class Meta:
-        label = 'application'
+        label = 'app'
 
         # text displayed at the top of --help output
-        # description = 'Applications command to list and show application details'
+        description = 'app controller is used for application related commands'
 
         # text displayed at the bottom of --help output
-        # epilog = 'Usage: espercli applications'
+        epilog = 'Usage: espercli app'
 
-        stacked_type = 'embedded'
+        stacked_type = 'nested'
         stacked_on = 'base'
 
     @ex(
-        help='application-list command to list application details',
+        help='list command used to list application details',
         arguments=[
             (['-n', '--name'],
              {'help': 'Filter devices by application name',
@@ -55,69 +55,68 @@ class Application(Controller):
               'dest': 'offset'}),
         ]
     )
-    def application_list(self):
+    def list(self):
         """Command to list applications"""
+        validate_creds_exists(self.app)
+        db = DBWrapper(self.app.creds)
+        application_client = APIClient(db.get_configure()).get_application_api_client()
+        enterprise_id = db.get_enterprise_id()
+
+        name = self.app.pargs.name
+        package = self.app.pargs.package
+        limit = self.app.pargs.limit
+        offset = self.app.pargs.offset
+
+        kwargs = {}
+        if name:
+            kwargs['application_name'] = name
+
+        if package:
+            kwargs['package_name'] = package
+
         try:
-
-            validate_creds_exists(self.app)
-            db = DBWrapper(self.app.creds)
-            application_client = APIClient(db.get_configure()).get_application_api_client()
-            enterprise_id = db.get_enterprise_id()
-
-            name = self.app.pargs.name
-            package = self.app.pargs.package
-            limit = self.app.pargs.limit
-            offset = self.app.pargs.offset
-
-            kwargs = {}
-            if name:
-                kwargs['application_name'] = name
-
-            if package:
-                kwargs['package_name'] = package
-
             # Find applications in an enterprise
             response = application_client.list(enterprise_id, limit=limit, offset=offset, **kwargs)
-
-            if not self.app.pargs.json:
-                applications = []
-
-                label = {
-                    'id': white("ID", bold=True),
-                    'name': white("NAME", bold=True),
-                    'package': white("PACKAGE NAME", bold=True),
-                    'version_count': white("NO. OF VERSIONS", bold=True)
-                }
-
-                for application in response.results:
-                    applications.append(
-                        {
-                            label['id']: application.id,
-                            label['name']: application.application_name,
-                            label['package']: application.package_name,
-                            label['version_count']: len(application.versions) if application.versions else 0
-                        }
-                    )
-                print(white(f"\tTotal Number of Applications: {response.count}", bold=True))
-                self.app.render(applications, format=OutputFormat.TABULATED.value, headers="keys",
-                                tablefmt="fancy_grid")
-            else:
-                applications = []
-                for application in response.results:
-                    applications.append(
-                        {
-                            'id': application.id,
-                            'name': application.application_name,
-                            'package': application.package_name,
-                            'version_count': len(application.versions) if application.versions else 0
-                        }
-                    )
-                print(white(f"Total Number of Applications: {response.count}", bold=True))
-                self.app.render(applications, format=OutputFormat.JSON.value)
-
         except ApiException as e:
             self.app.log.debug(f"Failed to list applications: {e}")
             self.app.log.error(f"Failed to list applications, reason: {e.reason}")
+            return
+
+        if not self.app.pargs.json:
+            applications = []
+
+            label = {
+                'id': white("ID", bold=True),
+                'name': white("NAME", bold=True),
+                'package': white("PACKAGE NAME", bold=True),
+                'version_count': white("NO. OF VERSIONS", bold=True)
+            }
+
+            for application in response.results:
+                applications.append(
+                    {
+                        label['id']: application.id,
+                        label['name']: application.application_name,
+                        label['package']: application.package_name,
+                        label['version_count']: len(application.versions) if application.versions else 0
+                    }
+                )
+            print(white(f"\tTotal Number of Applications: {response.count}", bold=True))
+            self.app.render(applications, format=OutputFormat.TABULATED.value, headers="keys",
+                            tablefmt="fancy_grid")
+        else:
+            applications = []
+            for application in response.results:
+                applications.append(
+                    {
+                        'id': application.id,
+                        'name': application.application_name,
+                        'package': application.package_name,
+                        'version_count': len(application.versions) if application.versions else 0
+                    }
+                )
+            print(white(f"Total Number of Applications: {response.count}", bold=True))
+            self.app.render(applications, format=OutputFormat.JSON.value)
 
     def _application_basic_response(self, application, format=OutputFormat.TABULATED):
         valid_keys = ['id', 'application_name', 'package_name', 'developer', 'category', 'content_rating',
@@ -137,7 +136,7 @@ class Application(Controller):
         return renderable
 
     @ex(
-        help='application-show command to showing application specific details',
+        help='show command used to showing application specific details',
         arguments=[
             (['application_id'],
              {'help': 'Show details about the application by id',
@@ -152,35 +151,36 @@ class Application(Controller):
               'dest': 'set'})
         ]
     )
-    def application_show(self):
+    def show(self):
+        validate_creds_exists(self.app)
+        db = DBWrapper(self.app.creds)
+
+        application_id = self.app.pargs.application_id
+
+        if self.app.pargs.set:
+            db.set_application({'id': application_id})
+
+        application_client = APIClient(db.get_configure()).get_application_api_client()
+        enterprise_id = db.get_enterprise_id()
+
         try:
-            validate_creds_exists(self.app)
-            db = DBWrapper(self.app.creds)
-
-            application_id = self.app.pargs.application_id
-
-            if self.app.pargs.set:
-                db.set_application({'id': application_id})
-
-            application_client = APIClient(db.get_configure()).get_application_api_client()
-            enterprise_id = db.get_enterprise_id()
-
             response = application_client.get(application_id, enterprise_id)
-
-            if not self.app.pargs.json:
-                print(white(f"\tAPPLICATION DETAILS of {response.application_name}", bold=True))
-                renderable = self._application_basic_response(response)
-                self.app.render(renderable, format=OutputFormat.TABULATED.value, headers="keys", tablefmt="fancy_grid")
-            else:
-                renderable = self._application_basic_response(response, OutputFormat.JSON)
-                self.app.render(renderable, format=OutputFormat.JSON.value)
-
         except ApiException as e:
             self.app.log.debug(f"Failed to show details of an application: {e}")
             self.app.log.error(f"Failed to show details of an application, reason: {e.reason}")
+            return
+
+        if not self.app.pargs.json:
+            print(white(f"\tAPPLICATION DETAILS of {response.application_name}", bold=True))
+            renderable = self._application_basic_response(response)
+            self.app.render(renderable, format=OutputFormat.TABULATED.value, headers="keys", tablefmt="fancy_grid")
+        else:
+            print(white(f"APPLICATION DETAILS of {response.application_name}", bold=True))
+            renderable = self._application_basic_response(response, OutputFormat.JSON)
+            self.app.render(renderable, format=OutputFormat.JSON.value)
 
     @ex(
-        help='Upload application file',
+        help='upload command used to upload application file',
         arguments=[
             (['application_file'],
              {'help': 'Application file path to upload',
@@ -191,54 +191,62 @@ class Application(Controller):
               'dest': 'json'}),
         ]
     )
-    def application_upload(self):
+    def upload(self):
+        application_file = self.app.pargs.application_file
+
+        validate_creds_exists(self.app)
+        db = DBWrapper(self.app.creds)
+        application_client = APIClient(db.get_configure()).get_application_upload_api_client()
+        enterprise_id = db.get_enterprise_id()
+
         try:
-            application_file = self.app.pargs.application_file
-
-            validate_creds_exists(self.app)
-            db = DBWrapper(self.app.creds)
-            application_client = APIClient(db.get_configure()).get_application_upload_api_client()
-            enterprise_id = db.get_enterprise_id()
-
             response = application_client.upload(enterprise_id, enterprise_id, application_file)
-
-            if not self.app.pargs.json:
-                print(white(f"\tAPPLICATION DETAILS of {response.application.application_name}", bold=True))
-                renderable = self._application_basic_response(response.application)
-                self.app.render(renderable, format=OutputFormat.TABULATED.value, headers="keys", tablefmt="fancy_grid")
-            else:
-                renderable = self._application_basic_response(response.application, OutputFormat.JSON)
-                self.app.render(renderable, format=OutputFormat.JSON.value)
-
         except ApiException as e:
             self.app.log.debug(f"Failed to upload an application: {e}")
             self.app.log.error(f"Failed to upload an application, reason: {e.reason}")
+            return
+
+        if not self.app.pargs.json:
+            print(white(f"\tAPPLICATION DETAILS of {response.application.application_name}", bold=True))
+            renderable = self._application_basic_response(response.application)
+            self.app.render(renderable, format=OutputFormat.TABULATED.value, headers="keys", tablefmt="fancy_grid")
+        else:
+            print(white(f"APPLICATION DETAILS of {response.application_name}", bold=True))
+            renderable = self._application_basic_response(response.application, OutputFormat.JSON)
+            self.app.render(renderable, format=OutputFormat.JSON.value)
 
     @ex(
-        help='application-delete command to delete particular an application',
+        help='delete command used to delete particular an application',
         arguments=[
             (['application_id'],
-             {'help': 'Show details about the application by id',
+             {'help': 'Delete an application by id',
               'action': 'store'}),
         ]
     )
-    def application_delete(self):
+    def delete(self):
+        application_id = self.app.pargs.application_id
+
+        validate_creds_exists(self.app)
+        db = DBWrapper(self.app.creds)
+        application_client = APIClient(db.get_configure()).get_application_api_client()
+        enterprise_id = db.get_enterprise_id()
+
         try:
-            application_id = self.app.pargs.application_id
-
-            validate_creds_exists(self.app)
-            db = DBWrapper(self.app.creds)
-            application_client = APIClient(db.get_configure()).get_application_api_client()
-            enterprise_id = db.get_enterprise_id()
-
             application_client.delete(application_id, enterprise_id)
             self.app.log.info(f"Application with id : {application_id} deleted successfully")
+
+            # Unset current application if matching
+            application = db.get_application()
+            if application and application.get('id') and application_id == application.get('id'):
+                db.unset_application()
+                self.app.log.debug(f'Unset the current application {application_id}')
         except ApiException as e:
-            self.app.log.debug(f"Failed to show details of an application: {e}")
-            self.app.log.error(f"Failed to show details of an application, reason: {e.reason}")
+            self.app.log.debug(f"Failed to delete an application: {e}")
+            self.app.log.error(f"Failed to delete an application, reason: {e.reason}")
+            return
 
     @ex(
-        help='application-current command to show or unset the current application',
+        help='current command used to show or unset the current application',
         arguments=[
             (['-j', '--json'],
              {'help': 'Render result in Json format',
@@ -250,42 +258,43 @@ class Application(Controller):
               'dest': 'unset'})
         ]
     )
-    def application_current(self):
-        try:
-            validate_creds_exists(self.app)
-            db = DBWrapper(self.app.creds)
+    def current(self):
+        validate_creds_exists(self.app)
+        db = DBWrapper(self.app.creds)
 
-            application_id = None
-            application = db.get_application()
-            if application:
-                application_id = application.get('id', None)
+        application_id = None
+        application = db.get_application()
+        if application:
+            application_id = application.get('id', None)
 
-            if self.app.pargs.unset:
-                if not application_id:
-                    self.app.log.info('Not set the current application.')
-                    return
-
-                db.unset_application()
-                self.app.log.info(f'Unset the current application {application_id}')
-                return
-
+        if self.app.pargs.unset:
             if not application_id:
-                self.app.log.error("Application id is empty!")
+                self.app.log.info('Not set the current application.')
                 return
 
-            application_client = APIClient(db.get_configure()).get_application_api_client()
-            enterprise_id = db.get_enterprise_id()
+            db.unset_application()
+            self.app.log.info(f'Unset the current application {application_id}')
+            return
 
+        if not application_id:
+            self.app.log.error("Not set the current application.")
+            return
+
+        application_client = APIClient(db.get_configure()).get_application_api_client()
+        enterprise_id = db.get_enterprise_id()
+
+        try:
             response = application_client.get(application_id, enterprise_id)
-
-            if not self.app.pargs.json:
-                print(white(f"\tAPPLICATION DETAILS of {response.application_name}", bold=True))
-                renderable = self._application_basic_response(response)
-                self.app.render(renderable, format=OutputFormat.TABULATED.value, headers="keys", tablefmt="fancy_grid")
-            else:
-                renderable = self._application_basic_response(response, OutputFormat.JSON)
-                self.app.render(renderable, format=OutputFormat.JSON.value)
-
         except ApiException as e:
-            self.app.log.debug(f"Failed to show details of an application: {e}")
-            self.app.log.error(f"Failed to show details of an application, reason: {e.reason}")
+            self.app.log.debug(f"Failed to show or unset the current application: {e}")
+            self.app.log.error(f"Failed to show or unset the current application, reason: {e.reason}")
+            return
+
+        if not self.app.pargs.json:
+            print(white(f"\tAPPLICATION DETAILS of {response.application_name}", bold=True))
+            renderable = self._application_basic_response(response)
+            self.app.render(renderable, format=OutputFormat.TABULATED.value, headers="keys", tablefmt="fancy_grid")
+        else:
+            print(white(f"APPLICATION DETAILS of {response.application_name}", bold=True))
+            renderable = self._application_basic_response(response, OutputFormat.JSON)
+            self.app.render(renderable, format=OutputFormat.JSON.value)
