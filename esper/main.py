@@ -4,8 +4,9 @@ from cement.core.exc import CaughtSignal
 from esper.controllers.base import Base
 from esper.controllers.configure import Configure
 from esper.controllers.devices import Devices
-from esper.controllers.application import Application
+from esper.controllers.application.application import Application
 from esper.controllers.command import Command
+from esper.controllers.application.version import ApplicationVersion
 from esper.core.exc import EsperError
 from esper.core.output_handler import EsperOutputHandler
 from esper.ext.utils import extend_tinydb
@@ -38,7 +39,7 @@ class Esper(App):
     """Esper CLI Tool primary application."""
 
     class Meta:
-        label = 'esper'
+        label = 'espercli'
 
         # call sys.exit() on close
         exit_on_close = True
@@ -80,7 +81,8 @@ class Esper(App):
             Configure,
             Devices,
             Application,
-            Command
+            Command,
+            ApplicationVersion
         ]
 
         # hooks
@@ -93,7 +95,7 @@ class EsperTest(TestApp, Esper):
     """A sub-class of Esper that is better suited for testing."""
 
     class Meta:
-        label = 'esper'
+        label = 'espercli'
 
 
 def main():
