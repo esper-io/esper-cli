@@ -4,6 +4,7 @@ import esperclient as client
 from cement.utils import fs
 from esperclient.configuration import Configuration
 from tinydb import TinyDB
+
 from esper.ext.db_wrapper import DBWrapper
 
 
@@ -43,18 +44,6 @@ def get_client_config(app):
     config.host = get_api_endpoint(creds["host"])
 
     return config
-
-
-def get_device_api_instance(config):
-    return client.DeviceApi(client.ApiClient(config))
-
-
-def get_application_api_instance(config):
-    return client.ApplicationApi(client.ApiClient(config))
-
-
-def get_application_upload_api_instance(config):
-    return client.EnterpriseApplicationApi(client.ApiClient(config))
 
 
 def get_command_api(config):

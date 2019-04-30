@@ -42,7 +42,7 @@ class Command(Controller):
               'dest': 'json'}),
         ]
     )
-    def install(self):
+    def install_app(self):
         """Command to install application"""
         try:
 
