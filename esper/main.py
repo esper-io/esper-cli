@@ -1,13 +1,14 @@
 from cement import App, TestApp, init_defaults
 from cement.core.exc import CaughtSignal
 
+from esper.controllers.application.application import Application
+from esper.controllers.application.version import ApplicationVersion
 from esper.controllers.base import Base
+from esper.controllers.command import Command
 from esper.controllers.configure import Configure
 from esper.controllers.device.device import Device
-from esper.controllers.application.application import Application
-from esper.controllers.command import Command
-from esper.controllers.application.version import ApplicationVersion
 from esper.controllers.device.install import AppInstall
+from esper.controllers.device.status import DeviceStatus
 from esper.core.exc import EsperError
 from esper.core.output_handler import EsperOutputHandler
 from esper.ext.utils import extend_tinydb
@@ -84,7 +85,8 @@ class Esper(App):
             Application,
             Command,
             ApplicationVersion,
-            AppInstall
+            AppInstall,
+            DeviceStatus
         ]
 
         # hooks
