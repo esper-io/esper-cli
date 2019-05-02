@@ -76,7 +76,7 @@ class Application(Controller):
 
         try:
             # Find applications in an enterprise
-            response = application_client.list(enterprise_id, limit=limit, offset=offset, **kwargs)
+            response = application_client.get_all_applications(enterprise_id, limit=limit, offset=offset, **kwargs)
         except ApiException as e:
             self.app.log.debug(f"Failed to list applications: {e}")
             self.app.log.error(f"Failed to list applications, reason: {e.reason}")
@@ -164,7 +164,7 @@ class Application(Controller):
         enterprise_id = db.get_enterprise_id()
 
         try:
-            response = application_client.get(application_id, enterprise_id)
+            response = application_client.get_application(application_id, enterprise_id)
         except ApiException as e:
             self.app.log.debug(f"Failed to show details of an application: {e}")
             self.app.log.error(f"Failed to show details of an application, reason: {e.reason}")
@@ -196,7 +196,7 @@ class Application(Controller):
 
         validate_creds_exists(self.app)
         db = DBWrapper(self.app.creds)
-        application_client = APIClient(db.get_configure()).get_application_upload_api_client()
+        application_client = APIClient(db.get_configure()).get_application_api_client()
         enterprise_id = db.get_enterprise_id()
 
         try:
@@ -232,7 +232,7 @@ class Application(Controller):
         enterprise_id = db.get_enterprise_id()
 
         try:
-            application_client.delete(application_id, enterprise_id)
+            application_client.delete_application(application_id, enterprise_id)
             self.app.log.info(f"Application with id : {application_id} deleted successfully")
 
             # Unset current application if matching
@@ -277,14 +277,14 @@ class Application(Controller):
             return
 
         if not application_id:
-            self.app.log.error("Not set the current application.")
+            self.app.log.info("Not set the current application.")
             return
 
         application_client = APIClient(db.get_configure()).get_application_api_client()
         enterprise_id = db.get_enterprise_id()
 
         try:
-            response = application_client.get(application_id, enterprise_id)
+            response = application_client.get_application(application_id, enterprise_id)
         except ApiException as e:
             self.app.log.debug(f"Failed to show or unset the current application: {e}")
             self.app.log.error(f"Failed to show or unset the current application, reason: {e.reason}")

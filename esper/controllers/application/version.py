@@ -252,7 +252,7 @@ class ApplicationVersion(Controller):
 
         # Unset current application if matching
         try:
-            application_client.get(application_id, enterprise_id)
+            application_client.get_application(application_id, enterprise_id)
         except ApiException as e:
             if e.status == HTTPStatus.NOT_FOUND:
                 application = db.get_application()

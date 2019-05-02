@@ -25,18 +25,8 @@ class Configure(Controller):
         # text displayed at the bottom of --help output
         epilog = 'Usage: espercli configure'
 
-        # controller level arguments. ex: 'espercli --version'
-        arguments = [
-            # ### add a version banner
-            # ( [ '-v', '--version' ],
-            #   { 'action'  : 'version',
-            #     'version' : VERSION_BANNER } ),
-        ]
-
     @ex(
         help='Configure the credentials for `esper.io` API Service',
-
-        # sub-command level arguments. ex: 'espercli configure --foo bar'
         arguments=[
             (['-s', '--set'],
              {'help': 'Create or Update credentials for Esper.io API Service',
@@ -64,19 +54,14 @@ class Configure(Controller):
         credentials = db.get_configure()
 
         if self.app.pargs.set or not credentials:
-            user = prompt.query("Enter your Username : ")
-            password = prompt.query("Enter your Password : ")
-            host = prompt.query("Enter your Host Endpoint:",
-                                default="demo",
-                                validators=[])
+            api_key = prompt.query("Enter API Key: ")
+            host = prompt.query("Enter your Host Endpoint:", default="demo", validators=[])
 
-            enterprise_id = prompt.query("Enter your Enterprise Id: ",
-                                      validators=[validators.RegexValidator(
-                                          regex='[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}')])
+            enterprise_id = prompt.query("Enter your Enterprise Id: ", validators=[
+                validators.RegexValidator(regex='[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}')])
 
             credentials = {
-                "username": user,
-                "password": password,
+                "api_key": api_key,
                 "enterprise_id": enterprise_id,
                 "host": host
             }

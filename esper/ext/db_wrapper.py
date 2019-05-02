@@ -51,3 +51,26 @@ class DBWrapper:
     def unset_application(self):
         Application = Query()
         self.db.remove(Application.application.exists())
+
+    def set_device(self, device):
+        Device = Query()
+
+        if self.db.get(Device.device.exists()):
+            self.db.remove(Device.device.exists())
+
+        self.db.insert({'device': device})
+
+    def get_device(self):
+        Device = Query()
+
+        db_result = self.db.get(Device.device.exists())
+
+        device = None
+        if db_result:
+            device = db_result['device']
+
+        return device
+
+    def unset_device(self):
+        Device = Query()
+        self.db.remove(Device.device.exists())
