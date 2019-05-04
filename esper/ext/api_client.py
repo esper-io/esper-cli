@@ -9,6 +9,9 @@ class APIClient:
         self.config.api_key_prefix['Authorization'] = 'Bearer'
         self.config.host = f"https://{credential['host']}-api.shoonyacloud.com/api"
 
+    def get_enterprise_api_client(self):
+        return client.EnterpriseApi(client.ApiClient(self.config))
+
     def get_device_api_client(self):
         return client.DeviceApi(client.ApiClient(self.config))
 

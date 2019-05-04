@@ -7,6 +7,7 @@ from esper.controllers.base import Base
 from esper.controllers.command import Command
 from esper.controllers.configure import Configure
 from esper.controllers.device.device import Device
+from esper.controllers.enterprise.enterprise import Enterprise
 from esper.controllers.device.install import AppInstall
 from esper.controllers.device.status import DeviceStatus
 from esper.core.exc import EsperError
@@ -86,7 +87,8 @@ class Esper(App):
             Command,
             ApplicationVersion,
             AppInstall,
-            DeviceStatus
+            DeviceStatus,
+            Enterprise
         ]
 
         # hooks
