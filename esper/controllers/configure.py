@@ -1,8 +1,12 @@
+from http import HTTPStatus
+
 from cement import Controller, ex
 from cement.utils.version import get_version_banner
-from clint.textui import prompt, validators
+from clint.textui import prompt
+from esperclient.rest import ApiException
 
 from esper.controllers.enums import OutputFormat
+from esper.ext.api_client import APIClient
 from esper.ext.db_wrapper import DBWrapper
 from esper.ext.utils import validate_creds_exists
 from ..core.version import get_version
@@ -57,8 +61,22 @@ class Configure(Controller):
             api_key = prompt.query("Enter API Key: ")
             host = prompt.query("Enter your Host Endpoint:", default="demo", validators=[])
 
-            enterprise_id = prompt.query("Enter your Enterprise Id: ", validators=[
-                validators.RegexValidator(regex='[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}')])
+            enterprise_client = APIClient({'api_key': api_key, 'host': host}).get_enterprise_api_client()
+            try:
+                response = enterprise_client.get_all_enterprises()
+            except ApiException as e:
+                self.app.log.debug(f"Failed to list enterprises: {e}")
+                if e.status == HTTPStatus.UNAUTHORIZED:
+                    self.app.log.error(f"You are not authorized, invalid API Key.")
+                else:
+                    self.app.log.error(f"Failed to fetch enterprise, reason: {e.reason}")
+                return
+
+            if response.results and len(response.results) > 0:
+                enterprise_id = response.results[0].id
+            else:
+                self.app.log.error(f"API key is not associated with any enterprise.")
+                return
 
             credentials = {
                 "api_key": api_key,
