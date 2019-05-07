@@ -74,3 +74,26 @@ class DBWrapper:
     def unset_device(self):
         Device = Query()
         self.db.remove(Device.device.exists())
+
+    def set_group(self, group):
+        Group = Query()
+
+        if self.db.get(Group.group.exists()):
+            self.db.remove(Group.group.exists())
+
+        self.db.insert({'group': group})
+
+    def get_group(self):
+        Group = Query()
+
+        db_result = self.db.get(Group.group.exists())
+
+        group = None
+        if db_result:
+            group = db_result['group']
+
+        return group
+
+    def unset_group(self):
+        Group = Query()
+        self.db.remove(Group.group.exists())
