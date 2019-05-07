@@ -1,7 +1,7 @@
 from cement import Controller, ex
 from cement.utils.version import get_version_banner
 from crayons import white
-from esperclient import Enterprise as EnterpriseRequest
+from esperclient import EnterpriseUpdate
 from esperclient.rest import ApiException
 
 from esper.controllers.enums import OutputFormat
@@ -158,7 +158,7 @@ class Enterprise(Controller):
         db = DBWrapper(self.app.creds)
         enterprise_client = APIClient(db.get_configure()).get_enterprise_api_client()
         enterprise_id = db.get_enterprise_id()
-        data = EnterpriseRequest()
+        data = EnterpriseUpdate()
 
         if self.app.pargs.name:
             data.name = self.app.pargs.name
@@ -175,6 +175,9 @@ class Enterprise(Controller):
 
         if self.app.pargs.location:
             details['location'] = self.app.pargs.location
+
+        if self.app.pargs.zipcode:
+            details['zipcode'] = self.app.pargs.zipcode
 
         if self.app.pargs.email:
             details['contact_email'] = self.app.pargs.email

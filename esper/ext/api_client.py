@@ -21,6 +21,9 @@ class APIClient:
     def get_command_api_client(self):
         return client.CommandsApi(client.ApiClient(self.config))
 
+    def get_group_api_client(self):
+        return client.DeviceGroupApi(client.ApiClient(self.config))
+
     def get_command_api_request(self, command_name, command_args):
         return client.CommandRequest(command_args=command_args,
                                      command=command_name)  # CommandRequest | command name to fire
