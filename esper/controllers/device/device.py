@@ -20,7 +20,7 @@ class Device(Controller):
         label = 'device'
 
         # text displayed at the top of --help output
-        description = 'device controller is used for application related commands'
+        description = 'Device commands'
 
         # text displayed at the bottom of --help output
         epilog = 'Usage: espercli device'
@@ -29,17 +29,13 @@ class Device(Controller):
         stacked_on = 'base'
 
     @ex(
-        help='list command to list device details',
+        help='List devices',
         arguments=[
             (['--filter'],
              {'help': 'Filter devices by device state',
               'action': 'store',
               'choices': ['active', 'inactive', 'disabled'],
               'dest': 'filter_state'}),
-            (['-j', '--json'],
-             {'help': 'Render result in Json format',
-              'action': 'store_true',
-              'dest': 'json'}),
             (['-l', '--limit'],
              {'help': 'Number of results to return per page',
               'action': 'store',
@@ -50,6 +46,10 @@ class Device(Controller):
               'action': 'store',
               'default': 0,
               'dest': 'offset'}),
+            (['-j', '--json'],
+             {'help': 'Render result in Json format',
+              'action': 'store_true',
+              'dest': 'json'}),
         ]
     )
     def list(self):
@@ -142,19 +142,19 @@ class Device(Controller):
         return renderable
 
     @ex(
-        help='show command used to showing device specific details',
+        help='Show device details and set as active device',
         arguments=[
             (['device_id'],
              {'help': 'Show details about the device',
               'action': 'store'}),
+            (['-s', '--set'],
+             {'help': 'Set device as active for further device specific commands',
+              'action': 'store_true',
+              'dest': 'set'}),
             (['-j', '--json'],
              {'help': 'Render result in Json format',
               'action': 'store_true',
               'dest': 'json'}),
-            (['-s', '--set'],
-             {'help': 'Set application as current application for further application related commands',
-              'action': 'store_true',
-              'dest': 'set'})
         ]
     )
     def show(self):
@@ -185,16 +185,16 @@ class Device(Controller):
             self.app.render(renderable, format=OutputFormat.JSON.value)
 
     @ex(
-        help='current command used to show or unset the current device',
+        help='Show or unset the active device',
         arguments=[
+            (['-u', '--unset'],
+             {'help': 'Unset the active device',
+              'action': 'store_true',
+              'dest': 'unset'}),
             (['-j', '--json'],
              {'help': 'Render result in Json format',
               'action': 'store_true',
               'dest': 'json'}),
-            (['-u', '--unset'],
-             {'help': 'Unset the current device',
-              'action': 'store_true',
-              'dest': 'unset'})
         ]
     )
     def current(self):
@@ -208,15 +208,15 @@ class Device(Controller):
 
         if self.app.pargs.unset:
             if not device_id:
-                self.app.log.info('Not set the current device.')
+                self.app.log.info('Not set the active device.')
                 return
 
             db.unset_device()
-            self.app.log.info(f'Unset the current device {device_id}')
+            self.app.log.info(f'Unset the active device {device_id}')
             return
 
         if not device_id:
-            self.app.log.info("Not set the current device.")
+            self.app.log.info("Not set the active device.")
             return
 
         device_client = APIClient(db.get_configure()).get_device_api_client()
@@ -225,8 +225,8 @@ class Device(Controller):
         try:
             response = device_client.get_device_by_id(enterprise_id, device_id)
         except ApiException as e:
-            self.app.log.debug(f"Failed to show or unset the current device: {e}")
-            self.app.log.error(f"Failed to show or unset the current device, reason: {e.reason}")
+            self.app.log.debug(f"Failed to show or unset the active device: {e}")
+            self.app.log.error(f"Failed to show or unset the active device, reason: {e.reason}")
             return
 
         if not self.app.pargs.json:

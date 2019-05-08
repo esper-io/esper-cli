@@ -20,7 +20,7 @@ class Application(Controller):
         label = 'app'
 
         # text displayed at the top of --help output
-        description = 'app controller is used for application related commands'
+        description = 'Application commands'
 
         # text displayed at the bottom of --help output
         epilog = 'Usage: espercli app'
@@ -29,20 +29,16 @@ class Application(Controller):
         stacked_on = 'base'
 
     @ex(
-        help='list command used to list application details',
+        help='List applications',
         arguments=[
             (['-n', '--name'],
-             {'help': 'Filter devices by application name',
+             {'help': 'Application name',
               'action': 'store',
               'dest': 'name'}),
             (['-p', '--package'],
-             {'help': 'Filter devices by package name',
+             {'help': 'Package name',
               'action': 'store',
               'dest': 'package'}),
-            (['-j', '--json'],
-             {'help': 'Render result in Json format',
-              'action': 'store_true',
-              'dest': 'json'}),
             (['-l', '--limit'],
              {'help': 'Number of results to return per page',
               'action': 'store',
@@ -53,6 +49,10 @@ class Application(Controller):
               'action': 'store',
               'default': 0,
               'dest': 'offset'}),
+            (['-j', '--json'],
+             {'help': 'Render result in Json format',
+              'action': 'store_true',
+              'dest': 'json'}),
         ]
     )
     def list(self):
@@ -136,19 +136,19 @@ class Application(Controller):
         return renderable
 
     @ex(
-        help='show command used to showing application specific details',
+        help='Show application details and set active application',
         arguments=[
             (['application_id'],
-             {'help': 'Show details about the application by id',
+             {'help': 'Application id',
               'action': 'store'}),
+            (['-s', '--set'],
+             {'help': 'Set this application as active application for further application specific commands',
+              'action': 'store_true',
+              'dest': 'set'}),
             (['-j', '--json'],
              {'help': 'Render result in Json format',
               'action': 'store_true',
               'dest': 'json'}),
-            (['-s', '--set'],
-             {'help': 'Set application as current application for further application related commands',
-              'action': 'store_true',
-              'dest': 'set'})
         ]
     )
     def show(self):
@@ -180,10 +180,10 @@ class Application(Controller):
             self.app.render(renderable, format=OutputFormat.JSON.value)
 
     @ex(
-        help='upload command used to upload application file',
+        help='Upload application',
         arguments=[
             (['application_file'],
-             {'help': 'Application file path to upload',
+             {'help': 'Application file',
               'action': 'store'}),
             (['-j', '--json'],
              {'help': 'Render result in Json format',
@@ -216,7 +216,7 @@ class Application(Controller):
             self.app.render(renderable, format=OutputFormat.JSON.value)
 
     @ex(
-        help='delete command used to delete particular an application',
+        help='Delete application',
         arguments=[
             (['application_id'],
              {'help': 'Delete an application by id',
@@ -239,23 +239,23 @@ class Application(Controller):
             application = db.get_application()
             if application and application.get('id') and application_id == application.get('id'):
                 db.unset_application()
-                self.app.log.debug(f'Unset the current application {application_id}')
+                self.app.log.debug(f'Unset the active application {application_id}')
         except ApiException as e:
             self.app.log.debug(f"Failed to delete an application: {e}")
             self.app.log.error(f"Failed to delete an application, reason: {e.reason}")
             return
 
     @ex(
-        help='current command used to show or unset the current application',
+        help='Show or unset the active application',
         arguments=[
+            (['-u', '--unset'],
+             {'help': 'Unset the active application',
+              'action': 'store_true',
+              'dest': 'unset'}),
             (['-j', '--json'],
              {'help': 'Render result in Json format',
               'action': 'store_true',
-              'dest': 'json'}),
-            (['-u', '--unset'],
-             {'help': 'Unset the current application',
-              'action': 'store_true',
-              'dest': 'unset'})
+              'dest': 'json'})
         ]
     )
     def current(self):
@@ -269,15 +269,15 @@ class Application(Controller):
 
         if self.app.pargs.unset:
             if not application_id:
-                self.app.log.info('Not set the current application.')
+                self.app.log.info('Not set the active application.')
                 return
 
             db.unset_application()
-            self.app.log.info(f'Unset the current application {application_id}')
+            self.app.log.info(f'Unset the active application {application_id}')
             return
 
         if not application_id:
-            self.app.log.info("Not set the current application.")
+            self.app.log.info("Not set the active application.")
             return
 
         application_client = APIClient(db.get_configure()).get_application_api_client()
@@ -286,8 +286,8 @@ class Application(Controller):
         try:
             response = application_client.get_application(application_id, enterprise_id)
         except ApiException as e:
-            self.app.log.debug(f"Failed to show or unset the current application: {e}")
-            self.app.log.error(f"Failed to show or unset the current application, reason: {e.reason}")
+            self.app.log.debug(f"Failed to show or unset the active application: {e}")
+            self.app.log.error(f"Failed to show or unset the active application, reason: {e.reason}")
             return
 
         if not self.app.pargs.json:

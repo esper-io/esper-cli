@@ -22,7 +22,7 @@ class DeviceStatus(Controller):
         label = 'status'
 
         # text displayed at the top of --help output
-        description = 'status controller is used for device status related commands'
+        description = 'Device status commands'
 
         # text displayed at the bottom of --help output
         epilog = 'Usage: espercli status'
@@ -31,12 +31,12 @@ class DeviceStatus(Controller):
         stacked_on = 'base'
 
     @ex(
-        help='list command to list status details',
+        help='Latest device status',
         arguments=[
             (['-d', '--device'],
-             {'help': 'Filter status by device id',
+             {'help': 'Device id',
               'action': 'store',
-              'dest': 'device_id'}),
+              'dest': 'device'}),
             (['-j', '--json'],
              {'help': 'Render result in Json format',
               'action': 'store_true',
@@ -50,12 +50,12 @@ class DeviceStatus(Controller):
         device_client = APIClient(db.get_configure()).get_device_api_client()
         enterprise_id = db.get_enterprise_id()
 
-        if self.app.pargs.device_id:
-            device_id = self.app.pargs.device_id
+        if self.app.pargs.device:
+            device_id = self.app.pargs.device
         else:
             device = db.get_device()
             if not device or not device.get('id'):
-                self.app.log.info('Not set the current device.')
+                self.app.log.info('Not set the active device.')
                 return
 
             device_id = device.get('id')

@@ -69,7 +69,7 @@ class DeviceCommand(Controller):
         else:
             device = db.get_device()
             if not device or not device.get('id'):
-                self.app.log.info('Not set the current device.')
+                self.app.log.info('Not set the active device.')
                 return
 
             device_id = device.get('id')
@@ -118,7 +118,7 @@ class DeviceCommand(Controller):
         else:
             device = db.get_device()
             if not device or not device.get('id'):
-                self.app.log.info('Not set the current device.')
+                self.app.log.info('Not set the active device.')
                 return
 
             device_id = device.get('id')
@@ -167,7 +167,7 @@ class DeviceCommand(Controller):
         else:
             device = db.get_device()
             if not device or not device.get('id'):
-                self.app.log.info('Not set the current device.')
+                self.app.log.info('Not set the active device.')
                 return
 
             device_id = device.get('id')
@@ -213,7 +213,7 @@ class DeviceCommand(Controller):
         else:
             device = db.get_device()
             if not device or not device.get('id'):
-                self.app.log.info('Not set the current device.')
+                self.app.log.info('Not set the active device.')
                 return
 
             device_id = device.get('id')
@@ -259,7 +259,7 @@ class DeviceCommand(Controller):
         else:
             device = db.get_device()
             if not device or not device.get('id'):
-                self.app.log.info('Not set the current device.')
+                self.app.log.info('Not set the active device.')
                 return
 
             device_id = device.get('id')
@@ -313,7 +313,7 @@ class DeviceCommand(Controller):
         else:
             device = db.get_device()
             if not device or not device.get('id'):
-                self.app.log.info('Not set the current device.')
+                self.app.log.info('Not set the active device.')
                 return
 
             device_id = device.get('id')
