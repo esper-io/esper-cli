@@ -20,7 +20,7 @@ class AppInstall(Controller):
         label = 'install'
 
         # text displayed at the top of --help output
-        description = 'install controller is used for application install related commands'
+        description = 'Application Installs commands'
 
         # text displayed at the bottom of --help output
         epilog = 'Usage: espercli install'
@@ -29,28 +29,24 @@ class AppInstall(Controller):
         stacked_on = 'base'
 
     @ex(
-        help='list command to list application install details',
+        help='List application installs',
         arguments=[
             (['-d', '--device'],
-             {'help': 'Filter installs by device id',
+             {'help': 'Device id',
               'action': 'store',
-              'dest': 'device_id'}),
+              'dest': 'device'}),
             (['-an', '--appname'],
-             {'help': 'Filter installs by application name',
+             {'help': 'Application name',
               'action': 'store',
               'dest': 'appname'}),
             (['-p', '--package'],
-             {'help': 'Filter installs by package name',
+             {'help': 'Package name',
               'action': 'store',
               'dest': 'package'}),
             (['-s', '--state'],
-             {'help': 'Filter installs by install state',
+             {'help': 'Install state',
               'action': 'store',
               'dest': 'state'}),
-            (['-j', '--json'],
-             {'help': 'Render result in Json format',
-              'action': 'store_true',
-              'dest': 'json'}),
             (['-l', '--limit'],
              {'help': 'Number of results to return per page',
               'action': 'store',
@@ -61,6 +57,10 @@ class AppInstall(Controller):
               'action': 'store',
               'default': 0,
               'dest': 'offset'}),
+            (['-j', '--json'],
+             {'help': 'Render result in Json format',
+              'action': 'store_true',
+              'dest': 'json'}),
         ]
     )
     def list(self):
@@ -70,12 +70,12 @@ class AppInstall(Controller):
         device_client = APIClient(db.get_configure()).get_device_api_client()
         enterprise_id = db.get_enterprise_id()
 
-        if self.app.pargs.device_id:
-            device_id = self.app.pargs.device_id
+        if self.app.pargs.device:
+            device_id = self.app.pargs.device
         else:
             device = db.get_device()
             if not device or not device.get('id'):
-                self.app.log.info('Not set the current device.')
+                self.app.log.info('Not set the active device.')
                 return
 
             device_id = device.get('id')

@@ -21,7 +21,7 @@ class Enterprise(Controller):
         label = 'enterprise'
 
         # text displayed at the top of --help output
-        description = 'enterprise controller is used for enterprise related commands'
+        description = 'Enterprise commands'
 
         # text displayed at the bottom of --help output
         epilog = 'Usage: espercli enterprise'
@@ -78,7 +78,7 @@ class Enterprise(Controller):
         return renderable
 
     @ex(
-        help='show command used to showing enterprise details',
+        help='Show enterprise details',
         arguments=[
             (['-j', '--json'],
              {'help': 'Render result in Json format',
@@ -109,7 +109,7 @@ class Enterprise(Controller):
             self.app.render(renderable, format=OutputFormat.JSON.value)
 
     @ex(
-        help='update command used to update enterprise details',
+        help='Update enterprise details',
         arguments=[
             (['-n', '--name'],
              {'help': 'Enterprise name',

@@ -21,7 +21,7 @@ class EnterpriseGroup(Controller):
         label = 'group'
 
         # text displayed at the top of --help output
-        description = 'group controller is used for group related commands'
+        description = 'Device group commands'
 
         # text displayed at the bottom of --help output
         epilog = 'Usage: espercli group'
@@ -30,16 +30,12 @@ class EnterpriseGroup(Controller):
         stacked_on = 'base'
 
     @ex(
-        help='list command used to list group details',
+        help='List groups',
         arguments=[
             (['-n', '--name'],
              {'help': 'Filter groups by group name',
               'action': 'store',
               'dest': 'name'}),
-            (['-j', '--json'],
-             {'help': 'Render result in Json format',
-              'action': 'store_true',
-              'dest': 'json'}),
             (['-l', '--limit'],
              {'help': 'Number of results to return per page',
               'action': 'store',
@@ -50,6 +46,10 @@ class EnterpriseGroup(Controller):
               'action': 'store',
               'default': 0,
               'dest': 'offset'}),
+            (['-j', '--json'],
+             {'help': 'Render result in Json format',
+              'action': 'store_true',
+              'dest': 'json'})
         ]
     )
     def list(self):
@@ -124,19 +124,19 @@ class EnterpriseGroup(Controller):
         return renderable
 
     @ex(
-        help='show command used to showing group detail',
+        help='Show group details and set as active group',
         arguments=[
             (['group_id'],
-             {'help': 'Show details about the group by id',
+             {'help': 'Group id',
               'action': 'store'}),
+            (['-s', '--set'],
+             {'help': 'Set this group as active group for further group specific commands',
+              'action': 'store_true',
+              'dest': 'set'}),
             (['-j', '--json'],
              {'help': 'Render result in Json format',
               'action': 'store_true',
-              'dest': 'json'}),
-            (['-s', '--set'],
-             {'help': 'Set group as current group for further group related commands',
-              'action': 'store_true',
-              'dest': 'set'})
+              'dest': 'json'})
         ]
     )
     def show(self):
@@ -167,19 +167,19 @@ class EnterpriseGroup(Controller):
             self.app.render(renderable, format=OutputFormat.JSON.value)
 
     @ex(
-        help='current command used to show or unset the current group',
+        help='Show or unset the active group',
         arguments=[
+            (['-u', '--unset'],
+             {'help': 'Unset the active group',
+              'action': 'store_true',
+              'dest': 'unset'}),
             (['-j', '--json'],
              {'help': 'Render result in Json format',
               'action': 'store_true',
-              'dest': 'json'}),
-            (['-u', '--unset'],
-             {'help': 'Unset the current group',
-              'action': 'store_true',
-              'dest': 'unset'})
+              'dest': 'json'})
         ]
     )
-    def current(self):
+    def active(self):
         validate_creds_exists(self.app)
         db = DBWrapper(self.app.creds)
         group_client = APIClient(db.get_configure()).get_group_api_client()
@@ -192,22 +192,22 @@ class EnterpriseGroup(Controller):
 
         if self.app.pargs.unset:
             if not group_id:
-                self.app.log.info('Not set the current group.')
+                self.app.log.info('Not set the active group.')
                 return
 
             db.unset_group()
-            self.app.log.info(f'Unset the current group {group_id}')
+            self.app.log.info(f'Unset the active group {group_id}')
             return
 
         if not group_id:
-            self.app.log.info("Not set the current group.")
+            self.app.log.info("Not set the active group.")
             return
 
         try:
             response = group_client.get_group_by_id(group_id, enterprise_id)
         except ApiException as e:
-            self.app.log.debug(f"Failed to show or unset the current group: {e}")
-            self.app.log.error(f"Failed to show or unset the current group, reason: {e.reason}")
+            self.app.log.debug(f"Failed to show or unset the active group: {e}")
+            self.app.log.error(f"Failed to show or unset the active group, reason: {e.reason}")
             return
 
         if not self.app.pargs.json:
@@ -220,10 +220,10 @@ class EnterpriseGroup(Controller):
             self.app.render(renderable, format=OutputFormat.JSON.value)
 
     @ex(
-        help='create command used to create group',
+        help='Create group',
         arguments=[
             (['-n', '--name'],
-             {'help': 'Enterprise name',
+             {'help': 'Group name',
               'action': 'store',
               'dest': 'name'}),
             (['-j', '--json'],
@@ -261,13 +261,13 @@ class EnterpriseGroup(Controller):
             self.app.render(renderable, format=OutputFormat.JSON.value)
 
     @ex(
-        help='update command used to update group details',
+        help='Update group details',
         arguments=[
             (['group_id'],
-             {'help': 'Show details about the group by id',
+             {'help': 'Group id',
               'action': 'store'}),
             (['-n', '--name'],
-             {'help': 'Enterprise name',
+             {'help': 'Group name',
               'action': 'store',
               'dest': 'name'}),
             (['-j', '--json'],
@@ -308,10 +308,10 @@ class EnterpriseGroup(Controller):
             self.app.render(renderable, format=OutputFormat.JSON.value)
 
     @ex(
-        help='delete command used to delete particular group',
+        help='Delete group',
         arguments=[
             (['group_id'],
-             {'help': 'Delete a group by id',
+             {'help': 'Group id',
               'action': 'store'}),
         ]
     )
@@ -336,3 +336,149 @@ class EnterpriseGroup(Controller):
             self.app.log.debug(f"Failed to delete group: {e}")
             self.app.log.error(f"Failed to delete group, reason: {e.reason}")
             return
+
+    def _get_group_device_ids(self, device_client, enterprise_id, group_id):
+        device_ids = []
+        try:
+            counter = 0
+            limit = 100
+            while True:
+                offset = limit * counter
+                response = device_client.get_all_devices(enterprise_id, group=group_id, limit=limit, offset=offset)
+                if not response.results or len(response.results) == 0:
+                    break
+
+                device_ids.extend([device.id for device in response.results])
+                counter += 1
+        except ApiException as e:
+            self.app.log.debug(f"Failed to list device by group: {e}")
+            self.app.log.error(f"Failed to get devices in the group, reason: {e.reason}")
+            return None
+
+        return device_ids
+
+    @ex(
+        help='Add devices to group',
+        arguments=[
+            (['-g', '--group'],
+             {'help': 'Group id',
+              'action': 'store',
+              'dest': 'group'}),
+            (['-d', '--devices'],
+             {'help': 'List of devices, space separated',
+              'nargs': "*",
+              'type': str,
+              'dest': 'devices'}),
+            (['-j', '--json'],
+             {'help': 'Render result in Json format',
+              'action': 'store_true',
+              'dest': 'json'})
+        ]
+    )
+    def add(self):
+        validate_creds_exists(self.app)
+        db = DBWrapper(self.app.creds)
+        group_client = APIClient(db.get_configure()).get_group_api_client()
+        enterprise_id = db.get_enterprise_id()
+        data = DeviceGroupUpdate()
+
+        if self.app.pargs.group:
+            group_id = self.app.pargs.group
+        else:
+            group = db.get_group()
+            if not group or not group.get('id'):
+                self.app.log.info('Not set the active group.')
+                return
+
+            group_id = group.get('id')
+
+        devices = self.app.pargs.devices
+        if not devices or len(devices) == 0:
+            self.app.log.error('devices cannot be empty.')
+            return
+
+        device_client = APIClient(db.get_configure()).get_device_api_client()
+        device_ids = self._get_group_device_ids(device_client, enterprise_id, group_id)
+        if device_ids is None:
+            return
+
+        device_ids.extend(devices)
+        data.device_ids = device_ids
+        try:
+            response = group_client.partial_update_group(group_id, enterprise_id, data)
+        except ApiException as e:
+            self.app.log.debug(f"Failed to add device into a group: {e}")
+            self.app.log.error(f"Failed to add device into a group, reason: {e.reason}")
+            return
+
+        if not self.app.pargs.json:
+            renderable = self._group_basic_response(response)
+            print(white(f"\tGROUP DETAILS", bold=True))
+            self.app.render(renderable, format=OutputFormat.TABULATED.value, headers="keys", tablefmt="fancy_grid")
+        else:
+            renderable = self._group_basic_response(response, OutputFormat.JSON)
+            print(white(f"GROUP DETAILS", bold=True))
+            self.app.render(renderable, format=OutputFormat.JSON.value)
+
+    @ex(
+        help='Remove devices from group',
+        arguments=[
+            (['-g', '--group'],
+             {'help': 'Group id',
+              'action': 'store',
+              'dest': 'group'}),
+            (['-d', '--devices'],
+             {'help': 'List of devices, space separated',
+              'nargs': "*",
+              'type': str,
+              'dest': 'devices'}),
+            (['-j', '--json'],
+             {'help': 'Render result in Json format',
+              'action': 'store_true',
+              'dest': 'json'})
+        ]
+    )
+    def remove(self):
+        validate_creds_exists(self.app)
+        db = DBWrapper(self.app.creds)
+        group_client = APIClient(db.get_configure()).get_group_api_client()
+        enterprise_id = db.get_enterprise_id()
+        data = DeviceGroupUpdate()
+
+        if self.app.pargs.group:
+            group_id = self.app.pargs.group
+        else:
+            group = db.get_group()
+            if not group or not group.get('id'):
+                self.app.log.info('Not set the active group.')
+                return
+
+            group_id = group.get('id')
+
+        devices = self.app.pargs.devices
+        if not devices or len(devices) == 0:
+            self.app.log.error('devices cannot be empty.')
+            return
+
+        device_client = APIClient(db.get_configure()).get_device_api_client()
+        current_device_ids = self._get_group_device_ids(device_client, enterprise_id, group_id)
+        if current_device_ids is None:
+            return
+
+        latest_devices = list(set(current_device_ids) - set(devices))
+        data.device_ids = latest_devices
+        try:
+            response = group_client.partial_update_group(group_id, enterprise_id, data)
+        except ApiException as e:
+            self.app.log.debug(f"Failed to remove device from group: {e}")
+            self.app.log.error(f"Failed to remove device from group, reason: {e.reason}")
+            return
+
+        if not self.app.pargs.json:
+            renderable = self._group_basic_response(response)
+            print(white(f"\tGROUP DETAILS", bold=True))
+            self.app.render(renderable, format=OutputFormat.TABULATED.value, headers="keys", tablefmt="fancy_grid")
+        else:
+            renderable = self._group_basic_response(response, OutputFormat.JSON)
+            print(white(f"GROUP DETAILS", bold=True))
+            self.app.render(renderable, format=OutputFormat.JSON.value)

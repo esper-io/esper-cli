@@ -22,7 +22,7 @@ class ApplicationVersion(Controller):
         label = 'version'
 
         # text displayed at the top of --help output
-        description = 'version controller is used for version related commands'
+        description = 'Version commands'
 
         # text displayed at the bottom of --help output
         epilog = 'Usage: espercli version'
@@ -31,24 +31,20 @@ class ApplicationVersion(Controller):
         stacked_on = 'base'
 
     @ex(
-        help='list command used to list application versions',
+        help='List application versions',
         arguments=[
             (['-a', '--app'],
-             {'help': 'Filter versions by application id',
+             {'help': 'Application id',
               'action': 'store',
-              'dest': 'application_id'}),
+              'dest': 'application'}),
             (['-vc', '--version_code'],
-             {'help': 'Filter versions by version code',
+             {'help': 'Version code',
               'action': 'store',
               'dest': 'version_code'}),
             (['-bn', '--build_number'],
-             {'help': 'Filter versions by build number',
+             {'help': 'Build number',
               'action': 'store',
               'dest': 'build_number'}),
-            (['-j', '--json'],
-             {'help': 'Render result in Json format',
-              'action': 'store_true',
-              'dest': 'json'}),
             (['-l', '--limit'],
              {'help': 'Number of results to return per page',
               'action': 'store',
@@ -59,6 +55,10 @@ class ApplicationVersion(Controller):
               'action': 'store',
               'default': 0,
               'dest': 'offset'}),
+            (['-j', '--json'],
+             {'help': 'Render result in Json format',
+              'action': 'store_true',
+              'dest': 'json'}),
         ]
     )
     def list(self):
@@ -68,12 +68,12 @@ class ApplicationVersion(Controller):
         application_client = APIClient(db.get_configure()).get_application_api_client()
         enterprise_id = db.get_enterprise_id()
 
-        if self.app.pargs.application_id:
-            application_id = self.app.pargs.application_id
+        if self.app.pargs.application:
+            application_id = self.app.pargs.application
         else:
             application = db.get_application()
             if not application or not application.get('id'):
-                self.app.log.info('Not set the current application.')
+                self.app.log.info('Not set the active application.')
                 return
 
             application_id = application.get('id')
@@ -163,15 +163,15 @@ class ApplicationVersion(Controller):
         return renderable
 
     @ex(
-        help='show command used to showing application version specific details',
+        help='Show application version details',
         arguments=[
             (['version_id'],
-             {'help': 'Show details about the version by id',
+             {'help': 'Version id',
               'action': 'store'}),
             (['-a', '--application'],
-             {'help': 'Application id of version',
+             {'help': 'Application id',
               'action': 'store',
-              'dest': 'application_id'}),
+              'dest': 'application'}),
             (['-j', '--json'],
              {'help': 'Render result in Json format',
               'action': 'store_true',
@@ -186,8 +186,8 @@ class ApplicationVersion(Controller):
         application_client = APIClient(db.get_configure()).get_application_api_client()
         enterprise_id = db.get_enterprise_id()
 
-        if self.app.pargs.application_id:
-            application_id = self.app.pargs.application_id
+        if self.app.pargs.application:
+            application_id = self.app.pargs.application
         else:
             application = db.get_application()
             if not application or not application.get('id'):
@@ -213,15 +213,15 @@ class ApplicationVersion(Controller):
             self.app.render(renderable, format=OutputFormat.JSON.value)
 
     @ex(
-        help='delete command used to delete particular application version',
+        help='Delete application version',
         arguments=[
             (['version_id'],
-             {'help': 'Delete a version by id',
+             {'help': 'Version id',
               'action': 'store'}),
             (['-a', '--app'],
-             {'help': 'Application id of version',
+             {'help': 'Application id',
               'action': 'store',
-              'dest': 'application_id'}),
+              'dest': 'application'}),
         ]
     )
     def delete(self):
@@ -232,12 +232,12 @@ class ApplicationVersion(Controller):
         application_client = APIClient(db.get_configure()).get_application_api_client()
         enterprise_id = db.get_enterprise_id()
 
-        if self.app.pargs.application_id:
-            application_id = self.app.pargs.application_id
+        if self.app.pargs.application:
+            application_id = self.app.pargs.application
         else:
             application = db.get_application()
             if not application or not application.get('id'):
-                self.app.log.info('Not set the current application.')
+                self.app.log.info('Not set the active application.')
                 return
 
             application_id = application.get('id')
@@ -258,7 +258,7 @@ class ApplicationVersion(Controller):
                 application = db.get_application()
                 if application and application.get('id') and application_id == application.get('id'):
                     db.unset_application()
-                    self.app.log.debug(f'Unset the current application {application_id}')
+                    self.app.log.debug(f'Unset the active application {application_id}')
             else:
                 self.app.log.debug(f"Failed to get an application when deleting a version: {e}")
                 self.app.log.warning(f"Failed to get an application when deleting a version, reason: {e.reason}")
