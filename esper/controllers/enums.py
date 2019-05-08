@@ -28,4 +28,8 @@ class OutputFormat(BaseEnum):
 
 
 class DeviceCommandEnum(BaseEnum):
+    LOCK = 10
+    REBOOT = 20
+    UPDATE_HEARTBEAT = 40
+    WIPE = 90
     INSTALL = 210

@@ -1,8 +1,6 @@
 import sys
 
-import esperclient as client
 from cement.utils import fs
-from esperclient.configuration import Configuration
 from tinydb import TinyDB
 
 from esper.ext.db_wrapper import DBWrapper
@@ -32,28 +30,3 @@ def validate_creds_exists(app):
         app.log.info("Setup credentials by calling `configure` command.")
 
         sys.exit(1)
-
-
-def get_client_config(app):
-    db = DBWrapper(app.creds)
-    creds = db.get_configure()
-
-    config = Configuration()
-    config.username = creds["username"]
-    config.password = creds["password"]
-    config.host = get_api_endpoint(creds["host"])
-
-    return config
-
-
-def get_command_api(config):
-    return client.CommandsApi(client.ApiClient(config))
-
-
-def get_api_endpoint(host):
-    return f'https://{host}-api.shoonyacloud.com/api'
-
-
-def get_command_request(command_name, command_args):
-    return client.CommandRequest(command_args=command_args,
-                                 command=command_name)  # CommandRequest | command name to fire
