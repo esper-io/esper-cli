@@ -4,7 +4,7 @@ from crayons import white
 from esperclient import DeviceGroup, DeviceGroupUpdate
 from esperclient.rest import ApiException
 
-from esper.controllers.enums import OutputFormat
+from esper.controllers.enums import OutputFormat, DeviceState
 from esper.core.version import get_version
 from esper.ext.api_client import APIClient
 from esper.ext.db_wrapper import DBWrapper
@@ -482,3 +482,87 @@ class EnterpriseGroup(Controller):
             renderable = self._group_basic_response(response, OutputFormat.JSON)
             print(white(f"GROUP DETAILS", bold=True))
             self.app.render(renderable, format=OutputFormat.JSON.value)
+
+    @ex(
+        help='List group devices',
+        arguments=[
+            (['-g', '--group'],
+             {'help': 'Group id',
+              'action': 'store',
+              'dest': 'group'}),
+            (['-l', '--limit'],
+             {'help': 'Number of results to return per page',
+              'action': 'store',
+              'default': 20,
+              'dest': 'limit'}),
+            (['-i', '--offset'],
+             {'help': 'The initial index from which to return the results',
+              'action': 'store',
+              'default': 0,
+              'dest': 'offset'}),
+            (['-j', '--json'],
+             {'help': 'Render result in Json format',
+              'action': 'store_true',
+              'dest': 'json'}),
+        ]
+    )
+    def devices(self):
+        validate_creds_exists(self.app)
+        db = DBWrapper(self.app.creds)
+        device_client = APIClient(db.get_configure()).get_device_api_client()
+        enterprise_id = db.get_enterprise_id()
+
+        if self.app.pargs.group:
+            group_id = self.app.pargs.group
+        else:
+            group = db.get_group()
+            if not group or not group.get('id'):
+                self.app.log.info('Not set the active group.')
+                return
+
+            group_id = group.get('id')
+
+        limit = self.app.pargs.limit
+        offset = self.app.pargs.offset
+
+        try:
+            response = device_client.get_all_devices(enterprise_id, group=group_id, limit=limit, offset=offset)
+        except ApiException as e:
+            self.app.log.debug(f"Failed to list group devices: {e}")
+            self.app.log.error(f"Failed to list devices, reason: {e.reason}")
+            return
+
+        if not self.app.pargs.json:
+            devices = []
+
+            label = {
+                'id': white("ID", bold=True),
+                'name': white("NAME", bold=True),
+                'model': white("MODEL", bold=True),
+                'state': white("CURRENT STATE", bold=True)
+            }
+
+            for device in response.results:
+                devices.append(
+                    {
+                        label['id']: device.id,
+                        label['name']: device.device_name,
+                        label['model']: device.hardware_info.get("manufacturer"),
+                        label['state']: DeviceState(device.status).name
+                    }
+                )
+            print(white(f"\tNumber of Devices: {response.count}", bold=True))
+            self.app.render(devices, format=OutputFormat.TABULATED.value, headers="keys", tablefmt="fancy_grid")
+        else:
+            devices = []
+            for device in response.results:
+                devices.append(
+                    {
+                        'id': device.id,
+                        'device': device.device_name,
+                        'model': device.hardware_info.get("manufacturer"),
+                        'state': DeviceState(device.status).name
+                    }
+                )
+            print(white(f"Number of Devices: {response.count}", bold=True))
+            self.app.render(devices, format=OutputFormat.JSON.value)

@@ -23,3 +23,6 @@ class APIClient:
 
     def get_group_api_client(self):
         return client.DeviceGroupApi(client.ApiClient(self.config))
+
+    def get_group_command_api_client(self):
+        return client.GroupCommandsApi(client.ApiClient(self.config))

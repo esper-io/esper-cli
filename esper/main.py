@@ -7,6 +7,7 @@ from esper.controllers.base import Base
 from esper.controllers.configure import Configure
 from esper.controllers.device.command import DeviceCommand
 from esper.controllers.device.device import Device
+from esper.controllers.device.group_command import GroupCommand
 from esper.controllers.device.install import AppInstall
 from esper.controllers.device.status import DeviceStatus
 from esper.controllers.enterprise.enterprise import Enterprise
@@ -90,7 +91,8 @@ class Esper(App):
             AppInstall,
             DeviceStatus,
             Enterprise,
-            EnterpriseGroup
+            EnterpriseGroup,
+            GroupCommand
         ]
 
         # hooks
