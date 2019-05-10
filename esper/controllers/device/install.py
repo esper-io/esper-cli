@@ -1,6 +1,5 @@
 from cement import Controller, ex
 from cement.utils.version import get_version_banner
-from crayons import white
 from esperclient.rest import ApiException
 
 from esper.controllers.enums import OutputFormat
@@ -107,12 +106,12 @@ class AppInstall(Controller):
             installs = []
 
             label = {
-                'id': white("ID", bold=True),
-                'application_name': white("APPLICATION", bold=True),
-                'package_name': white("PACKAGE", bold=True),
-                'version_code': white("VERSION", bold=True),
-                'install_state': white("STATE", bold=True),
-                'reason_details': white("REASON", bold=True)
+                'id': "ID",
+                'application_name': "APPLICATION",
+                'package_name': "PACKAGE",
+                'version_code': "VERSION",
+                'install_state': "STATE",
+                'reason_details': "REASON"
             }
 
             for install in response.results:
@@ -126,7 +125,7 @@ class AppInstall(Controller):
                         label['reason_details']: install.reason_details
                     }
                 )
-            print(white(f"\tTotal Number of Installs: {response.count}", bold=True))
+            print(f"Total Number of Installs: {response.count}")
             self.app.render(installs, format=OutputFormat.TABULATED.value, headers="keys",
                             tablefmt="fancy_grid")
         else:
@@ -142,5 +141,5 @@ class AppInstall(Controller):
                         'reason_details': install.reason_details
                     }
                 )
-            print(white(f"Total Number of Installs: {response.count}", bold=True))
+            print(f"Total Number of Installs: {response.count}")
             self.app.render(installs, format=OutputFormat.JSON.value)

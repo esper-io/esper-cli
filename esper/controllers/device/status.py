@@ -2,7 +2,6 @@ from ast import literal_eval
 
 from cement import Controller, ex
 from cement.utils.version import get_version_banner
-from crayons import white
 from esperclient.rest import ApiException
 
 from esper.controllers.enums import OutputFormat
@@ -108,8 +107,8 @@ class DeviceStatus(Controller):
                     signal_strength = data.get("networkEvent").get("wifiNetworkInfo").get("signalStrength")
 
         if not self.app.pargs.json:
-            title = white("TITLE", bold=True)
-            details = white("DETAILS", bold=True)
+            title = "TITLE"
+            details = "DETAILS"
             renderable = [
                 {title: 'battery_level', details: battery_level},
                 {title: 'battery_temperature', details: battery_temp},
@@ -121,7 +120,7 @@ class DeviceStatus(Controller):
                 {title: 'signal_strength', details: signal_strength}
             ]
 
-            print(white(f"\tEVENT DETAILS", bold=True))
+            print(f"LATEST EVENT DETAILS")
             self.app.render(renderable, format=OutputFormat.TABULATED.value, headers="keys", tablefmt="fancy_grid")
         else:
             renderable = {
@@ -134,5 +133,5 @@ class DeviceStatus(Controller):
                 'link_speed': link_speed,
                 'signal_strength': signal_strength
             }
-            print(white(f"EVENT DETAILS", bold=True))
+            print(f"LATEST EVENT DETAILS")
             self.app.render(renderable, format=OutputFormat.JSON.value)

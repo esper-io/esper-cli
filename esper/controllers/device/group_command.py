@@ -2,7 +2,6 @@ from ast import literal_eval
 
 from cement import ex, Controller
 from cement.utils.version import get_version_banner
-from crayons import white
 from esperclient import GroupCommandRequest
 from esperclient.rest import ApiException
 
@@ -60,7 +59,6 @@ class GroupCommand(Controller):
                 if len(inactive_list) > 0:
                     inactive = '\n'.join(inactive_list)
 
-
             if details.get('acknowledge'):
                 in_progress_list.extend([device.get('name', None) for device in details.get('acknowledge')])
 
@@ -77,8 +75,8 @@ class GroupCommand(Controller):
                 in_progress = '\n'.join(in_progress_list)
 
         if format == OutputFormat.TABULATED:
-            title = white("TITLE", bold=True)
-            details = white("DETAILS", bold=True)
+            title = "TITLE"
+            details = "DETAILS"
             renderable = [{title: k, details: v} for k, v in command.to_dict().items() if k in valid_keys]
             renderable.extend([
                 {title: 'success', details: success},
@@ -135,13 +133,12 @@ class GroupCommand(Controller):
             self.app.log.error(f"Failed to show details of group command, reason: {e.reason}")
             return
 
+        print(f"COMMAND DETAILS of {response.command}")
         if not self.app.pargs.json:
             renderable = self._command_basic_response(response)
-            print(white(f"\tCOMMAND DETAILS of {response.command}", bold=True))
             self.app.render(renderable, format=OutputFormat.TABULATED.value, headers="keys", tablefmt="fancy_grid")
         else:
             renderable = self._command_basic_response(response, OutputFormat.JSON)
-            print(white(f"COMMAND DETAILS of {response.command}", bold=True))
             self.app.render(renderable, format=OutputFormat.JSON.value)
 
     @ex(
@@ -188,13 +185,12 @@ class GroupCommand(Controller):
             self.app.log.error(f"Failed to install application, reason: {e.reason}")
             return
 
+        print(f"COMMAND DETAILS of {response.command}")
         if not self.app.pargs.json:
             renderable = self._command_basic_response(response)
-            print(white(f"\tCOMMAND DETAILS of {response.command}", bold=True))
             self.app.render(renderable, format=OutputFormat.TABULATED.value, headers="keys", tablefmt="fancy_grid")
         else:
             renderable = self._command_basic_response(response, OutputFormat.JSON)
-            print(white(f"COMMAND DETAILS of {response.command}", bold=True))
             self.app.render(renderable, format=OutputFormat.JSON.value)
 
     @ex(
@@ -234,13 +230,12 @@ class GroupCommand(Controller):
             self.app.log.error(f"Failed to ping the group of devices, reason: {e.reason}")
             return
 
+        print(f"COMMAND DETAILS of {response.command}")
         if not self.app.pargs.json:
             renderable = self._command_basic_response(response)
-            print(white(f"\tCOMMAND DETAILS of {response.command}", bold=True))
             self.app.render(renderable, format=OutputFormat.TABULATED.value, headers="keys", tablefmt="fancy_grid")
         else:
             renderable = self._command_basic_response(response, OutputFormat.JSON)
-            print(white(f"COMMAND DETAILS of {response.command}", bold=True))
             self.app.render(renderable, format=OutputFormat.JSON.value)
 
     @ex(
@@ -280,13 +275,12 @@ class GroupCommand(Controller):
             self.app.log.error(f"Failed to lock the group of devices, reason: {e.reason}")
             return
 
+        print(f"COMMAND DETAILS of {response.command}")
         if not self.app.pargs.json:
             renderable = self._command_basic_response(response)
-            print(white(f"\tCOMMAND DETAILS of {response.command}", bold=True))
             self.app.render(renderable, format=OutputFormat.TABULATED.value, headers="keys", tablefmt="fancy_grid")
         else:
             renderable = self._command_basic_response(response, OutputFormat.JSON)
-            print(white(f"COMMAND DETAILS of {response.command}", bold=True))
             self.app.render(renderable, format=OutputFormat.JSON.value)
 
     @ex(
@@ -326,11 +320,10 @@ class GroupCommand(Controller):
             self.app.log.error(f"Failed to reboot the group of devices, reason: {e.reason}")
             return
 
+        print(f"COMMAND DETAILS of {response.command}")
         if not self.app.pargs.json:
             renderable = self._command_basic_response(response)
-            print(white(f"\tCOMMAND DETAILS of {response.command}", bold=True))
             self.app.render(renderable, format=OutputFormat.TABULATED.value, headers="keys", tablefmt="fancy_grid")
         else:
             renderable = self._command_basic_response(response, OutputFormat.JSON)
-            print(white(f"COMMAND DETAILS of {response.command}", bold=True))
             self.app.render(renderable, format=OutputFormat.JSON.value)
