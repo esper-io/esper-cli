@@ -1,6 +1,5 @@
 from cement import Controller, ex
 from cement.utils.version import get_version_banner
-from crayons import white, red, green, blue
 from esperclient.rest import ApiException
 
 from esper.controllers.enums import DeviceState, OutputFormat
@@ -31,11 +30,32 @@ class Device(Controller):
     @ex(
         help='List devices',
         arguments=[
-            (['--filter'],
-             {'help': 'Filter devices by device state',
+            (['-s', '--state'],
+             {'help': 'Device state',
               'action': 'store',
               'choices': ['active', 'inactive', 'disabled'],
-              'dest': 'filter_state'}),
+              'dest': 'state'}),
+            (['-n', '--name'],
+             {'help': 'Device name',
+              'action': 'store',
+              'dest': 'name'}),
+            (['-g', '--group'],
+             {'help': 'Group id',
+              'action': 'store',
+              'dest': 'group'}),
+            (['-im', '--imei'],
+             {'help': 'IMEI number',
+              'action': 'store',
+              'dest': 'imei'}),
+            (['-b', '--brand'],
+             {'help': 'Brand name',
+              'action': 'store',
+              'dest': 'brand'}),
+            (['-gm', '--gms'],
+             {'help': 'GMS or not',
+              'action': 'store',
+              'choices': ['true', 'false'],
+              'dest': 'gms'}),
             (['-l', '--limit'],
              {'help': 'Number of results to return per page',
               'action': 'store',
@@ -59,13 +79,37 @@ class Device(Controller):
         device_client = APIClient(db.get_configure()).get_device_api_client()
         enterprise_id = db.get_enterprise_id()
 
-        state = self.app.pargs.filter_state
+        state = self.app.pargs.state
+        name = self.app.pargs.name
+        group = self.app.pargs.group
+        imei = self.app.pargs.imei
+        brand = self.app.pargs.brand
+        gms = self.app.pargs.gms
         limit = self.app.pargs.limit
         offset = self.app.pargs.offset
 
+        kwargs = {}
+        if state:
+            kwargs['state'] = DeviceState[state.upper()].value
+
+        if name:
+            kwargs['name'] = name
+
+        if group:
+            kwargs['group'] = group
+
+        if imei:
+            kwargs['imei'] = imei
+
+        if brand:
+            kwargs['brand'] = brand
+
+        if gms:
+            kwargs['is_gms'] = gms
+
         try:
             # Find devices in an enterprise
-            response = device_client.get_all_devices(enterprise_id, limit=limit, offset=offset)
+            response = device_client.get_all_devices(enterprise_id, limit=limit, offset=offset, **kwargs)
         except ApiException as e:
             self.app.log.debug(f"Failed to list devices: {e}")
             self.app.log.error(f"Failed to list devices, reason: {e.reason}")
@@ -75,27 +119,14 @@ class Device(Controller):
             devices = []
 
             label = {
-                'id': white("ID", bold=True),
-                'name': white("NAME", bold=True),
-                'model': white("MODEL", bold=True),
-                'state': white("CURRENT STATE", bold=True)
+                'id': "ID",
+                'name': "NAME",
+                'model': "MODEL",
+                'state': "CURRENT STATE"
             }
 
             for device in response.results:
-                if state and device.status != DeviceState[state.upper()].value:
-                    continue
-
-                if device.status == DeviceState.ACTIVE.value:
-                    current_state = blue("Active")
-                elif device.status == DeviceState.INACTIVE.value:
-                    current_state = red("Inactive")
-                elif device.status == DeviceState.DISABLED.value:
-                    current_state = white("Disabled")
-                elif device.status == DeviceState.POLICY_APPLICATION_IN_PROGRESS.value:
-                    current_state = green("Applying policy...")
-                else:
-                    current_state = DeviceState(device.status).name
-
+                current_state = DeviceState(device.status).name
                 devices.append(
                     {
                         label['id']: device.id,
@@ -104,21 +135,12 @@ class Device(Controller):
                         label['state']: current_state
                     }
                 )
-            print(white(f"\tNumber of Devices: {response.count}", bold=True))
+            print(f"Number of Devices: {response.count}")
             self.app.render(devices, format=OutputFormat.TABULATED.value, headers="keys", tablefmt="fancy_grid")
         else:
             devices = []
             for device in response.results:
-                if device.status == DeviceState.ACTIVE.value:
-                    current_state = DeviceState.ACTIVE.name
-                elif device.status == DeviceState.INACTIVE.value:
-                    current_state = DeviceState.INACTIVE.name
-                elif device.status == DeviceState.DISABLED.value:
-                    current_state = DeviceState.DISABLED.name
-                elif device.status == DeviceState.POLICY_APPLICATION_IN_PROGRESS.value:
-                    current_state = DeviceState.POLICY_APPLICATION_IN_PROGRESS.name
-                else:
-                    current_state = DeviceState(device.status).name
+                current_state = DeviceState(device.status).name
                 devices.append(
                     {
                         'id': device.id,
@@ -127,7 +149,7 @@ class Device(Controller):
                         'state': current_state
                     }
                 )
-            print(white(f"Number of Devices: {response.count}", bold=True))
+            print(f"Number of Devices: {response.count}")
             self.app.render(devices, format=OutputFormat.JSON.value)
 
     def _device_basic_response(self, device, format=OutputFormat.TABULATED):
@@ -136,8 +158,8 @@ class Device(Controller):
         if format == OutputFormat.JSON:
             renderable = {k: v for k, v in device.to_dict().items() if k in valid_keys}
         else:
-            title = white("TITLE", bold=True)
-            details = white("DETAILS", bold=True)
+            title = "TITLE"
+            details = "DETAILS"
             renderable = [{title: k, details: v} for k, v in device.to_dict().items() if k in valid_keys]
         return renderable
 
@@ -175,12 +197,11 @@ class Device(Controller):
             self.app.log.error(f"Failed to show details of a device, reason: {e.reason}")
             return
 
+        print(f"DEVICE DETAILS of {response.device_name}")
         if not self.app.pargs.json:
-            print(white(f"\tDEVICE DETAILS of {response.device_name}", bold=True))
             renderable = self._device_basic_response(response)
             self.app.render(renderable, format=OutputFormat.TABULATED.value, headers="keys", tablefmt="fancy_grid")
         else:
-            print(white(f"DEVICE DETAILS of {response.device_name}", bold=True))
             renderable = self._device_basic_response(response, OutputFormat.JSON)
             self.app.render(renderable, format=OutputFormat.JSON.value)
 
@@ -197,7 +218,7 @@ class Device(Controller):
               'dest': 'json'}),
         ]
     )
-    def current(self):
+    def active(self):
         validate_creds_exists(self.app)
         db = DBWrapper(self.app.creds)
 
@@ -229,11 +250,10 @@ class Device(Controller):
             self.app.log.error(f"Failed to show or unset the active device, reason: {e.reason}")
             return
 
+        print(f"DEVICE DETAILS of {response.device_name}")
         if not self.app.pargs.json:
-            print(white(f"\tDEVICE DETAILS of {response.device_name}", bold=True))
             renderable = self._device_basic_response(response)
             self.app.render(renderable, format=OutputFormat.TABULATED.value, headers="keys", tablefmt="fancy_grid")
         else:
-            print(white(f"DEVICE DETAILS of {response.device_name}", bold=True))
             renderable = self._device_basic_response(response, OutputFormat.JSON)
             self.app.render(renderable, format=OutputFormat.JSON.value)

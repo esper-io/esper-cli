@@ -1,6 +1,5 @@
 from cement import Controller, ex
 from cement.utils.version import get_version_banner
-from crayons import white
 from esperclient.rest import ApiException
 
 from esper.controllers.enums import OutputFormat
@@ -86,10 +85,10 @@ class Application(Controller):
             applications = []
 
             label = {
-                'id': white("ID", bold=True),
-                'name': white("NAME", bold=True),
-                'package': white("PACKAGE NAME", bold=True),
-                'version_count': white("NO. OF VERSIONS", bold=True)
+                'id': "ID",
+                'name': "NAME",
+                'package': "PACKAGE NAME",
+                'version_count': "NO. OF VERSIONS"
             }
 
             for application in response.results:
@@ -101,7 +100,7 @@ class Application(Controller):
                         label['version_count']: len(application.versions) if application.versions else 0
                     }
                 )
-            print(white(f"\tTotal Number of Applications: {response.count}", bold=True))
+            print("Total Number of Applications: {response.count}")
             self.app.render(applications, format=OutputFormat.TABULATED.value, headers="keys",
                             tablefmt="fancy_grid")
         else:
@@ -115,7 +114,7 @@ class Application(Controller):
                         'version_count': len(application.versions) if application.versions else 0
                     }
                 )
-            print(white(f"Total Number of Applications: {response.count}", bold=True))
+            print(f"Total Number of Applications: {response.count}")
             self.app.render(applications, format=OutputFormat.JSON.value)
 
     def _application_basic_response(self, application, format=OutputFormat.TABULATED):
@@ -127,8 +126,8 @@ class Application(Controller):
             if application:
                 renderable['version_count'] = len(application.versions)
         else:
-            title = white("TITLE", bold=True)
-            details = white("DETAILS", bold=True)
+            title = "TITLE"
+            details = "DETAILS"
             renderable = [{title: k, details: v} for k, v in application.to_dict().items() if k in valid_keys]
 
             if application:
@@ -170,12 +169,11 @@ class Application(Controller):
             self.app.log.error(f"Failed to show details of an application, reason: {e.reason}")
             return
 
+        print(f"APPLICATION DETAILS of {response.application_name}")
         if not self.app.pargs.json:
-            print(white(f"\tAPPLICATION DETAILS of {response.application_name}", bold=True))
             renderable = self._application_basic_response(response)
             self.app.render(renderable, format=OutputFormat.TABULATED.value, headers="keys", tablefmt="fancy_grid")
         else:
-            print(white(f"APPLICATION DETAILS of {response.application_name}", bold=True))
             renderable = self._application_basic_response(response, OutputFormat.JSON)
             self.app.render(renderable, format=OutputFormat.JSON.value)
 
@@ -206,12 +204,11 @@ class Application(Controller):
             self.app.log.error(f"Failed to upload an application, reason: {e.reason}")
             return
 
+        print(f"APPLICATION DETAILS of {response.application_name}")
         if not self.app.pargs.json:
-            print(white(f"\tAPPLICATION DETAILS of {response.application.application_name}", bold=True))
             renderable = self._application_basic_response(response.application)
             self.app.render(renderable, format=OutputFormat.TABULATED.value, headers="keys", tablefmt="fancy_grid")
         else:
-            print(white(f"APPLICATION DETAILS of {response.application_name}", bold=True))
             renderable = self._application_basic_response(response.application, OutputFormat.JSON)
             self.app.render(renderable, format=OutputFormat.JSON.value)
 
@@ -258,7 +255,7 @@ class Application(Controller):
               'dest': 'json'})
         ]
     )
-    def current(self):
+    def active(self):
         validate_creds_exists(self.app)
         db = DBWrapper(self.app.creds)
 
@@ -290,11 +287,10 @@ class Application(Controller):
             self.app.log.error(f"Failed to show or unset the active application, reason: {e.reason}")
             return
 
+        print(f"APPLICATION DETAILS of {response.application_name}")
         if not self.app.pargs.json:
-            print(white(f"\tAPPLICATION DETAILS of {response.application_name}", bold=True))
             renderable = self._application_basic_response(response)
             self.app.render(renderable, format=OutputFormat.TABULATED.value, headers="keys", tablefmt="fancy_grid")
         else:
-            print(white(f"APPLICATION DETAILS of {response.application_name}", bold=True))
             renderable = self._application_basic_response(response, OutputFormat.JSON)
             self.app.render(renderable, format=OutputFormat.JSON.value)

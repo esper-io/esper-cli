@@ -1,6 +1,5 @@
 from cement import ex, Controller
 from cement.utils.version import get_version_banner
-from crayons import white
 from esperclient import CommandRequest
 from esperclient.rest import ApiException
 
@@ -33,8 +32,8 @@ class DeviceCommand(Controller):
         valid_keys = ['id', 'command', 'state']
 
         if format == OutputFormat.TABULATED:
-            title = white("TITLE", bold=True)
-            details = white("DETAILS", bold=True)
+            title = "TITLE"
+            details = "DETAILS"
             renderable = [{title: k, details: v} for k, v in command.to_dict().items() if k in valid_keys]
         else:
             renderable = {k: v for k, v in command.to_dict().items() if k in valid_keys}
@@ -81,13 +80,12 @@ class DeviceCommand(Controller):
             self.app.log.error(f"Failed to show details of command, reason: {e.reason}")
             return
 
+        print(f"COMMAND DETAILS of {response.command}")
         if not self.app.pargs.json:
             renderable = self._command_basic_response(response)
-            print(white(f"\tCOMMAND DETAILS of {response.command}", bold=True))
             self.app.render(renderable, format=OutputFormat.TABULATED.value, headers="keys", tablefmt="fancy_grid")
         else:
             renderable = self._command_basic_response(response, OutputFormat.JSON)
-            print(white(f"COMMAND DETAILS of {response.command}", bold=True))
             self.app.render(renderable, format=OutputFormat.JSON.value)
 
     @ex(
@@ -134,13 +132,12 @@ class DeviceCommand(Controller):
             self.app.log.error(f"Failed to install application, reason: {e.reason}")
             return
 
+        print(f"COMMAND DETAILS of {response.command}")
         if not self.app.pargs.json:
             renderable = self._command_basic_response(response)
-            print(white(f"\tCOMMAND DETAILS of {response.command}", bold=True))
             self.app.render(renderable, format=OutputFormat.TABULATED.value, headers="keys", tablefmt="fancy_grid")
         else:
             renderable = self._command_basic_response(response, OutputFormat.JSON)
-            print(white(f"COMMAND DETAILS of {response.command}", bold=True))
             self.app.render(renderable, format=OutputFormat.JSON.value)
 
     @ex(
@@ -180,13 +177,12 @@ class DeviceCommand(Controller):
             self.app.log.error(f"Failed to ping the device, reason: {e.reason}")
             return
 
+        print(f"COMMAND DETAILS of {response.command}")
         if not self.app.pargs.json:
             renderable = self._command_basic_response(response)
-            print(white(f"\tCOMMAND DETAILS of {response.command}", bold=True))
             self.app.render(renderable, format=OutputFormat.TABULATED.value, headers="keys", tablefmt="fancy_grid")
         else:
             renderable = self._command_basic_response(response, OutputFormat.JSON)
-            print(white(f"COMMAND DETAILS of {response.command}", bold=True))
             self.app.render(renderable, format=OutputFormat.JSON.value)
 
     @ex(
@@ -226,13 +222,12 @@ class DeviceCommand(Controller):
             self.app.log.error(f"Failed to lock the device, reason: {e.reason}")
             return
 
+        print(f"COMMAND DETAILS of {response.command}")
         if not self.app.pargs.json:
             renderable = self._command_basic_response(response)
-            print(white(f"\tCOMMAND DETAILS of {response.command}", bold=True))
             self.app.render(renderable, format=OutputFormat.TABULATED.value, headers="keys", tablefmt="fancy_grid")
         else:
             renderable = self._command_basic_response(response, OutputFormat.JSON)
-            print(white(f"COMMAND DETAILS of {response.command}", bold=True))
             self.app.render(renderable, format=OutputFormat.JSON.value)
 
     @ex(
@@ -272,13 +267,12 @@ class DeviceCommand(Controller):
             self.app.log.error(f"Failed to reboot the device, reason: {e.reason}")
             return
 
+        print(f"COMMAND DETAILS of {response.command}")
         if not self.app.pargs.json:
             renderable = self._command_basic_response(response)
-            print(white(f"\tCOMMAND DETAILS of {response.command}", bold=True))
             self.app.render(renderable, format=OutputFormat.TABULATED.value, headers="keys", tablefmt="fancy_grid")
         else:
             renderable = self._command_basic_response(response, OutputFormat.JSON)
-            print(white(f"COMMAND DETAILS of {response.command}", bold=True))
             self.app.render(renderable, format=OutputFormat.JSON.value)
 
     @ex(
@@ -336,11 +330,10 @@ class DeviceCommand(Controller):
             self.app.log.error(f"Failed to wipe the device, reason: {e.reason}")
             return
 
+        print(f"COMMAND DETAILS of {response.command}")
         if not self.app.pargs.json:
             renderable = self._command_basic_response(response)
-            print(white(f"\tCOMMAND DETAILS of {response.command}", bold=True))
             self.app.render(renderable, format=OutputFormat.TABULATED.value, headers="keys", tablefmt="fancy_grid")
         else:
             renderable = self._command_basic_response(response, OutputFormat.JSON)
-            print(white(f"COMMAND DETAILS of {response.command}", bold=True))
             self.app.render(renderable, format=OutputFormat.JSON.value)

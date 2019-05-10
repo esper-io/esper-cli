@@ -1,6 +1,5 @@
 from cement import Controller, ex
 from cement.utils.version import get_version_banner
-from crayons import white
 from esperclient import EnterpriseUpdate
 from esperclient.rest import ApiException
 
@@ -47,8 +46,8 @@ class Enterprise(Controller):
             contact_number = enterprise.details.contact_number
 
         if format == OutputFormat.TABULATED:
-            title = white("TITLE", bold=True)
-            details = white("DETAILS", bold=True)
+            title = "TITLE"
+            details = "DETAILS"
             renderable = [
                 {title: 'id', details: enterprise.id},
                 {title: 'name', details: enterprise.name},
@@ -99,13 +98,12 @@ class Enterprise(Controller):
             self.app.log.error(f"Failed to show details of an enterprise, reason: {e.reason}")
             return
 
+        print(f"ENTERPRISE DETAILS")
         if not self.app.pargs.json:
             renderable = self._enterprise_basic_response(response)
-            print(white(f"\tENTERPRISE DETAILS", bold=True))
             self.app.render(renderable, format=OutputFormat.TABULATED.value, headers="keys", tablefmt="fancy_grid")
         else:
             renderable = self._enterprise_basic_response(response, OutputFormat.JSON)
-            print(white(f"ENTERPRISE DETAILS", bold=True))
             self.app.render(renderable, format=OutputFormat.JSON.value)
 
     @ex(
@@ -198,11 +196,10 @@ class Enterprise(Controller):
             self.app.log.error(f"Failed to update details of an enterprise, reason: {e.reason}")
             return
 
+        print(f"ENTERPRISE DETAILS")
         if not self.app.pargs.json:
             renderable = self._enterprise_basic_response(response)
-            print(white(f"\tENTERPRISE DETAILS", bold=True))
             self.app.render(renderable, format=OutputFormat.TABULATED.value, headers="keys", tablefmt="fancy_grid")
         else:
             renderable = self._enterprise_basic_response(response, OutputFormat.JSON)
-            print(white(f"ENTERPRISE DETAILS", bold=True))
             self.app.render(renderable, format=OutputFormat.JSON.value)

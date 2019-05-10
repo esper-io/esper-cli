@@ -2,7 +2,6 @@ from http import HTTPStatus
 
 from cement import Controller, ex
 from cement.utils.version import get_version_banner
-from crayons import white
 from esperclient.rest import ApiException
 
 from esper.controllers.enums import OutputFormat
@@ -103,12 +102,12 @@ class ApplicationVersion(Controller):
             versions = []
 
             label = {
-                'id': white("ID", bold=True),
-                'version_code': white("VERSION CODE", bold=True),
-                'build_number': white("BUILD NUMBER", bold=True),
-                'size_in_mb': white("SIZE IN Mb", bold=True),
-                'release_track': white("RELEASE TRACK", bold=True),
-                'installed_count': white("INSTALLED COUNT", bold=True),
+                'id': "ID",
+                'version_code': "VERSION CODE",
+                'build_number': "BUILD NUMBER",
+                'size_in_mb': "SIZE IN MB",
+                'release_track': "RELEASE TRACK",
+                'installed_count': "INSTALLED COUNT",
             }
 
             for version in response.results:
@@ -122,7 +121,7 @@ class ApplicationVersion(Controller):
                         label['installed_count']: version.installed_count if version.installed_count else 0
                     }
                 )
-            print(white(f"\tTotal Number of Versions: {response.count}", bold=True))
+            print(f"Total Number of Versions: {response.count}")
             self.app.render(versions, format=OutputFormat.TABULATED.value, headers="keys",
                             tablefmt="fancy_grid")
         else:
@@ -138,7 +137,7 @@ class ApplicationVersion(Controller):
                         'installed_count': version.installed_count if version.installed_count else 0
                     }
                 )
-            print(white(f"Total Number of Versions: {response.count}", bold=True))
+            print(f"Total Number of Versions: {response.count}")
             self.app.render(versions, format=OutputFormat.JSON.value)
 
     def _version_basic_response(self, version, format=OutputFormat.TABULATED):
@@ -149,8 +148,8 @@ class ApplicationVersion(Controller):
             if version:
                 renderable['installed_count'] = version.installed_count if version.installed_count else 0
         else:
-            title = white("TITLE", bold=True)
-            details = white("DETAILS", bold=True)
+            title = "TITLE"
+            details = "DETAILS"
             renderable = [{title: k, details: v} for k, v in version.to_dict().items() if k in valid_keys]
 
             if version:
@@ -203,12 +202,11 @@ class ApplicationVersion(Controller):
             self.app.log.error(f"Failed to show details of an version, reason: {e.reason}")
             return
 
+        print(f"\tVERSION DETAILS of {version_id}")
         if not self.app.pargs.json:
-            print(white(f"\tVERSION DETAILS of {version_id}", bold=True))
             renderable = self._version_basic_response(response)
             self.app.render(renderable, format=OutputFormat.TABULATED.value, headers="keys", tablefmt="fancy_grid")
         else:
-            print(white(f"VERSION DETAILS of {version_id}", bold=True))
             renderable = self._version_basic_response(response, OutputFormat.JSON)
             self.app.render(renderable, format=OutputFormat.JSON.value)
 

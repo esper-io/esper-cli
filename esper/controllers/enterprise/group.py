@@ -1,6 +1,5 @@
 from cement import Controller, ex
 from cement.utils.version import get_version_banner
-from crayons import white
 from esperclient import DeviceGroup, DeviceGroupUpdate
 from esperclient.rest import ApiException
 
@@ -77,9 +76,9 @@ class EnterpriseGroup(Controller):
             groups = []
 
             label = {
-                'id': white("ID", bold=True),
-                'name': white("NAME", bold=True),
-                'device_count': white("DEVICE COUNT", bold=True)
+                'id': "ID",
+                'name': "NAME",
+                'device_count': "DEVICE COUNT"
             }
 
             for group in response.results:
@@ -90,7 +89,7 @@ class EnterpriseGroup(Controller):
                         label['device_count']: group.device_count if group.device_count else 0
                     }
                 )
-            print(white(f"\tTotal Number of Groups: {response.count}", bold=True))
+            print(f"Total Number of Groups: {response.count}")
             self.app.render(groups, format=OutputFormat.TABULATED.value, headers="keys", tablefmt="fancy_grid")
         else:
             groups = []
@@ -102,13 +101,13 @@ class EnterpriseGroup(Controller):
                         'device_count': group.device_count if group.device_count else 0
                     }
                 )
-            print(white(f"Total Number of Groups: {response.count}", bold=True))
+            print(f"Total Number of Groups: {response.count}")
             self.app.render(groups, format=OutputFormat.JSON.value)
 
     def _group_basic_response(self, group, format=OutputFormat.TABULATED):
         if format == OutputFormat.TABULATED:
-            title = white("TITLE", bold=True)
-            details = white("DETAILS", bold=True)
+            title = "TITLE"
+            details = "DETAILS"
             renderable = [
                 {title: 'id', details: group.id},
                 {title: 'name', details: group.name},
@@ -157,13 +156,12 @@ class EnterpriseGroup(Controller):
             self.app.log.error(f"Failed to show details of an group, reason: {e.reason}")
             return
 
+        print(f"GROUP DETAILS")
         if not self.app.pargs.json:
             renderable = self._group_basic_response(response)
-            print(white(f"\tGROUP DETAILS", bold=True))
             self.app.render(renderable, format=OutputFormat.TABULATED.value, headers="keys", tablefmt="fancy_grid")
         else:
             renderable = self._group_basic_response(response, OutputFormat.JSON)
-            print(white(f"GROUP DETAILS", bold=True))
             self.app.render(renderable, format=OutputFormat.JSON.value)
 
     @ex(
@@ -210,12 +208,11 @@ class EnterpriseGroup(Controller):
             self.app.log.error(f"Failed to show or unset the active group, reason: {e.reason}")
             return
 
+        print(f"GROUP DETAILS")
         if not self.app.pargs.json:
-            print(white(f"\tGROUP DETAILS of {response.name}", bold=True))
             renderable = self._group_basic_response(response)
             self.app.render(renderable, format=OutputFormat.TABULATED.value, headers="keys", tablefmt="fancy_grid")
         else:
-            print(white(f"GROUP DETAILS of {response.name}", bold=True))
             renderable = self._group_basic_response(response, OutputFormat.JSON)
             self.app.render(renderable, format=OutputFormat.JSON.value)
 
@@ -251,13 +248,12 @@ class EnterpriseGroup(Controller):
             self.app.log.error(f"Failed to create a group, reason: {e.reason}")
             return
 
+        print(f"GROUP DETAILS")
         if not self.app.pargs.json:
             renderable = self._group_basic_response(response)
-            print(white(f"\tGROUP DETAILS", bold=True))
             self.app.render(renderable, format=OutputFormat.TABULATED.value, headers="keys", tablefmt="fancy_grid")
         else:
             renderable = self._group_basic_response(response, OutputFormat.JSON)
-            print(white(f"GROUP DETAILS", bold=True))
             self.app.render(renderable, format=OutputFormat.JSON.value)
 
     @ex(
@@ -298,13 +294,12 @@ class EnterpriseGroup(Controller):
             self.app.log.error(f"Failed to update details of a group, reason: {e.reason}")
             return
 
+        print(f"GROUP DETAILS")
         if not self.app.pargs.json:
             renderable = self._group_basic_response(response)
-            print(white(f"\tGROUP DETAILS", bold=True))
             self.app.render(renderable, format=OutputFormat.TABULATED.value, headers="keys", tablefmt="fancy_grid")
         else:
             renderable = self._group_basic_response(response, OutputFormat.JSON)
-            print(white(f"GROUP DETAILS", bold=True))
             self.app.render(renderable, format=OutputFormat.JSON.value)
 
     @ex(
@@ -411,13 +406,12 @@ class EnterpriseGroup(Controller):
             self.app.log.error(f"Failed to add device into a group, reason: {e.reason}")
             return
 
+        print(f"GROUP DETAILS")
         if not self.app.pargs.json:
             renderable = self._group_basic_response(response)
-            print(white(f"\tGROUP DETAILS", bold=True))
             self.app.render(renderable, format=OutputFormat.TABULATED.value, headers="keys", tablefmt="fancy_grid")
         else:
             renderable = self._group_basic_response(response, OutputFormat.JSON)
-            print(white(f"GROUP DETAILS", bold=True))
             self.app.render(renderable, format=OutputFormat.JSON.value)
 
     @ex(
@@ -474,13 +468,12 @@ class EnterpriseGroup(Controller):
             self.app.log.error(f"Failed to remove device from group, reason: {e.reason}")
             return
 
+        print(f"GROUP DETAILS")
         if not self.app.pargs.json:
             renderable = self._group_basic_response(response)
-            print(white(f"\tGROUP DETAILS", bold=True))
             self.app.render(renderable, format=OutputFormat.TABULATED.value, headers="keys", tablefmt="fancy_grid")
         else:
             renderable = self._group_basic_response(response, OutputFormat.JSON)
-            print(white(f"GROUP DETAILS", bold=True))
             self.app.render(renderable, format=OutputFormat.JSON.value)
 
     @ex(
@@ -536,10 +529,10 @@ class EnterpriseGroup(Controller):
             devices = []
 
             label = {
-                'id': white("ID", bold=True),
-                'name': white("NAME", bold=True),
-                'model': white("MODEL", bold=True),
-                'state': white("CURRENT STATE", bold=True)
+                'id': "ID",
+                'name': "NAME",
+                'model': "MODEL",
+                'state': "CURRENT STATE"
             }
 
             for device in response.results:
@@ -551,7 +544,7 @@ class EnterpriseGroup(Controller):
                         label['state']: DeviceState(device.status).name
                     }
                 )
-            print(white(f"\tNumber of Devices: {response.count}", bold=True))
+            print(f"Number of Devices: {response.count}")
             self.app.render(devices, format=OutputFormat.TABULATED.value, headers="keys", tablefmt="fancy_grid")
         else:
             devices = []
@@ -564,5 +557,5 @@ class EnterpriseGroup(Controller):
                         'state': DeviceState(device.status).name
                     }
                 )
-            print(white(f"Number of Devices: {response.count}", bold=True))
+            print(f"Number of Devices: {response.count}")
             self.app.render(devices, format=OutputFormat.JSON.value)
