@@ -89,7 +89,7 @@ class EnterpriseGroup(Controller):
                         label['device_count']: group.device_count if group.device_count else 0
                     }
                 )
-            print(f"Total Number of Groups: {response.count}")
+            print(f"Number of Groups: {response.count}")
             self.app.render(groups, format=OutputFormat.TABULATED.value, headers="keys", tablefmt="fancy_grid")
         else:
             groups = []
@@ -101,7 +101,7 @@ class EnterpriseGroup(Controller):
                         'device_count': group.device_count if group.device_count else 0
                     }
                 )
-            print(f"Total Number of Groups: {response.count}")
+            print(f"Number of Groups: {response.count}")
             self.app.render(groups, format=OutputFormat.JSON.value)
 
     def _group_basic_response(self, group, format=OutputFormat.TABULATED):
@@ -125,13 +125,13 @@ class EnterpriseGroup(Controller):
     @ex(
         help='Show group details and set as active group',
         arguments=[
-            (['group_id'],
-             {'help': 'Group id',
+            (['group_name'],
+             {'help': 'Group name',
               'action': 'store'}),
-            (['-s', '--set'],
-             {'help': 'Set this group as active group for further group specific commands',
+            (['-a', '--active'],
+             {'help': 'Set this group as active for further group specific commands',
               'action': 'store_true',
-              'dest': 'set'}),
+              'dest': 'active'}),
             (['-j', '--json'],
              {'help': 'Render result in Json format',
               'action': 'store_true',
@@ -144,19 +144,27 @@ class EnterpriseGroup(Controller):
         group_client = APIClient(db.get_configure()).get_group_api_client()
         enterprise_id = db.get_enterprise_id()
 
-        group_id = self.app.pargs.group_id
-
-        if self.app.pargs.set:
-            db.set_group({'id': group_id})
-
+        group_name = self.app.pargs.group_name
+        kwargs = {'name': group_name}
         try:
-            response = group_client.get_group_by_id(group_id, enterprise_id)
+            search_response = group_client.get_all_groups(enterprise_id, limit=1, offset=0, **kwargs)
+            response = None
+            for group in search_response.results:
+                if group.name == group_name:
+                    response = group
+                    break
+
+            if not response:
+                print(f'Group does not exist with name {group_name}')
+                return
         except ApiException as e:
-            self.app.log.debug(f"Failed to show details of an group: {e}")
-            self.app.log.error(f"Failed to show details of an group, reason: {e.reason}")
+            self.app.log.debug(f"Failed to list groups: {e}")
+            self.app.log.error(f"Failed to fetch group, reason: {e.reason}")
             return
 
-        print(f"GROUP DETAILS")
+        if self.app.pargs.active:
+            db.set_group({'id': response.id, 'name': group_name})
+
         if not self.app.pargs.json:
             renderable = self._group_basic_response(response)
             self.app.render(renderable, format=OutputFormat.TABULATED.value, headers="keys", tablefmt="fancy_grid")
@@ -165,8 +173,12 @@ class EnterpriseGroup(Controller):
             self.app.render(renderable, format=OutputFormat.JSON.value)
 
     @ex(
-        help='Show or unset the active group',
+        help='Set, show or unset the active group',
         arguments=[
+            (['-n', '--name'],
+             {'help': 'Group name.',
+              'action': 'store',
+              'dest': 'name'}),
             (['-u', '--unset'],
              {'help': 'Unset the active group',
               'action': 'store_true',
@@ -183,32 +195,44 @@ class EnterpriseGroup(Controller):
         group_client = APIClient(db.get_configure()).get_group_api_client()
         enterprise_id = db.get_enterprise_id()
 
-        group_id = None
-        group = db.get_group()
-        if group:
-            group_id = group.get('id', None)
-
-        if self.app.pargs.unset:
-            if not group_id:
-                self.app.log.info('Not set the active group.')
+        if self.app.pargs.name:
+            group_name = self.app.pargs.name
+            kwargs = {'name': group_name}
+            try:
+                search_response = group_client.get_all_groups(enterprise_id, limit=1, offset=0, **kwargs)
+                if not search_response.results or len(search_response.results) == 0:
+                    print(f'Group does not exist with name {group_name}')
+                    return
+                response = search_response.results[0]
+                db.set_group({'id': response.id, 'name': group_name})
+            except ApiException as e:
+                self.app.log.debug(f"Failed to list groups: {e}")
+                self.app.log.error(f"Failed to set active group, reason: {e.reason}")
+                return
+        elif self.app.pargs.unset:
+            group = db.get_group()
+            if group is None or group.get('name') is None:
+                print('There is no active group.')
                 return
 
             db.unset_group()
-            self.app.log.info(f'Unset the active group {group_id}')
+            self.app.log.debug(f"Unset the active group {group.get('name')}")
+            print(f"Unset the active group {group.get('name')}")
             return
+        else:
+            group = db.get_group()
+            if group is None or group.get('name') is None:
+                print('There is no active group.')
+                return
 
-        if not group_id:
-            self.app.log.info("Not set the active group.")
-            return
+            group_id = group.get('id')
+            try:
+                response = group_client.get_group_by_id(group_id, enterprise_id)
+            except ApiException as e:
+                self.app.log.debug(f"Failed to show active group: {e}")
+                self.app.log.error(f"Failed to show active group, reason: {e.reason}")
+                return
 
-        try:
-            response = group_client.get_group_by_id(group_id, enterprise_id)
-        except ApiException as e:
-            self.app.log.debug(f"Failed to show or unset the active group: {e}")
-            self.app.log.error(f"Failed to show or unset the active group, reason: {e.reason}")
-            return
-
-        print(f"GROUP DETAILS")
         if not self.app.pargs.json:
             renderable = self._group_basic_response(response)
             self.app.render(renderable, format=OutputFormat.TABULATED.value, headers="keys", tablefmt="fancy_grid")
@@ -248,7 +272,6 @@ class EnterpriseGroup(Controller):
             self.app.log.error(f"Failed to create a group, reason: {e.reason}")
             return
 
-        print(f"GROUP DETAILS")
         if not self.app.pargs.json:
             renderable = self._group_basic_response(response)
             self.app.render(renderable, format=OutputFormat.TABULATED.value, headers="keys", tablefmt="fancy_grid")
@@ -259,13 +282,13 @@ class EnterpriseGroup(Controller):
     @ex(
         help='Update group details',
         arguments=[
-            (['group_id'],
-             {'help': 'Group id',
+            (['name'],
+             {'help': 'Group current name',
               'action': 'store'}),
             (['-n', '--name'],
-             {'help': 'Group name',
+             {'help': 'Group new name',
               'action': 'store',
-              'dest': 'name'}),
+              'dest': 'new_name'}),
             (['-j', '--json'],
              {'help': 'Render result in Json format',
               'action': 'store_true',
@@ -279,10 +302,22 @@ class EnterpriseGroup(Controller):
         enterprise_id = db.get_enterprise_id()
         data = DeviceGroupUpdate()
 
-        group_id = self.app.pargs.group_id
+        group_name = self.app.pargs.name
+        kwargs = {'name': group_name}
+        try:
+            search_response = group_client.get_all_groups(enterprise_id, limit=1, offset=0, **kwargs)
+            if not search_response.results or len(search_response.results) == 0:
+                print(f'Group does not exist with name {group_name}')
+                return
+            response = search_response.results[0]
+            group_id = response.id
+        except ApiException as e:
+            self.app.log.debug(f"Failed to list groups: {e}")
+            self.app.log.error(f"Failed to get group, reason: {e.reason}")
+            return
 
-        if self.app.pargs.name:
-            data.name = self.app.pargs.name
+        if self.app.pargs.new_name:
+            data.name = self.app.pargs.new_name
         else:
             self.app.log.error('name cannot be empty.')
             return
@@ -294,7 +329,6 @@ class EnterpriseGroup(Controller):
             self.app.log.error(f"Failed to update details of a group, reason: {e.reason}")
             return
 
-        print(f"GROUP DETAILS")
         if not self.app.pargs.json:
             renderable = self._group_basic_response(response)
             self.app.render(renderable, format=OutputFormat.TABULATED.value, headers="keys", tablefmt="fancy_grid")
@@ -305,28 +339,41 @@ class EnterpriseGroup(Controller):
     @ex(
         help='Delete group',
         arguments=[
-            (['group_id'],
-             {'help': 'Group id',
+            (['name'],
+             {'help': 'Group name',
               'action': 'store'}),
         ]
     )
     def delete(self):
-        group_id = self.app.pargs.group_id
-
         validate_creds_exists(self.app)
         db = DBWrapper(self.app.creds)
         group_client = APIClient(db.get_configure()).get_group_api_client()
         enterprise_id = db.get_enterprise_id()
 
+        group_name = self.app.pargs.name
+        kwargs = {'name': group_name}
+        try:
+            search_response = group_client.get_all_groups(enterprise_id, limit=1, offset=0, **kwargs)
+            if not search_response.results or len(search_response.results) == 0:
+                print(f'Group does not exist with name {group_name}')
+                return
+            response = search_response.results[0]
+            group_id = response.id
+        except ApiException as e:
+            self.app.log.debug(f"Failed to list groups: {e}")
+            self.app.log.error(f"Failed to get group, reason: {e.reason}")
+            return
+
         try:
             group_client.delete_group(group_id, enterprise_id)
-            self.app.log.info(f"Group with id : {group_id} deleted successfully")
+            self.app.log.debug(f"Group with name {group_name} deleted successfully")
+            print(f"Group with name {group_name} deleted successfully")
 
             # Unset current group if matching
             group = db.get_group()
             if group and group.get('id') and group_id == group.get('id'):
                 db.unset_group()
-                self.app.log.debug(f'Unset the current group {group_id}')
+                self.app.log.debug(f'Unset the active group {group_name}')
         except ApiException as e:
             self.app.log.debug(f"Failed to delete group: {e}")
             self.app.log.error(f"Failed to delete group, reason: {e.reason}")
@@ -356,7 +403,7 @@ class EnterpriseGroup(Controller):
         help='Add devices to group',
         arguments=[
             (['-g', '--group'],
-             {'help': 'Group id',
+             {'help': 'Group name',
               'action': 'store',
               'dest': 'group'}),
             (['-d', '--devices'],
@@ -378,11 +425,24 @@ class EnterpriseGroup(Controller):
         data = DeviceGroupUpdate()
 
         if self.app.pargs.group:
-            group_id = self.app.pargs.group
+            group_name = self.app.pargs.group
+            kwargs = {'name': group_name}
+            try:
+                search_response = group_client.get_all_groups(enterprise_id, limit=1, offset=0, **kwargs)
+                if not search_response.results or len(search_response.results) == 0:
+                    print(f'Group does not exist with name {group_name}')
+                    return
+                response = search_response.results[0]
+                group_id = response.id
+            except ApiException as e:
+                self.app.log.debug(f"Failed to list groups: {e}")
+                self.app.log.error(f"Failed to get group, reason: {e.reason}")
+                return
+
         else:
             group = db.get_group()
-            if not group or not group.get('id'):
-                self.app.log.info('Not set the active group.')
+            if group is None or group.get('name') is None:
+                print('There is no active group.')
                 return
 
             group_id = group.get('id')
@@ -393,11 +453,27 @@ class EnterpriseGroup(Controller):
             return
 
         device_client = APIClient(db.get_configure()).get_device_api_client()
+        request_device_ids = []
+        for device_name in devices:
+            kwargs = {'name': device_name}
+            try:
+                search_response = device_client.get_all_devices(enterprise_id, limit=1, offset=0, **kwargs)
+                if not search_response.results or len(search_response.results) == 0:
+                    print(f'Device does not exist with name {device_name}')
+                    return
+                response = search_response.results[0]
+                request_device_ids.append(response.id)
+            except ApiException as e:
+                self.app.log.debug(f"Failed to list devices: {e}")
+                self.app.log.error(f"Failed to fetch device, reason: {e.reason}")
+                return
+
+        device_client = APIClient(db.get_configure()).get_device_api_client()
         device_ids = self._get_group_device_ids(device_client, enterprise_id, group_id)
         if device_ids is None:
             return
 
-        device_ids.extend(devices)
+        device_ids.extend(request_device_ids)
         data.device_ids = device_ids
         try:
             response = group_client.partial_update_group(group_id, enterprise_id, data)
@@ -406,7 +482,6 @@ class EnterpriseGroup(Controller):
             self.app.log.error(f"Failed to add device into a group, reason: {e.reason}")
             return
 
-        print(f"GROUP DETAILS")
         if not self.app.pargs.json:
             renderable = self._group_basic_response(response)
             self.app.render(renderable, format=OutputFormat.TABULATED.value, headers="keys", tablefmt="fancy_grid")
@@ -418,7 +493,7 @@ class EnterpriseGroup(Controller):
         help='Remove devices from group',
         arguments=[
             (['-g', '--group'],
-             {'help': 'Group id',
+             {'help': 'Group name',
               'action': 'store',
               'dest': 'group'}),
             (['-d', '--devices'],
@@ -440,11 +515,24 @@ class EnterpriseGroup(Controller):
         data = DeviceGroupUpdate()
 
         if self.app.pargs.group:
-            group_id = self.app.pargs.group
+            group_name = self.app.pargs.group
+            kwargs = {'name': group_name}
+            try:
+                search_response = group_client.get_all_groups(enterprise_id, limit=1, offset=0, **kwargs)
+                if not search_response.results or len(search_response.results) == 0:
+                    print(f'Group does not exist with name {group_name}')
+                    return
+                response = search_response.results[0]
+                group_id = response.id
+            except ApiException as e:
+                self.app.log.debug(f"Failed to list groups: {e}")
+                self.app.log.error(f"Failed to get group, reason: {e.reason}")
+                return
+
         else:
             group = db.get_group()
-            if not group or not group.get('id'):
-                self.app.log.info('Not set the active group.')
+            if group is None or group.get('name') is None:
+                print('There is no active group.')
                 return
 
             group_id = group.get('id')
@@ -455,11 +543,27 @@ class EnterpriseGroup(Controller):
             return
 
         device_client = APIClient(db.get_configure()).get_device_api_client()
+        request_device_ids = []
+        for device_name in devices:
+            kwargs = {'name': device_name}
+            try:
+                search_response = device_client.get_all_devices(enterprise_id, limit=1, offset=0, **kwargs)
+                if not search_response.results or len(search_response.results) == 0:
+                    print(f'Device does not exist with name {device_name}')
+                    return
+                response = search_response.results[0]
+                request_device_ids.append(response.id)
+            except ApiException as e:
+                self.app.log.debug(f"Failed to list devices: {e}")
+                self.app.log.error(f"Failed to fetch device, reason: {e.reason}")
+                return
+
+        device_client = APIClient(db.get_configure()).get_device_api_client()
         current_device_ids = self._get_group_device_ids(device_client, enterprise_id, group_id)
         if current_device_ids is None:
             return
 
-        latest_devices = list(set(current_device_ids) - set(devices))
+        latest_devices = list(set(current_device_ids) - set(request_device_ids))
         data.device_ids = latest_devices
         try:
             response = group_client.partial_update_group(group_id, enterprise_id, data)
@@ -468,7 +572,6 @@ class EnterpriseGroup(Controller):
             self.app.log.error(f"Failed to remove device from group, reason: {e.reason}")
             return
 
-        print(f"GROUP DETAILS")
         if not self.app.pargs.json:
             renderable = self._group_basic_response(response)
             self.app.render(renderable, format=OutputFormat.TABULATED.value, headers="keys", tablefmt="fancy_grid")
@@ -480,7 +583,7 @@ class EnterpriseGroup(Controller):
         help='List group devices',
         arguments=[
             (['-g', '--group'],
-             {'help': 'Group id',
+             {'help': 'Group name',
               'action': 'store',
               'dest': 'group'}),
             (['-l', '--limit'],
@@ -503,14 +606,28 @@ class EnterpriseGroup(Controller):
         validate_creds_exists(self.app)
         db = DBWrapper(self.app.creds)
         device_client = APIClient(db.get_configure()).get_device_api_client()
+        group_client = APIClient(db.get_configure()).get_group_api_client()
         enterprise_id = db.get_enterprise_id()
 
         if self.app.pargs.group:
-            group_id = self.app.pargs.group
+            group_name = self.app.pargs.group
+            kwargs = {'name': group_name}
+            try:
+                search_response = group_client.get_all_groups(enterprise_id, limit=1, offset=0, **kwargs)
+                if not search_response.results or len(search_response.results) == 0:
+                    print(f'Group does not exist with name {group_name}')
+                    return
+                response = search_response.results[0]
+                group_id = response.id
+            except ApiException as e:
+                self.app.log.debug(f"Failed to list groups: {e}")
+                self.app.log.error(f"Failed to get group, reason: {e.reason}")
+                return
+
         else:
             group = db.get_group()
-            if not group or not group.get('id'):
-                self.app.log.info('Not set the active group.')
+            if group is None or group.get('name') is None:
+                print('There is no active group.')
                 return
 
             group_id = group.get('id')

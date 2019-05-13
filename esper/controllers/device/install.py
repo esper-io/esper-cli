@@ -16,13 +16,13 @@ Command Line Tool for Esper SDK %s
 
 class AppInstall(Controller):
     class Meta:
-        label = 'install'
+        label = 'installs'
 
         # text displayed at the top of --help output
         description = 'Application Installs commands'
 
         # text displayed at the bottom of --help output
-        epilog = 'Usage: espercli install'
+        epilog = 'Usage: espercli installs'
 
         stacked_type = 'nested'
         stacked_on = 'base'
@@ -31,7 +31,7 @@ class AppInstall(Controller):
         help='List application installs',
         arguments=[
             (['-d', '--device'],
-             {'help': 'Device id',
+             {'help': 'Device name',
               'action': 'store',
               'dest': 'device'}),
             (['-an', '--appname'],
@@ -70,11 +70,24 @@ class AppInstall(Controller):
         enterprise_id = db.get_enterprise_id()
 
         if self.app.pargs.device:
-            device_id = self.app.pargs.device
+            device_name = self.app.pargs.device
+            kwargs = {'name': device_name}
+            try:
+                search_response = device_client.get_all_devices(enterprise_id, limit=1, offset=0, **kwargs)
+                if not search_response.results or len(search_response.results) == 0:
+                    print(f'Device does not exist with name {device_name}')
+                    return
+                response = search_response.results[0]
+                device_id = response.id
+            except ApiException as e:
+                self.app.log.debug(f"Failed to list devices: {e}")
+                self.app.log.error(f"Failed to fetch device, reason: {e.reason}")
+                return
         else:
             device = db.get_device()
             if not device or not device.get('id'):
-                self.app.log.info('Not set the active device.')
+                self.app.log.debug('There is no active device.')
+                print('There is no active device.')
                 return
 
             device_id = device.get('id')
@@ -110,8 +123,7 @@ class AppInstall(Controller):
                 'application_name': "APPLICATION",
                 'package_name': "PACKAGE",
                 'version_code': "VERSION",
-                'install_state': "STATE",
-                'reason_details': "REASON"
+                'install_state': "STATE"
             }
 
             for install in response.results:
@@ -121,8 +133,7 @@ class AppInstall(Controller):
                         label['application_name']: install.application.application_name,
                         label['package_name']: install.application.package_name,
                         label['version_code']: install.application.version.version_code,
-                        label['install_state']: install.install_state,
-                        label['reason_details']: install.reason_details
+                        label['install_state']: install.install_state
                     }
                 )
             print(f"Total Number of Installs: {response.count}")
@@ -137,8 +148,7 @@ class AppInstall(Controller):
                         'application_name': install.application.application_name,
                         'package_name': install.application.package_name,
                         'version_code': install.application.version.version_code,
-                        'install_state': install.install_state,
-                        'reason_details': install.reason_details
+                        'install_state': install.install_state
                     }
                 )
             print(f"Total Number of Installs: {response.count}")

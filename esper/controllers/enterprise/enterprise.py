@@ -98,7 +98,6 @@ class Enterprise(Controller):
             self.app.log.error(f"Failed to show details of an enterprise, reason: {e.reason}")
             return
 
-        print(f"ENTERPRISE DETAILS")
         if not self.app.pargs.json:
             renderable = self._enterprise_basic_response(response)
             self.app.render(renderable, format=OutputFormat.TABULATED.value, headers="keys", tablefmt="fancy_grid")
@@ -196,7 +195,6 @@ class Enterprise(Controller):
             self.app.log.error(f"Failed to update details of an enterprise, reason: {e.reason}")
             return
 
-        print(f"ENTERPRISE DETAILS")
         if not self.app.pargs.json:
             renderable = self._enterprise_basic_response(response)
             self.app.render(renderable, format=OutputFormat.TABULATED.value, headers="keys", tablefmt="fancy_grid")
