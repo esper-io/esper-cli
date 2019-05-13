@@ -1,19 +1,12 @@
 from http import HTTPStatus
 
 from cement import Controller, ex
-from cement.utils.version import get_version_banner
 from esperclient.rest import ApiException
 
 from esper.controllers.enums import OutputFormat
-from esper.core.version import get_version
 from esper.ext.api_client import APIClient
 from esper.ext.db_wrapper import DBWrapper
 from esper.ext.utils import validate_creds_exists
-
-VERSION_BANNER = """
-Command Line Tool for Esper SDK %s
-%s
-""" % (get_version(), get_version_banner())
 
 
 class ApplicationVersion(Controller):
@@ -36,11 +29,11 @@ class ApplicationVersion(Controller):
              {'help': 'Application id',
               'action': 'store',
               'dest': 'application'}),
-            (['-vc', '--version_code'],
+            (['-c', '--code'],
              {'help': 'Version code',
               'action': 'store',
               'dest': 'version_code'}),
-            (['-bn', '--build_number'],
+            (['-n', '--number'],
              {'help': 'Build number',
               'action': 'store',
               'dest': 'build_number'}),
@@ -72,7 +65,8 @@ class ApplicationVersion(Controller):
         else:
             application = db.get_application()
             if not application or not application.get('id'):
-                self.app.log.info('Not set the active application.')
+                self.app.log.debug('There is no active application.')
+                print('There is no active application.')
                 return
 
             application_id = application.get('id')
@@ -122,8 +116,7 @@ class ApplicationVersion(Controller):
                     }
                 )
             print(f"Total Number of Versions: {response.count}")
-            self.app.render(versions, format=OutputFormat.TABULATED.value, headers="keys",
-                            tablefmt="fancy_grid")
+            self.app.render(versions, format=OutputFormat.TABULATED.value, headers="keys", tablefmt="plain")
         else:
             versions = []
             for version in response.results:
@@ -167,7 +160,7 @@ class ApplicationVersion(Controller):
             (['version_id'],
              {'help': 'Version id',
               'action': 'store'}),
-            (['-a', '--application'],
+            (['-a', '--app'],
              {'help': 'Application id',
               'action': 'store',
               'dest': 'application'}),
@@ -190,7 +183,8 @@ class ApplicationVersion(Controller):
         else:
             application = db.get_application()
             if not application or not application.get('id'):
-                self.app.log.info('Not set the current application.')
+                self.app.log.debug('There is no active application.')
+                print('There is no active application.')
                 return
 
             application_id = application.get('id')
@@ -202,10 +196,9 @@ class ApplicationVersion(Controller):
             self.app.log.error(f"Failed to show details of an version, reason: {e.reason}")
             return
 
-        print(f"\tVERSION DETAILS of {version_id}")
         if not self.app.pargs.json:
             renderable = self._version_basic_response(response)
-            self.app.render(renderable, format=OutputFormat.TABULATED.value, headers="keys", tablefmt="fancy_grid")
+            self.app.render(renderable, format=OutputFormat.TABULATED.value, headers="keys", tablefmt="plain")
         else:
             renderable = self._version_basic_response(response, OutputFormat.JSON)
             self.app.render(renderable, format=OutputFormat.JSON.value)
@@ -235,14 +228,16 @@ class ApplicationVersion(Controller):
         else:
             application = db.get_application()
             if not application or not application.get('id'):
-                self.app.log.info('Not set the active application.')
+                self.app.log.debug('There is no active application.')
+                print('There is no active application.')
                 return
 
             application_id = application.get('id')
 
         try:
             application_client.delete_app_version(version_id, application_id, enterprise_id)
-            self.app.log.info(f"Version with id : {version_id} deleted successfully")
+            self.app.log.debug(f"Version with id : {version_id} deleted successfully")
+            print(f"Version with id {version_id} deleted successfully")
         except ApiException as e:
             self.app.log.debug(f"Failed to delete a version: {e}")
             self.app.log.error(f"Failed to delete a version, reason: {e.reason}")

@@ -1,17 +1,10 @@
 from cement import Controller, ex
-from cement.utils.version import get_version_banner
 from esperclient.rest import ApiException
 
 from esper.controllers.enums import OutputFormat
-from esper.core.version import get_version
 from esper.ext.api_client import APIClient
 from esper.ext.db_wrapper import DBWrapper
 from esper.ext.utils import validate_creds_exists
-
-VERSION_BANNER = """
-Command Line Tool for Esper SDK %s
-%s
-""" % (get_version(), get_version_banner())
 
 
 class Application(Controller):
@@ -73,6 +66,8 @@ class Application(Controller):
         if package:
             kwargs['package_name'] = package
 
+        kwargs['is_hidden'] = False
+
         try:
             # Find applications in an enterprise
             response = application_client.get_all_applications(enterprise_id, limit=limit, offset=offset, **kwargs)
@@ -100,9 +95,8 @@ class Application(Controller):
                         label['version_count']: len(application.versions) if application.versions else 0
                     }
                 )
-            print("Total Number of Applications: {response.count}")
-            self.app.render(applications, format=OutputFormat.TABULATED.value, headers="keys",
-                            tablefmt="fancy_grid")
+            print(f"Total Number of Applications: {response.count}")
+            self.app.render(applications, format=OutputFormat.TABULATED.value, headers="keys", tablefmt="plain")
         else:
             applications = []
             for application in response.results:
@@ -140,10 +134,10 @@ class Application(Controller):
             (['application_id'],
              {'help': 'Application id',
               'action': 'store'}),
-            (['-s', '--set'],
-             {'help': 'Set this application as active application for further application specific commands',
+            (['-a', '--active'],
+             {'help': 'Set application as active application for further application specific commands',
               'action': 'store_true',
-              'dest': 'set'}),
+              'dest': 'active'}),
             (['-j', '--json'],
              {'help': 'Render result in Json format',
               'action': 'store_true',
@@ -155,10 +149,6 @@ class Application(Controller):
         db = DBWrapper(self.app.creds)
 
         application_id = self.app.pargs.application_id
-
-        if self.app.pargs.set:
-            db.set_application({'id': application_id})
-
         application_client = APIClient(db.get_configure()).get_application_api_client()
         enterprise_id = db.get_enterprise_id()
 
@@ -169,10 +159,12 @@ class Application(Controller):
             self.app.log.error(f"Failed to show details of an application, reason: {e.reason}")
             return
 
-        print(f"APPLICATION DETAILS of {response.application_name}")
+        if self.app.pargs.active:
+            db.set_application({'id': application_id})
+
         if not self.app.pargs.json:
             renderable = self._application_basic_response(response)
-            self.app.render(renderable, format=OutputFormat.TABULATED.value, headers="keys", tablefmt="fancy_grid")
+            self.app.render(renderable, format=OutputFormat.TABULATED.value, headers="keys", tablefmt="plain")
         else:
             renderable = self._application_basic_response(response, OutputFormat.JSON)
             self.app.render(renderable, format=OutputFormat.JSON.value)
@@ -204,10 +196,9 @@ class Application(Controller):
             self.app.log.error(f"Failed to upload an application, reason: {e.reason}")
             return
 
-        print(f"APPLICATION DETAILS of {response.application_name}")
         if not self.app.pargs.json:
             renderable = self._application_basic_response(response.application)
-            self.app.render(renderable, format=OutputFormat.TABULATED.value, headers="keys", tablefmt="fancy_grid")
+            self.app.render(renderable, format=OutputFormat.TABULATED.value, headers="keys", tablefmt="plain")
         else:
             renderable = self._application_basic_response(response.application, OutputFormat.JSON)
             self.app.render(renderable, format=OutputFormat.JSON.value)
@@ -230,7 +221,8 @@ class Application(Controller):
 
         try:
             application_client.delete_application(application_id, enterprise_id)
-            self.app.log.info(f"Application with id : {application_id} deleted successfully")
+            self.app.log.debug(f"Application with id : {application_id} deleted successfully")
+            print(f"Application with id {application_id} deleted successfully")
 
             # Unset current application if matching
             application = db.get_application()
@@ -243,8 +235,12 @@ class Application(Controller):
             return
 
     @ex(
-        help='Show or unset the active application',
+        help='Set, show or unset the active application',
         arguments=[
+            (['-i', '--id'],
+             {'help': 'Application id.',
+              'action': 'store',
+              'dest': 'id'}),
             (['-u', '--unset'],
              {'help': 'Unset the active application',
               'action': 'store_true',
@@ -258,39 +254,46 @@ class Application(Controller):
     def active(self):
         validate_creds_exists(self.app)
         db = DBWrapper(self.app.creds)
-
-        application_id = None
-        application = db.get_application()
-        if application:
-            application_id = application.get('id', None)
-
-        if self.app.pargs.unset:
-            if not application_id:
-                self.app.log.info('Not set the active application.')
-                return
-
-            db.unset_application()
-            self.app.log.info(f'Unset the active application {application_id}')
-            return
-
-        if not application_id:
-            self.app.log.info("Not set the active application.")
-            return
-
         application_client = APIClient(db.get_configure()).get_application_api_client()
         enterprise_id = db.get_enterprise_id()
 
-        try:
-            response = application_client.get_application(application_id, enterprise_id)
-        except ApiException as e:
-            self.app.log.debug(f"Failed to show or unset the active application: {e}")
-            self.app.log.error(f"Failed to show or unset the active application, reason: {e.reason}")
-            return
+        if self.app.pargs.id:
+            application_id = self.app.pargs.id
+            try:
+                response = application_client.get_application(application_id, enterprise_id)
+                db.set_application({'id': application_id})
+            except ApiException as e:
+                self.app.log.debug(f"Failed to show active application: {e}")
+                self.app.log.error(f"Failed to set active application, reason: {e.reason}")
+                return
+        elif self.app.pargs.unset:
+            application = db.get_application()
+            if application is None or application.get('id') is None:
+                print('There is no active application.')
+                return
 
-        print(f"APPLICATION DETAILS of {response.application_name}")
+            db.unset_application()
+            self.app.log.debug(f"Unset the active application {application.get('id')}")
+            print(f"Unset the active application {application.get('id')}")
+            return
+        else:
+            application = db.get_application()
+            if application is None or application.get('id') is None:
+                print('There is no active application.')
+                return
+
+            application_id = application.get('id')
+            try:
+                response = application_client.get_application(application_id, enterprise_id)
+                db.set_application({'id': application_id})
+            except ApiException as e:
+                self.app.log.debug(f"Failed to show active application: {e}")
+                self.app.log.error(f"Failed to show active application, reason: {e.reason}")
+                return
+
         if not self.app.pargs.json:
             renderable = self._application_basic_response(response)
-            self.app.render(renderable, format=OutputFormat.TABULATED.value, headers="keys", tablefmt="fancy_grid")
+            self.app.render(renderable, format=OutputFormat.TABULATED.value, headers="keys", tablefmt="plain")
         else:
             renderable = self._application_basic_response(response, OutputFormat.JSON)
             self.app.render(renderable, format=OutputFormat.JSON.value)

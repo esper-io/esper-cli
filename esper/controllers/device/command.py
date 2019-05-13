@@ -1,18 +1,11 @@
 from cement import ex, Controller
-from cement.utils.version import get_version_banner
 from esperclient import CommandRequest
 from esperclient.rest import ApiException
 
 from esper.controllers.enums import OutputFormat, DeviceCommandEnum
-from esper.core.version import get_version
 from esper.ext.api_client import APIClient
 from esper.ext.db_wrapper import DBWrapper
 from esper.ext.utils import validate_creds_exists
-
-VERSION_BANNER = """
-Command Line Tool for Esper SDK %s
-%s
-""" % (get_version(), get_version_banner())
 
 
 class DeviceCommand(Controller):
@@ -47,7 +40,7 @@ class DeviceCommand(Controller):
              {'help': 'Device command id',
               'action': 'store'}),
             (['-d', '--device'],
-             {'help': 'Device id',
+             {'help': 'Device name',
               'action': 'store',
               'dest': 'device'}),
             (['-j', '--json'],
@@ -62,13 +55,27 @@ class DeviceCommand(Controller):
         db = DBWrapper(self.app.creds)
         command_client = APIClient(db.get_configure()).get_command_api_client()
         enterprise_id = db.get_enterprise_id()
+        device_client = APIClient(db.get_configure()).get_device_api_client()
 
         if self.app.pargs.device:
-            device_id = self.app.pargs.device
+            device_name = self.app.pargs.device
+            kwargs = {'name': device_name}
+            try:
+                search_response = device_client.get_all_devices(enterprise_id, limit=1, offset=0, **kwargs)
+                if not search_response.results or len(search_response.results) == 0:
+                    print(f'Device does not exist with name {device_name}')
+                    return
+                response = search_response.results[0]
+                device_id = response.id
+            except ApiException as e:
+                self.app.log.debug(f"Failed to list devices: {e}")
+                self.app.log.error(f"Failed to fetch device, reason: {e.reason}")
+                return
         else:
             device = db.get_device()
             if not device or not device.get('id'):
-                self.app.log.info('Not set the active device.')
+                self.app.log.debug('There is no active device.')
+                print('There is no active device.')
                 return
 
             device_id = device.get('id')
@@ -80,10 +87,9 @@ class DeviceCommand(Controller):
             self.app.log.error(f"Failed to show details of command, reason: {e.reason}")
             return
 
-        print(f"COMMAND DETAILS of {response.command}")
         if not self.app.pargs.json:
             renderable = self._command_basic_response(response)
-            self.app.render(renderable, format=OutputFormat.TABULATED.value, headers="keys", tablefmt="fancy_grid")
+            self.app.render(renderable, format=OutputFormat.TABULATED.value, headers="keys", tablefmt="plain")
         else:
             renderable = self._command_basic_response(response, OutputFormat.JSON)
             self.app.render(renderable, format=OutputFormat.JSON.value)
@@ -92,7 +98,7 @@ class DeviceCommand(Controller):
         help='Install application version',
         arguments=[
             (['-d', '--device'],
-             {'help': 'Device id',
+             {'help': 'Device name',
               'action': 'store',
               'dest': 'device'}),
             (['-v', '--version'],
@@ -110,19 +116,32 @@ class DeviceCommand(Controller):
         db = DBWrapper(self.app.creds)
         command_client = APIClient(db.get_configure()).get_command_api_client()
         enterprise_id = db.get_enterprise_id()
+        device_client = APIClient(db.get_configure()).get_device_api_client()
 
         if self.app.pargs.device:
-            device_id = self.app.pargs.device
+            device_name = self.app.pargs.device
+            kwargs = {'name': device_name}
+            try:
+                search_response = device_client.get_all_devices(enterprise_id, limit=1, offset=0, **kwargs)
+                if not search_response.results or len(search_response.results) == 0:
+                    print(f'Device does not exist with name {device_name}')
+                    return
+                response = search_response.results[0]
+                device_id = response.id
+            except ApiException as e:
+                self.app.log.debug(f"Failed to list devices: {e}")
+                self.app.log.error(f"Failed to fetch device, reason: {e.reason}")
+                return
         else:
             device = db.get_device()
             if not device or not device.get('id'):
-                self.app.log.info('Not set the active device.')
+                self.app.log.debug('There is no active device.')
+                print('There is no active device.')
                 return
 
             device_id = device.get('id')
 
         version_id = self.app.pargs.version
-
         command_request = CommandRequest(command_args={"app_version": version_id},
                                          command=DeviceCommandEnum.INSTALL.name)
         try:
@@ -132,10 +151,9 @@ class DeviceCommand(Controller):
             self.app.log.error(f"Failed to install application, reason: {e.reason}")
             return
 
-        print(f"COMMAND DETAILS of {response.command}")
         if not self.app.pargs.json:
             renderable = self._command_basic_response(response)
-            self.app.render(renderable, format=OutputFormat.TABULATED.value, headers="keys", tablefmt="fancy_grid")
+            self.app.render(renderable, format=OutputFormat.TABULATED.value, headers="keys", tablefmt="plain")
         else:
             renderable = self._command_basic_response(response, OutputFormat.JSON)
             self.app.render(renderable, format=OutputFormat.JSON.value)
@@ -144,7 +162,7 @@ class DeviceCommand(Controller):
         help='Ping a device',
         arguments=[
             (['-d', '--device'],
-             {'help': 'Device id',
+             {'help': 'Device name',
               'action': 'store',
               'dest': 'device'}),
             (['-j', '--json'],
@@ -158,13 +176,27 @@ class DeviceCommand(Controller):
         db = DBWrapper(self.app.creds)
         command_client = APIClient(db.get_configure()).get_command_api_client()
         enterprise_id = db.get_enterprise_id()
+        device_client = APIClient(db.get_configure()).get_device_api_client()
 
         if self.app.pargs.device:
-            device_id = self.app.pargs.device
+            device_name = self.app.pargs.device
+            kwargs = {'name': device_name}
+            try:
+                search_response = device_client.get_all_devices(enterprise_id, limit=1, offset=0, **kwargs)
+                if not search_response.results or len(search_response.results) == 0:
+                    print(f'Device does not exist with name {device_name}')
+                    return
+                response = search_response.results[0]
+                device_id = response.id
+            except ApiException as e:
+                self.app.log.debug(f"Failed to list devices: {e}")
+                self.app.log.error(f"Failed to fetch device, reason: {e.reason}")
+                return
         else:
             device = db.get_device()
             if not device or not device.get('id'):
-                self.app.log.info('Not set the active device.')
+                self.app.log.debug('There is no active device.')
+                print('There is no active device.')
                 return
 
             device_id = device.get('id')
@@ -177,10 +209,9 @@ class DeviceCommand(Controller):
             self.app.log.error(f"Failed to ping the device, reason: {e.reason}")
             return
 
-        print(f"COMMAND DETAILS of {response.command}")
         if not self.app.pargs.json:
             renderable = self._command_basic_response(response)
-            self.app.render(renderable, format=OutputFormat.TABULATED.value, headers="keys", tablefmt="fancy_grid")
+            self.app.render(renderable, format=OutputFormat.TABULATED.value, headers="keys", tablefmt="plain")
         else:
             renderable = self._command_basic_response(response, OutputFormat.JSON)
             self.app.render(renderable, format=OutputFormat.JSON.value)
@@ -189,7 +220,7 @@ class DeviceCommand(Controller):
         help='Lock a device',
         arguments=[
             (['-d', '--device'],
-             {'help': 'Device id',
+             {'help': 'Device name',
               'action': 'store',
               'dest': 'device'}),
             (['-j', '--json'],
@@ -203,13 +234,27 @@ class DeviceCommand(Controller):
         db = DBWrapper(self.app.creds)
         command_client = APIClient(db.get_configure()).get_command_api_client()
         enterprise_id = db.get_enterprise_id()
+        device_client = APIClient(db.get_configure()).get_device_api_client()
 
         if self.app.pargs.device:
-            device_id = self.app.pargs.device
+            device_name = self.app.pargs.device
+            kwargs = {'name': device_name}
+            try:
+                search_response = device_client.get_all_devices(enterprise_id, limit=1, offset=0, **kwargs)
+                if not search_response.results or len(search_response.results) == 0:
+                    print(f'Device does not exist with name {device_name}')
+                    return
+                response = search_response.results[0]
+                device_id = response.id
+            except ApiException as e:
+                self.app.log.debug(f"Failed to list devices: {e}")
+                self.app.log.error(f"Failed to fetch device, reason: {e.reason}")
+                return
         else:
             device = db.get_device()
             if not device or not device.get('id'):
-                self.app.log.info('Not set the active device.')
+                self.app.log.debug('There is no active device.')
+                print('There is no active device.')
                 return
 
             device_id = device.get('id')
@@ -222,10 +267,9 @@ class DeviceCommand(Controller):
             self.app.log.error(f"Failed to lock the device, reason: {e.reason}")
             return
 
-        print(f"COMMAND DETAILS of {response.command}")
         if not self.app.pargs.json:
             renderable = self._command_basic_response(response)
-            self.app.render(renderable, format=OutputFormat.TABULATED.value, headers="keys", tablefmt="fancy_grid")
+            self.app.render(renderable, format=OutputFormat.TABULATED.value, headers="keys", tablefmt="plain")
         else:
             renderable = self._command_basic_response(response, OutputFormat.JSON)
             self.app.render(renderable, format=OutputFormat.JSON.value)
@@ -234,7 +278,7 @@ class DeviceCommand(Controller):
         help='Reboot a device',
         arguments=[
             (['-d', '--device'],
-             {'help': 'Device id',
+             {'help': 'Device name',
               'action': 'store',
               'dest': 'device'}),
             (['-j', '--json'],
@@ -248,13 +292,27 @@ class DeviceCommand(Controller):
         db = DBWrapper(self.app.creds)
         command_client = APIClient(db.get_configure()).get_command_api_client()
         enterprise_id = db.get_enterprise_id()
+        device_client = APIClient(db.get_configure()).get_device_api_client()
 
         if self.app.pargs.device:
-            device_id = self.app.pargs.device
+            device_name = self.app.pargs.device
+            kwargs = {'name': device_name}
+            try:
+                search_response = device_client.get_all_devices(enterprise_id, limit=1, offset=0, **kwargs)
+                if not search_response.results or len(search_response.results) == 0:
+                    print(f'Device does not exist with name {device_name}')
+                    return
+                response = search_response.results[0]
+                device_id = response.id
+            except ApiException as e:
+                self.app.log.debug(f"Failed to list devices: {e}")
+                self.app.log.error(f"Failed to fetch device, reason: {e.reason}")
+                return
         else:
             device = db.get_device()
             if not device or not device.get('id'):
-                self.app.log.info('Not set the active device.')
+                self.app.log.debug('There is no active device.')
+                print('There is no active device.')
                 return
 
             device_id = device.get('id')
@@ -267,10 +325,9 @@ class DeviceCommand(Controller):
             self.app.log.error(f"Failed to reboot the device, reason: {e.reason}")
             return
 
-        print(f"COMMAND DETAILS of {response.command}")
         if not self.app.pargs.json:
             renderable = self._command_basic_response(response)
-            self.app.render(renderable, format=OutputFormat.TABULATED.value, headers="keys", tablefmt="fancy_grid")
+            self.app.render(renderable, format=OutputFormat.TABULATED.value, headers="keys", tablefmt="plain")
         else:
             renderable = self._command_basic_response(response, OutputFormat.JSON)
             self.app.render(renderable, format=OutputFormat.JSON.value)
@@ -279,7 +336,7 @@ class DeviceCommand(Controller):
         help='Wipe a device',
         arguments=[
             (['-d', '--device'],
-             {'help': 'Device id',
+             {'help': 'Device name',
               'action': 'store',
               'dest': 'device'}),
             (['-e', '--exstorage'],
@@ -301,13 +358,27 @@ class DeviceCommand(Controller):
         db = DBWrapper(self.app.creds)
         command_client = APIClient(db.get_configure()).get_command_api_client()
         enterprise_id = db.get_enterprise_id()
+        device_client = APIClient(db.get_configure()).get_device_api_client()
 
         if self.app.pargs.device:
-            device_id = self.app.pargs.device
+            device_name = self.app.pargs.device
+            kwargs = {'name': device_name}
+            try:
+                search_response = device_client.get_all_devices(enterprise_id, limit=1, offset=0, **kwargs)
+                if not search_response.results or len(search_response.results) == 0:
+                    print(f'Device does not exist with name {device_name}')
+                    return
+                response = search_response.results[0]
+                device_id = response.id
+            except ApiException as e:
+                self.app.log.debug(f"Failed to list devices: {e}")
+                self.app.log.error(f"Failed to fetch device, reason: {e.reason}")
+                return
         else:
             device = db.get_device()
             if not device or not device.get('id'):
-                self.app.log.info('Not set the active device.')
+                self.app.log.debug('There is no active device.')
+                print('There is no active device.')
                 return
 
             device_id = device.get('id')
@@ -330,10 +401,9 @@ class DeviceCommand(Controller):
             self.app.log.error(f"Failed to wipe the device, reason: {e.reason}")
             return
 
-        print(f"COMMAND DETAILS of {response.command}")
         if not self.app.pargs.json:
             renderable = self._command_basic_response(response)
-            self.app.render(renderable, format=OutputFormat.TABULATED.value, headers="keys", tablefmt="fancy_grid")
+            self.app.render(renderable, format=OutputFormat.TABULATED.value, headers="keys", tablefmt="plain")
         else:
             renderable = self._command_basic_response(response, OutputFormat.JSON)
             self.app.render(renderable, format=OutputFormat.JSON.value)

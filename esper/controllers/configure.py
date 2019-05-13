@@ -1,7 +1,6 @@
 from http import HTTPStatus
 
 from cement import Controller, ex
-from cement.utils.version import get_version_banner
 from clint.textui import prompt
 from esperclient.rest import ApiException
 
@@ -9,12 +8,6 @@ from esper.controllers.enums import OutputFormat
 from esper.ext.api_client import APIClient
 from esper.ext.db_wrapper import DBWrapper
 from esper.ext.utils import validate_creds_exists
-from ..core.version import get_version
-
-VERSION_BANNER = """
-Esper CLI tool to manage resources on Esper.io API service %s
-%s
-""" % (get_version(), get_version_banner())
 
 
 class Configure(Controller):
@@ -58,10 +51,10 @@ class Configure(Controller):
         credentials = db.get_configure()
 
         if self.app.pargs.set or not credentials:
-            api_key = prompt.query("Enter API Key: ")
-            host = prompt.query("Enter your Host Endpoint:", default="demo", validators=[])
+            api_key = prompt.query("Esper API Key: ")
+            tenant = prompt.query("Tenant name: ")
 
-            enterprise_client = APIClient({'api_key': api_key, 'host': host}).get_enterprise_api_client()
+            enterprise_client = APIClient({'api_key': api_key, 'tenant': tenant}).get_enterprise_api_client()
             try:
                 response = enterprise_client.get_all_enterprises()
             except ApiException as e:
@@ -81,7 +74,7 @@ class Configure(Controller):
             credentials = {
                 "api_key": api_key,
                 "enterprise_id": enterprise_id,
-                "host": host
+                "tenant": tenant
             }
 
             # set new credentials into the DB
@@ -93,9 +86,17 @@ class Configure(Controller):
             validate_creds_exists(self.app)
 
             if not self.app.pargs.json:
-                creds = [(k, v) for k, v in credentials.items()]
-                # Render the Credentials
-                self.app.render(creds, format=OutputFormat.TABULATED.value, headers=["Title", "Details"],
-                                tablefmt="fancy_grid")
+                title = "TITLE"
+                details = "DETAILS"
+                renderable = [
+                    {title: 'api_key', details: credentials.get('api_key')},
+                    {title: 'tenant', details: credentials.get('tenant')}
+                ]
+                self.app.render(renderable, format=OutputFormat.TABULATED.value, headers="keys",
+                                tablefmt="plain")
             else:
-                self.app.render(self.app.creds.all()[0], format=OutputFormat.JSON.value)
+                renderable = {
+                    'api_key': credentials.get('api_key'),
+                    'tenant': credentials.get('tenant')
+                }
+                self.app.render(renderable, format=OutputFormat.JSON.value)

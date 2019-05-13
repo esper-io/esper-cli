@@ -1,18 +1,11 @@
 from cement import Controller, ex
-from cement.utils.version import get_version_banner
 from esperclient import EnterpriseUpdate
 from esperclient.rest import ApiException
 
 from esper.controllers.enums import OutputFormat
-from esper.core.version import get_version
 from esper.ext.api_client import APIClient
 from esper.ext.db_wrapper import DBWrapper
 from esper.ext.utils import validate_creds_exists
-
-VERSION_BANNER = """
-Command Line Tool for Esper SDK %s
-%s
-""" % (get_version(), get_version_banner())
 
 
 class Enterprise(Controller):
@@ -98,10 +91,9 @@ class Enterprise(Controller):
             self.app.log.error(f"Failed to show details of an enterprise, reason: {e.reason}")
             return
 
-        print(f"ENTERPRISE DETAILS")
         if not self.app.pargs.json:
             renderable = self._enterprise_basic_response(response)
-            self.app.render(renderable, format=OutputFormat.TABULATED.value, headers="keys", tablefmt="fancy_grid")
+            self.app.render(renderable, format=OutputFormat.TABULATED.value, headers="keys", tablefmt="plain")
         else:
             renderable = self._enterprise_basic_response(response, OutputFormat.JSON)
             self.app.render(renderable, format=OutputFormat.JSON.value)
@@ -196,10 +188,9 @@ class Enterprise(Controller):
             self.app.log.error(f"Failed to update details of an enterprise, reason: {e.reason}")
             return
 
-        print(f"ENTERPRISE DETAILS")
         if not self.app.pargs.json:
             renderable = self._enterprise_basic_response(response)
-            self.app.render(renderable, format=OutputFormat.TABULATED.value, headers="keys", tablefmt="fancy_grid")
+            self.app.render(renderable, format=OutputFormat.TABULATED.value, headers="keys", tablefmt="plain")
         else:
             renderable = self._enterprise_basic_response(response, OutputFormat.JSON)
             self.app.render(renderable, format=OutputFormat.JSON.value)

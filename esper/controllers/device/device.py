@@ -1,17 +1,10 @@
 from cement import Controller, ex
-from cement.utils.version import get_version_banner
 from esperclient.rest import ApiException
 
 from esper.controllers.enums import DeviceState, OutputFormat
-from esper.core.version import get_version
 from esper.ext.api_client import APIClient
 from esper.ext.db_wrapper import DBWrapper
 from esper.ext.utils import validate_creds_exists
-
-VERSION_BANNER = """
-Command Line Tool for Esper SDK %s
-%s
-""" % (get_version(), get_version_banner())
 
 
 class Device(Controller):
@@ -136,7 +129,7 @@ class Device(Controller):
                     }
                 )
             print(f"Number of Devices: {response.count}")
-            self.app.render(devices, format=OutputFormat.TABULATED.value, headers="keys", tablefmt="fancy_grid")
+            self.app.render(devices, format=OutputFormat.TABULATED.value, headers="keys", tablefmt="plain")
         else:
             devices = []
             for device in response.results:
@@ -153,26 +146,29 @@ class Device(Controller):
             self.app.render(devices, format=OutputFormat.JSON.value)
 
     def _device_basic_response(self, device, format=OutputFormat.TABULATED):
-        valid_keys = ['id', 'device_name', 'status', 'state', 'suid', 'api_level', 'template_name', 'is_gms']
+        valid_keys = ['id', 'device_name', 'suid', 'api_level', 'template_name', 'is_gms']
+        current_state = DeviceState(device.status).name
 
         if format == OutputFormat.JSON:
             renderable = {k: v for k, v in device.to_dict().items() if k in valid_keys}
+            renderable['state'] = current_state
         else:
             title = "TITLE"
             details = "DETAILS"
             renderable = [{title: k, details: v} for k, v in device.to_dict().items() if k in valid_keys]
+            renderable.append({title: 'state', details: current_state})
         return renderable
 
     @ex(
         help='Show device details and set as active device',
         arguments=[
-            (['device_id'],
+            (['device_name'],
              {'help': 'Show details about the device',
               'action': 'store'}),
-            (['-s', '--set'],
+            (['-a', '--active'],
              {'help': 'Set device as active for further device specific commands',
               'action': 'store_true',
-              'dest': 'set'}),
+              'dest': 'active'}),
             (['-j', '--json'],
              {'help': 'Render result in Json format',
               'action': 'store_true',
@@ -182,32 +178,40 @@ class Device(Controller):
     def show(self):
         validate_creds_exists(self.app)
         db = DBWrapper(self.app.creds)
-        device_id = self.app.pargs.device_id
-
-        if self.app.pargs.set:
-            db.set_device({'id': device_id})
+        device_name = self.app.pargs.device_name
 
         device_client = APIClient(db.get_configure()).get_device_api_client()
         enterprise_id = db.get_enterprise_id()
 
+        kwargs = {'name': device_name}
         try:
-            response = device_client.get_device_by_id(enterprise_id, device_id)
+            search_response = device_client.get_all_devices(enterprise_id, limit=1, offset=0, **kwargs)
+            if not search_response.results or len(search_response.results) == 0:
+                print(f'Device does not exist with name {device_name}')
+                return
+            response = search_response.results[0]
         except ApiException as e:
-            self.app.log.debug(f"Failed to show details of a device: {e}")
-            self.app.log.error(f"Failed to show details of a device, reason: {e.reason}")
+            self.app.log.debug(f"Failed to list devices: {e}")
+            self.app.log.error(f"Failed to fetch device, reason: {e.reason}")
             return
 
-        print(f"DEVICE DETAILS of {response.device_name}")
+        if self.app.pargs.active:
+            db.set_device({'id': response.id, 'name': response.device_name})
+
         if not self.app.pargs.json:
             renderable = self._device_basic_response(response)
-            self.app.render(renderable, format=OutputFormat.TABULATED.value, headers="keys", tablefmt="fancy_grid")
+            self.app.render(renderable, format=OutputFormat.TABULATED.value, headers="keys", tablefmt="plain")
         else:
             renderable = self._device_basic_response(response, OutputFormat.JSON)
             self.app.render(renderable, format=OutputFormat.JSON.value)
 
     @ex(
-        help='Show or unset the active device',
+        help='Set, show or unset the active device',
         arguments=[
+            (['-n', '--name'],
+             {'help': 'Device name.',
+              'action': 'store',
+              'dest': 'name'}),
             (['-u', '--unset'],
              {'help': 'Unset the active device',
               'action': 'store_true',
@@ -221,39 +225,50 @@ class Device(Controller):
     def active(self):
         validate_creds_exists(self.app)
         db = DBWrapper(self.app.creds)
-
-        device_id = None
-        device = db.get_device()
-        if device:
-            device_id = device.get('id', None)
-
-        if self.app.pargs.unset:
-            if not device_id:
-                self.app.log.info('Not set the active device.')
-                return
-
-            db.unset_device()
-            self.app.log.info(f'Unset the active device {device_id}')
-            return
-
-        if not device_id:
-            self.app.log.info("Not set the active device.")
-            return
-
         device_client = APIClient(db.get_configure()).get_device_api_client()
         enterprise_id = db.get_enterprise_id()
 
-        try:
-            response = device_client.get_device_by_id(enterprise_id, device_id)
-        except ApiException as e:
-            self.app.log.debug(f"Failed to show or unset the active device: {e}")
-            self.app.log.error(f"Failed to show or unset the active device, reason: {e.reason}")
-            return
+        if self.app.pargs.name:
+            device_name = self.app.pargs.name
+            kwargs = {'name': device_name}
+            try:
+                search_response = device_client.get_all_devices(enterprise_id, limit=1, offset=0, **kwargs)
+                if not search_response.results or len(search_response.results) == 0:
+                    print(f'Device does not exist with name {device_name}')
+                    return
+                response = search_response.results[0]
+                db.set_device({'id': response.id, 'name': response.device_name})
+            except ApiException as e:
+                self.app.log.debug(f"Failed to list devices: {e}")
+                self.app.log.error(f"Failed to set active device, reason: {e.reason}")
+                return
+        elif self.app.pargs.unset:
+            device = db.get_device()
+            if device is None or device.get('name') is None:
+                print('There is no active device.')
+                return
 
-        print(f"DEVICE DETAILS of {response.device_name}")
+            db.unset_device()
+            self.app.log.debug(f"Unset the active device {device.get('name')}")
+            print(f"Unset the active device {device.get('name')}")
+            return
+        else:
+            device = db.get_device()
+            if device is None or device.get('name') is None:
+                print('There is no active device.')
+                return
+
+            device_id = device.get('id')
+            try:
+                response = device_client.get_device_by_id(enterprise_id, device_id)
+            except ApiException as e:
+                self.app.log.debug(f"Failed to show active device: {e}")
+                self.app.log.error(f"Failed to show active device, reason: {e.reason}")
+                return
+
         if not self.app.pargs.json:
             renderable = self._device_basic_response(response)
-            self.app.render(renderable, format=OutputFormat.TABULATED.value, headers="keys", tablefmt="fancy_grid")
+            self.app.render(renderable, format=OutputFormat.TABULATED.value, headers="keys", tablefmt="plain")
         else:
             renderable = self._device_basic_response(response, OutputFormat.JSON)
             self.app.render(renderable, format=OutputFormat.JSON.value)

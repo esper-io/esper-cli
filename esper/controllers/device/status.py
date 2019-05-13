@@ -1,19 +1,12 @@
 from ast import literal_eval
 
 from cement import Controller, ex
-from cement.utils.version import get_version_banner
 from esperclient.rest import ApiException
 
 from esper.controllers.enums import OutputFormat
-from esper.core.version import get_version
 from esper.ext.api_client import APIClient
 from esper.ext.db_wrapper import DBWrapper
 from esper.ext.utils import validate_creds_exists
-
-VERSION_BANNER = """
-Command Line Tool for Esper SDK %s
-%s
-""" % (get_version(), get_version_banner())
 
 
 class DeviceStatus(Controller):
@@ -33,7 +26,7 @@ class DeviceStatus(Controller):
         help='Latest device status',
         arguments=[
             (['-d', '--device'],
-             {'help': 'Device id',
+             {'help': 'Device name',
               'action': 'store',
               'dest': 'device'}),
             (['-j', '--json'],
@@ -50,11 +43,24 @@ class DeviceStatus(Controller):
         enterprise_id = db.get_enterprise_id()
 
         if self.app.pargs.device:
-            device_id = self.app.pargs.device
+            device_name = self.app.pargs.device
+            kwargs = {'name': device_name}
+            try:
+                search_response = device_client.get_all_devices(enterprise_id, limit=1, offset=0, **kwargs)
+                if not search_response.results or len(search_response.results) == 0:
+                    print(f'Device does not exist with name {device_name}')
+                    return
+                response = search_response.results[0]
+                device_id = response.id
+            except ApiException as e:
+                self.app.log.debug(f"Failed to list devices: {e}")
+                self.app.log.error(f"Failed to fetch device, reason: {e.reason}")
+                return
         else:
             device = db.get_device()
             if not device or not device.get('id'):
-                self.app.log.info('Not set the active device.')
+                self.app.log.debug('There is no active device.')
+                print('There is no active device.')
                 return
 
             device_id = device.get('id')
@@ -120,8 +126,7 @@ class DeviceStatus(Controller):
                 {title: 'signal_strength', details: signal_strength}
             ]
 
-            print(f"LATEST EVENT DETAILS")
-            self.app.render(renderable, format=OutputFormat.TABULATED.value, headers="keys", tablefmt="fancy_grid")
+            self.app.render(renderable, format=OutputFormat.TABULATED.value, headers="keys", tablefmt="plain")
         else:
             renderable = {
                 'battery_level': battery_level,
@@ -133,5 +138,4 @@ class DeviceStatus(Controller):
                 'link_speed': link_speed,
                 'signal_strength': signal_strength
             }
-            print(f"LATEST EVENT DETAILS")
             self.app.render(renderable, format=OutputFormat.JSON.value)
