@@ -1,17 +1,10 @@
 from cement import Controller, ex
-from cement.utils.version import get_version_banner
 from esperclient.rest import ApiException
 
 from esper.controllers.enums import DeviceState, OutputFormat
-from esper.core.version import get_version
 from esper.ext.api_client import APIClient
 from esper.ext.db_wrapper import DBWrapper
 from esper.ext.utils import validate_creds_exists
-
-VERSION_BANNER = """
-Command Line Tool for Esper SDK %s
-%s
-""" % (get_version(), get_version_banner())
 
 
 class Device(Controller):
@@ -136,7 +129,7 @@ class Device(Controller):
                     }
                 )
             print(f"Number of Devices: {response.count}")
-            self.app.render(devices, format=OutputFormat.TABULATED.value, headers="keys", tablefmt="fancy_grid")
+            self.app.render(devices, format=OutputFormat.TABULATED.value, headers="keys", tablefmt="plain")
         else:
             devices = []
             for device in response.results:
@@ -207,7 +200,7 @@ class Device(Controller):
 
         if not self.app.pargs.json:
             renderable = self._device_basic_response(response)
-            self.app.render(renderable, format=OutputFormat.TABULATED.value, headers="keys", tablefmt="fancy_grid")
+            self.app.render(renderable, format=OutputFormat.TABULATED.value, headers="keys", tablefmt="plain")
         else:
             renderable = self._device_basic_response(response, OutputFormat.JSON)
             self.app.render(renderable, format=OutputFormat.JSON.value)
@@ -275,7 +268,7 @@ class Device(Controller):
 
         if not self.app.pargs.json:
             renderable = self._device_basic_response(response)
-            self.app.render(renderable, format=OutputFormat.TABULATED.value, headers="keys", tablefmt="fancy_grid")
+            self.app.render(renderable, format=OutputFormat.TABULATED.value, headers="keys", tablefmt="plain")
         else:
             renderable = self._device_basic_response(response, OutputFormat.JSON)
             self.app.render(renderable, format=OutputFormat.JSON.value)
