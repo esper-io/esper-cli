@@ -15,8 +15,7 @@ class EsperOutputHandler(OutputHandler):
             format = kw.pop('format')
 
         if not format:
-            self.app.log.error('Output format cannot be empty.')
-            self.app.exit_code = 0
+            return str(data)
 
         if OutputFormat.TABULATED.value == format:
             return TabulateOutputHandler().render(data, **kw)

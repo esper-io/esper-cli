@@ -91,7 +91,7 @@ Configure command is used to set and modify Esper credential details and can sho
 $ espercli configure [OPTIONS]
 ```
 
-###### Options
+##### Options
 | Name, shorthand| Default| Description|
 | -------------  |:------:|:----------|
 | --set, -s      |        | Set or modify credentials |
@@ -112,12 +112,12 @@ Enterprise command used to show and modify enterprise information.
 $ espercli enterprise [SUB-COMMANDS]
 ```
 #### Sub commands
-##### 1. show
+#### 1. show
 Show enterprise information.
 ```sh
 $ espercli enterprise show [OPTIONS]
 ```
-###### Options
+##### Options
 | Name, shorthand| Default| Description|
 | ------------- |:-------------:|:-----|
 | --json, -j     |  | Render result in JSON format |
@@ -142,12 +142,12 @@ $ espercli enterprise show -j
 {"id": "595a6107-b137-448d-b217-e20cc58ee84d", "name": "Myapp Enterprise", "display_name": "Myapp", "registered_name": "Myapp Enterprise", "address": "#123, Industrial Layout, Random Avenue", "location": "Santa Clara, CA", "zipcode": "12345", "email": "contact@myapp.io", "contact_person": "Muneer", "contact_number": "+141234501234"}%
 ```
 
-##### 2. update
+#### 2. update
 Modify the enterprise information.
 ```sh
 $ espercli enterprise update [OPTIONS]
 ```
-###### Options
+##### Options
 | Name, shorthand | Default| Description|
 | -------------   |:------:|:----------|
 | --name, -n      |        | Enterprise name |
@@ -184,12 +184,12 @@ Device used to list and show device information and set device as active for fur
 $ espercli device [SUB-COMMANDS]
 ```
 #### Sub commands
-##### 1. list
+#### 1. list
 List sub command used to list all devices and can filter results by using different options listed below. Pagination used to limit the number of results, default is 20 results per page.
 ```sh
 $ espercli device list [OPTIONS]
 ```
-###### Options
+##### Options
 | Name, shorthand | Default| Description|
 | -------------   |:------:|:----------|
 | --limit, -l     |20      | Number of results to return per page |
@@ -220,12 +220,12 @@ e2a7d069-b536-4700-b07b-4db9d9d9236c  SNA-SNL-B424  Esper     INACTIVE
 c7c0382e-b911-451a-9d62-54936622d3b3  SNA-SNL-R123  QUALCOMM  DISABLED
 ```
 
-##### 2. show
+#### 2. show
 Show device details and set device as active. Here, device name is required to show device information.
 ```sh
 $ espercli device show [OPTIONS] [device-name]
 ```
-###### Options
+##### Options
 | Name, shorthand | Default| Description|
 | -------------   |:------:|:----------|
 | --active, -a    |        | Set device as active for further device specific commands |
@@ -245,12 +245,12 @@ is_gms         False
 state          INACTIVE
 ```
 
-##### 3. active
+#### 3. active
 Active sub command used to set and unset active device and show active device information with no options.
 ```sh
 $ espercli device active [OPTIONS]
 ```
-###### Options
+##### Options
 | Name, shorthand | Default| Description|
 | -------------   |:------:|:----------|
 | --name, -n      |        | Device name |
@@ -277,12 +277,12 @@ Group used to manage a group like list, show, create and update. Also can list d
 $ espercli group [SUB-COMMANDS]
 ```
 #### Sub commands
-##### 1. list
+#### 1. list
 List sub command used to list all groups and can filter results by using different options listed below. Pagination used to limit the number of results, default is 20 results per page.
 ```sh
 $ espercli group list [OPTIONS]
 ```
-###### Options
+##### Options
 | Name, shorthand | Default| Description|
 | -------------   |:------:|:----------|
 | --limit, -l     |20      | Number of results to return per page |
@@ -299,12 +299,12 @@ ID                                    NAME      DEVICE COUNT
 2e5efca2-7776-442e-a5ef-c2758d4a45a3  5G                   2
 ```
 
-##### 2. show
+#### 2. show
 Show group details and set group as active. Here, group name is required to show group information.
 ```sh
 $ espercli group show [OPTIONS] [group-name]
 ```
-###### Options
+##### Options
 | Name, shorthand | Default| Description|
 | -------------   |:------:|:----------|
 | --active, -a    |        | Set device as active for further device specific commands |
@@ -320,16 +320,16 @@ name          5G
 device_count  2
 ```
 
-##### 3. active
-Active sub command used to set and unset active group and show active group information with no options.
+#### 3. active
+Active sub command used to set and reset active group and show active group information with no options.
 ```sh
 $ espercli group active [OPTIONS]
 ```
-###### Options
+##### Options
 | Name, shorthand | Default| Description|
 | -------------   |:------:|:----------|
 | --name, -n      |        | Group name |
-| --unset, -u     |        | Unset the active group |
+| --reset, -u     |        | Reset the active group |
 | --json, -j      |        | Render result in JSON format |
 
 ##### Example
@@ -342,12 +342,12 @@ name          5G
 device_count  2
 ```
 
-##### 4. create
+#### 4. create
 Create new group.
 ```sh
 $ espercli group create [OPTIONS]
 ```
-###### Options
+##### Options
 | Name, shorthand | Default| Description|
 | -------------   |:------:|:----------|
 | --name, -n      |        | Group name |
@@ -363,12 +363,12 @@ name          5G
 device_count  0
 ```
 
-##### 5. update
+#### 5. update
 Modify group information.
 ```sh
 $ espercli group update [OPTIONS] [group-name]
 ```
-###### Options
+##### Options
 | Name, shorthand | Default| Description|
 | -------------   |:------:|:----------|
 | --name, -n      |        | Group new name |
@@ -384,7 +384,7 @@ name          4G
 device_count  2
 ```
 
-##### 6. delete
+#### 6. delete
 Remove particular group.
 ```sh
 $ espercli group delete [group-name]
@@ -396,12 +396,12 @@ $ espercli group delete 5G
 Group with name 5G deleted successfully
 ```
 
-##### 7. add
+#### 7. add
 Add devices into a group, active group is used to add devices if `--group` or `-g` option is not given explicitly.
 ```sh
 $ espercli group add [OPTIONS]
 ```
-###### Options
+##### Options
 | Name, shorthand | Default| Description|
 | -------------   |:------:|:----------|
 | --group, -g     |        | Group name |
@@ -418,12 +418,12 @@ name          5G
 device_count  2
 ```
 
-##### 8. remove
+#### 8. remove
 Remove devices from a group, active group is used to add devices if `--group` or `-g` option is not given explicitly.
 ```sh
 $ espercli group remove [OPTIONS]
 ```
-###### Options
+##### Options
 | Name, shorthand | Default| Description|
 | -------------   |:------:|:----------|
 | --group, -g     |        | Group name |
@@ -440,12 +440,12 @@ name          5G
 device_count  0
 ```
 
-##### 9. devices
+#### 9. devices
 List devices in a particular group, active group is used to add devices if `--group` or `-g` option is not given explicitly. Pagination used to limit the number of results, default is 20 results per page.
 ```sh
 $ espercli group devices [OPTIONS] [group-name]
 ```
-###### Options
+##### Options
 | Name, shorthand | Default| Description|
 | -------------   |:------:|:----------|
 | --limit, -l     |20      | Number of results to return per page |
@@ -993,7 +993,7 @@ Status command used to list latest device event information.
 $ espercli status [SUB-COMMANDS]
 ```
 #### Sub commands
-##### 1. latest
+#### 1. latest
 Show latest device event, active device is used to list if `--device` or `-d` option is not given explicitly.
 ```sh
 $ espercli status latest [OPTIONS]

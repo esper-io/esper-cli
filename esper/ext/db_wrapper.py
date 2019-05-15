@@ -94,6 +94,6 @@ class DBWrapper:
 
         return group
 
-    def unset_group(self):
+    def reset_group(self):
         Group = Query()
         self.db.remove(Group.group.exists())
