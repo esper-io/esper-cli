@@ -48,7 +48,7 @@ class DBWrapper:
 
         return application
 
-    def unset_application(self):
+    def reset_application(self):
         Application = Query()
         self.db.remove(Application.application.exists())
 

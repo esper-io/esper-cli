@@ -39,3 +39,4 @@ def parse_error_message(app, exception):
             'message') else exception.reason
     except ValueError:
         app.log.error(f'[parse_error_message] Decoding JSON has failed, exception body: {exception.body}')
+        return exception.reason

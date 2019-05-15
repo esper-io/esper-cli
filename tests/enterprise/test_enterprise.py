@@ -10,12 +10,12 @@ class EnterpriseTest(TestCase):
 
     def setUp(self) -> None:
         self.monkeypatch = MonkeyPatch()
+        set_configure(self.monkeypatch)
 
     def tearDown(self) -> None:
         teardown()
 
     def test_show_enterprise(self):
-        set_configure(self.monkeypatch)
         argv = ['enterprise', 'show']
         with EsperTest(argv=argv) as app:
             app.run()
@@ -25,7 +25,6 @@ class EnterpriseTest(TestCase):
             assert data[3]["DETAILS"] == "Shoonya Default Enterprise"
 
     def test_update_enterprise(self):
-        set_configure(self.monkeypatch)
         argv = ['enterprise', 'update', '--zipcode', '54321']
         with EsperTest(argv=argv) as app:
             app.run()
