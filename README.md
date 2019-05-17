@@ -1,6 +1,6 @@
 # Esper CLI
 
-This package provides a unified command line interface to Esper API Services.
+This package provides a unified command line interface to the Esper API Services.
 
 Current stable release versions are
 
@@ -8,11 +8,11 @@ Current stable release versions are
     SDK version: 0.0.6
     CLI version: 0.0.1
 
-## Pre-requisites
+## Requirements
 
 1. **Python:** We recommend you use Python 3.6 or above.
-2. **An Esper Cloud Account:** On request, we create an isolated namspace for you and generate an Esper `SERVER URL` to talk to APIs. You will receive this information in confirmation email from Esper. If your domain is, let's say, `myapp` then your `SERVER URL` will be `https://myapp-api.espercloud.com/api`. See [Requesting an Esper Endpoint](./gettingstarted.md#requesting-an-esper-endpoint). 
-3. **Generate an API key:** API key authentication is used for accessing APIs. You will have to generate this from web dashboard. Web Dashboard for your account can be accessed at `https://myapp.espercloud.com`. See [Generating an API Key](http://example.com)
+2. **An Esper Dev Account:** You need a free Esper Dev Trial account to create an environment and generate an Esper `SERVER URL`to talk to APIs. You will choose the environment name that will then be assigned as your custom URL and when you complete the sign up process your private environment will be created. For example if your you choose the environment name of “foo” then your `SERVER URL` will be `https://foo.esper.cloud/api`. See Requesting an Esper Dev Trial account. 
+3. **Generate an API key:** API key authentication is used for accessing APIs. You will have to generate this from the Esper Dev Console once you have set up your account. The Esper Dev Console for your account can be accessed at `https://foo.espercloud.com`. See [Generating an API Key](http://example.com)
 
 ## Installation
 
@@ -47,7 +47,7 @@ python setup.py install
 
 ### Usage
 
-Before using espercli, you need to tell it about your Esper credentials. For this you will need `API KEY` and `HOST ENDPOINT` as generated in [pre-requisites](#pre-requisites) section.
+Before using espercli, you need to tell it about your Esper credentials. For this you will need `API KEY` and `HOST ENVIRONMENT` as generated in [Requirements](#requirements) section.
 The way to get started is to run the espercli configure command:
 ```sh
 $ espercli configure
@@ -196,7 +196,7 @@ $ espercli device list [OPTIONS]
 | --offset, -i    |0       | The initial index from which to return the results |
 | --state, -s     |        | Filter by device state, choices are [active, inactive, disabled] |
 | --name, -n      |        | Filter by device name |
-| --group, -g     |        | Filter by group id |
+| --group, -g     |        | Filter by group name |
 | --imei, -im     |        | Filter by device IMEI number |
 | --brand, -b     |        | Filter by device brand name |
 | --gms, -gm      |        | Filter by GMS and non GMS flag, choices are [true, false] |
@@ -246,7 +246,7 @@ state          INACTIVE
 ```
 
 #### 3. active
-Active sub command used to set and unset active device and show active device information with no options.
+Active sub command used to set and reset active device and show active device information with no options.
 ```sh
 $ espercli device active [OPTIONS]
 ```
@@ -254,7 +254,7 @@ $ espercli device active [OPTIONS]
 | Name, shorthand | Default| Description|
 | -------------   |:------:|:----------|
 | --name, -n      |        | Device name |
-| --unset, -u     |        | Unset the active device |
+| --reset, -r     |        | Reset the active device |
 | --json, -j      |        | Render result in JSON format |
 
 ##### Example
@@ -329,7 +329,7 @@ $ espercli group active [OPTIONS]
 | Name, shorthand | Default| Description|
 | -------------   |:------:|:----------|
 | --name, -n      |        | Group name |
-| --reset, -u     |        | Reset the active group |
+| --reset, -r     |        | Reset the active group |
 | --json, -j      |        | Render result in JSON format |
 
 ##### Example
@@ -544,7 +544,9 @@ developer
 category
 content_rating    0.0
 compatibility
-version_count     1
+version_id        e933366b-9bb2-4c41-87fe-023f839dc367
+version_code      1.0
+build_number      1
 ```
 
 #### 4. delete
@@ -568,7 +570,7 @@ $ espercli app active [OPTIONS]
 | Name, shorthand | Default| Description|
 | -------------   |:------:|:----------|
 | --id, -i        |        | Application id |
-| --reset, -u     |        | Reset the active application |
+| --reset, -r     |        | Reset the active application |
 | --json, -j      |        | Render result in JSON format |
 
 ##### Example
@@ -703,7 +705,29 @@ command  INSTALL
 state    Command Initiated
 ```
 
-#### 2. ping
+#### 2. uninstall
+Uninstall an application version on device. Active device is used to uninstall application if `--device` or `-d` option is not given explicitly.
+```sh
+$ espercli device-command uninstall [OPTIONS]
+```
+##### Options
+| Name, shorthand | Default| Description|
+| -------------   |:------:|:----------|
+| --device, -d    |        | Device name |
+| --version, -v   |        | Application version id (UUID) |
+| --json, -j      |        | Render result in JSON format |
+
+##### Example
+```sh
+$ espercli device-command uninstall -d SNA-SNL-3GQA -v 54436edb-9b43-4e2c-8107-2c6fa90e2a9e
+
+TITLE    DETAILS
+id       21180eef-678f-4447-87d8-e29af2bcb8e6
+command  UNINSTALL
+state    Command Initiated
+```
+
+#### 3. ping
 Ping a device, active device is used to ping if `--device` or `-d` option is not given explicitly.
 ```sh
 $ espercli device-command ping [OPTIONS]
@@ -724,7 +748,7 @@ command  UPDATE_HEARTBEAT
 state    Command Initiated
 ```
 
-#### 3. lock
+#### 4. lock
 Lock command is used to lock screen of a device, active device is used to lock if `--device` or `-d` option is not given explicitly.
 ```sh
 $ espercli device-command lock [OPTIONS]
@@ -745,7 +769,7 @@ command  LOCK
 state    Command Initiated
 ```
 
-#### 4. reboot
+#### 5. reboot
 Reboot command is used to reboot a device, active device is used to lock if `--device` or `-d` option is not given explicitly.
 ```sh
 $ espercli device-command reboot [OPTIONS]
@@ -766,7 +790,7 @@ command  REBOOT
 state    Command Initiated
 ```
 
-#### 5. wipe
+#### 6. wipe
 Wipe a device, active device is used to wipe if `--device` or `-d` option is not given explicitly.
 ```sh
 $ espercli device-command wipe [OPTIONS]
@@ -789,7 +813,7 @@ command  WIPE
 state    Command Initiated
 ```
 
-#### 6. show
+#### 7. show
 Show device-command information and command id (UUID) is required to show command information. This is used active device to show command if `--device` or `-d` option is not given explicitly.
 ```sh
 $ espercli device-command show [OPTIONS] [command-id]

@@ -33,12 +33,12 @@ class GroupTest(TestCase):
             assert data[1]["DETAILS"] == "All devices"
 
     def test_show_not_existed_group(self):
-        argv = ['group', 'show', 'wrong group']
+        argv = ['group', 'show', 'wrong-group']
         with EsperTest(argv=argv) as app:
             app.run()
             data, output = app.last_rendered
 
-            assert data == "Group does not exist with name wrong group"
+            assert data == "Group does not exist with name wrong-group"
 
     def test_show_group_with_active(self):
         argv = ['group', 'show', 'All devices', '--active']
@@ -140,10 +140,66 @@ class GroupTest(TestCase):
 
             assert data == "Group with name group1 deleted successfully"
 
-    def test_group_devices(self):
+    def test_group_list_devices(self):
         argv = ['group', 'devices', '--group', 'All devices']
         with EsperTest(argv=argv) as app:
             app.run()
             data, output = app.last_rendered
 
             assert len(data) >= 0
+
+    def test_group_add_devices(self):
+        device = None
+        argv = ['group', 'devices', '--group', 'All devices']
+        with EsperTest(argv=argv) as app:
+            app.run()
+            data, output = app.last_rendered
+
+            if len(data) > 0:
+                device = data[0]["NAME"]
+
+        if device:
+            argv = ['group', 'create', '--name', 'group1']
+            with EsperTest(argv=argv) as app:
+                app.run()
+
+            argv = ['group', 'add', '--group', 'group1', '--devices', device]
+            with EsperTest(argv=argv) as app:
+                app.run()
+                data, output = app.last_rendered
+
+                assert data[2]["DETAILS"] == 1
+
+            argv = ['group', 'delete', 'group1']
+            with EsperTest(argv=argv) as app:
+                app.run()
+
+    def test_group_remove_devices(self):
+        device = None
+        argv = ['group', 'devices', '--group', 'All devices']
+        with EsperTest(argv=argv) as app:
+            app.run()
+            data, output = app.last_rendered
+
+            if len(data) > 0:
+                device = data[0]["NAME"]
+
+        if device:
+            argv = ['group', 'create', '--name', 'group1']
+            with EsperTest(argv=argv) as app:
+                app.run()
+
+            argv = ['group', 'add', '--group', 'group1', '--devices', device]
+            with EsperTest(argv=argv) as app:
+                app.run()
+
+            argv = ['group', 'remove', '--group', 'group1', '--devices', device]
+            with EsperTest(argv=argv) as app:
+                app.run()
+                data, output = app.last_rendered
+
+                assert data[2]["DETAILS"] == 0
+
+            argv = ['group', 'delete', 'group1']
+            with EsperTest(argv=argv) as app:
+                app.run()

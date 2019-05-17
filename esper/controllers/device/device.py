@@ -1,10 +1,11 @@
+import uuid
 from cement import Controller, ex
 from esperclient.rest import ApiException
 
 from esper.controllers.enums import DeviceState, OutputFormat
 from esper.ext.api_client import APIClient
 from esper.ext.db_wrapper import DBWrapper
-from esper.ext.utils import validate_creds_exists
+from esper.ext.utils import validate_creds_exists, parse_error_message
 
 
 class Device(Controller):
@@ -33,7 +34,7 @@ class Device(Controller):
               'action': 'store',
               'dest': 'name'}),
             (['-g', '--group'],
-             {'help': 'Group id',
+             {'help': 'Group name',
               'action': 'store',
               'dest': 'group'}),
             (['-im', '--imei'],
@@ -74,7 +75,7 @@ class Device(Controller):
 
         state = self.app.pargs.state
         name = self.app.pargs.name
-        group = self.app.pargs.group
+        group_name = self.app.pargs.group
         imei = self.app.pargs.imei
         brand = self.app.pargs.brand
         gms = self.app.pargs.gms
@@ -88,8 +89,25 @@ class Device(Controller):
         if name:
             kwargs['name'] = name
 
-        if group:
-            kwargs['group'] = group
+        if group_name:
+            kw = {'name': group_name}
+            group_id = None
+            try:
+                group_client = APIClient(db.get_configure()).get_group_api_client()
+                search_response = group_client.get_all_groups(enterprise_id, limit=1, offset=0, **kw)
+                for group in search_response.results:
+                    if group.name == group_name:
+                        group_id = group.id
+                        break
+            except ApiException as e:
+                self.app.log.error(f"[device-list] Failed to list groups: {e}")
+                self.app.render(f"ERROR: {parse_error_message(self.app, e)}")
+                return
+
+            if not group_id:
+                group_id = str(uuid.uuid4())  # random uuid
+
+            kwargs['group'] = group_id
 
         if imei:
             kwargs['imei'] = imei
@@ -104,10 +122,11 @@ class Device(Controller):
             # Find devices in an enterprise
             response = device_client.get_all_devices(enterprise_id, limit=limit, offset=offset, **kwargs)
         except ApiException as e:
-            self.app.log.debug(f"Failed to list devices: {e}")
-            self.app.log.error(f"Failed to list devices, reason: {e.reason}")
+            self.app.log.error(f"[device-list] Failed to list devices: {e}")
+            self.app.render(f"ERROR: {parse_error_message(self.app, e)}")
             return
 
+        self.app.render(f"Number of Devices: {response.count}")
         if not self.app.pargs.json:
             devices = []
 
@@ -128,7 +147,6 @@ class Device(Controller):
                         label['state']: current_state
                     }
                 )
-            print(f"Number of Devices: {response.count}")
             self.app.render(devices, format=OutputFormat.TABULATED.value, headers="keys", tablefmt="plain")
         else:
             devices = []
@@ -142,7 +160,6 @@ class Device(Controller):
                         'state': current_state
                     }
                 )
-            print(f"Number of Devices: {response.count}")
             self.app.render(devices, format=OutputFormat.JSON.value)
 
     def _device_basic_response(self, device, format=OutputFormat.TABULATED):
@@ -187,12 +204,13 @@ class Device(Controller):
         try:
             search_response = device_client.get_all_devices(enterprise_id, limit=1, offset=0, **kwargs)
             if not search_response.results or len(search_response.results) == 0:
-                print(f'Device does not exist with name {device_name}')
+                self.app.log.debug(f'[device-show] Device does not exist with name {device_name}')
+                self.app.render(f'Device does not exist with name {device_name}')
                 return
             response = search_response.results[0]
         except ApiException as e:
-            self.app.log.debug(f"Failed to list devices: {e}")
-            self.app.log.error(f"Failed to fetch device, reason: {e.reason}")
+            self.app.log.error(f"[device-show] Failed to list devices: {e}")
+            self.app.render(f"ERROR: {parse_error_message(self.app, e)}")
             return
 
         if self.app.pargs.active:
@@ -206,16 +224,16 @@ class Device(Controller):
             self.app.render(renderable, format=OutputFormat.JSON.value)
 
     @ex(
-        help='Set, show or unset the active device',
+        help='Set, show or reset the active device',
         arguments=[
             (['-n', '--name'],
              {'help': 'Device name.',
               'action': 'store',
               'dest': 'name'}),
-            (['-u', '--unset'],
-             {'help': 'Unset the active device',
+            (['-r', '--reset'],
+             {'help': 'Reset the active device',
               'action': 'store_true',
-              'dest': 'unset'}),
+              'dest': 'reset'}),
             (['-j', '--json'],
              {'help': 'Render result in Json format',
               'action': 'store_true',
@@ -234,36 +252,39 @@ class Device(Controller):
             try:
                 search_response = device_client.get_all_devices(enterprise_id, limit=1, offset=0, **kwargs)
                 if not search_response.results or len(search_response.results) == 0:
-                    print(f'Device does not exist with name {device_name}')
+                    self.app.log.debug(f'[device-active] Device does not exist with name {device_name}')
+                    self.app.render(f'Device does not exist with name {device_name}')
                     return
                 response = search_response.results[0]
                 db.set_device({'id': response.id, 'name': response.device_name})
             except ApiException as e:
-                self.app.log.debug(f"Failed to list devices: {e}")
-                self.app.log.error(f"Failed to set active device, reason: {e.reason}")
+                self.app.log.error(f"[device-active] Failed to list devices: {e}")
+                self.app.render(f"ERROR: {parse_error_message(self.app, e)}")
                 return
-        elif self.app.pargs.unset:
+        elif self.app.pargs.reset:
             device = db.get_device()
             if device is None or device.get('name') is None:
-                print('There is no active device.')
+                self.app.log.debug('[device-active] There is no active device.')
+                self.app.render('There is no active device.')
                 return
 
             db.unset_device()
-            self.app.log.debug(f"Unset the active device {device.get('name')}")
-            print(f"Unset the active device {device.get('name')}")
+            self.app.log.debug(f"[device-active] Reset the active device {device.get('name')}")
+            self.app.render(f"Reset the active device {device.get('name')}")
             return
         else:
             device = db.get_device()
             if device is None or device.get('name') is None:
-                print('There is no active device.')
+                self.app.log.debug('[device-active] There is no active device.')
+                self.app.render('There is no active device.')
                 return
 
             device_id = device.get('id')
             try:
                 response = device_client.get_device_by_id(enterprise_id, device_id)
             except ApiException as e:
-                self.app.log.debug(f"Failed to show active device: {e}")
-                self.app.log.error(f"Failed to show active device, reason: {e.reason}")
+                self.app.log.error(f"[device-active] Failed to show active device: {e}")
+                self.app.render(f"ERROR: {parse_error_message(self.app, e)}")
                 return
 
         if not self.app.pargs.json:

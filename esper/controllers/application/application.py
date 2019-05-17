@@ -190,16 +190,35 @@ class Application(Controller):
 
         try:
             response = application_client.upload(enterprise_id, application_file)
+            application = response.application
         except ApiException as e:
             self.app.log.error(f"[application-upload] Failed to upload an application: {e}")
             self.app.render(f"ERROR: {parse_error_message(self.app, e)}")
             return
 
+        valid_keys = ['id', 'application_name', 'package_name', 'developer', 'category', 'content_rating',
+                      'compatibility']
+
         if not self.app.pargs.json:
-            renderable = self._application_basic_response(response.application)
+            title = "TITLE"
+            details = "DETAILS"
+            renderable = [{title: k, details: v} for k, v in application.to_dict().items() if k in valid_keys]
+
+            if application and application.versions and len(application.versions) > 0:
+                version = application.versions[0]
+                renderable.append({title: 'version_id', details: version.id})
+                renderable.append({title: 'version_code', details: version.version_code})
+                renderable.append({title: 'build_number', details: version.build_number})
+
             self.app.render(renderable, format=OutputFormat.TABULATED.value, headers="keys", tablefmt="plain")
         else:
-            renderable = self._application_basic_response(response.application, OutputFormat.JSON)
+            renderable = {k: v for k, v in application.to_dict().items() if k in valid_keys}
+            if application and application.versions and len(application.versions) > 0:
+                version = application.versions[0]
+                renderable['version_id'] = version.id
+                renderable['version_code'] = version.version_code
+                renderable['build_number'] = version.build_number
+
             self.app.render(renderable, format=OutputFormat.JSON.value)
 
     @ex(
