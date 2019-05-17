@@ -3,7 +3,7 @@ from unittest import TestCase
 
 from _pytest.monkeypatch import MonkeyPatch
 
-from esper.controllers.enums import DeviceGroupCommandState
+from esper.controllers.enums import DeviceGroupCommandState, DeviceCommandState
 from esper.main import EsperTest
 from tests.utils import set_configure, teardown
 
@@ -59,6 +59,27 @@ class GroupCommandTest(TestCase):
 
         return state == DeviceGroupCommandState.SUCCESS.value or state == DeviceGroupCommandState.FAILURE.value
 
+    def is_device_command_completed(self, device, command):
+        argv = ['device-command', 'show', '--device', device, command]
+        with EsperTest(argv=argv) as app:
+            app.run()
+            data, output = app.last_rendered
+            state = data[2]["DETAILS"]
+
+        return state == DeviceCommandState.SUCCESS.value or state == DeviceCommandState.FAILURE.value
+
+    def get_installation_success_devices(self, command):
+        devices = []
+        argv = ['group-command', 'show', '--group', self.group, command]
+        with EsperTest(argv=argv) as app:
+            app.run()
+            data, output = app.last_rendered
+            state = data[3]["DETAILS"]
+
+            if state:
+                devices.extend(state.split('\n'))
+        return devices
+
     def test_device_commands(self):
         if len(self.devices) == 0:
             return
@@ -110,28 +131,31 @@ class GroupCommandTest(TestCase):
 
         time.sleep(2)
 
-        for device in self.devices:
-            command_id = None
+        installed_devices = self.get_installation_success_devices(command_id)
+        for device in installed_devices:
             argv = ['device-command', 'uninstall', '--device', device, '--version', version_id]
             with EsperTest(argv=argv) as app:
                 app.run()
                 data, output = app.last_rendered
-                if data and isinstance(data, list) and len(data) > 0:
-                    command_id = data[0]['DETAILS']
+                command_id = data[0]['DETAILS']
 
-                if command_id:
-                    while not self.is_command_completed(command_id):
-                        time.sleep(3)
+                while not self.is_device_command_completed(device, command_id):
+                    time.sleep(3)
 
         time.sleep(2)
         argv = ['group-command', 'reboot', '--group', self.group]
         with EsperTest(argv=argv) as app:
             app.run()
             data, output = app.last_rendered
+            command_id = data[0]['DETAILS']
 
             assert data[1]["DETAILS"] == 'REBOOT'
             assert data[2]["DETAILS"] == 'Command Initiated'
 
+        while not self.is_command_completed(command_id):
+            time.sleep(10)
+
+        time.sleep(120)
         argv = ['app', 'delete', application_id]
         with EsperTest(argv=argv) as app:
             app.run()

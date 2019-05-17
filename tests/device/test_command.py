@@ -120,6 +120,10 @@ class CommandTest(TestCase):
                 assert data[1]["DETAILS"] == 'REBOOT'
                 assert data[2]["DETAILS"] == 'Command Initiated'
 
+            while not self.is_command_completed(command_id):
+                time.sleep(10)
+
+            time.sleep(120)
             argv = ['app', 'delete', application_id]
             with EsperTest(argv=argv) as app:
                 app.run()
