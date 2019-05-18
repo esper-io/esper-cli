@@ -2,11 +2,13 @@ language: python
 python:
   - "3.6"
 
+env:
+  - PYTHONPATH=.
+
 # command to install dependencies
 install:
   - pip install -r requirements-dev.txt
 
 # command to run tests
 script:
-  - PYTHONPATH=.
   - pytest
