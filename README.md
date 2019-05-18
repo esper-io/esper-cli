@@ -1,4 +1,5 @@
 # Esper CLI
+[![Build Status](https://travis-ci.com/esper-io/esper-cli.svg?branch=master)](https://travis-ci.com/esper-io/esper-cli) [![Gitter](https://badges.gitter.im/esper-dev/esper-cli.svg)](https://gitter.im/esper-dev/esper-cli?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
 
 This package provides a unified command line interface to the Esper API Services.
 
