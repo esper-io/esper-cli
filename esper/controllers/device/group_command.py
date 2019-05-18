@@ -7,7 +7,7 @@ from esperclient.rest import ApiException
 from esper.controllers.enums import OutputFormat, DeviceCommandEnum
 from esper.ext.api_client import APIClient
 from esper.ext.db_wrapper import DBWrapper
-from esper.ext.utils import validate_creds_exists
+from esper.ext.utils import validate_creds_exists, parse_error_message
 
 
 class GroupCommand(Controller):
@@ -116,19 +116,21 @@ class GroupCommand(Controller):
             try:
                 search_response = group_client.get_all_groups(enterprise_id, limit=1, offset=0, **kwargs)
                 if not search_response.results or len(search_response.results) == 0:
-                    print(f'Group does not exist with name {group_name}')
+                    self.app.log.debug(f'[group-command-show] Group does not exist with name {group_name}')
+                    self.app.render(f'Group does not exist with name {group_name}')
                     return
                 response = search_response.results[0]
                 group_id = response.id
             except ApiException as e:
-                self.app.log.debug(f"Failed to list groups: {e}")
-                self.app.log.error(f"Failed to get group, reason: {e.reason}")
+                self.app.log.error(f"[group-command-show] ailed to list groups: {e}")
+                self.app.render(f"ERROR: {parse_error_message(self.app, e)}")
                 return
 
         else:
             group = db.get_group()
             if group is None or group.get('name') is None:
-                print('There is no active group.')
+                self.app.log.debug('[group-command-show] There is no active group.')
+                self.app.render('There is no active group.')
                 return
 
             group_id = group.get('id')
@@ -136,8 +138,8 @@ class GroupCommand(Controller):
         try:
             response = command_client.get_group_command(command_id, group_id, enterprise_id)
         except ApiException as e:
-            self.app.log.debug(f"Failed to show details of group command: {e}")
-            self.app.log.error(f"Failed to show details of group command, reason: {e.reason}")
+            self.app.log.error(f"[group-command-show] Failed to show details of group command: {e}")
+            self.app.render(f"ERROR: {parse_error_message(self.app, e)}")
             return
 
         if not self.app.pargs.json:
@@ -177,19 +179,21 @@ class GroupCommand(Controller):
             try:
                 search_response = group_client.get_all_groups(enterprise_id, limit=1, offset=0, **kwargs)
                 if not search_response.results or len(search_response.results) == 0:
-                    print(f'Group does not exist with name {group_name}')
+                    self.app.log.debug(f'[group-command-install] Group does not exist with name {group_name}')
+                    self.app.render(f'Group does not exist with name {group_name}')
                     return
                 response = search_response.results[0]
                 group_id = response.id
             except ApiException as e:
-                self.app.log.debug(f"Failed to list groups: {e}")
-                self.app.log.error(f"Failed to get group, reason: {e.reason}")
+                self.app.log.error(f"[group-command-install] Failed to list groups: {e}")
+                self.app.render(f"ERROR: {parse_error_message(self.app, e)}")
                 return
 
         else:
             group = db.get_group()
             if group is None or group.get('name') is None:
-                print('There is no active group.')
+                self.app.log.debug('[group-command-install] There is no active group.')
+                self.app.render('There is no active group.')
                 return
 
             group_id = group.get('id')
@@ -200,8 +204,8 @@ class GroupCommand(Controller):
         try:
             response = command_client.run_group_command(enterprise_id, group_id, command_request)
         except ApiException as e:
-            self.app.log.debug(f"Failed to fire the install group command: {e}")
-            self.app.log.error(f"Failed to install application, reason: {e.reason}")
+            self.app.log.error(f"[group-command-install] Failed to fire the install group command: {e}")
+            self.app.render(f"ERROR: {parse_error_message(self.app, e)}")
             return
 
         if not self.app.pargs.json:
@@ -237,19 +241,21 @@ class GroupCommand(Controller):
             try:
                 search_response = group_client.get_all_groups(enterprise_id, limit=1, offset=0, **kwargs)
                 if not search_response.results or len(search_response.results) == 0:
-                    print(f'Group does not exist with name {group_name}')
+                    self.app.log.debug(f'[group-command-ping] Group does not exist with name {group_name}')
+                    self.app.render(f'Group does not exist with name {group_name}')
                     return
                 response = search_response.results[0]
                 group_id = response.id
             except ApiException as e:
-                self.app.log.debug(f"Failed to list groups: {e}")
-                self.app.log.error(f"Failed to get group, reason: {e.reason}")
+                self.app.log.error(f"[group-command-ping] Failed to list groups: {e}")
+                self.app.render(f"ERROR: {parse_error_message(self.app, e)}")
                 return
 
         else:
             group = db.get_group()
             if group is None or group.get('name') is None:
-                print('There is no active group.')
+                self.app.log.debug('[group-command-ping] There is no active group.')
+                self.app.render('There is no active group.')
                 return
 
             group_id = group.get('id')
@@ -258,8 +264,8 @@ class GroupCommand(Controller):
         try:
             response = command_client.run_group_command(enterprise_id, group_id, command_request)
         except ApiException as e:
-            self.app.log.debug(f"Failed to fire the ping group command: {e}")
-            self.app.log.error(f"Failed to ping the group of devices, reason: {e.reason}")
+            self.app.log.error(f"[group-command-ping] Failed to fire the ping group command: {e}")
+            self.app.render(f"ERROR: {parse_error_message(self.app, e)}")
             return
 
         if not self.app.pargs.json:
@@ -295,19 +301,21 @@ class GroupCommand(Controller):
             try:
                 search_response = group_client.get_all_groups(enterprise_id, limit=1, offset=0, **kwargs)
                 if not search_response.results or len(search_response.results) == 0:
-                    print(f'Group does not exist with name {group_name}')
+                    self.app.log.debug(f'[group-command-lock] Group does not exist with name {group_name}')
+                    self.app.render(f'Group does not exist with name {group_name}')
                     return
                 response = search_response.results[0]
                 group_id = response.id
             except ApiException as e:
-                self.app.log.debug(f"Failed to list groups: {e}")
-                self.app.log.error(f"Failed to get group, reason: {e.reason}")
+                self.app.log.error(f"[group-command-lock] Failed to list groups: {e}")
+                self.app.render(f"ERROR: {parse_error_message(self.app, e)}")
                 return
 
         else:
             group = db.get_group()
             if group is None or group.get('name') is None:
-                print('There is no active group.')
+                self.app.log.debug('[group-command-lock] There is no active group.')
+                self.app.render('There is no active group.')
                 return
 
             group_id = group.get('id')
@@ -316,8 +324,8 @@ class GroupCommand(Controller):
         try:
             response = command_client.run_group_command(enterprise_id, group_id, command_request)
         except ApiException as e:
-            self.app.log.debug(f"Failed to fire the lock group command: {e}")
-            self.app.log.error(f"Failed to lock the group of devices, reason: {e.reason}")
+            self.app.log.error(f"[group-command-lock] Failed to fire the lock group command: {e}")
+            self.app.render(f"ERROR: {parse_error_message(self.app, e)}")
             return
 
         if not self.app.pargs.json:
@@ -353,19 +361,21 @@ class GroupCommand(Controller):
             try:
                 search_response = group_client.get_all_groups(enterprise_id, limit=1, offset=0, **kwargs)
                 if not search_response.results or len(search_response.results) == 0:
-                    print(f'Group does not exist with name {group_name}')
+                    self.app.log.debug(f'[group-command-reboot] Group does not exist with name {group_name}')
+                    self.app.render(f'Group does not exist with name {group_name}')
                     return
                 response = search_response.results[0]
                 group_id = response.id
             except ApiException as e:
-                self.app.log.debug(f"Failed to list groups: {e}")
-                self.app.log.error(f"Failed to get group, reason: {e.reason}")
+                self.app.log.error(f"[group-command-reboot] Failed to list groups: {e}")
+                self.app.render(f"ERROR: {parse_error_message(self.app, e)}")
                 return
 
         else:
             group = db.get_group()
             if group is None or group.get('name') is None:
-                print('There is no active group.')
+                self.app.log.debug('[group-command-reboot] There is no active group.')
+                self.app.render('There is no active group.')
                 return
 
             group_id = group.get('id')
@@ -374,8 +384,8 @@ class GroupCommand(Controller):
         try:
             response = command_client.run_group_command(enterprise_id, group_id, command_request)
         except ApiException as e:
-            self.app.log.debug(f"Failed to fire the reboot group command: {e}")
-            self.app.log.error(f"Failed to reboot the group of devices, reason: {e.reason}")
+            self.app.log.error(f"[group-command-reboot] Failed to fire the reboot group command: {e}")
+            self.app.render(f"ERROR: {parse_error_message(self.app, e)}")
             return
 
         if not self.app.pargs.json:

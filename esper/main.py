@@ -25,7 +25,7 @@ CONFIG['esper']['creds_file'] = '~/.esper/db/creds.json'
 META = init_defaults('log.colorlog')
 META['log.colorlog']['file'] = '~/.esper/logs/esper.log'
 META['log.colorlog']['level'] = 'debug'
-META['log.colorlog']['to_console'] = True
+META['log.colorlog']['to_console'] = False
 META['log.colorlog']['rotate'] = False
 META['log.colorlog']['max_bytes'] = 512000
 META['log.colorlog']['max_files'] = 4
@@ -101,11 +101,19 @@ class Esper(App):
         ]
 
 
+# configuration defaults for test
+TEST_CONFIG = init_defaults('esper')
+TEST_CONFIG['esper']['debug'] = False
+TEST_CONFIG['esper']['creds_file'] = 'creds.json'
+
+
 class EsperTest(TestApp, Esper):
     """A sub-class of Esper that is better suited for testing."""
 
     class Meta:
         label = 'espercli'
+        config_defaults = TEST_CONFIG
+        config_files = []
 
 
 def main():

@@ -1,6 +1,6 @@
 # Esper CLI
 
-This package provides a unified command line interface to Esper API Services.
+This package provides a unified command line interface to the Esper API Services.
 
 Current stable release versions are
 
@@ -8,11 +8,11 @@ Current stable release versions are
     SDK version: 0.0.6
     CLI version: 0.0.1
 
-## Pre-requisites
+## Requirements
 
 1. **Python:** We recommend you use Python 3.6 or above.
-2. **An Esper Cloud Account:** On request, we create an isolated namspace for you and generate an Esper `SERVER URL` to talk to APIs. You will receive this information in confirmation email from Esper. If your domain is, let's say, `myapp` then your `SERVER URL` will be `https://myapp-api.espercloud.com/api`. See [Requesting an Esper Endpoint](./gettingstarted.md#requesting-an-esper-endpoint). 
-3. **Generate an API key:** API key authentication is used for accessing APIs. You will have to generate this from web dashboard. Web Dashboard for your account can be accessed at `https://myapp.espercloud.com`. See [Generating an API Key](http://example.com)
+2. **An Esper Dev Account:** You need a free Esper Dev Trial account to create an environment and generate an Esper `SERVER URL`to talk to APIs. You will choose the environment name that will then be assigned as your custom URL and when you complete the sign up process your private environment will be created. For example if your you choose the environment name of “foo” then your `SERVER URL` will be `https://foo.esper.cloud/api`. See Requesting an Esper Dev Trial account. 
+3. **Generate an API key:** API key authentication is used for accessing APIs. You will have to generate this from the Esper Dev Console once you have set up your account. The Esper Dev Console for your account can be accessed at `https://foo.espercloud.com`. See [Generating an API Key](http://example.com)
 
 ## Installation
 
@@ -47,7 +47,7 @@ python setup.py install
 
 ### Usage
 
-Before using espercli, you need to tell it about your Esper credentials. For this you will need `API KEY` and `HOST ENDPOINT` as generated in [pre-requisites](#pre-requisites) section.
+Before using espercli, you need to tell it about your Esper credentials. For this you will need `API KEY` and `HOST ENVIRONMENT` as generated in [Requirements](#requirements) section.
 The way to get started is to run the espercli configure command:
 ```sh
 $ espercli configure
@@ -91,7 +91,7 @@ Configure command is used to set and modify Esper credential details and can sho
 $ espercli configure [OPTIONS]
 ```
 
-###### Options
+##### Options
 | Name, shorthand| Default| Description|
 | -------------  |:------:|:----------|
 | --set, -s      |        | Set or modify credentials |
@@ -112,12 +112,12 @@ Enterprise command used to show and modify enterprise information.
 $ espercli enterprise [SUB-COMMANDS]
 ```
 #### Sub commands
-##### 1. show
+#### 1. show
 Show enterprise information.
 ```sh
 $ espercli enterprise show [OPTIONS]
 ```
-###### Options
+##### Options
 | Name, shorthand| Default| Description|
 | ------------- |:-------------:|:-----|
 | --json, -j     |  | Render result in JSON format |
@@ -142,12 +142,12 @@ $ espercli enterprise show -j
 {"id": "595a6107-b137-448d-b217-e20cc58ee84d", "name": "Myapp Enterprise", "display_name": "Myapp", "registered_name": "Myapp Enterprise", "address": "#123, Industrial Layout, Random Avenue", "location": "Santa Clara, CA", "zipcode": "12345", "email": "contact@myapp.io", "contact_person": "Muneer", "contact_number": "+141234501234"}%
 ```
 
-##### 2. update
+#### 2. update
 Modify the enterprise information.
 ```sh
 $ espercli enterprise update [OPTIONS]
 ```
-###### Options
+##### Options
 | Name, shorthand | Default| Description|
 | -------------   |:------:|:----------|
 | --name, -n      |        | Enterprise name |
@@ -184,19 +184,19 @@ Device used to list and show device information and set device as active for fur
 $ espercli device [SUB-COMMANDS]
 ```
 #### Sub commands
-##### 1. list
+#### 1. list
 List sub command used to list all devices and can filter results by using different options listed below. Pagination used to limit the number of results, default is 20 results per page.
 ```sh
 $ espercli device list [OPTIONS]
 ```
-###### Options
+##### Options
 | Name, shorthand | Default| Description|
 | -------------   |:------:|:----------|
 | --limit, -l     |20      | Number of results to return per page |
 | --offset, -i    |0       | The initial index from which to return the results |
 | --state, -s     |        | Filter by device state, choices are [active, inactive, disabled] |
 | --name, -n      |        | Filter by device name |
-| --group, -g     |        | Filter by group id |
+| --group, -g     |        | Filter by group name |
 | --imei, -im     |        | Filter by device IMEI number |
 | --brand, -b     |        | Filter by device brand name |
 | --gms, -gm      |        | Filter by GMS and non GMS flag, choices are [true, false] |
@@ -220,12 +220,12 @@ e2a7d069-b536-4700-b07b-4db9d9d9236c  SNA-SNL-B424  Esper     INACTIVE
 c7c0382e-b911-451a-9d62-54936622d3b3  SNA-SNL-R123  QUALCOMM  DISABLED
 ```
 
-##### 2. show
+#### 2. show
 Show device details and set device as active. Here, device name is required to show device information.
 ```sh
 $ espercli device show [OPTIONS] [device-name]
 ```
-###### Options
+##### Options
 | Name, shorthand | Default| Description|
 | -------------   |:------:|:----------|
 | --active, -a    |        | Set device as active for further device specific commands |
@@ -245,16 +245,16 @@ is_gms         False
 state          INACTIVE
 ```
 
-##### 3. active
-Active sub command used to set and unset active device and show active device information with no options.
+#### 3. active
+Active sub command used to set and reset active device and show active device information with no options.
 ```sh
 $ espercli device active [OPTIONS]
 ```
-###### Options
+##### Options
 | Name, shorthand | Default| Description|
 | -------------   |:------:|:----------|
 | --name, -n      |        | Device name |
-| --unset, -u     |        | Unset the active device |
+| --reset, -r     |        | Reset the active device |
 | --json, -j      |        | Render result in JSON format |
 
 ##### Example
@@ -277,12 +277,12 @@ Group used to manage a group like list, show, create and update. Also can list d
 $ espercli group [SUB-COMMANDS]
 ```
 #### Sub commands
-##### 1. list
+#### 1. list
 List sub command used to list all groups and can filter results by using different options listed below. Pagination used to limit the number of results, default is 20 results per page.
 ```sh
 $ espercli group list [OPTIONS]
 ```
-###### Options
+##### Options
 | Name, shorthand | Default| Description|
 | -------------   |:------:|:----------|
 | --limit, -l     |20      | Number of results to return per page |
@@ -299,12 +299,12 @@ ID                                    NAME      DEVICE COUNT
 2e5efca2-7776-442e-a5ef-c2758d4a45a3  5G                   2
 ```
 
-##### 2. show
+#### 2. show
 Show group details and set group as active. Here, group name is required to show group information.
 ```sh
 $ espercli group show [OPTIONS] [group-name]
 ```
-###### Options
+##### Options
 | Name, shorthand | Default| Description|
 | -------------   |:------:|:----------|
 | --active, -a    |        | Set device as active for further device specific commands |
@@ -320,16 +320,16 @@ name          5G
 device_count  2
 ```
 
-##### 3. active
-Active sub command used to set and unset active group and show active group information with no options.
+#### 3. active
+Active sub command used to set and reset active group and show active group information with no options.
 ```sh
 $ espercli group active [OPTIONS]
 ```
-###### Options
+##### Options
 | Name, shorthand | Default| Description|
 | -------------   |:------:|:----------|
 | --name, -n      |        | Group name |
-| --unset, -u     |        | Unset the active group |
+| --reset, -r     |        | Reset the active group |
 | --json, -j      |        | Render result in JSON format |
 
 ##### Example
@@ -342,12 +342,12 @@ name          5G
 device_count  2
 ```
 
-##### 4. create
+#### 4. create
 Create new group.
 ```sh
 $ espercli group create [OPTIONS]
 ```
-###### Options
+##### Options
 | Name, shorthand | Default| Description|
 | -------------   |:------:|:----------|
 | --name, -n      |        | Group name |
@@ -363,12 +363,12 @@ name          5G
 device_count  0
 ```
 
-##### 5. update
+#### 5. update
 Modify group information.
 ```sh
 $ espercli group update [OPTIONS] [group-name]
 ```
-###### Options
+##### Options
 | Name, shorthand | Default| Description|
 | -------------   |:------:|:----------|
 | --name, -n      |        | Group new name |
@@ -384,7 +384,7 @@ name          4G
 device_count  2
 ```
 
-##### 6. delete
+#### 6. delete
 Remove particular group.
 ```sh
 $ espercli group delete [group-name]
@@ -396,12 +396,12 @@ $ espercli group delete 5G
 Group with name 5G deleted successfully
 ```
 
-##### 7. add
+#### 7. add
 Add devices into a group, active group is used to add devices if `--group` or `-g` option is not given explicitly.
 ```sh
 $ espercli group add [OPTIONS]
 ```
-###### Options
+##### Options
 | Name, shorthand | Default| Description|
 | -------------   |:------:|:----------|
 | --group, -g     |        | Group name |
@@ -418,12 +418,12 @@ name          5G
 device_count  2
 ```
 
-##### 8. remove
+#### 8. remove
 Remove devices from a group, active group is used to add devices if `--group` or `-g` option is not given explicitly.
 ```sh
 $ espercli group remove [OPTIONS]
 ```
-###### Options
+##### Options
 | Name, shorthand | Default| Description|
 | -------------   |:------:|:----------|
 | --group, -g     |        | Group name |
@@ -440,12 +440,12 @@ name          5G
 device_count  0
 ```
 
-##### 9. devices
+#### 9. devices
 List devices in a particular group, active group is used to add devices if `--group` or `-g` option is not given explicitly. Pagination used to limit the number of results, default is 20 results per page.
 ```sh
 $ espercli group devices [OPTIONS] [group-name]
 ```
-###### Options
+##### Options
 | Name, shorthand | Default| Description|
 | -------------   |:------:|:----------|
 | --limit, -l     |20      | Number of results to return per page |
@@ -469,12 +469,12 @@ Application command used to list, show, upload and delete applications and set a
 $ espercli app [SUB-COMMANDS]
 ```
 #### Sub commands
-##### 1. list
+#### 1. list
 List all applications and can filter results by using different options listed below. Pagination used to limit the number of results, default is 20 results per page.
 ```sh
 $ espercli app list [OPTIONS]
 ```
-###### Options
+##### Options
 | Name, shorthand | Default| Description|
 | -------------   |:------:|:----------|
 | --limit, -l     |20      | Number of results to return per page |
@@ -496,12 +496,12 @@ d7131f72-17e4-40e9-bb9e-28f1fad1f623  ATID Reader         com.atid.app.atx      
 09368a1b-a9cd-45bc-8824-7190bc0f6b7e  WiFiAnalyzer        com.vrem.wifianalyzer                         1
 ```
 
-##### 2. show
+#### 2. show
 Show application information and set application as active. Here, application id (UUID) is required to show application information.
 ```sh
 $ espercli app show [OPTIONS] [application-id]
 ```
-###### Options
+##### Options
 | Name, shorthand | Default| Description|
 | -------------   |:------:|:----------|
 | --active, -a    |        | Set application as active for further application specific commands |
@@ -522,12 +522,12 @@ compatibility
 version_count     1
 ```
 
-##### 3. upload
+#### 3. upload
 Upload sub command used to upload application file. Here, application file path is required to upload file.
 ```sh
 $ espercli app upload [OPTIONS] [application-file]
 ```
-###### Options
+##### Options
 | Name, shorthand | Default| Description|
 | -------------   |:------:|:----------|
 | --json, -j      |        | Render result in JSON format |
@@ -544,11 +544,13 @@ developer
 category
 content_rating    0.0
 compatibility
-version_count     1
+version_id        e933366b-9bb2-4c41-87fe-023f839dc367
+version_code      1.0
+build_number      1
 ```
 
-##### 4. delete
-Delete sub command used to delete application. Here, application id (UUID) is required to delete application.
+#### 4. delete
+Delete sub command used to delete application. Here, application id (UUID) is required to delete application and reset active application if it is set as active.
 ```sh
 $ espercli app delete [application-id]
 ```
@@ -559,16 +561,16 @@ $ espercli app delete 630dbfab-7d85-4f81-9f3b-ffb038b0df72
 Application with id 630dbfab-7d85-4f81-9f3b-ffb038b0df72 deleted successfully
 ```
 
-##### 5. active
-Active sub command used to set and unset active application and show active application information with no options.
+#### 5. active
+Active sub command used to set and reset active application and show active application information with no options.
 ```sh
 $ espercli app active [OPTIONS]
 ```
-###### Options
+##### Options
 | Name, shorthand | Default| Description|
 | -------------   |:------:|:----------|
 | --id, -i        |        | Application id |
-| --unset, -u     |        | Unset the active application |
+| --reset, -r     |        | Reset the active application |
 | --json, -j      |        | Render result in JSON format |
 
 ##### Example
@@ -592,12 +594,12 @@ Version command used to list, show and delete application versions.
 $ espercli version [SUB-COMMANDS]
 ```
 #### Sub commands
-##### 1. list
+#### 1. list
 List all application versions and can filter results by using different options listed below. Pagination used to limit the number of results, default is 20 results per page. Active application is used to list if `--app` or `-a` option is not given explicitly.
 ```sh
 $ espercli version list [OPTIONS]
 ```
-###### Options
+##### Options
 | Name, shorthand | Default| Description|
 | -------------   |:------:|:----------|
 | --limit, -l     |20      | Number of results to return per page |
@@ -624,13 +626,13 @@ ID                                    VERSION CODE      BUILD NUMBER    SIZE IN 
 54436edb-9b43-4e2c-8107-2c6fa90e2a9e  6.4.5                      189       9.36421                                   1
 ```
 
-##### 2. show
+#### 2. show
 Show application version information, here version id (UUID) is required to show version information.
 ```sh
 $ espercli version show [OPTIONS] [version-id]
 ```
 
-###### Options
+##### Options
 | Name, shorthand | Default| Description|
 | -------------   |:------:|:----------|
 | --app, -a       |        | Application id (UUID) |
@@ -649,13 +651,13 @@ release_track
 installed_count  1
 ```
 
-##### 3. delete
-Delete sub command used to delete particular application version. Here, version id (UUID) is required to delete version.
+#### 3. delete
+Delete sub command used to delete particular application version. Here, version id (UUID) is required to delete version. Application will be also deleted if application contains one version and reset active application if it is set as active
 ```sh
 $ espercli version delete [OPTIONS] [version-id]
 ```
 
-###### Options
+##### Options
 | Name, shorthand | Default| Description|
 | -------------   |:------:|:----------|
 | --app, -a       |        | Application id (UUID) |
@@ -672,12 +674,12 @@ Device-command command used to fire different actions on device like lock, ping,
 $ espercli device-command [SUB-COMMANDS]
 ```
 #### Sub commands
-##### 1. install
+#### 1. install
 Deploy an application version on device. Active device is used to install application if `--device` or `-d` option is not given explicitly.
 ```sh
 $ espercli device-command install [OPTIONS]
 ```
-###### Options
+##### Options
 | Name, shorthand | Default| Description|
 | -------------   |:------:|:----------|
 | --device, -d    |        | Device name |
@@ -703,12 +705,34 @@ command  INSTALL
 state    Command Initiated
 ```
 
-##### 2. ping
+#### 2. uninstall
+Uninstall an application version on device. Active device is used to uninstall application if `--device` or `-d` option is not given explicitly.
+```sh
+$ espercli device-command uninstall [OPTIONS]
+```
+##### Options
+| Name, shorthand | Default| Description|
+| -------------   |:------:|:----------|
+| --device, -d    |        | Device name |
+| --version, -v   |        | Application version id (UUID) |
+| --json, -j      |        | Render result in JSON format |
+
+##### Example
+```sh
+$ espercli device-command uninstall -d SNA-SNL-3GQA -v 54436edb-9b43-4e2c-8107-2c6fa90e2a9e
+
+TITLE    DETAILS
+id       21180eef-678f-4447-87d8-e29af2bcb8e6
+command  UNINSTALL
+state    Command Initiated
+```
+
+#### 3. ping
 Ping a device, active device is used to ping if `--device` or `-d` option is not given explicitly.
 ```sh
 $ espercli device-command ping [OPTIONS]
 ```
-###### Options
+##### Options
 | Name, shorthand | Default| Description|
 | -------------   |:------:|:----------|
 | --device, -d    |        | Device name |
@@ -724,12 +748,12 @@ command  UPDATE_HEARTBEAT
 state    Command Initiated
 ```
 
-##### 3. lock
+#### 4. lock
 Lock command is used to lock screen of a device, active device is used to lock if `--device` or `-d` option is not given explicitly.
 ```sh
 $ espercli device-command lock [OPTIONS]
 ```
-###### Options
+##### Options
 | Name, shorthand | Default| Description|
 | -------------   |:------:|:----------|
 | --device, -d    |        | Device name |
@@ -745,12 +769,12 @@ command  LOCK
 state    Command Initiated
 ```
 
-##### 4. reboot
+#### 5. reboot
 Reboot command is used to reboot a device, active device is used to lock if `--device` or `-d` option is not given explicitly.
 ```sh
 $ espercli device-command reboot [OPTIONS]
 ```
-###### Options
+##### Options
 | Name, shorthand | Default| Description|
 | -------------   |:------:|:----------|
 | --device, -d    |        | Device name |
@@ -766,12 +790,12 @@ command  REBOOT
 state    Command Initiated
 ```
 
-##### 5. wipe
+#### 6. wipe
 Wipe a device, active device is used to wipe if `--device` or `-d` option is not given explicitly.
 ```sh
 $ espercli device-command wipe [OPTIONS]
 ```
-###### Options
+##### Options
 | Name, shorthand | Default| Description|
 | -------------   |:------:|:----------|
 | --device, -d    |        | Device name |
@@ -789,12 +813,12 @@ command  WIPE
 state    Command Initiated
 ```
 
-##### 6. show
+#### 7. show
 Show device-command information and command id (UUID) is required to show command information. This is used active device to show command if `--device` or `-d` option is not given explicitly.
 ```sh
 $ espercli device-command show [OPTIONS] [command-id]
 ```
-###### Options
+##### Options
 | Name, shorthand | Default| Description|
 | -------------   |:------:|:----------|
 | --device, -d    |        | Device name |
@@ -816,12 +840,12 @@ Group-command command used to fire different actions on group like lock, ping, r
 $ espercli device-command [SUB-COMMANDS]
 ```
 #### Sub commands
-##### 1. install
+#### 1. install
 Deploy an application version on a group. Active group is used to install application if `--group` or `-g` option is not given explicitly.
 ```sh
 $ espercli group-command install [OPTIONS]
 ```
-###### Options
+##### Options
 | Name, shorthand | Default| Description|
 | -------------   |:------:|:----------|
 | --group, -g     |        | Group name |
@@ -855,12 +879,12 @@ in_progress
 inactive
 ```
 
-##### 2. ping
+#### 2. ping
 Ping a group, active group is used to ping if `--group` or `-g` option is not given explicitly.
 ```sh
 $ espercli group-command ping [OPTIONS]
 ```
-###### Options
+##### Options
 | Name, shorthand | Default| Description|
 | -------------   |:------:|:----------|
 | --group, -g     |        | Group name |
@@ -880,12 +904,12 @@ in_progress
 inactive
 ```
 
-##### 3. lock
+#### 3. lock
 Lock command is used to lock screen of a group of devices, active group is used to lock if `--group` or `-g` option is not given explicitly.
 ```sh
 $ espercli group-command lock [OPTIONS]
 ```
-###### Options
+##### Options
 | Name, shorthand | Default| Description|
 | -------------   |:------:|:----------|
 | --group, -g     |        | Group name |
@@ -905,12 +929,12 @@ in_progress
 inactive
 ```
 
-##### 4. reboot
+#### 4. reboot
 Reboot command is used to reboot group of devices, active group is used to lock if `--group` or `-g` option is not given explicitly.
 ```sh
 $ espercli group-command reboot [OPTIONS]
 ```
-###### Options
+##### Options
 | Name, shorthand | Default| Description|
 | -------------   |:------:|:----------|
 | --group, -g     |        | Group name |
@@ -930,12 +954,12 @@ in_progress
 inactive
 ```
 
-##### 5. show
+#### 5. show
 Show group-command information and command id (UUID) is required to show command information. This is used active group to show command if `--group` or `-g` option is not given explicitly.
 ```sh
 $ espercli group-command show [OPTIONS] [command-id]
 ```
-###### Options
+##### Options
 | Name, shorthand | Default| Description|
 | -------------   |:------:|:----------|
 | --group, -g     |        | Group name |
@@ -962,12 +986,12 @@ Installs command used to list all installations on a device.
 $ espercli installs [SUB-COMMANDS]
 ```
 #### Sub commands
-##### 1. list
+#### 1. list
 List all application installations on a device and can filter results by using different options listed below. Pagination used to limit the number of results, default is 20 results per page. Active device is used to list if `--device` or `-d` option is not given explicitly.
 ```sh
 $ espercli installs list [OPTIONS]
 ```
-###### Options
+##### Options
 | Name, shorthand | Default| Description|
 | -------------   |:------:|:----------|
 | --limit, -l     |20      | Number of results to return per page |
@@ -993,12 +1017,12 @@ Status command used to list latest device event information.
 $ espercli status [SUB-COMMANDS]
 ```
 #### Sub commands
-##### 1. latest
+#### 1. latest
 Show latest device event, active device is used to list if `--device` or `-d` option is not given explicitly.
 ```sh
 $ espercli status latest [OPTIONS]
 ```
-###### Options
+##### Options
 | Name, shorthand | Default| Description|
 | -------------   |:------:|:----------|
 | --device, -d    |        | Device name |

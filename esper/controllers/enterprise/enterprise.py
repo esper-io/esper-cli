@@ -5,7 +5,7 @@ from esperclient.rest import ApiException
 from esper.controllers.enums import OutputFormat
 from esper.ext.api_client import APIClient
 from esper.ext.db_wrapper import DBWrapper
-from esper.ext.utils import validate_creds_exists
+from esper.ext.utils import validate_creds_exists, parse_error_message
 
 
 class Enterprise(Controller):
@@ -87,8 +87,8 @@ class Enterprise(Controller):
         try:
             response = enterprise_client.get_enterprise(enterprise_id)
         except ApiException as e:
-            self.app.log.debug(f"Failed to show details of an enterprise: {e}")
-            self.app.log.error(f"Failed to show details of an enterprise, reason: {e.reason}")
+            self.app.log.error(f"[enterprise-show] Failed to show details of an enterprise: {e}")
+            self.app.render(f"ERROR: {parse_error_message(self.app, e)}")
             return
 
         if not self.app.pargs.json:
@@ -184,8 +184,8 @@ class Enterprise(Controller):
         try:
             response = enterprise_client.partial_update_enterprise(enterprise_id, data)
         except ApiException as e:
-            self.app.log.debug(f"Failed to update details of an enterprise: {e}")
-            self.app.log.error(f"Failed to update details of an enterprise, reason: {e.reason}")
+            self.app.log.error(f"[enterprise-update] Failed to update details of an enterprise: {e}")
+            self.app.render(f"ERROR: {parse_error_message(self.app, e)}")
             return
 
         if not self.app.pargs.json:

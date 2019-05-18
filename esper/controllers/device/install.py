@@ -4,7 +4,7 @@ from esperclient.rest import ApiException
 from esper.controllers.enums import OutputFormat
 from esper.ext.api_client import APIClient
 from esper.ext.db_wrapper import DBWrapper
-from esper.ext.utils import validate_creds_exists
+from esper.ext.utils import validate_creds_exists, parse_error_message
 
 
 class AppInstall(Controller):
@@ -68,19 +68,20 @@ class AppInstall(Controller):
             try:
                 search_response = device_client.get_all_devices(enterprise_id, limit=1, offset=0, **kwargs)
                 if not search_response.results or len(search_response.results) == 0:
-                    print(f'Device does not exist with name {device_name}')
+                    self.app.log.debug(f'[installs-list] Device does not exist with name {device_name}')
+                    self.app.render(f'Device does not exist with name {device_name}')
                     return
                 response = search_response.results[0]
                 device_id = response.id
             except ApiException as e:
-                self.app.log.debug(f"Failed to list devices: {e}")
-                self.app.log.error(f"Failed to fetch device, reason: {e.reason}")
+                self.app.log.error(f"[installs-list] Failed to list devices: {e}")
+                self.app.render(f"ERROR: {parse_error_message(self.app, e)}")
                 return
         else:
             device = db.get_device()
             if not device or not device.get('id'):
-                self.app.log.debug('There is no active device.')
-                print('There is no active device.')
+                self.app.log.debug('[installs-list] There is no active device.')
+                self.app.render('There is no active device.')
                 return
 
             device_id = device.get('id')
@@ -104,10 +105,11 @@ class AppInstall(Controller):
         try:
             response = device_client.get_app_installs(enterprise_id, device_id, limit=limit, offset=offset, **kwargs)
         except ApiException as e:
-            self.app.log.debug(f"Failed to list installs: {e}")
-            self.app.log.error(f"Failed to list installs, reason: {e.reason}")
+            self.app.log.error(f"[installs-list] Failed to list installs: {e}")
+            self.app.render(f"ERROR: {parse_error_message(self.app, e)}")
             return
 
+        self.app.render(f"Total Number of Installs: {response.count}")
         if not self.app.pargs.json:
             installs = []
 
@@ -129,7 +131,6 @@ class AppInstall(Controller):
                         label['install_state']: install.install_state
                     }
                 )
-            print(f"Total Number of Installs: {response.count}")
             self.app.render(installs, format=OutputFormat.TABULATED.value, headers="keys", tablefmt="plain")
         else:
             installs = []
@@ -143,5 +144,4 @@ class AppInstall(Controller):
                         'install_state': install.install_state
                     }
                 )
-            print(f"Total Number of Installs: {response.count}")
             self.app.render(installs, format=OutputFormat.JSON.value)

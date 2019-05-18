@@ -19,7 +19,7 @@ class DeviceState(BaseEnum):
     GOOGLE_PLAY_CONFIGURATION = 40
     POLICY_APPLICATION_IN_PROGRESS = 50
 
-    INACTIVE = 60  # This state is set by cloud, when device is unreachable
+    INACTIVE = 60
 
 
 class OutputFormat(BaseEnum):
@@ -33,3 +33,25 @@ class DeviceCommandEnum(BaseEnum):
     UPDATE_HEARTBEAT = 40
     WIPE = 90
     INSTALL = 210
+    UNINSTALL = 220
+
+
+class DeviceCommandState(BaseEnum):
+    INITIATE = "Command Initiated"
+    ACKNOWLEDGE = "Command Acknowledged"
+    IN_PROGRESS = "Command In Progress"
+    TIMEOUT = "Command TimeOut"
+    SUCCESS = "Command Success"
+    FAILURE = "Command Failure"
+    SCHEDULED = "Command Scheduled"
+
+
+class DeviceGroupCommandState(Enum):
+    INITIATE = "Command Initiated"
+    SUCCESS = "Command Success"
+    FAILURE = "Command Failure"
+    SCHEDULED = "Command Scheduled"
+
+    @classmethod
+    def choices(cls):
+        return [(member.value, name) for name, member in cls.__members__.items()]

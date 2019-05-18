@@ -4,7 +4,7 @@ from esperclient.rest import ApiException
 from esper.controllers.enums import OutputFormat
 from esper.ext.api_client import APIClient
 from esper.ext.db_wrapper import DBWrapper
-from esper.ext.utils import validate_creds_exists
+from esper.ext.utils import validate_creds_exists, parse_error_message
 
 
 class Application(Controller):
@@ -72,10 +72,11 @@ class Application(Controller):
             # Find applications in an enterprise
             response = application_client.get_all_applications(enterprise_id, limit=limit, offset=offset, **kwargs)
         except ApiException as e:
-            self.app.log.debug(f"Failed to list applications: {e}")
-            self.app.log.error(f"Failed to list applications, reason: {e.reason}")
+            self.app.log.error(f"[application-list] Failed to list applications: {e}")
+            self.app.render(f"ERROR: {parse_error_message(self.app, e)}")
             return
 
+        self.app.render(f"Total Number of Applications: {response.count}")
         if not self.app.pargs.json:
             applications = []
 
@@ -95,7 +96,6 @@ class Application(Controller):
                         label['version_count']: len(application.versions) if application.versions else 0
                     }
                 )
-            print(f"Total Number of Applications: {response.count}")
             self.app.render(applications, format=OutputFormat.TABULATED.value, headers="keys", tablefmt="plain")
         else:
             applications = []
@@ -108,7 +108,6 @@ class Application(Controller):
                         'version_count': len(application.versions) if application.versions else 0
                     }
                 )
-            print(f"Total Number of Applications: {response.count}")
             self.app.render(applications, format=OutputFormat.JSON.value)
 
     def _application_basic_response(self, application, format=OutputFormat.TABULATED):
@@ -155,8 +154,8 @@ class Application(Controller):
         try:
             response = application_client.get_application(application_id, enterprise_id)
         except ApiException as e:
-            self.app.log.debug(f"Failed to show details of an application: {e}")
-            self.app.log.error(f"Failed to show details of an application, reason: {e.reason}")
+            self.app.log.error(f"[application-show] Failed to show details of an application: {e}")
+            self.app.render(f"ERROR: {parse_error_message(self.app, e)}")
             return
 
         if self.app.pargs.active:
@@ -190,17 +189,36 @@ class Application(Controller):
         enterprise_id = db.get_enterprise_id()
 
         try:
-            response = application_client.upload(enterprise_id, enterprise_id, application_file)
+            response = application_client.upload(enterprise_id, application_file)
+            application = response.application
         except ApiException as e:
-            self.app.log.debug(f"Failed to upload an application: {e}")
-            self.app.log.error(f"Failed to upload an application, reason: {e.reason}")
+            self.app.log.error(f"[application-upload] Failed to upload an application: {e}")
+            self.app.render(f"ERROR: {parse_error_message(self.app, e)}")
             return
 
+        valid_keys = ['id', 'application_name', 'package_name', 'developer', 'category', 'content_rating',
+                      'compatibility']
+
         if not self.app.pargs.json:
-            renderable = self._application_basic_response(response.application)
+            title = "TITLE"
+            details = "DETAILS"
+            renderable = [{title: k, details: v} for k, v in application.to_dict().items() if k in valid_keys]
+
+            if application and application.versions and len(application.versions) > 0:
+                version = application.versions[0]
+                renderable.append({title: 'version_id', details: version.id})
+                renderable.append({title: 'version_code', details: version.version_code})
+                renderable.append({title: 'build_number', details: version.build_number})
+
             self.app.render(renderable, format=OutputFormat.TABULATED.value, headers="keys", tablefmt="plain")
         else:
-            renderable = self._application_basic_response(response.application, OutputFormat.JSON)
+            renderable = {k: v for k, v in application.to_dict().items() if k in valid_keys}
+            if application and application.versions and len(application.versions) > 0:
+                version = application.versions[0]
+                renderable['version_id'] = version.id
+                renderable['version_code'] = version.version_code
+                renderable['build_number'] = version.build_number
+
             self.app.render(renderable, format=OutputFormat.JSON.value)
 
     @ex(
@@ -221,30 +239,30 @@ class Application(Controller):
 
         try:
             application_client.delete_application(application_id, enterprise_id)
-            self.app.log.debug(f"Application with id : {application_id} deleted successfully")
-            print(f"Application with id {application_id} deleted successfully")
+            self.app.log.debug(f"[application-delete] Application with id : {application_id} deleted successfully")
+            self.app.render(f"Application with id {application_id} deleted successfully")
 
-            # Unset current application if matching
+            # Reset current application if matching
             application = db.get_application()
             if application and application.get('id') and application_id == application.get('id'):
-                db.unset_application()
-                self.app.log.debug(f'Unset the active application {application_id}')
+                db.reset_application()
+                self.app.log.debug(f'[application-delete] Reset the active application {application_id}')
         except ApiException as e:
-            self.app.log.debug(f"Failed to delete an application: {e}")
-            self.app.log.error(f"Failed to delete an application, reason: {e.reason}")
+            self.app.log.debug(f"[application-delete] Failed to delete an application: {e}")
+            self.app.render(f"ERROR: {parse_error_message(self.app, e)}")
             return
 
     @ex(
-        help='Set, show or unset the active application',
+        help='Set, show or reset the active application',
         arguments=[
             (['-i', '--id'],
              {'help': 'Application id.',
               'action': 'store',
               'dest': 'id'}),
-            (['-u', '--unset'],
-             {'help': 'Unset the active application',
+            (['-r', '--reset'],
+             {'help': 'Reset the active application',
               'action': 'store_true',
-              'dest': 'unset'}),
+              'dest': 'reset'}),
             (['-j', '--json'],
              {'help': 'Render result in Json format',
               'action': 'store_true',
@@ -263,23 +281,25 @@ class Application(Controller):
                 response = application_client.get_application(application_id, enterprise_id)
                 db.set_application({'id': application_id})
             except ApiException as e:
-                self.app.log.debug(f"Failed to show active application: {e}")
-                self.app.log.error(f"Failed to set active application, reason: {e.reason}")
+                self.app.log.error(f"[application-active] Failed to show active application: {e}")
+                self.app.render(f"ERROR: {parse_error_message(self.app, e)}")
                 return
-        elif self.app.pargs.unset:
+        elif self.app.pargs.reset:
             application = db.get_application()
             if application is None or application.get('id') is None:
-                print('There is no active application.')
+                self.app.log.debug('[application-active] There is no active application.')
+                self.app.render('There is no active application.')
                 return
 
-            db.unset_application()
-            self.app.log.debug(f"Unset the active application {application.get('id')}")
-            print(f"Unset the active application {application.get('id')}")
+            db.reset_application()
+            self.app.log.debug(f"[application-active] Reset the active application {application.get('id')}")
+            self.app.render(f"Reset the active application {application.get('id')}")
             return
         else:
             application = db.get_application()
             if application is None or application.get('id') is None:
-                print('There is no active application.')
+                self.app.log.debug('[application-active] There is no active application.')
+                self.app.render('There is no active application.')
                 return
 
             application_id = application.get('id')
@@ -287,8 +307,8 @@ class Application(Controller):
                 response = application_client.get_application(application_id, enterprise_id)
                 db.set_application({'id': application_id})
             except ApiException as e:
-                self.app.log.debug(f"Failed to show active application: {e}")
-                self.app.log.error(f"Failed to show active application, reason: {e.reason}")
+                self.app.log.error(f"[application-active] Failed to show active application: {e}")
+                self.app.render(f"ERROR: {parse_error_message(self.app, e)}")
                 return
 
         if not self.app.pargs.json:

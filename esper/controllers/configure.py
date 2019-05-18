@@ -1,3 +1,4 @@
+import json
 from http import HTTPStatus
 
 from cement import Controller, ex
@@ -52,23 +53,26 @@ class Configure(Controller):
 
         if self.app.pargs.set or not credentials:
             api_key = prompt.query("Esper API Key: ")
-            tenant = prompt.query("Tenant name: ")
+            tenant = input("Tenant name: ")
 
             enterprise_client = APIClient({'api_key': api_key, 'tenant': tenant}).get_enterprise_api_client()
             try:
                 response = enterprise_client.get_all_enterprises()
             except ApiException as e:
-                self.app.log.debug(f"Failed to list enterprises: {e}")
+                self.app.log.error(f"[configure] Failed to list enterprises: {e}")
                 if e.status == HTTPStatus.UNAUTHORIZED:
-                    self.app.log.error(f"You are not authorized, invalid API Key.")
+                    self.app.render("You are not authorized, invalid API Key.")
                 else:
-                    self.app.log.error(f"Failed to fetch enterprise, reason: {e.reason}")
+                    error_message = json.loads(e.body).get('message') if e.body and json.loads(e.body).get(
+                        'message') else e.reason
+                    self.app.render(f"ERROR: {error_message}")
                 return
 
             if response.results and len(response.results) > 0:
                 enterprise_id = response.results[0].id
             else:
-                self.app.log.error(f"API key is not associated with any enterprise.")
+                self.app.log.info(f"[configure] API key is not associated with any enterprise.")
+                self.app.render("API key is not associated with any enterprise.")
                 return
 
             credentials = {

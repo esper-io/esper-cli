@@ -6,7 +6,7 @@ from esperclient.rest import ApiException
 from esper.controllers.enums import OutputFormat
 from esper.ext.api_client import APIClient
 from esper.ext.db_wrapper import DBWrapper
-from esper.ext.utils import validate_creds_exists
+from esper.ext.utils import validate_creds_exists, parse_error_message
 
 
 class ApplicationVersion(Controller):
@@ -65,8 +65,8 @@ class ApplicationVersion(Controller):
         else:
             application = db.get_application()
             if not application or not application.get('id'):
-                self.app.log.debug('There is no active application.')
-                print('There is no active application.')
+                self.app.log.debug('[version-list] There is no active application.')
+                self.app.render('There is no active application.')
                 return
 
             application_id = application.get('id')
@@ -88,10 +88,11 @@ class ApplicationVersion(Controller):
             response = application_client.get_app_versions(application_id, enterprise_id, limit=limit, offset=offset,
                                                            **kwargs)
         except ApiException as e:
-            self.app.log.debug(f"Failed to list applications: {e}")
-            self.app.log.error(f"Failed to list applications, reason: {e.reason}")
+            self.app.log.error(f"[version-list] Failed to list applications: {e}")
+            self.app.render(f"ERROR: {parse_error_message(self.app, e)}")
             return
 
+        self.app.render(f"Total Number of Versions: {response.count}")
         if not self.app.pargs.json:
             versions = []
 
@@ -115,7 +116,6 @@ class ApplicationVersion(Controller):
                         label['installed_count']: version.installed_count if version.installed_count else 0
                     }
                 )
-            print(f"Total Number of Versions: {response.count}")
             self.app.render(versions, format=OutputFormat.TABULATED.value, headers="keys", tablefmt="plain")
         else:
             versions = []
@@ -130,7 +130,6 @@ class ApplicationVersion(Controller):
                         'installed_count': version.installed_count if version.installed_count else 0
                     }
                 )
-            print(f"Total Number of Versions: {response.count}")
             self.app.render(versions, format=OutputFormat.JSON.value)
 
     def _version_basic_response(self, version, format=OutputFormat.TABULATED):
@@ -183,8 +182,8 @@ class ApplicationVersion(Controller):
         else:
             application = db.get_application()
             if not application or not application.get('id'):
-                self.app.log.debug('There is no active application.')
-                print('There is no active application.')
+                self.app.log.debug('[version-show] There is no active application.')
+                self.app.render('There is no active application.')
                 return
 
             application_id = application.get('id')
@@ -192,8 +191,8 @@ class ApplicationVersion(Controller):
         try:
             response = application_client.get_app_version(version_id, application_id, enterprise_id)
         except ApiException as e:
-            self.app.log.debug(f"Failed to show details of an version: {e}")
-            self.app.log.error(f"Failed to show details of an version, reason: {e.reason}")
+            self.app.log.error(f"[version-show] Failed to show details of an version: {e}")
+            self.app.render(f"ERROR: {parse_error_message(self.app, e)}")
             return
 
         if not self.app.pargs.json:
@@ -228,30 +227,30 @@ class ApplicationVersion(Controller):
         else:
             application = db.get_application()
             if not application or not application.get('id'):
-                self.app.log.debug('There is no active application.')
-                print('There is no active application.')
+                self.app.log.debug('[version-delete] There is no active application.')
+                self.app.render('There is no active application.')
                 return
 
             application_id = application.get('id')
 
         try:
             application_client.delete_app_version(version_id, application_id, enterprise_id)
-            self.app.log.debug(f"Version with id : {version_id} deleted successfully")
-            print(f"Version with id {version_id} deleted successfully")
+            self.app.log.debug(f"[version-delete] Version with id : {version_id} deleted successfully")
+            self.app.render(f"Version with id {version_id} deleted successfully")
         except ApiException as e:
-            self.app.log.debug(f"Failed to delete a version: {e}")
-            self.app.log.error(f"Failed to delete a version, reason: {e.reason}")
+            self.app.log.error(f"[version-delete] Failed to delete a version: {e}")
+            self.app.render(f"ERROR: {parse_error_message(self.app, e)}")
             return
 
-        # Unset current application if matching
+        # Reset current application if matching
         try:
             application_client.get_application(application_id, enterprise_id)
         except ApiException as e:
             if e.status == HTTPStatus.NOT_FOUND:
                 application = db.get_application()
                 if application and application.get('id') and application_id == application.get('id'):
-                    db.unset_application()
-                    self.app.log.debug(f'Unset the active application {application_id}')
+                    db.reset_application()
+                    self.app.log.debug(f'[version-delete] Reset the active application {application_id}')
             else:
-                self.app.log.debug(f"Failed to get an application when deleting a version: {e}")
-                self.app.log.warning(f"Failed to get an application when deleting a version, reason: {e.reason}")
+                self.app.log.debug(f"[version-delete] Failed to get an application when deleting a version: {e}")
+                self.app.render(f"ERROR: {parse_error_message(self.app, e)}")
