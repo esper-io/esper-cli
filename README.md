@@ -12,8 +12,8 @@ Current stable release versions are
 ## Requirements
 
 1. **Python:** We recommend you use Python 3.6 or above.
-2. **An Esper Dev Account:** You need a free Esper Dev Trial account to create an environment and generate an Esper `SERVER URL`to talk to APIs. You will choose the environment name that will then be assigned as your custom URL and when you complete the sign up process your private environment will be created. For example if your you choose the environment name of “foo” then your `SERVER URL` will be `https://foo.esper.cloud/api`. See Requesting an Esper Dev Trial account. 
-3. **Generate an API key:** API key authentication is used for accessing APIs. You will have to generate this from the Esper Dev Console once you have set up your account. The Esper Dev Console for your account can be accessed at `https://foo.espercloud.com`. See [Generating an API Key](http://example.com)
+2. **An Esper Dev Account:** You need a free Esper Dev Trial account to create an environment and generate an Esper `SERVER URL`to talk to APIs. You will choose the environment name that will then be assigned as your custom URL and when you complete the sign up process your private environment will be created. For example if your you choose the environment name of “foo” then your `SERVER URL` will be `https://foo.esper.cloud/api`. See [Requesting an Esper Dev Trial account](https://docs.esper.io/home/gettingstarted.html#setup). 
+3. **Generate an API key:** API key authentication is used for accessing APIs. You will have to generate this from the Esper Dev Console once you have set up your account. The Esper Dev Console for your account can be accessed at `https://foo.espercloud.com`. See [Generating an API Key](https://docs.esper.io/home/module/genapikey.html)
 
 ## Installation
 
