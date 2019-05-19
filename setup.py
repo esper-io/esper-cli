@@ -1,8 +1,7 @@
 
 from setuptools import setup, find_packages
-from esper.core.version import get_version
 
-VERSION = get_version()
+VERSION = "0.0.1"
 
 f = open('README.md', 'r', encoding='utf-8', errors='ignore')
 LONG_DESCRIPTION = f.read()
@@ -27,13 +26,13 @@ setup(
     """,
     install_requires=[
         'cement==3.0.2',
-        'jinja2',
-        'pyyaml',
-        'colorlog',
-        'esperclient',
-        'tinydb',
-        'clint',
-        'tabulate',
-        'crayons'
+        'clint>=0.5.1',
+        'colorlog>=4.0.2',
+        'crayons>=0.2.0',
+        'esperclient>=0.0.6',
+        'jinja2>=2.10.1',
+        'pyyaml>=5.1',
+        'tabulate>=0.8.3',
+        'tinydb>=3.13.0',
     ],
 )
