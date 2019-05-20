@@ -153,7 +153,7 @@ class ApplicationTest(TestCase):
         with EsperTest(argv=argv) as app:
             app.run()
 
-    def test_reset_active_application(self):
+    def test_unset_active_application(self):
         argv = ['app', 'upload', 'tests/application/Tiny Notepad Simple Small_v1.0_apkpure.com.apk']
         with EsperTest(argv=argv) as app:
             app.run()
@@ -164,12 +164,12 @@ class ApplicationTest(TestCase):
         with EsperTest(argv=argv) as app:
             app.run()
 
-        argv = ['app', 'active', '--reset']
+        argv = ['app', 'active', '--unset']
         with EsperTest(argv=argv) as app:
             app.run()
             data, output = app.last_rendered
 
-            assert data == f"Reset the active application {application_id}"
+            assert data == f"Unset the active application {application_id}"
 
         argv = ['app', 'delete', application_id]
         with EsperTest(argv=argv) as app:

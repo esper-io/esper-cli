@@ -52,10 +52,10 @@ class Configure(Controller):
         credentials = db.get_configure()
 
         if self.app.pargs.set or not credentials:
+            environment = input("Environment name: ")
             api_key = prompt.query("Esper API Key: ")
-            tenant = input("Tenant name: ")
 
-            enterprise_client = APIClient({'api_key': api_key, 'tenant': tenant}).get_enterprise_api_client()
+            enterprise_client = APIClient({'api_key': api_key, 'environment': environment}).get_enterprise_api_client()
             try:
                 response = enterprise_client.get_all_enterprises()
             except ApiException as e:
@@ -76,9 +76,9 @@ class Configure(Controller):
                 return
 
             credentials = {
+                "environment": environment,
                 "api_key": api_key,
-                "enterprise_id": enterprise_id,
-                "tenant": tenant
+                "enterprise_id": enterprise_id
             }
 
             # set new credentials into the DB
@@ -93,14 +93,14 @@ class Configure(Controller):
                 title = "TITLE"
                 details = "DETAILS"
                 renderable = [
-                    {title: 'api_key', details: credentials.get('api_key')},
-                    {title: 'tenant', details: credentials.get('tenant')}
+                    {title: 'environment', details: credentials.get('environment')},
+                    {title: 'api_key', details: credentials.get('api_key')}
                 ]
                 self.app.render(renderable, format=OutputFormat.TABULATED.value, headers="keys",
                                 tablefmt="plain")
             else:
                 renderable = {
-                    'api_key': credentials.get('api_key'),
-                    'tenant': credentials.get('tenant')
+                    'environment': credentials.get('environment'),
+                    'api_key': credentials.get('api_key')
                 }
                 self.app.render(renderable, format=OutputFormat.JSON.value)

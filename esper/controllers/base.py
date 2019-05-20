@@ -4,7 +4,7 @@ from cement.utils.version import get_version_banner
 from ..core.version import get_version
 
 VERSION_BANNER = """
-Esper CLI tool to manage resources on Esper.io API service:  %s
+Esper CLI is Command line tool for the Esper APIs:  %s
 %s
 """ % (get_version(), get_version_banner())
 
@@ -14,7 +14,7 @@ class Base(Controller):
         label = 'base'
 
         # text displayed at the top of --help output
-        description = 'Esper CLI tool to manage resources on Esper.io API service'
+        description = 'Esper CLI is Command line tool for the Esper APIs'
 
         # text displayed at the bottom of --help output
         epilog = 'Usage: espercli <sub-command> [--options]'

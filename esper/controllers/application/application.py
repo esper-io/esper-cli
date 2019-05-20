@@ -1,5 +1,11 @@
+import os
+import random
+import time
+from pathlib import Path
+
 from cement import Controller, ex
 from esperclient.rest import ApiException
+from tqdm import tqdm
 
 from esper.controllers.enums import OutputFormat
 from esper.ext.api_client import APIClient
@@ -189,7 +195,18 @@ class Application(Controller):
         enterprise_id = db.get_enterprise_id()
 
         try:
-            response = application_client.upload(enterprise_id, application_file)
+            filesize = os.path.getsize(application_file)
+            random_no = random.randint(1, 50)
+            with tqdm(total=int(filesize), unit='B', unit_scale=True, miniters=1, desc='Uploading......',
+                      unit_divisor=1024) as pbar:
+                for i in range(100):
+                    if i == random_no:
+                        response = application_client.upload(enterprise_id, application_file)
+
+                    time.sleep(0.07)
+                    pbar.set_postfix(file=Path(application_file).name, refresh=False)
+                    pbar.update(int(filesize / 100))
+
             application = response.application
         except ApiException as e:
             self.app.log.error(f"[application-upload] Failed to upload an application: {e}")
@@ -242,27 +259,27 @@ class Application(Controller):
             self.app.log.debug(f"[application-delete] Application with id : {application_id} deleted successfully")
             self.app.render(f"Application with id {application_id} deleted successfully")
 
-            # Reset current application if matching
+            # Unset current application if matching
             application = db.get_application()
             if application and application.get('id') and application_id == application.get('id'):
-                db.reset_application()
-                self.app.log.debug(f'[application-delete] Reset the active application {application_id}')
+                db.unset_application()
+                self.app.log.debug(f'[application-delete] Unset the active application {application_id}')
         except ApiException as e:
             self.app.log.debug(f"[application-delete] Failed to delete an application: {e}")
             self.app.render(f"ERROR: {parse_error_message(self.app, e)}")
             return
 
     @ex(
-        help='Set, show or reset the active application',
+        help='Set, show or unset the active application',
         arguments=[
             (['-i', '--id'],
              {'help': 'Application id.',
               'action': 'store',
               'dest': 'id'}),
-            (['-r', '--reset'],
-             {'help': 'Reset the active application',
+            (['-u', '--unset'],
+             {'help': 'Unset the active application',
               'action': 'store_true',
-              'dest': 'reset'}),
+              'dest': 'unset'}),
             (['-j', '--json'],
              {'help': 'Render result in Json format',
               'action': 'store_true',
@@ -284,16 +301,16 @@ class Application(Controller):
                 self.app.log.error(f"[application-active] Failed to show active application: {e}")
                 self.app.render(f"ERROR: {parse_error_message(self.app, e)}")
                 return
-        elif self.app.pargs.reset:
+        elif self.app.pargs.unset:
             application = db.get_application()
             if application is None or application.get('id') is None:
                 self.app.log.debug('[application-active] There is no active application.')
                 self.app.render('There is no active application.')
                 return
 
-            db.reset_application()
-            self.app.log.debug(f"[application-active] Reset the active application {application.get('id')}")
-            self.app.render(f"Reset the active application {application.get('id')}")
+            db.unset_application()
+            self.app.log.debug(f"[application-active] Unset the active application {application.get('id')}")
+            self.app.render(f"Unset the active application {application.get('id')}")
             return
         else:
             application = db.get_application()

@@ -1,4 +1,5 @@
 import uuid
+
 from cement import Controller, ex
 from esperclient.rest import ApiException
 
@@ -224,16 +225,16 @@ class Device(Controller):
             self.app.render(renderable, format=OutputFormat.JSON.value)
 
     @ex(
-        help='Set, show or reset the active device',
+        help='Set, show or unset the active device',
         arguments=[
             (['-n', '--name'],
              {'help': 'Device name.',
               'action': 'store',
               'dest': 'name'}),
-            (['-r', '--reset'],
-             {'help': 'Reset the active device',
+            (['-u', '--unset'],
+             {'help': 'Unset the active device',
               'action': 'store_true',
-              'dest': 'reset'}),
+              'dest': 'unset'}),
             (['-j', '--json'],
              {'help': 'Render result in Json format',
               'action': 'store_true',
@@ -261,7 +262,7 @@ class Device(Controller):
                 self.app.log.error(f"[device-active] Failed to list devices: {e}")
                 self.app.render(f"ERROR: {parse_error_message(self.app, e)}")
                 return
-        elif self.app.pargs.reset:
+        elif self.app.pargs.unset:
             device = db.get_device()
             if device is None or device.get('name') is None:
                 self.app.log.debug('[device-active] There is no active device.')
@@ -269,8 +270,8 @@ class Device(Controller):
                 return
 
             db.unset_device()
-            self.app.log.debug(f"[device-active] Reset the active device {device.get('name')}")
-            self.app.render(f"Reset the active device {device.get('name')}")
+            self.app.log.debug(f"[device-active] Unset the active device {device.get('name')}")
+            self.app.render(f"Unset the active device {device.get('name')}")
             return
         else:
             device = db.get_device()

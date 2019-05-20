@@ -48,7 +48,7 @@ class DBWrapper:
 
         return application
 
-    def reset_application(self):
+    def unset_application(self):
         Application = Query()
         self.db.remove(Application.application.exists())
 
@@ -94,6 +94,6 @@ class DBWrapper:
 
         return group
 
-    def reset_group(self):
+    def unset_group(self):
         Group = Query()
         self.db.remove(Group.group.exists())

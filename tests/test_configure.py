@@ -20,11 +20,11 @@ class EnterpriseTest(TestCase):
         def get_api_key(p):
             return credentials.get('key')
 
-        def get_tenant(p):
-            return credentials.get('tenant')
+        def get_environment(p):
+            return credentials.get('environment')
 
         self.monkeypatch.setattr(prompt, 'query', get_api_key)
-        self.monkeypatch.setattr('builtins.input', get_tenant)
+        self.monkeypatch.setattr('builtins.input', get_environment)
 
         argv = ['configure']
         with EsperTest(argv=argv) as app:
@@ -32,8 +32,8 @@ class EnterpriseTest(TestCase):
 
             data, output = app.last_rendered
 
-            assert data[0]["DETAILS"] == credentials.get('key')
-            assert data[1]["DETAILS"] == credentials.get('tenant')
+            assert data[0]["DETAILS"] == credentials.get('environment')
+            assert data[1]["DETAILS"] == credentials.get('key')
 
     def test_configure_invalid_credential(self):
         credentials = get_esper_credentials()
@@ -41,11 +41,11 @@ class EnterpriseTest(TestCase):
         def get_api_key(p):
             return 'wrongapikey'
 
-        def get_tenant(p):
-            return credentials.get('tenant')
+        def get_environment(p):
+            return credentials.get('environment')
 
         self.monkeypatch.setattr(prompt, 'query', get_api_key)
-        self.monkeypatch.setattr('builtins.input', get_tenant)
+        self.monkeypatch.setattr('builtins.input', get_environment)
 
         argv = ['configure']
         with EsperTest(argv=argv) as app:
@@ -60,11 +60,11 @@ class EnterpriseTest(TestCase):
         def get_api_key(p):
             return credentials.get('key')
 
-        def get_tenant(p):
-            return credentials.get('tenant')
+        def get_environment(p):
+            return credentials.get('environment')
 
         self.monkeypatch.setattr(prompt, 'query', get_api_key)
-        self.monkeypatch.setattr('builtins.input', get_tenant)
+        self.monkeypatch.setattr('builtins.input', get_environment)
 
         argv = ['configure', '--set']
         with EsperTest(argv=argv) as app:
@@ -72,8 +72,8 @@ class EnterpriseTest(TestCase):
 
             data, output = app.last_rendered
 
-            assert data[0]["DETAILS"] == credentials.get('key')
-            assert data[1]["DETAILS"] == credentials.get('tenant')
+            assert data[0]["DETAILS"] == credentials.get('environment')
+            assert data[1]["DETAILS"] == credentials.get('key')
 
     def test_show_configure(self):
         set_configure(self.monkeypatch)
@@ -85,5 +85,5 @@ class EnterpriseTest(TestCase):
             data, output = app.last_rendered
 
             credentials = get_esper_credentials()
-            assert data[0]["DETAILS"] == credentials.get('key')
-            assert data[1]["DETAILS"] == credentials.get('tenant')
+            assert data[0]["DETAILS"] == credentials.get('environment')
+            assert data[1]["DETAILS"] == credentials.get('key')

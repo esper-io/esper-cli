@@ -1,5 +1,5 @@
 FROM python:3.6-alpine
-MAINTAINER Jeryn Mathew  <jeryn@shoonya.io>
+MAINTAINER Esper  <developer@esper.io>
 ENV PS1="\[\e[0;33m\]|> esper <| \[\e[1;35m\]\W\[\e[0m\] \[\e[0m\]# "
 
 WORKDIR /src

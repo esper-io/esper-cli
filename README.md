@@ -12,8 +12,8 @@ Current stable release versions are
 ## Requirements
 
 1. **Python:** We recommend you use Python 3.6 or above.
-2. **An Esper Dev Account:** You need a free Esper Dev Trial account to create an environment and generate an Esper `SERVER URL`to talk to APIs. You will choose the environment name that will then be assigned as your custom URL and when you complete the sign up process your private environment will be created. For example if your you choose the environment name of “foo” then your `SERVER URL` will be `https://foo.esper.cloud/api`. See [Requesting an Esper Dev Trial account](https://docs.esper.io/home/gettingstarted.html#setup). 
-3. **Generate an API key:** API key authentication is used for accessing APIs. You will have to generate this from the Esper Dev Console once you have set up your account. The Esper Dev Console for your account can be accessed at `https://foo.espercloud.com`. See [Generating an API Key](https://docs.esper.io/home/module/genapikey.html)
+2. **An Esper Dev Account:** You need a free Esper Dev Trial account to create an environment and generate an Esper `SERVER URL`to talk to APIs. You will choose the `ENVIRONMENT NAME` that will then be assigned as your custom URL and when you complete the sign up process your private environment will be created. See [Requesting an Esper Dev Trial account](https://docs.esper.io/home/gettingstarted.html#setup). 
+3. **Generate an API key:** API key authentication is used for accessing APIs. You will have to generate this from the Esper Dev Console once you have set up your account. For example, the Esper Dev Console for your account can be accessed at `https://foo.espercloud.com` if you choose the `ENVIRONMENT NAME` of “foo”. See [Generating an API Key](https://docs.esper.io/home/module/genapikey.html)
 
 ## Installation
 
@@ -48,12 +48,12 @@ python setup.py install
 
 ### Usage
 
-Before using espercli, you need to tell it about your Esper credentials. For this you will need `API KEY` and `HOST ENVIRONMENT` as generated in [Requirements](#requirements) section.
+Before using espercli, you need to tell it about your Esper credentials. For this you will need `ENVIRONMENT NAME` and `API KEY` as generated in [Requirements](#requirements) section.
 The way to get started is to run the espercli configure command:
 ```sh
 $ espercli configure
+$ Environment name: foo
 $ Esper API Key: LpDriKp7MWJiRGcwc8xzREeUj8OEFa
-$ Tenant name: myapp
 ```
 To list available commands, either run `espercli` with no parameters or execute `espercli --help`:
 ```sh
@@ -103,8 +103,8 @@ $ espercli configure [OPTIONS]
 $ espercli configure
 
 TITLE    DETAILS
+environment   foo
 api_key  LpDriKp7MWJiRGcwc8xzREeUj8OEFa
-tenant   myapp
 ```
 
 ### **Enterprise**
@@ -129,18 +129,18 @@ $ espercli enterprise show
 
 TITLE            DETAILS
 id               595a6107-b137-448d-b217-e20cc58ee84d
-name             Myapp Enterprise
-display_name     Myapp
-registered_name  Myapp Enterprise
+name             Foo Enterprise
+display_name     Foo
+registered_name  Foo Enterprise
 address          #123, Industrial Layout, Random Avenue
 location         Santa Clara, CA
 zipcode          12345
-email            contact@myapp.io
+email            contact@foo.io
 contact_person   Muneer
 contact_number   +145678901234
 
 $ espercli enterprise show -j
-{"id": "595a6107-b137-448d-b217-e20cc58ee84d", "name": "Myapp Enterprise", "display_name": "Myapp", "registered_name": "Myapp Enterprise", "address": "#123, Industrial Layout, Random Avenue", "location": "Santa Clara, CA", "zipcode": "12345", "email": "contact@myapp.io", "contact_person": "Muneer", "contact_number": "+141234501234"}%
+{"id": "595a6107-b137-448d-b217-e20cc58ee84d", "name": "Foo Enterprise", "display_name": "Foo", "registered_name": "Foo Enterprise", "address": "#123, Industrial Layout, Random Avenue", "location": "Santa Clara, CA", "zipcode": "12345", "email": "contact@foo.io", "contact_person": "Muneer", "contact_number": "+141234501234"}%
 ```
 
 #### 2. update
@@ -168,13 +168,13 @@ $ espercli enterprise update -p 'Muneer M'
 
 TITLE            DETAILS
 id               595a6107-b137-448d-b217-e20cc58ee84d
-name             Myapp Enterprise
-display_name     Myapp
-registered_name  Myapp Enterprise
+name             Foo Enterprise
+display_name     Foo
+registered_name  Foo Enterprise
 address          #123, Industrial Layout, Random Avenue
 location         Santa Clara, CA
 zipcode          12345
-email            contact@myapp.io
+email            contact@foo.io
 contact_person   Muneer M
 contact_number   +145678901234
 ```
@@ -222,7 +222,8 @@ c7c0382e-b911-451a-9d62-54936622d3b3  SNA-SNL-R123  QUALCOMM  DISABLED
 ```
 
 #### 2. show
-Show device details and set device as active. Here, device name is required to show device information.
+Show the details of the device. Here, `device-name` is required to show device information. 
+Use the `--active` or `-a` flag to mark this device as the active device. This will allow you to call further device commands without specifying the device.
 ```sh
 $ espercli device show [OPTIONS] [device-name]
 ```
@@ -247,7 +248,7 @@ state          INACTIVE
 ```
 
 #### 3. active
-Active sub command used to set and reset active device and show active device information with no options.
+Active sub command used to set a device as the active device, unset the device from active and show the details the current active device with no options.
 ```sh
 $ espercli device active [OPTIONS]
 ```
@@ -255,7 +256,7 @@ $ espercli device active [OPTIONS]
 | Name, shorthand | Default| Description|
 | -------------   |:------:|:----------|
 | --name, -n      |        | Device name |
-| --reset, -r     |        | Reset the active device |
+| --unset, -u     |        | Unset the active device |
 | --json, -j      |        | Render result in JSON format |
 
 ##### Example
@@ -301,7 +302,8 @@ ID                                    NAME      DEVICE COUNT
 ```
 
 #### 2. show
-Show group details and set group as active. Here, group name is required to show group information.
+Show the details of the group. Here, `group-name` is required to show group information. 
+Use the `--active` or `-a` flag to mark this group as the active group. This will allow you to call further group commands without specifying the group.
 ```sh
 $ espercli group show [OPTIONS] [group-name]
 ```
@@ -322,7 +324,7 @@ device_count  2
 ```
 
 #### 3. active
-Active sub command used to set and reset active group and show active group information with no options.
+Active sub command used to set a group as the active group, unset the group from active and show the details the current active group with no options.
 ```sh
 $ espercli group active [OPTIONS]
 ```
@@ -330,7 +332,7 @@ $ espercli group active [OPTIONS]
 | Name, shorthand | Default| Description|
 | -------------   |:------:|:----------|
 | --name, -n      |        | Group name |
-| --reset, -r     |        | Reset the active group |
+| --unset, -u     |        | Unset the active group |
 | --json, -j      |        | Render result in JSON format |
 
 ##### Example
@@ -464,8 +466,8 @@ ID                                    NAME          MODEL     CURRENT STATE
 c8efa083-f325-4e3b-8d20-71b7a2927ffb  SNA-SNL-3606  QUALCOMM  INACTIVE
 ```
 
-### **Application**
-Application command used to list, show, upload and delete applications and set application as active for further commands.
+### **App**
+App command used to list, show, upload and delete applications and set application as active for further commands.
 ```sh
 $ espercli app [SUB-COMMANDS]
 ```
@@ -498,7 +500,8 @@ d7131f72-17e4-40e9-bb9e-28f1fad1f623  ATID Reader         com.atid.app.atx      
 ```
 
 #### 2. show
-Show application information and set application as active. Here, application id (UUID) is required to show application information.
+Show the details of an application. Here, `application-id` (UUID) is required to show application information.
+Use the `--active` or `-a` flag to mark this application as the active application. This will allow you to call further app related commands without specifying the application.
 ```sh
 $ espercli app show [OPTIONS] [application-id]
 ```
@@ -535,7 +538,8 @@ $ espercli app upload [OPTIONS] [application-file]
 
 ##### Example
 ```sh
-$ espercli app upload ~/myapp/com.joeykrim.rootcheck-v1.1.apk
+$ espercli app upload ~/foo/com.joeykrim.rootcheck-v1.1.apk
+Uploading......: 100%|███████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████▉| 196k/196k [00:11<00:00, 18.1kB/s, file=com.joeykrim.rootcheck-v1.1.apk]
 
 TITLE             DETAILS
 id                630dbfab-7d85-4f81-9f3b-ffb038b0df72
@@ -551,7 +555,7 @@ build_number      1
 ```
 
 #### 4. delete
-Delete sub command used to delete application. Here, application id (UUID) is required to delete application and reset active application if it is set as active.
+Delete sub command used to delete application. Here, application id (UUID) is required to delete application and unset active application if it is set as active.
 ```sh
 $ espercli app delete [application-id]
 ```
@@ -563,7 +567,7 @@ Application with id 630dbfab-7d85-4f81-9f3b-ffb038b0df72 deleted successfully
 ```
 
 #### 5. active
-Active sub command used to set and reset active application and show active application information with no options.
+Active sub command used to set and unset active application and show active application information with no options.
 ```sh
 $ espercli app active [OPTIONS]
 ```
@@ -571,7 +575,7 @@ $ espercli app active [OPTIONS]
 | Name, shorthand | Default| Description|
 | -------------   |:------:|:----------|
 | --id, -i        |        | Application id |
-| --reset, -r     |        | Reset the active application |
+| --unset, -u     |        | Unset the active application |
 | --json, -j      |        | Render result in JSON format |
 
 ##### Example
@@ -587,6 +591,14 @@ category
 content_rating    0.0
 compatibility
 version_count     1
+```
+Below example listing versions of current active app,
+```sh
+$ espercli version list
+Total Number of Versions: 1
+
+ID                                    VERSION CODE      BUILD NUMBER    SIZE IN MB  RELEASE TRACK      INSTALLED COUNT
+54436edb-9b43-4e2c-8107-2c6fa90e2a9e  6.4.5                      189       9.36421                                   1
 ```
 
 ### **Version**
@@ -653,7 +665,7 @@ installed_count  1
 ```
 
 #### 3. delete
-Delete sub command used to delete particular application version. Here, version id (UUID) is required to delete version. Application will be also deleted if application contains one version and reset active application if it is set as active
+Delete sub command used to delete particular application version. Here, version id (UUID) is required to delete version. Application will be also deleted if application contains one version and unset active application if it is set as active
 ```sh
 $ espercli version delete [OPTIONS] [version-id]
 ```

@@ -167,16 +167,16 @@ class EnterpriseGroup(Controller):
             self.app.render(renderable, format=OutputFormat.JSON.value)
 
     @ex(
-        help='Set, show or reset the active group',
+        help='Set, show or unset the active group',
         arguments=[
             (['-n', '--name'],
              {'help': 'Group name.',
               'action': 'store',
               'dest': 'name'}),
-            (['-r', '--reset'],
-             {'help': 'Reset the active group',
+            (['-u', '--unset'],
+             {'help': 'Unset the active group',
               'action': 'store_true',
-              'dest': 'reset'}),
+              'dest': 'unset'}),
             (['-j', '--json'],
              {'help': 'Render result in Json format',
               'action': 'store_true',
@@ -204,16 +204,16 @@ class EnterpriseGroup(Controller):
                 self.app.log.error(f"[group-active] Failed to list groups: {e}")
                 self.app.render(f"ERROR: {parse_error_message(self.app, e)}")
                 return
-        elif self.app.pargs.reset:
+        elif self.app.pargs.unset:
             group = db.get_group()
             if group is None or group.get('name') is None:
                 self.app.log.debug('[group-active] There is no active group.')
                 self.app.render('There is no active group.')
                 return
 
-            db.reset_group()
-            self.app.log.debug(f"[group-active] Reset the active group {group.get('name')}")
-            self.app.render(f"Reset the active group {group.get('name')}")
+            db.unset_group()
+            self.app.log.debug(f"[group-active] Unset the active group {group.get('name')}")
+            self.app.render(f"Unset the active group {group.get('name')}")
             return
         else:
             group = db.get_group()
@@ -370,11 +370,11 @@ class EnterpriseGroup(Controller):
             self.app.log.debug(f"[group-update] Group with name {group_name} deleted successfully")
             self.app.render(f"Group with name {group_name} deleted successfully")
 
-            # Reset current group if matching
+            # Unset current group if matching
             group = db.get_group()
             if group and group.get('id') and group_id == group.get('id'):
-                db.reset_group()
-                self.app.log.debug(f'[group-update] Reset the active group {group_name}')
+                db.unset_group()
+                self.app.log.debug(f'[group-update] Unset the active group {group_name}')
         except ApiException as e:
             self.app.log.error(f"[group-update] Failed to delete group: {e}")
             self.app.render(f"ERROR: {parse_error_message(self.app, e)}")

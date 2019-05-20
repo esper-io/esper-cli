@@ -10,7 +10,7 @@ f.close()
 setup(
     name='espercli',
     version=VERSION,
-    description='Esper CLI tool to manage resources on Esper.io API service',
+    description='Esper CLI is Command line tool for the Esper APIs',
     long_description=LONG_DESCRIPTION,
     long_description_content_type='text/markdown',
     author='Esper',
@@ -34,5 +34,6 @@ setup(
         'pyyaml>=5.1',
         'tabulate>=0.8.3',
         'tinydb>=3.13.0',
+        'tqdm>=4.32.1'
     ],
 )

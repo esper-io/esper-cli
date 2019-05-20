@@ -242,15 +242,15 @@ class ApplicationVersion(Controller):
             self.app.render(f"ERROR: {parse_error_message(self.app, e)}")
             return
 
-        # Reset current application if matching
+        # Unset current application if matching
         try:
             application_client.get_application(application_id, enterprise_id)
         except ApiException as e:
             if e.status == HTTPStatus.NOT_FOUND:
                 application = db.get_application()
                 if application and application.get('id') and application_id == application.get('id'):
-                    db.reset_application()
-                    self.app.log.debug(f'[version-delete] Reset the active application {application_id}')
+                    db.unset_application()
+                    self.app.log.debug(f'[version-delete] Unset the active application {application_id}')
             else:
                 self.app.log.debug(f"[version-delete] Failed to get an application when deleting a version: {e}")
                 self.app.render(f"ERROR: {parse_error_message(self.app, e)}")

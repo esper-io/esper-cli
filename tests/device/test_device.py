@@ -88,18 +88,18 @@ class DeviceTest(TestCase):
         else:
             assert 1 == 1
 
-    def test_reset_active_device(self):
+    def test_unset_active_device(self):
         if self.device:
             argv = ['device', 'active', '--name', self.device]
             with EsperTest(argv=argv) as app:
                 app.run()
 
-            argv = ['device', 'active', '--reset']
+            argv = ['device', 'active', '--unset']
             with EsperTest(argv=argv) as app:
                 app.run()
                 data, output = app.last_rendered
 
-                assert data == f"Reset the active device {self.device}"
+                assert data == f"Unset the active device {self.device}"
         else:
             assert 1 == 1
 
