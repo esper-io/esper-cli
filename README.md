@@ -1058,4 +1058,4 @@ signal_strength              2
  
 We are always in active development and we try our best to keep our documentation up to date. However, if you end up ahead of time you can check our latest documentation on [Github](https://github.com/esper-io/esper-cli).
 
-If you face any issue with CLI usage, we recommend you to reach out to [Developer Support](http://example.com)
+If you face any issue with CLI usage, we recommend you to reach out to [Esper Dev Support](https://docs.esper.io/home/support.html)
