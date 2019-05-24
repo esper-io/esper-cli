@@ -45,7 +45,7 @@ class GroupTest(TestCase):
         with EsperTest(argv=argv) as app:
             app.run()
 
-        argv = ['group', 'active']
+        argv = ['group', 'set-active']
         with EsperTest(argv=argv) as app:
             app.run()
             data, output = app.last_rendered
@@ -53,7 +53,7 @@ class GroupTest(TestCase):
             assert data[1]["DETAILS"] == "All devices"
 
     def test_set_active_group(self):
-        argv = ['group', 'active', '--name', 'All devices']
+        argv = ['group', 'set-active', '--name', 'All devices']
         with EsperTest(argv=argv) as app:
             app.run()
             data, output = app.last_rendered
@@ -61,11 +61,11 @@ class GroupTest(TestCase):
             assert data[1]["DETAILS"] == "All devices"
 
     def test_unset_active_group(self):
-        argv = ['group', 'active', '--name', 'All devices']
+        argv = ['group', 'set-active', '--name', 'All devices']
         with EsperTest(argv=argv) as app:
             app.run()
 
-        argv = ['group', 'active', '--unset']
+        argv = ['group', 'unset-active']
         with EsperTest(argv=argv) as app:
             app.run()
             data, output = app.last_rendered
@@ -73,11 +73,11 @@ class GroupTest(TestCase):
             assert data == "Unset the active group All devices"
 
     def test_show_active_group(self):
-        argv = ['group', 'active', '--name', 'All devices']
+        argv = ['group', 'set-active', '--name', 'All devices']
         with EsperTest(argv=argv) as app:
             app.run()
 
-        argv = ['group', 'active']
+        argv = ['group', 'set-active']
         with EsperTest(argv=argv) as app:
             app.run()
             data, output = app.last_rendered

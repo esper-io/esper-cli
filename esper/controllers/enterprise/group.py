@@ -167,23 +167,19 @@ class EnterpriseGroup(Controller):
             self.app.render(renderable, format=OutputFormat.JSON.value)
 
     @ex(
-        help='Set, show or unset the active group',
+        help='Set or show the active group',
         arguments=[
             (['-n', '--name'],
              {'help': 'Group name.',
               'action': 'store',
               'dest': 'name'}),
-            (['-u', '--unset'],
-             {'help': 'Unset the active group',
-              'action': 'store_true',
-              'dest': 'unset'}),
             (['-j', '--json'],
              {'help': 'Render result in Json format',
               'action': 'store_true',
               'dest': 'json'})
         ]
     )
-    def active(self):
+    def set_active(self):
         validate_creds_exists(self.app)
         db = DBWrapper(self.app.creds)
         group_client = APIClient(db.get_configure()).get_group_api_client()
@@ -204,17 +200,6 @@ class EnterpriseGroup(Controller):
                 self.app.log.error(f"[group-active] Failed to list groups: {e}")
                 self.app.render(f"ERROR: {parse_error_message(self.app, e)}")
                 return
-        elif self.app.pargs.unset:
-            group = db.get_group()
-            if group is None or group.get('name') is None:
-                self.app.log.debug('[group-active] There is no active group.')
-                self.app.render('There is no active group.')
-                return
-
-            db.unset_group()
-            self.app.log.debug(f"[group-active] Unset the active group {group.get('name')}")
-            self.app.render(f"Unset the active group {group.get('name')}")
-            return
         else:
             group = db.get_group()
             if group is None or group.get('name') is None:
@@ -236,6 +221,24 @@ class EnterpriseGroup(Controller):
         else:
             renderable = self._group_basic_response(response, OutputFormat.JSON)
             self.app.render(renderable, format=OutputFormat.JSON.value)
+
+    @ex(
+        help='Unset the current active group',
+        arguments=[]
+    )
+    def unset_active(self):
+        validate_creds_exists(self.app)
+        db = DBWrapper(self.app.creds)
+
+        group = db.get_group()
+        if group is None or group.get('name') is None:
+            self.app.log.debug('[group-active] There is no active group.')
+            self.app.render('There is no active group.')
+            return
+
+        db.unset_group()
+        self.app.log.debug(f"[group-active] Unset the active group {group.get('name')}")
+        self.app.render(f"Unset the active group {group.get('name')}")
 
     @ex(
         help='Create group',

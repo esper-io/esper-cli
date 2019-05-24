@@ -68,7 +68,7 @@ class DeviceTest(TestCase):
             with EsperTest(argv=argv) as app:
                 app.run()
 
-            argv = ['device', 'active']
+            argv = ['device', 'set-active']
             with EsperTest(argv=argv) as app:
                 app.run()
                 data, output = app.last_rendered
@@ -79,7 +79,7 @@ class DeviceTest(TestCase):
 
     def test_set_active_device(self):
         if self.device:
-            argv = ['device', 'active', '--name', self.device]
+            argv = ['device', 'set-active', '--name', self.device]
             with EsperTest(argv=argv) as app:
                 app.run()
                 data, output = app.last_rendered
@@ -90,11 +90,11 @@ class DeviceTest(TestCase):
 
     def test_unset_active_device(self):
         if self.device:
-            argv = ['device', 'active', '--name', self.device]
+            argv = ['device', 'set-active', '--name', self.device]
             with EsperTest(argv=argv) as app:
                 app.run()
 
-            argv = ['device', 'active', '--unset']
+            argv = ['device', 'unset-active']
             with EsperTest(argv=argv) as app:
                 app.run()
                 data, output = app.last_rendered
@@ -105,11 +105,11 @@ class DeviceTest(TestCase):
 
     def test_show_active_device(self):
         if self.device:
-            argv = ['device', 'active', '--name', self.device]
+            argv = ['device', 'set-active', '--name', self.device]
             with EsperTest(argv=argv) as app:
                 app.run()
 
-            argv = ['device', 'active']
+            argv = ['device', 'set-active']
             with EsperTest(argv=argv) as app:
                 app.run()
                 data, output = app.last_rendered

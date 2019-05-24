@@ -3,6 +3,7 @@ import random
 import time
 from pathlib import Path
 
+import requests
 from cement import Controller, ex
 from esperclient.rest import ApiException
 from tqdm import tqdm
@@ -239,6 +240,70 @@ class Application(Controller):
             self.app.render(renderable, format=OutputFormat.JSON.value)
 
     @ex(
+        help='Download application version',
+        arguments=[
+            (['version_id'],
+             {'help': 'Version id',
+              'action': 'store'}),
+            (['-a', '--app'],
+             {'help': 'Application id',
+              'action': 'store',
+              'dest': 'application'}),
+            (['-d', '--dest'],
+             {'help': 'Destination file path',
+              'action': 'store',
+              'dest': 'dest'}),
+        ]
+    )
+    def download(self):
+        version_id = self.app.pargs.version_id
+
+        validate_creds_exists(self.app)
+        db = DBWrapper(self.app.creds)
+        application_client = APIClient(db.get_configure()).get_application_api_client()
+        enterprise_id = db.get_enterprise_id()
+
+        if self.app.pargs.application:
+            application_id = self.app.pargs.application
+        else:
+            application = db.get_application()
+            if not application or not application.get('id'):
+                self.app.log.debug('[app-download] There is no active application.')
+                self.app.render('There is no active application.')
+                return
+
+            application_id = application.get('id')
+
+        if self.app.pargs.dest:
+            destination = self.app.pargs.dest
+        else:
+            self.app.log.debug('[app-download] destination file path cannot be empty.')
+            self.app.render('destination file path cannot be empty.')
+            return
+
+        try:
+            response = application_client.get_app_version(version_id, application_id, enterprise_id)
+        except ApiException as e:
+            self.app.log.error(f"[app-download] Failed to show details of an version: {e}")
+            self.app.render(f"ERROR: {parse_error_message(self.app, e)}")
+            return
+
+        url = response.app_file
+        file_size = int(response.size_in_mb * 1024 * 1024)
+        first_byte = 0
+
+        pbar = tqdm(total=file_size, initial=first_byte, unit='B', unit_scale=True, desc='Downloading......')
+        req = requests.get(url, stream=True)
+
+        with(open(destination, 'ab')) as f:
+            for chunk in req.iter_content(chunk_size=1024):
+                if chunk:
+                    f.write(chunk)
+                    pbar.update(1024)
+                    time.sleep(0.001)
+        pbar.close()
+
+    @ex(
         help='Delete application',
         arguments=[
             (['application_id'],
@@ -270,23 +335,19 @@ class Application(Controller):
             return
 
     @ex(
-        help='Set, show or unset the active application',
+        help='Set or show the active application',
         arguments=[
             (['-i', '--id'],
              {'help': 'Application id.',
               'action': 'store',
               'dest': 'id'}),
-            (['-u', '--unset'],
-             {'help': 'Unset the active application',
-              'action': 'store_true',
-              'dest': 'unset'}),
             (['-j', '--json'],
              {'help': 'Render result in Json format',
               'action': 'store_true',
               'dest': 'json'})
         ]
     )
-    def active(self):
+    def set_active(self):
         validate_creds_exists(self.app)
         db = DBWrapper(self.app.creds)
         application_client = APIClient(db.get_configure()).get_application_api_client()
@@ -301,17 +362,6 @@ class Application(Controller):
                 self.app.log.error(f"[application-active] Failed to show active application: {e}")
                 self.app.render(f"ERROR: {parse_error_message(self.app, e)}")
                 return
-        elif self.app.pargs.unset:
-            application = db.get_application()
-            if application is None or application.get('id') is None:
-                self.app.log.debug('[application-active] There is no active application.')
-                self.app.render('There is no active application.')
-                return
-
-            db.unset_application()
-            self.app.log.debug(f"[application-active] Unset the active application {application.get('id')}")
-            self.app.render(f"Unset the active application {application.get('id')}")
-            return
         else:
             application = db.get_application()
             if application is None or application.get('id') is None:
@@ -334,3 +384,21 @@ class Application(Controller):
         else:
             renderable = self._application_basic_response(response, OutputFormat.JSON)
             self.app.render(renderable, format=OutputFormat.JSON.value)
+
+    @ex(
+        help='Unset the current active application',
+        arguments=[]
+    )
+    def unset_active(self):
+        validate_creds_exists(self.app)
+        db = DBWrapper(self.app.creds)
+
+        application = db.get_application()
+        if application is None or application.get('id') is None:
+            self.app.log.debug('[application-active] There is no active application.')
+            self.app.render('There is no active application.')
+            return
+
+        db.unset_application()
+        self.app.log.debug(f"[application-active] Unset the active application {application.get('id')}")
+        self.app.render(f"Unset the active application {application.get('id')}")

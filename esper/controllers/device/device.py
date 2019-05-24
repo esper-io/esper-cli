@@ -225,23 +225,19 @@ class Device(Controller):
             self.app.render(renderable, format=OutputFormat.JSON.value)
 
     @ex(
-        help='Set, show or unset the active device',
+        help='Set or show the active device',
         arguments=[
             (['-n', '--name'],
              {'help': 'Device name.',
               'action': 'store',
               'dest': 'name'}),
-            (['-u', '--unset'],
-             {'help': 'Unset the active device',
-              'action': 'store_true',
-              'dest': 'unset'}),
             (['-j', '--json'],
              {'help': 'Render result in Json format',
               'action': 'store_true',
               'dest': 'json'}),
         ]
     )
-    def active(self):
+    def set_active(self):
         validate_creds_exists(self.app)
         db = DBWrapper(self.app.creds)
         device_client = APIClient(db.get_configure()).get_device_api_client()
@@ -262,17 +258,6 @@ class Device(Controller):
                 self.app.log.error(f"[device-active] Failed to list devices: {e}")
                 self.app.render(f"ERROR: {parse_error_message(self.app, e)}")
                 return
-        elif self.app.pargs.unset:
-            device = db.get_device()
-            if device is None or device.get('name') is None:
-                self.app.log.debug('[device-active] There is no active device.')
-                self.app.render('There is no active device.')
-                return
-
-            db.unset_device()
-            self.app.log.debug(f"[device-active] Unset the active device {device.get('name')}")
-            self.app.render(f"Unset the active device {device.get('name')}")
-            return
         else:
             device = db.get_device()
             if device is None or device.get('name') is None:
@@ -294,3 +279,21 @@ class Device(Controller):
         else:
             renderable = self._device_basic_response(response, OutputFormat.JSON)
             self.app.render(renderable, format=OutputFormat.JSON.value)
+
+    @ex(
+        help='Unset the active device',
+        arguments=[]
+    )
+    def unset_active(self):
+        validate_creds_exists(self.app)
+        db = DBWrapper(self.app.creds)
+
+        device = db.get_device()
+        if device is None or device.get('name') is None:
+            self.app.log.debug('[device-active] There is no active device.')
+            self.app.render('There is no active device.')
+            return
+
+        db.unset_device()
+        self.app.log.debug(f"[device-active] Unset the active device {device.get('name')}")
+        self.app.render(f"Unset the active device {device.get('name')}")
