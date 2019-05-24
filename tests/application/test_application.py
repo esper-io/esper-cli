@@ -64,7 +64,7 @@ class ApplicationTest(TestCase):
         with EsperTest(argv=argv) as app:
             app.run()
 
-        argv = ['app', 'active']
+        argv = ['app', 'set-active']
         with EsperTest(argv=argv) as app:
             app.run()
             data, output = app.last_rendered
@@ -141,7 +141,7 @@ class ApplicationTest(TestCase):
             data, output = app.last_rendered
             application_id = data[0]["DETAILS"]
 
-        argv = ['app', 'active', '--id', application_id]
+        argv = ['app', 'set-active', '--id', application_id]
         with EsperTest(argv=argv) as app:
             app.run()
             data, output = app.last_rendered
@@ -160,11 +160,11 @@ class ApplicationTest(TestCase):
             data, output = app.last_rendered
             application_id = data[0]["DETAILS"]
 
-        argv = ['app', 'active', '--id', application_id]
+        argv = ['app', 'set-active', '--id', application_id]
         with EsperTest(argv=argv) as app:
             app.run()
 
-        argv = ['app', 'active', '--unset']
+        argv = ['app', 'unset-active']
         with EsperTest(argv=argv) as app:
             app.run()
             data, output = app.last_rendered
@@ -182,11 +182,11 @@ class ApplicationTest(TestCase):
             data, output = app.last_rendered
             application_id = data[0]["DETAILS"]
 
-        argv = ['app', 'active', '--id', application_id]
+        argv = ['app', 'set-active', '--id', application_id]
         with EsperTest(argv=argv) as app:
             app.run()
 
-        argv = ['app', 'active']
+        argv = ['app', 'set-active']
         with EsperTest(argv=argv) as app:
             app.run()
             data, output = app.last_rendered
@@ -197,3 +197,21 @@ class ApplicationTest(TestCase):
         argv = ['app', 'delete', application_id]
         with EsperTest(argv=argv) as app:
             app.run()
+
+    def test_download_application(self):
+        argv = ['app', 'upload', 'tests/application/Tiny Notepad Simple Small_v1.0_apkpure.com.apk']
+        with EsperTest(argv=argv) as app:
+            app.run()
+            data, output = app.last_rendered
+            application_id = data[0]["DETAILS"]
+            version_id = data[7]["DETAILS"]
+
+        dest_file_name = 'testfile.apk'
+        argv = ['app', 'download', version_id, '--app', application_id, '--dest', dest_file_name]
+        with EsperTest(argv=argv) as app:
+            app.run()
+
+        assert os.path.exists(dest_file_name) == True
+
+        if os.path.exists(dest_file_name):
+            os.remove(dest_file_name)

@@ -34,7 +34,7 @@ class VersionTest(TestCase):
             assert len(data) == 1
 
     def test_list_version_with_active_application(self):
-        argv = ['app', 'active', '--id', self.application_id]
+        argv = ['app', 'set-active', '--id', self.application_id]
         with EsperTest(argv=argv) as app:
             app.run()
 
