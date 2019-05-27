@@ -156,7 +156,7 @@ class GroupCommand(Controller):
              {'help': 'Group name',
               'action': 'store',
               'dest': 'group'}),
-            (['-v', '--version'],
+            (['-V', '--version'],
              {'help': 'Application version id',
               'action': 'store',
               'dest': 'version'}),

@@ -45,6 +45,7 @@ class Esper(App):
 
     class Meta:
         label = 'espercli'
+        debug_argument_options = ['-D', '--debug']
 
         # call sys.exit() on close
         exit_on_close = True
