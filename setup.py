@@ -1,7 +1,7 @@
 
 from setuptools import setup, find_packages
 
-VERSION = "0.0.2"
+VERSION = "0.0.3"
 
 f = open('README.md', 'r', encoding='utf-8', errors='ignore')
 LONG_DESCRIPTION = f.read()
@@ -32,6 +32,7 @@ setup(
         'esperclient>=0.0.6',
         'jinja2>=2.10.1',
         'pyyaml>=5.1',
+        'requests==2.22.0',
         'tabulate>=0.8.3',
         'tinydb>=3.13.0',
         'tqdm>=4.32.1'

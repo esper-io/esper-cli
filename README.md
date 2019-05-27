@@ -7,7 +7,7 @@ Current stable release versions are
 
     API version: 1.0.0
     SDK version: 0.0.6
-    CLI version: 0.0.2
+    CLI version: 0.0.3
 
 ## Requirements
 
@@ -57,7 +57,7 @@ $ Esper API Key: LpDriKp7MWJiRGcwc8xzREeUj8OEFa
 ```
 To list available commands, either run `espercli` with no parameters or execute `espercli --help`:
 ```sh
-usage: espercli [-h] [-d] [-q] [-v]
+usage: espercli [-h] [-D] [-q] [-v]
                 {group-command,group,enterprise,status,install,version,device-command,app,device,configure}
                 ...
 
@@ -65,7 +65,7 @@ Esper CLI tool to manage resources on Esper.io API service
 
 optional arguments:
   -h, --help            show this help message and exit
-  -d, --debug           full application debug mode
+  -D, --debug           full application debug mode
   -q, --quiet           suppress all console output
   -v, --version         show program's version number and exit
 
@@ -747,12 +747,12 @@ $ espercli device-command install [OPTIONS]
 | Name, shorthand | Default| Description|
 | -------------   |:------:|:----------|
 | --device, -d    |        | Device name |
-| --version, -v   |        | Application version id (UUID) |
+| --version, -V   |        | Application version id (UUID) |
 | --json, -j      |        | Render result in JSON format |
 
 ##### Example
 ```sh
-$ espercli device-command install -d SNA-SNL-3GQA -v 54436edb-9b43-4e2c-8107-2c6fa90e2a9e
+$ espercli device-command install -d SNA-SNL-3GQA -V 54436edb-9b43-4e2c-8107-2c6fa90e2a9e
 
 TITLE    DETAILS
 id       21180eef-678f-4447-87d8-e29af2bcb8e6
@@ -761,7 +761,7 @@ state    Command Initiated
 ```
 For install command if active device is set,
 ```sh
-$ espercli device-command install -v 54436edb-9b43-4e2c-8107-2c6fa90e2a9e
+$ espercli device-command install -V 54436edb-9b43-4e2c-8107-2c6fa90e2a9e
 
 TITLE    DETAILS
 id       21180eef-678f-4447-87d8-e29af2bcb8e6
@@ -778,12 +778,12 @@ $ espercli device-command uninstall [OPTIONS]
 | Name, shorthand | Default| Description|
 | -------------   |:------:|:----------|
 | --device, -d    |        | Device name |
-| --version, -v   |        | Application version id (UUID) |
+| --version, -V   |        | Application version id (UUID) |
 | --json, -j      |        | Render result in JSON format |
 
 ##### Example
 ```sh
-$ espercli device-command uninstall -d SNA-SNL-3GQA -v 54436edb-9b43-4e2c-8107-2c6fa90e2a9e
+$ espercli device-command uninstall -d SNA-SNL-3GQA -V 54436edb-9b43-4e2c-8107-2c6fa90e2a9e
 
 TITLE    DETAILS
 id       21180eef-678f-4447-87d8-e29af2bcb8e6
@@ -913,12 +913,12 @@ $ espercli group-command install [OPTIONS]
 | Name, shorthand | Default| Description|
 | -------------   |:------:|:----------|
 | --group, -g     |        | Group name |
-| --version, -v   |        | Application version id (UUID) |
+| --version, -V   |        | Application version id (UUID) |
 | --json, -j      |        | Render result in JSON format |
 
 ##### Example
 ```sh
-$ espercli group-command install -g 5G -v 54436edb-9b43-4e2c-8107-2c6fa90e2a9e
+$ espercli group-command install -g 5G -V 54436edb-9b43-4e2c-8107-2c6fa90e2a9e
 
 TITLE        DETAILS
 id           6cda46b4-05da-4e76-b7ae-4af52ce288fa
@@ -931,7 +931,7 @@ inactive
 ```
 For list of versions if active group is set,
 ```sh
-$ espercli group-command install -v 54436edb-9b43-4e2c-8107-2c6fa90e2a9e
+$ espercli group-command install -V 54436edb-9b43-4e2c-8107-2c6fa90e2a9e
 
 TITLE        DETAILS
 id           6cda46b4-05da-4e76-b7ae-4af52ce288fa
@@ -1068,8 +1068,8 @@ $ espercli installs list [OPTIONS]
 
 ##### Example
  ```sh
- $ espercli installs list -d SNA-SNL-3GQA
- Total Number of Installs: 1
+$ espercli installs list -d SNA-SNL-3GQA
+Total Number of Installs: 1
 
 ID                                    APPLICATION         PACKAGE                 VERSION            STATE
 fc9e0d4e-fc88-4729-a575-7d4645901f1d  Root Checker Basic  com.joeykrim.rootcheck  6.4.5              Install Success
