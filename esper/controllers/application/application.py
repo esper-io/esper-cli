@@ -90,8 +90,7 @@ class Application(Controller):
             label = {
                 'id': "ID",
                 'name': "NAME",
-                'package': "PACKAGE NAME",
-                'version_count': "NO. OF VERSIONS"
+                'package': "PACKAGE NAME"
             }
 
             for application in response.results:
@@ -99,8 +98,7 @@ class Application(Controller):
                     {
                         label['id']: application.id,
                         label['name']: application.application_name,
-                        label['package']: application.package_name,
-                        label['version_count']: len(application.versions) if application.versions else 0
+                        label['package']: application.package_name
                     }
                 )
             self.app.render(applications, format=OutputFormat.TABULATED.value, headers="keys", tablefmt="plain")
@@ -111,8 +109,7 @@ class Application(Controller):
                     {
                         'id': application.id,
                         'name': application.application_name,
-                        'package': application.package_name,
-                        'version_count': len(application.versions) if application.versions else 0
+                        'package': application.package_name
                     }
                 )
             self.app.render(applications, format=OutputFormat.JSON.value)
@@ -123,15 +120,11 @@ class Application(Controller):
 
         if format == OutputFormat.JSON:
             renderable = {k: v for k, v in application.to_dict().items() if k in valid_keys}
-            if application:
-                renderable['version_count'] = len(application.versions)
         else:
             title = "TITLE"
             details = "DETAILS"
             renderable = [{title: k, details: v} for k, v in application.to_dict().items() if k in valid_keys]
 
-            if application:
-                renderable.append({title: 'version_count', details: len(application.versions)})
         return renderable
 
     @ex(
