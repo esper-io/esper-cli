@@ -38,7 +38,7 @@ class Configure(Controller):
               'default': False,
               'dest': 'list'}),
 
-            (['--json'],
+            (['-j', '--json'],
              {'help': 'Render result in Json format',
               'action': 'store_true',
               'dest': 'json'}),
