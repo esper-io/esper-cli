@@ -19,6 +19,12 @@ esper:
 # creds_file: ~/.esper/creds.json
 
 
+### Certificates
+# certs_folder: ~/.esper/certs
+# local_key: ~/.esper/certs/local.key
+# local_cert: ~/.esper/certs/local.pem
+
+
 log.colorlog:
 
 ### Where the log file lives (no log file by default)

@@ -12,14 +12,20 @@ from esper.controllers.device.install import AppInstall
 from esper.controllers.device.status import DeviceStatus
 from esper.controllers.enterprise.enterprise import Enterprise
 from esper.controllers.enterprise.group import EnterpriseGroup
+from esper.controllers.secureadb.secureadb import SecureADB
 from esper.core.exc import EsperError
 from esper.core.output_handler import EsperOutputHandler
 from esper.ext.utils import extend_tinydb
+from esper.ext.certs import init_certs
 
 # configuration defaults
 CONFIG = init_defaults('esper')
 CONFIG['esper']['debug'] = False
 CONFIG['esper']['creds_file'] = '~/.esper/db/creds.json'
+CONFIG['esper']['certs_folder'] = '~/.esper/certs'
+CONFIG['esper']['local_key'] = '~/.esper/certs/local.key'
+CONFIG['esper']['local_cert'] = '~/.esper/certs/local.pem'
+CONFIG['esper']['device_cert'] = '~/.esper/certs/device.pem'
 
 # meta defaults
 META = init_defaults('log.colorlog')
@@ -93,12 +99,14 @@ class Esper(App):
             DeviceStatus,
             Enterprise,
             EnterpriseGroup,
-            GroupCommand
+            GroupCommand,
+            SecureADB
         ]
 
         # hooks
         hooks = [
-            ('post_setup', extend_tinydb)
+            ('post_setup', extend_tinydb),
+            ('post_setup', init_certs),
         ]
 
 

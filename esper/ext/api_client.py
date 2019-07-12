@@ -1,5 +1,6 @@
 import esperclient as client
 from esperclient.configuration import Configuration
+import requests
 
 
 class APIClient:
@@ -26,3 +27,8 @@ class APIClient:
 
     def get_group_command_api_client(self):
         return client.GroupCommandsApi(client.ApiClient(self.config))
+
+    def get_remoteadb_api_client(self):
+        return client.DeviceApi(client.ApiClient(self.config))
+
+
