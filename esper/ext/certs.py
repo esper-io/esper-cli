@@ -5,13 +5,13 @@ from cement.utils import fs
 
 
 def init_certs(app):
-    certs_folder = app.config.get('esper', 'ca_key')
+    certs_folder = app.config.get('esper', 'certs_folder')
     path = fs.abspath(certs_folder)
 
     # Check if path exists
     if not Path(path).exists():
-        app.log.info(f"[init_certs] Creating Certs folder!")
-        fs.ensure_parent_dir_exists(path)
+        app.log.debug(f"[init_certs] Creating Certs folder!")
+        fs.ensure_dir_exists(path)
 
     app.extend('certs_path', path)
     app.extend('local_key', fs.abspath(app.config.get('esper', 'local_key')))
@@ -35,7 +35,7 @@ def cleanup_certs(app):
     if Path(app.device_cert).exists():
         Path(app.device_cert).unlink()
 
-    app.log.info("Existing Certificates removed!")
+    app.log.debug("[cleanup_certs] Existing certificates removed!")
 
 
 def create_self_signed_cert_root(ca_cert, ca_key):

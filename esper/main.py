@@ -114,6 +114,10 @@ class Esper(App):
 TEST_CONFIG = init_defaults('esper')
 TEST_CONFIG['esper']['debug'] = False
 TEST_CONFIG['esper']['creds_file'] = 'creds.json'
+TEST_CONFIG['esper']['certs_folder'] = '~/.esper/certs'
+TEST_CONFIG['esper']['local_key'] = '~/.esper/certs/local.key'
+TEST_CONFIG['esper']['local_cert'] = '~/.esper/certs/local.pem'
+TEST_CONFIG['esper']['device_cert'] = '~/.esper/certs/device.pem'
 
 
 class EsperTest(TestApp, Esper):
