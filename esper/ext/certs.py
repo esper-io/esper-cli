@@ -14,8 +14,6 @@ def init_certs(app):
         fs.ensure_parent_dir_exists(path)
 
     app.extend('certs_path', path)
-    app.extend('ca_key', fs.abspath(app.config.get('esper', 'ca_key')))
-    app.extend('ca_cert', fs.abspath(app.config.get('esper', 'ca_cert')))
     app.extend('local_key', fs.abspath(app.config.get('esper', 'local_key')))
     app.extend('local_cert', fs.abspath(app.config.get('esper', 'local_cert')))
     app.extend('device_cert', fs.abspath(app.config.get('esper', 'device_cert')))
@@ -27,12 +25,6 @@ def cleanup_certs(app):
     :param app: Cement App instance
     :return:
     '''
-
-    if Path(app.ca_key).exists():
-        Path(app.ca_key).unlink()
-
-    if Path(app.ca_cert).exists():
-        Path(app.ca_cert).unlink()
 
     if Path(app.local_key).exists():
         Path(app.local_key).unlink()
@@ -91,7 +83,7 @@ def create_signed_cert(ca_cert, ca_key, local_cert, local_key):
     :return:
     '''
 
-    with open(ca_cert) as ca_cert_file:
+    with open(ca_cert, 'rb') as ca_cert_file:
         ca_cert = crypto.load_certificate(crypto.FILETYPE_PEM, ca_cert_file.read())
 
     with open(ca_key) as ca_key_file:
