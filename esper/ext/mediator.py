@@ -1,12 +1,9 @@
+import random
 import selectors
 import socket
 import types
-from typing import Tuple
-import random
-import sys
-import traceback
 from logging import Logger
-from datetime import datetime
+from typing import Tuple
 
 from esper.ext.forwarder import TCPForwarder
 
@@ -130,12 +127,7 @@ class Mediator(object):
             else:
                 if self.log:
                     self.log.debug(f"Closing connection to {data.addr[0]}:{data.addr[1]}")
-                # self.selector.unregister(sock)
-                # try:
-                #     sock.shutdown(socket.SHUT_RDWR)
-                # except OSError:
-                #     pass
-                # sock.close()
+
                 raise MediatorShutdown("Shutdown initiated from EVENT_READ")
 
         if mask & selectors.EVENT_WRITE:
@@ -150,12 +142,6 @@ class Mediator(object):
                     sent = sock.send(self._outbound_data)  # Should be ready to write
                     self._outbound_data = self._outbound_data[sent:]
             except OSError:
-                traceback.print_exception(*sys.exc_info())
-                # try:
-                #     sock.shutdown(socket.SHUT_RDWR)
-                # except OSError:
-                #     pass
-                # sock.close()
                 raise MediatorShutdown("Shutdown initiated from EVENT_WRITE")
 
     def run_forever(self):
@@ -194,7 +180,6 @@ class Mediator(object):
 
 
 class Relay(object):
-
     listener_host = '127.0.0.1'
     listener_port = None
     _listener_server = None
