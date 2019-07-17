@@ -11,6 +11,11 @@ class MediatorShutdown(BaseException):
 
 
 class Mediator(object):
+    """
+    A simple TCP relay based on Non-blocking sockets. This implementation uses `selectors` to eliminate the need for
+    threads to manage the various data streams.
+    """
+
     selector = None
     listener = None
     log = None
