@@ -1,18 +1,16 @@
+import signal
 import socket
 import ssl
-import sys
 import time
-import traceback
 from typing import Tuple
 
 import requests
 from cement import Controller, ex, CaughtSignal
-import signal
 
 from esper.ext.api_client import APIClient
 from esper.ext.certs import cleanup_certs, create_self_signed_cert, save_device_certificate
 from esper.ext.db_wrapper import DBWrapper
-from esper.ext.mediator import Mediator, Relay
+from esper.ext.mediator import Relay
 from esper.ext.utils import validate_creds_exists
 
 
@@ -231,9 +229,7 @@ class SecureADB(Controller):
         cert = secure_sock.getpeercert()
         self.app.log.debug(f"[remoteadb-connect] Peer Certificate -> {cert}")
 
-        # verify server
-        # if not cert or ('commonName', 'test') not in cert['subject'][3]:
-        #     raise Exception("ERROR")
+        # TODO: verify device via cert params
 
         return secure_sock
 
@@ -305,11 +301,6 @@ class SecureADB(Controller):
                                                     client_key=self.app.local_key,
                                                     device_cert=self.app.device_cert)
 
-            # Set up Mediator: unsecured localhost to SSLed tcp relay
-            # mediator = Mediator(secure_conn=secure_sock, log=self.app.log)
-            #
-            # listener_ip, listener_port = mediator.setup_listener()
-
             relay = Relay(relay_conn=secure_sock, relay_addr=secure_sock.getsockname(), log=self.app.log)
 
             listener_ip, listener_port = relay.get_listener_address()
@@ -318,14 +309,13 @@ class SecureADB(Controller):
             self.app.log.info(
                 f"| Please connect ADB client to the following endpoint: {listener_ip} : {listener_port} |")
             self.app.log.info(f"| If adb-tools is installed, please run the command below:               |")
-            self.app.log.info(f"|        adb connect {listener_ip}:{listener_port}                                     |")
+            self.app.log.info(
+                f"|        adb connect {listener_ip}:{listener_port}                                     |")
             self.app.log.info(f"|                                                                        |")
             self.app.log.info(f"| Press Ctrl+C to quit!                                                  |")
             self.app.log.info(f"|------------------------------------------------------------------------|")
 
             self.app.log.debug("[remoteadb-connect] Starting Client Mediator")
-
-            # mediator.run_forever()
 
             relay.accept_connection()
             relay.start_relay()
@@ -341,7 +331,6 @@ class SecureADB(Controller):
         except Exception as exc:
             self.app.log.error(f"Failed to establish Secure ADB connection to device: {self.app.pargs.device_name}")
             self.app.log.debug(f"Exception Encountered -> {exc}")
-            traceback.print_exception(*sys.exc_info())
 
         finally:
             if "relay" in locals():
