@@ -1,16 +1,15 @@
 import signal
 import socket
 import ssl
-import time
-from typing import Tuple
 
-import requests
 from cement import Controller, ex, CaughtSignal
 
 from esper.ext.api_client import APIClient
 from esper.ext.certs import cleanup_certs, create_self_signed_cert, save_device_certificate
 from esper.ext.db_wrapper import DBWrapper
-from esper.ext.mediator import Relay
+from esper.ext.relay import Relay
+from esper.ext.remoteadb_api import initiate_remoteadb_connection, fetch_device_certificate, fetch_relay_endpoint, \
+    RemoteADBError
 from esper.ext.utils import validate_creds_exists
 
 
@@ -40,7 +39,6 @@ class SecureADB(Controller):
         :param name: Device Name
         :return: uuid str - Device ID as UUID string
         """
-        validate_creds_exists(self.app)
         db = DBWrapper(self.app.creds)
         device_name = name
 
@@ -54,139 +52,6 @@ class SecureADB(Controller):
             raise SecureADBWorkflowError(f'Device does not exist with name {device_name}')
 
         return search_response.results[0].id
-
-    def initiate_remoteadb_connection(self,
-                                      environment: str,
-                                      api_key: str,
-                                      enterprise_id: str,
-                                      device_id: str) -> str:
-        """
-        Create a Remote ADB session for given enterprise and device, and return its id.
-
-        :param environment: The client/tenant's environment
-        :param api_key: API access key for the above environments
-        :param enterprise_id: UUID string representing user's enterprise
-        :param device_id: UUID string representing user's device, against which remote-adb connection should be established
-        :return: uuid-string - ID for the remote adb connection
-        """
-
-        host = f'https://{environment}-api.shoonyacloud.com'
-        url = f'{host}/api/v0/enterprise/{enterprise_id}/device/{device_id}/remoteadb/'
-
-        client_cert = ""
-        with open(self.app.local_cert, 'rb') as f:
-            client_cert = f.read()
-
-        # Convert byte stream to utf-8
-        client_cert = client_cert.decode('utf-8')
-
-        self.app.log.info("Initiating RemoteADB connection...")
-        self.app.log.debug(f"Creating RemoteADB session at {url}")
-
-        response = requests.post(
-            url,
-            json={
-                'client_certificate': client_cert
-            },
-            headers={
-                'Authorization': f'Bearer {api_key}'
-            }
-        )
-
-        if not response.ok:
-            self.app.log.debug(
-                f"[remoteadb-connect] Error in Remote ADB connection. [{response.status_code}] -> {response.content}")
-            raise SecureADBWorkflowError("Failed to create Remote ADB Connection")
-
-        return response.json().get('id')
-
-    def fetch_relay_endpoint(self,
-                             environment: str,
-                             api_key: str,
-                             enterprise_id: str,
-                             device_id: str,
-                             remoteadb_id: str) -> Tuple[str, int]:
-        """
-        Poll the remoteadb-connection API and Fetch the TCP relay's IP:port
-
-        :param environment: The client/tenant's environment
-        :param api_key: API access key for the above environments
-        :param enterprise_id: UUID string representing user's enterprise
-        :param device_id: UUID string representing user's device, against which remote-adb connection should be established
-        :param remoteadb_id: UUID string for the remote adb connection
-        :return: (Relay IP, Relay Port) as a Tuple
-        """
-
-        host = f'https://{environment}-api.shoonyacloud.com'
-        url = f'{host}/api/v0/enterprise/{enterprise_id}/device/{device_id}/remoteadb/{remoteadb_id}'
-        timeout = 160.0
-
-        self.app.log.info("[remoteadb-connect] Acquiring TCP relay's IP and port... [attempting for 20s]...")
-        start = time.time()
-
-        while time.time() - start < timeout:
-            response = requests.get(
-                url,
-                headers={
-                    'Authorization': f'Bearer {api_key}'
-                }
-            )
-
-            if response.ok:
-                host = response.json().get("ip")
-                port = response.json().get("client_port")
-
-                if host and port:
-                    port = int(port)
-
-                    self.app.log.debug(f"[remoteadb-connect] Recieved IP:Port -> {host}:{port}")
-                    return host, port
-
-            # Wait 1s before repolling the same endpoint
-            time.sleep(1)
-
-        # If the method didnt return, then it failed to fetch the details from SCAPI endpoint
-        raise SecureADBWorkflowError(f"Failed to acquire TCP Relay's IP:port in {timeout}  secs")
-
-    def fetch_device_cert(self,
-                          environment: str,
-                          api_key: str,
-                          enterprise_id: str,
-                          device_id: str,
-                          remoteadb_id: str) -> str:
-        """
-        Poll the remoteadb-connection API and fetch the Device's SSL certificate (public key)
-
-        :param environment: The client/tenant's environment
-        :param api_key: API access key for the above environments
-        :param enterprise_id: UUID string representing user's enterprise
-        :param device_id: UUID string representing user's device, against which remote-adb connection should be established
-        :param remoteadb_id: UUID string for the remote adb connection
-        :return: Device's Public Key to be used for SSL connection. The data is in PEM format (base-64 encoded)
-        """
-
-        host = f'https://{environment}-api.shoonyacloud.com'
-        url = f'{host}/api/v0/enterprise/{enterprise_id}/device/{device_id}/remoteadb/{remoteadb_id}'
-        timeout = 160.0
-
-        self.app.log.info("[remoteadb-connect] Acquiring Device's Certificate... [attempting for 20s]...")
-        start = time.time()
-
-        while time.time() - start < timeout:
-            response = requests.get(
-                url,
-                headers={
-                    'Authorization': f'Bearer {api_key}'
-                }
-            )
-
-            if response.ok and response.json().get("device_certificate"):
-                self.app.log.debug("[remoteadb-connect] Recieved Device Certificate")
-                return response.json().get("device_certificate")
-
-            time.sleep(1)
-
-        raise SecureADBWorkflowError(f"Failed to acquire Device's certificate in {timeout} secs")
 
     def setup_ssl_connection(self,
                              host: str,
@@ -247,7 +112,6 @@ class SecureADB(Controller):
         validate_creds_exists(self.app)
         db = DBWrapper(self.app.creds)
 
-        # client = APIClient(db.get_configure()).get_device_api_client()
         enterprise_id = db.get_enterprise_id()
 
         # Remove older certs
@@ -272,24 +136,28 @@ class SecureADB(Controller):
                 return
 
             # Call SCAPI for establish remote adb connection with device
-            remoteadb_id = self.initiate_remoteadb_connection(environment=db.get_configure().get("environment"),
-                                                              api_key=db.get_configure().get("api_key"),
-                                                              enterprise_id=enterprise_id,
-                                                              device_id=device_id)
+            remoteadb_id = initiate_remoteadb_connection(environment=db.get_configure().get("environment"),
+                                                         enterprise_id=enterprise_id,
+                                                         device_id=device_id,
+                                                         api_key=db.get_configure().get("api_key"),
+                                                         client_cert_path=self.app.local_cert,
+                                                         log=self.app.log)
 
             # Poll and fetch the TCP relay's endpoint
-            relay_ip, relay_port = self.fetch_relay_endpoint(environment=db.get_configure().get("environment"),
-                                                             api_key=db.get_configure().get("api_key"),
-                                                             enterprise_id=enterprise_id,
-                                                             device_id=device_id,
-                                                             remoteadb_id=remoteadb_id)
+            relay_ip, relay_port = fetch_relay_endpoint(environment=db.get_configure().get("environment"),
+                                                        enterprise_id=enterprise_id,
+                                                        device_id=device_id,
+                                                        remoteadb_id=remoteadb_id,
+                                                        api_key=db.get_configure().get("api_key"),
+                                                        log=self.app.log)
 
             # Poll and fetch the Device's Certificate String
-            device_cert = self.fetch_device_cert(environment=db.get_configure().get("environment"),
-                                                 api_key=db.get_configure().get("api_key"),
-                                                 enterprise_id=enterprise_id,
-                                                 device_id=device_id,
-                                                 remoteadb_id=remoteadb_id)
+            device_cert = fetch_device_certificate(environment=db.get_configure().get("environment"),
+                                                   enterprise_id=enterprise_id,
+                                                   device_id=device_id,
+                                                   remoteadb_id=remoteadb_id,
+                                                   api_key=db.get_configure().get("api_key"),
+                                                   log=self.app.log)
 
             # Save Device certificate to disk
             save_device_certificate(self.app.device_cert, device_cert)
@@ -320,7 +188,7 @@ class SecureADB(Controller):
             relay.accept_connection()
             relay.start_relay()
 
-        except SecureADBWorkflowError as timeout_exc:
+        except (SecureADBWorkflowError, RemoteADBError) as timeout_exc:
             self.app.log.error(f"[remoteadb-connect] {str(timeout_exc)}")
 
         except CaughtSignal as sig:
