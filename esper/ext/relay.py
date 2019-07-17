@@ -7,6 +7,11 @@ from esper.ext.forwarder import TCPForwarder
 
 
 class Relay(object):
+    """
+    A Local TCP relay to stream data between ADB Client and TCP relay.
+    Data streaming is implemented using 2 threads, one for each direction.
+    """
+
     listener_host = '127.0.0.1'
     listener_port = None
     _listener_server = None
