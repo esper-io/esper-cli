@@ -150,5 +150,5 @@ class TCPForwarder(Forwarder):
         # Cleanup sockets
         self.cleanup()
 
-        self.log.info(f"[{self.name}] [METRICS] Bytes Txfered: {self.bytes} bytes, Connection Duration: {self.duration}s")
+        self.log.debug(f"[{self.name}] [METRICS] Bytes Txfered: {self.bytes} bytes, Connection Duration: {self.duration}s")
         return
