@@ -92,9 +92,15 @@ class Relay(object):
         else:
             self.stopped = self.forward.connection_stopped or self.reverse.connection_stopped
 
-        self.log.info(f"Relay started: {self.started.isoformat()}")
-        self.log.info(f"Relay stopped: {self.stopped.isoformat()}")
-        self.log.info(f"Relay Session duration: {str(self.stopped - self.started)}")
+        self.log.debug(f"Relay started: {self.started.isoformat()}")
+        self.log.debug(f"Relay stopped: {self.stopped.isoformat()}")
+        self.log.debug(f"Relay Session duration: {str(self.stopped - self.started)}")
+
+        return {
+            "started": self.started,
+            "stopped": self.stopped,
+            "bytes": max(self.forward.bytes, self.reverse.bytes)
+        }
 
     def start_relay(self):
 
@@ -114,11 +120,11 @@ class Relay(object):
 
     def stop_relay(self):
 
-        self.log.info(f"Killing Forward Thread")
+        self.log.debug(f"Killing Forward Thread")
         self.forward.stop()
         self.forward.join(timeout=1)
 
-        self.log.info(f"Killing Reverse Thread...")
+        self.log.debug(f"Killing Reverse Thread...")
         self.reverse.stop()
         self.reverse.join(timeout=1)
 

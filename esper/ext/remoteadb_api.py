@@ -56,7 +56,7 @@ def get_remoteadb_connection_details(environment: str,
     url = get_remoteadb_url(environment, enterprise_id, device_id, remoteadb_id)
 
     if log:
-        log.info("[remoteadb-connect] Fetching remoteadb session details...")
+        log.debug("[remoteadb-connect] Fetching remoteadb session details...")
 
     response = requests.get(
         url,
@@ -89,7 +89,7 @@ def fetch_relay_endpoint(environment: str,
     sleeper = exponential_sleep()
 
     if log:
-        log.info(f"[remoteadb-connect] Acquiring TCP relay's IP and port... [attempting for {timeout}s]...")
+        log.debug(f"[remoteadb-connect] Acquiring TCP relay's IP and port... [attempting for {timeout}s]...")
 
     # Start the timer
     start = time.time()
@@ -139,7 +139,7 @@ def fetch_device_certificate(environment: str,
     sleeper = exponential_sleep()
 
     if log:
-        log.info(f"[remoteadb-connect] Acquiring Device's Certificate... [attempting for {timeout}s]...")
+        log.debug(f"[remoteadb-connect] Acquiring Device's Certificate... [attempting for {timeout}s]...")
 
     # Start the timer
     start = time.time()
@@ -187,7 +187,7 @@ def initiate_remoteadb_connection(environment: str,
     # Convert byte stream to utf-8
     client_cert = client_cert.decode('utf-8')
 
-    log.info("Initiating RemoteADB connection...")
+    log.debug("Initiating RemoteADB connection...")
     log.debug(f"Creating RemoteADB session at {url}")
 
     response = requests.post(

@@ -4,6 +4,7 @@ import ssl
 
 from cement import Controller, ex, CaughtSignal
 
+from esper.controllers.enums import OutputFormat
 from esper.ext.api_client import APIClient
 from esper.ext.certs import cleanup_certs, create_self_signed_cert, save_device_certificate
 from esper.ext.db_wrapper import DBWrapper
@@ -135,6 +136,8 @@ class SecureADB(Controller):
                 self.app.log.error("[remoteadb-connect] Device not specified!")
                 return
 
+            self.app.render("\nInitiating Remote ADB Session. This may take a few seconds...\n")
+
             # Call SCAPI for establish remote adb connection with device
             remoteadb_id = initiate_remoteadb_connection(environment=db.get_configure().get("environment"),
                                                          enterprise_id=enterprise_id,
@@ -173,15 +176,15 @@ class SecureADB(Controller):
 
             listener_ip, listener_port = relay.get_listener_address()
 
-            self.app.log.info(f"|------------------------------------------------------------------------|")
-            self.app.log.info(
-                f"| Please connect ADB client to the following endpoint: {listener_ip} : {listener_port} |")
-            self.app.log.info(f"| If adb-tools is installed, please run the command below:               |")
-            self.app.log.info(
-                f"|        adb connect {listener_ip}:{listener_port}                                     |")
-            self.app.log.info(f"|                                                                        |")
-            self.app.log.info(f"| Press Ctrl+C to quit!                                                  |")
-            self.app.log.info(f"|------------------------------------------------------------------------|")
+            title = "Secure ADB Client"
+            table = [
+                {title: f"Please connect ADB client to the following endpoint: {listener_ip} : {listener_port}"},
+                {
+                    title: f"If adb-tools is installed, please run the command below:\n adb connect {listener_ip}:{listener_port}"},
+                {title: "Press Ctrl+C to quit! "},
+            ]
+
+            self.app.render(table, format=OutputFormat.TABULATED.value, headers="keys", tablefmt="plain")
 
             self.app.log.debug("[remoteadb-connect] Starting Client Mediator")
 
@@ -190,11 +193,12 @@ class SecureADB(Controller):
 
         except (SecureADBWorkflowError, RemoteADBError) as timeout_exc:
             self.app.log.error(f"[remoteadb-connect] {str(timeout_exc)}")
+            self.app.render(f"[ERROR] Issue in reaching Esper API Service for connection negotiation!")
 
         except CaughtSignal as sig:
             self.app.log.debug(f"Recieved Signal: {signal.Signals(sig.signum).name}")
             if sig.signum == signal.SIGINT:
-                self.app.log.info("Quitting application...")
+                self.app.render("Quitting application...")
 
         except Exception as exc:
             self.app.log.error(f"Failed to establish Secure ADB connection to device: {self.app.pargs.device_name}")
@@ -204,112 +208,8 @@ class SecureADB(Controller):
             if "relay" in locals():
                 relay = locals().get("relay")
                 relay.stop_relay()
-                relay.gather_metrics()
+                metrics = relay.gather_metrics()
                 relay.cleanup_connections()
-    #
-    # @ex(help='Server')
-    # def test_server(self):
-    #     import socket
-    #     import ssl
-    #     import pprint
-    #
-    #     HOST = '127.0.0.1'
-    #     PORT = 1234
-    #
-    #     server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    #     server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-    #     server_socket.bind((HOST, PORT))
-    #     server_socket.listen(10)
-    #
-    #     print(f"Listening on {HOST}:{PORT}...")
-    #     client, fromaddr = server_socket.accept()
-    #     print(f"Connection accepted from {fromaddr}")
-    #
-    #     secure_sock = ssl.wrap_socket(client, server_side=True,
-    #                                   ca_certs="/Users/jeryn/.esper/certs1/local.pem",
-    #                                   certfile="/Users/jeryn/.esper/certs2/local.pem",
-    #                                   keyfile="/Users/jeryn/.esper/certs2/local.key",
-    #                                   cert_reqs=ssl.CERT_REQUIRED,
-    #                                   ssl_version=ssl.PROTOCOL_TLSv1_2)
-    #
-    #     print(repr(secure_sock.getpeername()))
-    #     print(secure_sock.cipher())
-    #
-    #     pprint.pformat(secure_sock.getpeercert())
-    #     cert = secure_sock.getpeercert()
-    #     print(cert)
-    #
-    #     # verify client
-    #     # if not cert or ('commonName', 'test') not in cert['subject'][3]:
-    #     #     raise Exception("ERROR")
-    #
-    #     try:
-    #         data = secure_sock.read(1024)
-    #         secure_sock.write(data)
-    #     finally:
-    #         secure_sock.close()
-    #         server_socket.close()
-    #
-    # @ex(help="Test Client",
-    #     arguments=[
-    #         (['-p', '--port'],
-    #          {'help': "Port",
-    #           'action': 'store',
-    #           'type': int,
-    #           'dest': 'port',
-    #           'default': 1234})
-    #     ]
-    #     )
-    # def test_client(self, host='127.0.0.1'):
-    #     import socket
-    #     import ssl
-    #
-    #     HOST = host
-    #     PORT = self.app.pargs.port
-    #
-    #     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    #     sock.setblocking(1)
-    #     sock.connect((HOST, PORT))
-    #
-    #     context = ssl.SSLContext(ssl.PROTOCOL_TLSv1_2)
-    #     context.verify_mode = ssl.CERT_REQUIRED
-    #     context.load_verify_locations(cafile='/Users/jeryn/.esper/certs2/local.pem')
-    #     context.load_cert_chain(certfile="/Users/jeryn/.esper/certs1/local.pem",
-    #                             keyfile="/Users/jeryn/.esper/certs1/local.key")
-    #
-    #     if ssl.HAS_SNI:
-    #         secure_sock = context.wrap_socket(sock, server_side=False, server_hostname=HOST)
-    #     else:
-    #         secure_sock = context.wrap_socket(sock, server_side=False)
-    #
-    #     cert = secure_sock.getpeercert()
-    #     print(cert)
-    #
-    #     # verify server
-    #     # if not cert or ('commonName', 'test') not in cert['subject'][3]:
-    #     #     raise Exception("ERROR")
-    #
-    #     secure_sock.write(b'hello')
-    #     print(secure_sock.read(1024))
-    #
-    #     secure_sock.close()
-    #     sock.close()
-    #
-    # @ex(help="Test Mediator")
-    # def test_mediator(self):
-    #
-    #     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    #     sock.setblocking(1)
-    #     sock.connect(('127.0.0.1', 1234))
-    #
-    #     mediator = Mediator(secure_conn=sock, secure_addr=('127.0.0.1', 6789), log=self.app.log)
-    #     listener_ip, listener_port = mediator.setup_listener()
-    #
-    #     self.app.log.info(f"|------------------------------------------------------------------------|")
-    #     self.app.log.info(f"| Please connect ADB client to the following endpoint: {listener_ip} : {listener_port} |")
-    #     self.app.log.info(f"|                                                                        |")
-    #     self.app.log.info(f"| Note: Press Ctrl+C to quit!                                            |")
-    #     self.app.log.info(f"|------------------------------------------------------------------------|")
-    #
-    #     self.app.log.debug("[remoteadb-connect] Starting Client Mediator")
-    #     mediator.run_forever()
+
+                self.app.render(f"\nSession Duration: {metrics.get('stopped') - metrics.get('started')}")
+                self.app.render(f"\nTotal Data streamed: {metrics.get('bytes')/1024.0} KB\n")
