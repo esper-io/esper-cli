@@ -13,7 +13,7 @@ class Relay(object):
     """
 
     listener_host = '127.0.0.1'
-    listener_port = None
+    listener_port = 0
     _listener_server = None
     listener_timeout = 5 * 60
 
@@ -41,19 +41,7 @@ class Relay(object):
         self.outbound_conn = relay_conn
         self.outbound_addr = relay_addr
 
-        self.listener_port = self.get_random_port()
-
         self.setup_listener()
-
-    def get_random_port(self, min_port=47000, max_port=57000) -> int:
-        '''Iterate over a range of ports and pick the first free port and return it '''
-
-        for count in range((max_port - min_port)):
-            port = random.randrange(min_port, max_port)
-            with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as probe:
-                resp = probe.connect_ex((socket.gethostname(), port))
-                if resp != 0:
-                    return port
 
     def get_listener_address(self) -> Tuple[str, int]:
         return self.listener_host, self.listener_port
@@ -62,7 +50,14 @@ class Relay(object):
         # Setup a TCP Socket Listener
         self._listener_server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self._listener_server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+
+        # Bind to any free random port
         self._listener_server.bind(self.get_listener_address())
+
+        # Fetch Listener port from bound socket
+        _, self.listener_port = self._listener_server.getsockname()
+
+        # Set to listen mode, with a backlog of 1 connection
         self._listener_server.listen(1)
 
     def accept_connection(self) -> Tuple[socket.socket, Tuple[str, int]]:
@@ -92,9 +87,9 @@ class Relay(object):
         else:
             self.stopped = self.forward.connection_stopped or self.reverse.connection_stopped
 
-        self.log.debug(f"Relay started: {self.started.isoformat()}")
-        self.log.debug(f"Relay stopped: {self.stopped.isoformat()}")
-        self.log.debug(f"Relay Session duration: {str(self.stopped - self.started)}")
+        self.log.debug(f"Relay started: {self.started.isoformat() if self.started else self.started}")
+        self.log.debug(f"Relay stopped: {self.stopped.isoformat() if self.stopped else self.stopped}")
+        self.log.debug(f"Relay Session duration: {str(self.stopped - self.started) if self.started and self.stopped else None}")
 
         return {
             "started": self.started,
