@@ -70,7 +70,8 @@ optional arguments:
   -v, --version         show program's version number and exit
 
 sub-commands:
-  {group-command,group,enterprise,status,install,version,device-command,app,device,configure}
+  {secureadb,group-command,group,enterprise,status,installs,version,device-command,app,device,configure}
+    secureadb           Setup Secure ADB connection to Device
     group-command       group-command controller
     group               group controller
     enterprise          enterprise controller
@@ -1103,6 +1104,42 @@ memory_storage            8294
 memory_ram                1177
 link_speed                  65
 signal_strength              2
+ ```
+
+### **secureadb**
+Secureadb is a new feature that allows users to connect to their devices over Remote adb (using `adb-tools`), over the 
+internet, securely.
+```sh
+$ espercli secureadb [SUB-COMMANDS]
+```
+#### Sub commands
+#### 1. connect
+Establish a secure connection to the device; active device is used to connect if `--device` or `-d` option is not given explicitly.
+
+This will open a local endpoint on your machine, to which the `adb-tool` can connect.
+This local service will relay the traffic, securing by TLS encryption, from adb-tools to the device.
+This will also keep running until `adb disconnect` is run, or the application is quit by `Ctrl+C`. 
+```sh
+$ espercli secureadb connect [OPTIONS]
+```
+##### Options
+| Name, shorthand | Default| Description|
+| -------------   |:------:|:----------|
+| --device, -d    |        | Device name |
+
+##### Example
+ ```sh
+ $ espercli secureadb connect -d SNA-SNL-3GQA
+
+Initiating Remote ADB Session. This may take a few seconds...
+
+Secure ADB Client
+Please connect ADB client to the following endpoint: 127.0.0.1 : 62945
+If adb-tools is installed, please run the command below:
+        adb connect 127.0.0.1:62945
+
+Press Ctrl+C to quit!
+
  ```
  
 We are always in active development and we try our best to keep our documentation up to date. However, if you end up ahead of time you can check our latest documentation on [Github](https://github.com/esper-io/esper-cli).
