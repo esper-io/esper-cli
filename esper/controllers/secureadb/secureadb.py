@@ -101,7 +101,7 @@ class SecureADB(Controller):
 
     @ex(help='Setup and connect securely via Remote ADB to device',
         arguments=[
-            (['-d', '--device-name'],
+            (['-d', '--device'],
              {'help': "Device name",
               'action': 'store',
               'dest': 'device_name',
