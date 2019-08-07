@@ -101,7 +101,7 @@ class SecureADB(Controller):
 
     @ex(help='Setup and connect securely via Remote ADB to device',
         arguments=[
-            (['-d', '--device-name'],
+            (['-d', '--device'],
              {'help': "Device name",
               'action': 'store',
               'dest': 'device_name',
@@ -211,5 +211,8 @@ class SecureADB(Controller):
                 metrics = relay.gather_metrics()
                 relay.cleanup_connections()
 
-                self.app.render(f"\nSession Duration: {metrics.get('stopped') - metrics.get('started')}")
-                self.app.render(f"\nTotal Data streamed: {metrics.get('bytes')/1024.0} KB\n")
+                if metrics.get('started') and metrics.get('stopped'):
+                    self.app.render(f"\nSession Duration: {metrics.get('stopped') - metrics.get('started')}")
+
+                if metrics.get('bytes'):
+                    self.app.render(f"\nTotal Data streamed: {metrics.get('bytes')/1024.0} KB\n")
