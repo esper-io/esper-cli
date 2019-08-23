@@ -31,4 +31,7 @@ class APIClient:
     def get_remoteadb_api_client(self):
         return client.DeviceApi(client.ApiClient(self.config))
 
+    def get_token_api_client(self):
+        return client.TokenApi(client.ApiClient(self.config))
+
 

@@ -1,5 +1,5 @@
 from cement import Controller, ex
-from esperclient import EnterpriseUpdate
+from esperclient import EnterpriseUpdateV1
 from esperclient.rest import ApiException
 
 from esper.controllers.enums import OutputFormat
@@ -29,42 +29,40 @@ class Enterprise(Controller):
         email = None
         contact_person = None
         contact_number = None
-        if enterprise.details:
-            registered_name = enterprise.details.registered_name
-            address = enterprise.details.registered_address
-            location = enterprise.details.location
-            zipcode = enterprise.details.zipcode
-            email = enterprise.details.contact_email
-            contact_person = enterprise.details.contact_person
-            contact_number = enterprise.details.contact_number
+        if enterprise:
+            registered_name = enterprise.registered_name
+            address = enterprise.registered_address
+            location = enterprise.location
+            zipcode = enterprise.zipcode
+            email = enterprise.contact_email
+            contact_person = enterprise.contact_person
+            contact_number = enterprise.contact_number
 
         if format == OutputFormat.TABULATED:
             title = "TITLE"
             details = "DETAILS"
             renderable = [
-                {title: 'id', details: enterprise.id},
-                {title: 'name', details: enterprise.name},
-                {title: 'display_name', details: enterprise.display_name},
-                {title: 'registered_name', details: registered_name},
-                {title: 'address', details: address},
-                {title: 'location', details: location},
-                {title: 'zipcode', details: zipcode},
-                {title: 'email', details: email},
-                {title: 'contact_person', details: contact_person},
-                {title: 'contact_number', details: contact_number}
+                {title: 'Enterprise Id', details: enterprise.id},
+                {title: 'Name', details: enterprise.name},
+                {title: 'Registered Name', details: registered_name},
+                {title: 'Address', details: address},
+                {title: 'Location', details: location},
+                {title: 'Zip Code', details: zipcode},
+                {title: 'Email', details: email},
+                {title: 'Contact Person', details: contact_person},
+                {title: 'Contact Number', details: contact_number}
             ]
         else:
             renderable = {
-                'id': enterprise.id,
-                'name': enterprise.name,
-                'display_name': enterprise.display_name,
-                'registered_name': registered_name,
-                'address': address,
-                'location': location,
-                'zipcode': zipcode,
-                'email': email,
-                'contact_person': contact_person,
-                'contact_number': contact_number
+                'Enterprise Id': enterprise.id,
+                'Name': enterprise.name,
+                'Registered Name': registered_name,
+                'Address': address,
+                'Location': location,
+                'Zip Code': zipcode,
+                'Email': email,
+                'Contact Person': contact_person,
+                'Contact Number': contact_number
             }
 
         return renderable
@@ -148,41 +146,35 @@ class Enterprise(Controller):
         db = DBWrapper(self.app.creds)
         enterprise_client = APIClient(db.get_configure()).get_enterprise_api_client()
         enterprise_id = db.get_enterprise_id()
-        data = EnterpriseUpdate()
+        data = EnterpriseUpdateV1()
+        update_dict = {}
 
         if self.app.pargs.name:
-            data.name = self.app.pargs.name
+            update_dict['name'] = self.app.pargs.name
 
-        if self.app.pargs.display_name:
-            data.display_name = self.app.pargs.display_name
-
-        details = {}
         if self.app.pargs.registered_name:
-            details['registered_name'] = self.app.pargs.registered_name
+            update_dict['registered_name'] = self.app.pargs.registered_name
 
         if self.app.pargs.address:
-            details['registered_address'] = self.app.pargs.address
+            update_dict['registered_address'] = self.app.pargs.address
 
         if self.app.pargs.location:
-            details['location'] = self.app.pargs.location
+            update_dict['location'] = self.app.pargs.location
 
         if self.app.pargs.zipcode:
-            details['zipcode'] = self.app.pargs.zipcode
+            update_dict['zipcode'] = self.app.pargs.zipcode
 
         if self.app.pargs.email:
-            details['contact_email'] = self.app.pargs.email
+            update_dict['contact_email'] = self.app.pargs.email
 
         if self.app.pargs.contact_person:
-            details['contact_person'] = self.app.pargs.contact_person
+            update_dict['contact_person'] = self.app.pargs.contact_person
 
         if self.app.pargs.contact_number:
-            details['contact_number'] = self.app.pargs.contact_number
-
-        if bool(details):
-            data.details = details
+            update_dict['contact_number'] = self.app.pargs.contact_number
 
         try:
-            response = enterprise_client.partial_update_enterprise(enterprise_id, data)
+            response = enterprise_client.partial_update_enterprise(enterprise_id, update_dict)
         except ApiException as e:
             self.app.log.error(f"[enterprise-update] Failed to update details of an enterprise: {e}")
             self.app.render(f"ERROR: {parse_error_message(self.app, e)}")

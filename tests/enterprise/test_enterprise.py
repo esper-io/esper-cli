@@ -21,18 +21,28 @@ class EnterpriseTest(TestCase):
             app.run()
             data, output = app.last_rendered
 
-            assert data[1]["DETAILS"] == "Shoonya Default Enterprise"
-            assert data[3]["DETAILS"] == "Shoonya Default Enterprise"
+
+            assert data[2]["DETAILS"] == "Shoonya Default Enterprise"
 
     def test_update_enterprise(self):
-        argv = ['enterprise', 'update', '--zipcode', '54321']
+        argv = ['enterprise', 'show', '--json']
+        zipcode = None
+        with EsperTest(argv=argv) as app:
+            app.run()
+            data, output = app.last_rendered
+            zipcode =data['Zip Code']
+
+
+
+        argv = ['enterprise', 'update', '--json','--zipcode', '54321']
+
         with EsperTest(argv=argv) as app:
             app.run()
             data, output = app.last_rendered
 
-            assert data[6]["DETAILS"] == "54321"
+            assert data['Zip Code'] == '54321'
 
         # Revert the changes
-        argv = ['enterprise', 'update', '--zipcode', '12345']
+        argv = ['enterprise', 'update', '--zipcode', zipcode]
         with EsperTest(argv=argv) as app:
             app.run()
