@@ -12,7 +12,7 @@ class Token(Controller):
         label = 'token'
 
         # text displayed at the top of --help output
-        description = 'token command'
+        description = 'token command for displaying all the information associated with the token'
 
         # text displayed at the bottom of --help output
         epilog = 'Usage: espercli token'
