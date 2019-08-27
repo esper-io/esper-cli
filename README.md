@@ -6,8 +6,8 @@ This package provides a unified command line interface to the Esper API Services
 Current stable release versions are
 
     API version: 1.0.0
-    SDK version: 0.0.6
-    CLI version: 0.0.4
+    SDK version: 0.0.9
+    CLI version: 0.0.6
 
 ## Requirements
 
@@ -108,6 +108,38 @@ environment   foo
 api_key  LpDriKp7MWJiRGcwc8xzREeUj8OEFa
 ```
 
+### **Token**
+Token command is used to show the information associated with the token.
+```sh
+$ espercli token [SUB-COMMANDS]
+```
+#### Sub commands
+#### 1. show
+Show token information.
+```sh
+$ espercli token show [OPTIONS]
+```
+##### Options
+| Name, shorthand| Default| Description|
+| ------------- |:-------------:|:-----|
+| --json, -j     |  | Render result in JSON format |
+
+##### Example
+```sh
+$ espercli token show
+
+TITLE          DETAILS
+Enterprise Id  f44373cb-1800-43c6-aab3-c81f8b1f435c
+Token          U1XEFTNS1ujALK2Q7Gl3hfPclCclhX
+Expires On     2019-11-19 15:42:16.637203+00:00
+Scope          ['read', 'write', 'update', 'introspection', 'sdk', 'register']
+Created On     2019-08-20 08:02:16.640250+00:00
+Updated On     2019-08-20 08:02:16.640275+00:00
+
+$ espercli token show -j
+{"Enterprise": "f44373cb-1800-43c6-aab3-c81f8b1f435c", "Developer App": "5b4ececb-b446-4f47-9e6f-0b47760763be", "Token": "U2XEFT3S2ujALK2QlGl3hf2clCclhX", "Expires On": ["read", "write", "update", "introspection", "sdk", "register"], "Created On": "2019-08-20 08:02:16.640250+00:00", "Updated On": "2019-08-20 08:02:16.640275+00:00"}%
+```
+
 ### **Enterprise**
 Enterprise command used to show and modify enterprise information.
 ```sh
@@ -129,19 +161,18 @@ $ espercli enterprise show [OPTIONS]
 $ espercli enterprise show
 
 TITLE            DETAILS
-id               595a6107-b137-448d-b217-e20cc58ee84d
-name             Foo Enterprise
-display_name     Foo
-registered_name  Foo Enterprise
-address          #123, Industrial Layout, Random Avenue
-location         Santa Clara, CA
-zipcode          12345
-email            contact@foo.io
-contact_person   Muneer
-contact_number   +145678901234
+Enterprise Id    595a6107-b137-448d-b217-e20cc58ee84d
+Name             Foo Enterprise
+Registered Name  Foo Enterprise
+Address          #123, Industrial Layout, Random Avenue
+Location         Santa Clara, CA
+Zip Code          12345
+Email            contact@foo.io
+Contact Person   Muneer
+Contact Number   +145678901234
 
 $ espercli enterprise show -j
-{"id": "595a6107-b137-448d-b217-e20cc58ee84d", "name": "Foo Enterprise", "display_name": "Foo", "registered_name": "Foo Enterprise", "address": "#123, Industrial Layout, Random Avenue", "location": "Santa Clara, CA", "zipcode": "12345", "email": "contact@foo.io", "contact_person": "Muneer", "contact_number": "+141234501234"}%
+{"Enterprise Id": "f44373cb-1800-43c6-aab3-c81f8b1f435c", "Name": "Shoonya", "Registered Name": "Foo Enterprise", "Address": "#123, Industrial Layout, Random Avenue", "Location": "Santa Clara, CA", "Zip Code": "54321", "Email": "contact@foo.io", "Contact Person": "Muneer", "Contact Number": "+145678901234"}%
 ```
 
 #### 2. update
