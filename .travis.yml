@@ -11,4 +11,3 @@ install:
 
 # command to run tests
 script:
-  - echo "test"
