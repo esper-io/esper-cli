@@ -33,5 +33,3 @@ class APIClient:
 
     def get_token_api_client(self):
         return client.TokenApi(client.ApiClient(self.config))
-
-

@@ -12,3 +12,4 @@ tqdm==4.32.1
 
 # For Secure ADB
 pyOpenSSL==19.0.0
+
