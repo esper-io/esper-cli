@@ -33,7 +33,6 @@ class EnterpriseTest(TestCase):
             zipcode =data['Zip Code']
 
 
-
         argv = ['enterprise', 'update', '--json','--zipcode', '54321']
 
         with EsperTest(argv=argv) as app:
