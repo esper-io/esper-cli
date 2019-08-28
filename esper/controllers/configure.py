@@ -55,11 +55,11 @@ class Configure(Controller):
             environment = input("Environment name: ")
             api_key = prompt.query("Esper API Key: ")
 
-            enterprise_client = APIClient({'api_key': api_key, 'environment': environment}).get_enterprise_api_client()
+            token_client = APIClient({'api_key': api_key, 'environment': environment}).get_token_api_client()
             try:
-                response = enterprise_client.get_all_enterprises()
+                response = token_client.get_token_info()
             except ApiException as e:
-                self.app.log.error(f"[configure] Failed to list enterprises: {e}")
+                self.app.log.error(f"[configure] Failed to get token info: {e}")
                 if e.status == HTTPStatus.UNAUTHORIZED:
                     self.app.render("You are not authorized, invalid API Key.")
                 else:
@@ -68,8 +68,8 @@ class Configure(Controller):
                     self.app.render(f"ERROR: {error_message}")
                 return
 
-            if response.results and len(response.results) > 0:
-                enterprise_id = response.results[0].id
+            if response:
+                enterprise_id = response.enterprise
             else:
                 self.app.log.info(f"[configure] API key is not associated with any enterprise.")
                 self.app.render("API key is not associated with any enterprise.")
