@@ -172,7 +172,7 @@ Contact Person   Shiv Sundar
 Contact Number   +145678901234
 
 $ espercli enterprise show -j
-{"Enterprise Id": "f44373cb-1800-43c6-aab3-c81f8b1f435c", "Name": "Shoonya", "Registered Name": "Foo Enterprise", "Address": "#123, Industrial Layout, Random Avenue", "Location": "Santa Clara, CA", "Zip Code": "54321", "Email": "contact@foo.io", "Contact Person": "Muneer", "Contact Number": "+145678901234"}%
+{"Enterprise Id": "f44373cb-1800-43c6-aab3-c81f8b1f435c", "Name": "Shoonya", "Registered Name": "Foo Enterprise", "Address": "#123, Industrial Layout, Random Avenue", "Location": "Santa Clara, CA", "Zip Code": "54321", "Email": "contact@foo.io", "Contact Person": "Shiv Sundar", "Contact Number": "+145678901234"}%
 ```
 
 #### 2. update
