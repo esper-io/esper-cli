@@ -166,9 +166,9 @@ Name             Foo Enterprise
 Registered Name  Foo Enterprise
 Address          #123, Industrial Layout, Random Avenue
 Location         Santa Clara, CA
-Zip Code          12345
+Zip Code         12345
 Email            contact@foo.io
-Contact Person   Muneer
+Contact Person   Shiv Sundar
 Contact Number   +145678901234
 
 $ espercli enterprise show -j
@@ -199,16 +199,15 @@ $ espercli enterprise update [OPTIONS]
 $ espercli enterprise update -p 'Muneer M'
 
 TITLE            DETAILS
-id               595a6107-b137-448d-b217-e20cc58ee84d
-name             Foo Enterprise
-display_name     Foo
-registered_name  Foo Enterprise
-address          #123, Industrial Layout, Random Avenue
-location         Santa Clara, CA
-zipcode          12345
-email            contact@foo.io
-contact_person   Muneer M
-contact_number   +145678901234
+Enterprise Id    595a6107-b137-448d-b217-e20cc58ee84d
+Name             Foo Enterprise
+Registered Name  Foo Enterprise
+Address          #123, Industrial Layout, Random Avenue
+Location         Santa Clara, CA
+Zip Code         12345
+Email            contact@foo.io
+Contact Person   Muneer M
+Contact Number   +145678901234
 ```
 
 ### **Device**
