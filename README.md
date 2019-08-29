@@ -130,14 +130,14 @@ $ espercli token show
 
 TITLE          DETAILS
 Enterprise Id  f44373cb-1800-43c6-aab3-c81f8b1f435c
-Token          U1XEFTNS1ujALK2Q7Gl3hfPclCclhX
+Token          U1XEFTNS1ujAMK2Q7Gl3hfPclCclhX
 Expires On     2019-11-19 15:42:16.637203+00:00
 Scope          ['read', 'write', 'update', 'introspection', 'sdk', 'register']
 Created On     2019-08-20 08:02:16.640250+00:00
 Updated On     2019-08-20 08:02:16.640275+00:00
 
 $ espercli token show -j
-{"Enterprise": "f44373cb-1800-43c6-aab3-c81f8b1f435c", "Developer App": "5b4ececb-b446-4f47-9e6f-0b47760763be", "Token": "U2XEFT3S2ujALK2QlGl3hf2clCclhX", "Expires On": ["read", "write", "update", "introspection", "sdk", "register"], "Created On": "2019-08-20 08:02:16.640250+00:00", "Updated On": "2019-08-20 08:02:16.640275+00:00"}%
+{"Enterprise": "f44373cb-1800-43c6-aab3-c81f8b1f435c", "Developer App": "5b4ececb-b446-4f47-9e6f-0b47760763be", "Token": "U1XEFTNS1ujAMK2Q7Gl3hfPclCclhX", "Expires On": ["read", "write", "update", "introspection", "sdk", "register"], "Created On": "2019-08-20 08:02:16.640250+00:00", "Updated On": "2019-08-20 08:02:16.640275+00:00"}%
 ```
 
 ### **Enterprise**
@@ -172,7 +172,7 @@ Contact Person   Shiv Sundar
 Contact Number   +145678901234
 
 $ espercli enterprise show -j
-{"Enterprise Id": "f44373cb-1800-43c6-aab3-c81f8b1f435c", "Name": "Shoonya", "Registered Name": "Foo Enterprise", "Address": "#123, Industrial Layout, Random Avenue", "Location": "Santa Clara, CA", "Zip Code": "54321", "Email": "contact@foo.io", "Contact Person": "Shiv Sundar", "Contact Number": "+145678901234"}%
+{"Enterprise Id": "595a6107-b137-448d-b217-e20cc58ee84d", "Name": "Foo Enterprise", "Registered Name": "Foo Enterprise", "Address": "#123, Industrial Layout, Random Avenue", "Location": "Santa Clara, CA", "Zip Code": "12345", "Email": "contact@foo.io", "Contact Person": "Shiv Sundar", "Contact Number": "+145678901234"}%
 ```
 
 #### 2. update
