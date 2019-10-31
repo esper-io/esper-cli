@@ -10,9 +10,6 @@ from esper.ext.utils import validate_creds_exists, parse_error_message
 from datetime import datetime, timedelta
 import requests
 
-# Hardcoded until code cleanup
-environment = 'multicontainer2'
-
 
 class Telemetry(Controller):
     class Meta:
@@ -64,6 +61,7 @@ class Telemetry(Controller):
     def get_data(self):
         validate_creds_exists(self.app)
         db = DBWrapper(self.app.creds)
+        environment = db.get_configure().get("environment")
         enterprise_id = db.get_enterprise_id()
         device_client = APIClient(db.get_configure()).get_device_api_client()
 
