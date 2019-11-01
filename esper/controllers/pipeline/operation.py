@@ -3,23 +3,23 @@ from clint.textui import prompt
 
 from esper.controllers.enums import OutputFormat
 from esper.ext.db_wrapper import DBWrapper
-from esper.ext.pipeline_api import get_stage_url, create_stage, edit_stage, list_stages, delete_api,\
+from esper.ext.pipeline_api import get_operation_url, create_operation, edit_operation, list_stages, delete_api, \
     APIException, render_single_dict
 from esper.ext.utils import validate_creds_exists
 
 
-class Stage(Controller):
+class Operation(Controller):
     class Meta:
-        label = 'stage'
+        label = 'operation'
 
         # text displayed at the top of --help output
-        description = 'Pipeline Stage commands'
+        description = 'Pipeline Stage Operation commands'
 
         # text displayed at the bottom of --help output
-        epilog = 'Usage: espercli pipeline stage'
+        epilog = 'Usage: espercli pipeline stage operation'
 
         stacked_type = 'nested'
-        stacked_on = 'pipeline'
+        stacked_on = 'stage'
 
     @ex(
         help='Add a Stage',
@@ -29,21 +29,25 @@ class Stage(Controller):
               'action': 'store',
               'dest': 'pipeline_id',
               'default': None}),
+            (['-s', '--stage-id'],
+             {'help': 'Stage ID',
+              'action': 'store',
+              'dest': 'stage_id',
+              'default': None}),
             (['-n', '--name'],
-             {'help': 'Name for this Stage',
+             {'help': 'Name for this Operation',
               'action': 'store',
               'dest': 'name',
               'default': None}),
             (['--desc'],
-             {'help': 'Stage Description',
+             {'help': 'Operation Description',
               'action': 'store',
               'dest': 'desc',
               'default': None}),
-            (['-o', '--order'],
-             {'help': 'Stage Ordering - This has to be unique within a pipeline',
+            (['-a, --action'],
+             {'help': 'Action for this Operation',
               'action': 'store',
-              'dest': 'order',
-              'type': int,
+              'dest': 'action',
               'default': None})
         ]
     )
@@ -57,25 +61,35 @@ class Stage(Controller):
         if not pipeline_id:
             pipeline_id = prompt.query("Enter the Pipeline ID: ")
 
+        stage_id = self.app.pargs.stage_id
+        if not stage_id:
+            stage_id = prompt.query("Enter the Stage ID: ")
+
         name = self.app.pargs.name
         if not name:
-            name = input("Name of the Stage: ")
+            name = input("Name of the Operation: ")
 
-        order = self.app.pargs.order
-        if not order:
-            order = prompt.query("Order of this Stage: ")
+        action = self.app.pargs.action
+        if not action:
+            action = prompt.options(
+                "Action for this Operation: ",
+                options=[
+                    {"selector": 1, "prompt": "App Install to a Group of Devices", "return": 1},
+                    {"selector": 2, "prompt": "App UnInstall to a Group of Devices", "return": 2},
+                    {"selector": 3, "prompt": "Reboot a Group of Devices", "return": 3},
+                ])
 
         desc = self.app.pargs.desc
         if not desc:
-            desc = input("Description for this Stage [optional]: ")
+            desc = input("Description for this Operation [optional]: ")
 
         # Calling Pipeline Graphs API
-        url = get_stage_url(environment, enterprise_id, pipeline_id)
+        url = get_operation_url(environment, enterprise_id, pipeline_id, stage_id)
         api_key = db.get_configure().get("api_key")
 
         try:
-            self.app.log.debug("Creating Pipeline...")
-            response = create_stage(url, api_key, name, order, desc)
+            self.app.log.debug("Creating Operation...")
+            response = create_operation(url, api_key, name, action, desc)
         except APIException:
             self.app.render("ERROR in connecting to Environment!")
             return
@@ -88,7 +102,10 @@ class Stage(Controller):
                 if errors:
                     self.app.log.error(f"Validation Error: {errors}")
                 if response.json().get("errors"):
-                    self.app.log.error(f"Validation Error: {response.json().get('errors')}")
+                    if "The fields pipeline, ordering must make a unique set." in response.json().get("message"):
+                        self.app.log.error(f"Operation Already created for this Stage!")
+                    else:
+                        self.app.log.error(f"Validation Error: {response.json().get('errors')}")
 
             if response.status_code == 404:
                 self.app.log.error("Stage URL not found!")
@@ -100,11 +117,11 @@ class Stage(Controller):
         # Rendering table with populated values
         data = render_single_dict(response.json())
 
-        self.app.render(f"Added Stage to Pipeline Successfully! Details: \n")
+        self.app.render(f"Added Operation to Stage Successfully! Details: \n")
         self.app.render(data, format=OutputFormat.TABULATED.value, headers="keys", tablefmt="plain")
 
     @ex(
-        help='Edit a Stage',
+        help='Edit an Operation',
         arguments=[
             (['-s', '--stage-id'],
              {'help': 'Stage ID',
@@ -116,20 +133,25 @@ class Stage(Controller):
               'action': 'store',
               'dest': 'pipeline_id',
               'default': None}),
+            (['-o', '--operation-id'],
+             {'help': 'Operation ID',
+              'action': 'store',
+              'dest': 'operation_id',
+              'default': None}),
             (['-n', '--name'],
-             {'help': 'Name for this Stage',
+             {'help': 'Name for this Operation',
               'action': 'store',
               'dest': 'name',
               'default': None}),
             (['--desc'],
-             {'help': 'Stage Description',
+             {'help': 'Operation Description',
               'action': 'store',
               'dest': 'desc',
               'default': None}),
-            (['-o', '--order'],
-             {'help': 'Stage Ordering - This has to be unique within a pipeline',
+            (['-a', '--action'],
+             {'help': 'Action for this Operation',
               'action': 'store',
-              'dest': 'order',
+              'dest': 'action',
               'type': int,
               'default': None})
         ]
@@ -148,25 +170,35 @@ class Stage(Controller):
         if not stage_id:
             stage_id = prompt.query("Enter the Stage ID: ")
 
+        operation_id = self.app.pargs.operation_id
+        if not operation_id:
+            operation_id = prompt.query("Enter the Operation ID: ")
+
         name = self.app.pargs.name
         if not name:
-            name = input("Change the name of the Stage: ")
+            name = input("Change the name of the Operation: ")
 
         desc = self.app.pargs.desc
         if not desc:
-            desc = input("Change the description for this Stage [optional]: ")
+            desc = input("Change the description for this Operation [optional]: ")
 
-        order = self.app.pargs.order
-        if not order:
-            order = input("Change the Ordering for this Stage [optional]: ")
+        action = self.app.pargs.action
+        if not action:
+            action = prompt.options(
+                "Action for this Operation: ",
+                options=[
+                    {"selector": 1, "prompt": "App Install to a Group of Devices", "return": 1},
+                    {"selector": 2, "prompt": "App UnInstall to a Group of Devices", "return": 2},
+                    {"selector": 3, "prompt": "Reboot a Group of Devices", "return": 3},
+                ])
 
         # Calling Pipeline Graphs API
-        url = get_stage_url(environment, enterprise_id, pipeline_id=pipeline_id, stage_id=stage_id)
+        url = get_operation_url(environment, enterprise_id, pipeline_id=pipeline_id, stage_id=stage_id, operation_id=operation_id)
         api_key = db.get_configure().get("api_key")
 
         try:
-            self.app.log.debug("Editing Stage...")
-            response = edit_stage(url, api_key, name, order, desc)
+            self.app.log.debug("Editing Operation...")
+            response = edit_operation(url, api_key, name, action, desc)
         except APIException:
             self.app.render("ERROR in connecting to Environment!")
             return
@@ -191,14 +223,19 @@ class Stage(Controller):
         # Rendering table with populated values
         data = render_single_dict(response.json())
 
-        self.app.render(f"Edited Stage for this Pipeline Successfully! Details: \n")
+        self.app.render(f"Edited Operation for this Stage Successfully! Details: \n")
         self.app.render(data, format=OutputFormat.TABULATED.value, headers="keys", tablefmt="plain")
 
     @ex(
         help='List all Stages',
         arguments=[
+            (['-s', '--stage-id'],
+             {'help': 'Stage ID',
+              'action': 'store',
+              'dest': 'stage_id',
+              'default': None}),
             (['-p', '--pipeline-id'],
-             {'help': 'Name of the Pipeline',
+             {'help': 'Pipeline ID',
               'action': 'store',
               'dest': 'pipeline_id',
               'default': None})
@@ -214,12 +251,16 @@ class Stage(Controller):
         if not pipeline_id:
             pipeline_id = prompt.query("Enter the Pipeline ID: ")
 
+        stage_id = self.app.pargs.stage_id
+        if not stage_id:
+            stage_id = prompt.query("Enter the Stage ID: ")
+
         # Calling Pipeline Graphs API
-        url = get_stage_url(environment, enterprise_id, pipeline_id=pipeline_id)
+        url = get_operation_url(environment, enterprise_id, pipeline_id=pipeline_id, stage_id=stage_id)
         api_key = db.get_configure().get("api_key")
 
         try:
-            self.app.log.debug("Listing Stages...")
+            self.app.log.debug("Listing Operations...")
             response = list_stages(url, api_key)
 
         except APIException:
@@ -253,16 +294,16 @@ class Stage(Controller):
                 "NAME": stage.get("name"),
                 "DESCRIPTION": stage.get("description"),
                 "ORDERING": stage.get("ordering"),
-                "OPERATIONS": len(stage.get("operations")),
+                "ACTION": stage.get("action"),
                 "VERSION": stage.get("version")
             }
             render_data.append(render_pipeline)
 
-        self.app.render(f"Listing Stages for the Pipeline! Details: \n")
+        self.app.render(f"Listing Operations for the Stage! Details: \n")
         self.app.render(render_data, format=OutputFormat.TABULATED.value, headers="keys", tablefmt="plain")
 
     @ex(
-        help='Remove a Stage',
+        help='Remove an Operation',
         arguments=[
             (['-s', '--stage-id'],
              {'help': 'Stage ID',
@@ -273,6 +314,11 @@ class Stage(Controller):
              {'help': 'Pipeline ID',
               'action': 'store',
               'dest': 'pipeline_id',
+              'default': None}),
+            (['-o', '--operation-id'],
+             {'help': 'Operation ID',
+              'action': 'store',
+              'dest': 'operation_id',
               'default': None})
         ]
     )
@@ -290,12 +336,17 @@ class Stage(Controller):
         if not stage_id:
             stage_id = prompt.query("Enter the Stage ID: ")
 
+        operation_id = self.app.pargs.operation_id
+        if not operation_id:
+            operation_id = prompt.query("Enter the Operation ID: ")
+
         # Calling Pipeline Graphs API
-        url = get_stage_url(environment, enterprise_id, pipeline_id=pipeline_id, stage_id=stage_id)
+        url = get_operation_url(environment, enterprise_id, pipeline_id=pipeline_id, stage_id=stage_id,
+                                operation_id=operation_id)
         api_key = db.get_configure().get("api_key")
 
         try:
-            self.app.log.debug("Removing Stage...")
+            self.app.log.debug("Removing Operation...")
             response = delete_api(url, api_key)
         except APIException:
             self.app.render("ERROR in connecting to Environment!")
@@ -306,10 +357,10 @@ class Stage(Controller):
             self.app.log.debug(f"Response not OK. Response: {response.json()}")
 
             if response.status_code == 404:
-                self.app.log.error("Stage not found!")
+                self.app.log.error("Operation not found!")
 
             if response.status_code == 500:
                 self.app.log.error(f"Internal Server Error! {response.json()}")
             return
 
-        self.app.render(f"Removed Stage for this Pipeline Successfully! \n")
+        self.app.render(f"Removed Operation for this Stage Successfully! \n")

@@ -3,7 +3,8 @@ from clint.textui import prompt
 
 from esper.controllers.enums import OutputFormat
 from esper.ext.db_wrapper import DBWrapper
-from esper.ext.pipeline_api import get_pipeline_url, create_pipeline, edit_pipeline, list_pipelines, fetch_pipelines, APIException, render_single_dict
+from esper.ext.pipeline_api import get_pipeline_url, create_pipeline, edit_pipeline, list_pipelines, fetch_pipelines, \
+    APIException, render_single_dict, delete_api
 from esper.ext.utils import validate_creds_exists
 
 
@@ -227,3 +228,47 @@ class Pipeline(Controller):
 
         self.app.render(f"Listing Pipeline! Details: \n")
         self.app.render(render_data, format=OutputFormat.TABULATED.value, headers="keys", tablefmt="plain")
+
+    @ex(
+        help='Remove a Pipeline',
+        arguments=[
+            (['-p', '--pipeline-id'],
+             {'help': 'Pipeline ID',
+              'action': 'store',
+              'dest': 'pipeline_id',
+              'default': None})
+        ]
+    )
+    def remove(self):
+        validate_creds_exists(self.app)
+        db = DBWrapper(self.app.creds)
+        environment = db.get_configure().get("environment")
+        enterprise_id = db.get_enterprise_id()
+
+        pipeline_id = self.app.pargs.pipeline_id
+        if not pipeline_id:
+            pipeline_id = prompt.query("Enter the Pipeline ID: ")
+
+        # Calling Pipeline Graphs API
+        url = get_pipeline_url(environment, enterprise_id, pipeline_id=pipeline_id)
+        api_key = db.get_configure().get("api_key")
+
+        try:
+            self.app.log.debug("Removing Pipeline...")
+            response = delete_api(url, api_key)
+        except APIException:
+            self.app.render("ERROR in connecting to Environment!")
+            return
+
+        if not response.ok:
+            self.app.log.debug(f"Response not OK. Status Code: {response.status_code}")
+            self.app.log.debug(f"Response not OK. Response: {response.json()}")
+
+            if response.status_code == 404:
+                self.app.log.error("Pipeline not found!")
+
+            if response.status_code == 500:
+                self.app.log.error(f"Internal Server Error! {response.json()}")
+            return
+
+        self.app.render(f"Removed Pipeline Successfully! \n")

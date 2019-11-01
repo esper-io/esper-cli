@@ -94,11 +94,32 @@ def create_pipeline(url, api_key, pipeline_name, pipeline_desc=None):
 
     return response
 
+
 def create_stage(url, api_key, stage_name, stage_order, stage_desc=None):
     try:
         data = {"name": stage_name, "ordering": stage_order}
         if stage_desc:
             data["description"] = stage_desc
+
+        response = requests.post(
+            url,
+            headers={
+                'Authorization': f'Bearer {api_key}'
+            },
+            data=data
+        )
+
+    except Exception as exc:
+        raise APIException(exc)
+
+    return response
+
+
+def create_operation(url, api_key, operation_name, operation_action, operation_desc=None):
+    try:
+        data = {"name": operation_name, "action": operation_action}
+        if operation_desc:
+            data["description"] = operation_desc
 
         response = requests.post(
             url,
@@ -145,6 +166,30 @@ def edit_stage(url, api_key, stage_name=None, stage_order=None, stage_desc=None)
             data["ordering"] = stage_order
         if stage_desc:
             data["description"] = stage_desc
+
+        response = requests.patch(
+            url,
+            headers={
+                'Authorization': f'Bearer {api_key}'
+            },
+            data=data
+        )
+
+    except Exception as exc:
+        raise APIException(exc)
+
+    return response
+
+
+def edit_operation(url, api_key, operation_name=None, operation_action=None, operation_desc=None):
+    try:
+        data = {}
+        if operation_name:
+            data["name"] = operation_name
+        if operation_action:
+            data["action"] = operation_action
+        if operation_desc:
+            data["description"] = operation_desc
 
         response = requests.patch(
             url,
@@ -208,6 +253,21 @@ def fetch_pipelines(url, api_key):
 def fetch_stages(url, api_key):
     try:
         response = requests.get(
+            url,
+            headers={
+                'Authorization': f'Bearer {api_key}'
+            }
+        )
+
+    except Exception as exc:
+        raise APIException(exc)
+
+    return response
+
+
+def delete_api(url, api_key):
+    try:
+        response = requests.delete(
             url,
             headers={
                 'Authorization': f'Bearer {api_key}'
