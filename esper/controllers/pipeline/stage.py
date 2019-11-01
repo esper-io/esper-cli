@@ -62,7 +62,7 @@ class Stage(Controller):
 
         order = self.app.pargs.order
         if not order:
-            name = prompt.query("Order of this Stage: ")
+            order = prompt.query("Order of this Stage: ")
 
         desc = self.app.pargs.desc
         if not desc:
