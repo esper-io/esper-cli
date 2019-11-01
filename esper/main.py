@@ -16,6 +16,7 @@ from esper.controllers.enterprise.group import EnterpriseGroup
 from esper.controllers.secureadb.secureadb import SecureADB
 from esper.controllers.token.token import Token
 from esper.controllers.pipeline.pipeline import Pipeline
+from esper.controllers.pipeline.stage import Stage
 from esper.core.exc import EsperError
 from esper.core.output_handler import EsperOutputHandler
 from esper.ext.utils import extend_tinydb
@@ -106,7 +107,8 @@ class Esper(App):
             SecureADB,
             Token,
             Telemetry,
-            Pipeline
+            Pipeline,
+            Stage
         ]
 
         # hooks

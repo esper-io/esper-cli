@@ -3,35 +3,46 @@ from clint.textui import prompt
 
 from esper.controllers.enums import OutputFormat
 from esper.ext.db_wrapper import DBWrapper
-from esper.ext.pipeline_api import get_pipeline_url, create_pipeline, edit_pipeline, list_pipelines, fetch_pipelines, APIException, render_single_dict
+from esper.ext.pipeline_api import get_stage_url, create_stage, edit_stage, list_stages, fetch_stages, APIException, render_single_dict
 from esper.ext.utils import validate_creds_exists
 
 
-class Pipeline(Controller):
+class Stage(Controller):
     class Meta:
-        label = 'pipeline'
+        label = 'stage'
 
         # text displayed at the top of --help output
-        description = 'Pipeline commands'
+        description = 'Pipeline Stage commands'
 
         # text displayed at the bottom of --help output
-        epilog = 'Usage: espercli pipeline'
+        epilog = 'Usage: espercli pipeline stage'
 
         stacked_type = 'nested'
-        stacked_on = 'base'
+        stacked_on = 'pipeline'
 
     @ex(
-        help='Create a pipeline',
+        help='Add a Stage',
         arguments=[
+            (['-p', '--pipeline-id'],
+             {'help': 'Pipeline ID',
+              'action': 'store',
+              'dest': 'pipeline_id',
+              'default': None}),
             (['-n', '--name'],
-             {'help': 'Name of the Pipeline',
+             {'help': 'Name for this Stage',
               'action': 'store',
               'dest': 'name',
               'default': None}),
             (['--desc'],
-             {'help': 'Pipeline Description',
+             {'help': 'Stage Description',
               'action': 'store',
               'dest': 'desc',
+              'default': None}),
+            (['-o', '--order'],
+             {'help': 'Stage Ordering - This has to be unique within a pipeline',
+              'action': 'store',
+              'dest': 'order',
+              'type': int,
               'default': None})
         ]
     )
@@ -41,21 +52,29 @@ class Pipeline(Controller):
         environment = db.get_configure().get("environment")
         enterprise_id = db.get_enterprise_id()
 
+        pipeline_id = self.app.pargs.pipeline_id
+        if not pipeline_id:
+            pipeline_id = prompt.query("Enter the Pipeline ID: ")
+
         name = self.app.pargs.name
         if not name:
-            name = prompt.query("Name of the Pipeline: ")
+            name = input("Name of the Stage: ")
+
+        order = self.app.pargs.order
+        if not order:
+            name = prompt.query("Order of this Stage: ")
 
         desc = self.app.pargs.desc
         if not desc:
-            desc = input("Description for this Pipeline [optional]: ")
+            desc = input("Description for this Stage [optional]: ")
 
         # Calling Pipeline Graphs API
-        url = get_pipeline_url(environment, enterprise_id)
+        url = get_stage_url(environment, enterprise_id, pipeline_id)
         api_key = db.get_configure().get("api_key")
 
         try:
             self.app.log.debug("Creating Pipeline...")
-            response = create_pipeline(url, api_key, name, desc)
+            response = create_stage(url, api_key, name, order, desc)
         except APIException:
             self.app.render("ERROR in connecting to Environment!")
             return
@@ -71,7 +90,7 @@ class Pipeline(Controller):
                     self.app.log.error(f"Validation Error: {response.json().get('errors')}")
 
             if response.status_code == 404:
-                self.app.log.error("Pipeline URL not found!")
+                self.app.log.error("Stage URL not found!")
 
             if response.status_code == 500:
                 self.app.log.error(f"Internal Server Error! {response.json()}")
@@ -80,26 +99,37 @@ class Pipeline(Controller):
         # Rendering table with populated values
         data = render_single_dict(response.json())
 
-        self.app.render(f"Created Pipeline Successfully! Details: \n")
+        self.app.render(f"Added Stage to Pipeline Successfully! Details: \n")
         self.app.render(data, format=OutputFormat.TABULATED.value, headers="keys", tablefmt="plain")
 
     @ex(
-        help='Edit a pipeline(s)',
+        help='Edit a Stage',
         arguments=[
+            (['-s', '--stage-id'],
+             {'help': 'Stage ID',
+              'action': 'store',
+              'dest': 'stage_id',
+              'default': None}),
+            (['-p', '--pipeline-id'],
+             {'help': 'Pipeline ID',
+              'action': 'store',
+              'dest': 'pipeline_id',
+              'default': None}),
             (['-n', '--name'],
-             {'help': 'Name of the Pipeline',
+             {'help': 'Name for this Stage',
               'action': 'store',
               'dest': 'name',
               'default': None}),
             (['--desc'],
-             {'help': 'Pipeline Description',
+             {'help': 'Stage Description',
               'action': 'store',
               'dest': 'desc',
               'default': None}),
-            (['-p, --pipeline-id'],
-             {'help': 'Pipeline ID',
+            (['-o', '--order'],
+             {'help': 'Stage Ordering - This has to be unique within a pipeline',
               'action': 'store',
-              'dest': 'pipeline_id',
+              'dest': 'order',
+              'type': int,
               'default': None})
         ]
     )
@@ -109,29 +139,37 @@ class Pipeline(Controller):
         environment = db.get_configure().get("environment")
         enterprise_id = db.get_enterprise_id()
 
-        name = self.app.pargs.name
-        if not name:
-            name = input("Change the name of the Pipeline: ")
-
-        desc = self.app.pargs.desc
-        if not desc:
-            desc = input("Change the description for this Pipeline [optional]: ")
-
         pipeline_id = self.app.pargs.pipeline_id
         if not pipeline_id:
             pipeline_id = prompt.query("Enter the Pipeline ID: ")
+
+        stage_id = self.app.pargs.stage_id
+        if not stage_id:
+            stage_id = prompt.query("Enter the Stage ID: ")
+
+        name = self.app.pargs.name
+        if not name:
+            name = input("Change the name of the Stage: ")
+
+        desc = self.app.pargs.desc
+        if not desc:
+            desc = input("Change the description for this Stage [optional]: ")
+
+        order = self.app.pargs.order
+        if not order:
+            order = input("Change the Ordering for this Stage [optional]: ")
 
         if not name and not desc:
             self.app.render("No changes requested. Exiting app!")
             return
 
         # Calling Pipeline Graphs API
-        url = get_pipeline_url(environment, enterprise_id, pipeline_id=pipeline_id)
+        url = get_stage_url(environment, enterprise_id, pipeline_id=pipeline_id, stage_id=stage_id)
         api_key = db.get_configure().get("api_key")
 
         try:
-            self.app.log.debug("Editing Pipeline...")
-            response = edit_pipeline(url, api_key, name, desc)
+            self.app.log.debug("Editing Stage...")
+            response = edit_stage(url, api_key, name, order, desc)
         except APIException:
             self.app.render("ERROR in connecting to Environment!")
             return
@@ -156,11 +194,11 @@ class Pipeline(Controller):
         # Rendering table with populated values
         data = render_single_dict(response.json())
 
-        self.app.render(f"Edited Pipeline Successfully! Details: \n")
+        self.app.render(f"Edited Stage for this Pipeline Successfully! Details: \n")
         self.app.render(data, format=OutputFormat.TABULATED.value, headers="keys", tablefmt="plain")
 
     @ex(
-        help='List or Fetch a pipeline(s)',
+        help='List all Stages',
         arguments=[
             (['-p', '--pipeline-id'],
              {'help': 'Name of the Pipeline',
@@ -176,17 +214,17 @@ class Pipeline(Controller):
         enterprise_id = db.get_enterprise_id()
 
         pipeline_id = self.app.pargs.pipeline_id
+        if not pipeline_id:
+            pipeline_id = prompt.query("Enter the Pipeline ID: ")
 
         # Calling Pipeline Graphs API
-        url = get_pipeline_url(environment, enterprise_id, pipeline_id=pipeline_id)
+        url = get_stage_url(environment, enterprise_id, pipeline_id=pipeline_id)
         api_key = db.get_configure().get("api_key")
 
         try:
-            self.app.log.debug("Listing Pipeline...")
-            if pipeline_id:
-                response = fetch_pipelines(url, api_key)
-            else:
-                response = list_pipelines(url, api_key)
+            self.app.log.debug("Listing Stages...")
+            response = list_stages(url, api_key)
+
         except APIException:
             self.app.render("ERROR in connecting to Environment!")
             return
@@ -202,28 +240,26 @@ class Pipeline(Controller):
                     self.app.log.error(f"Validation Error: {response.json().get('errors')}")
 
             if response.status_code == 404:
-                self.app.log.error("Pipeline URL not found!")
+                self.app.log.error("Stage URL not found!")
 
             if response.status_code == 500:
                 self.app.log.error(f"Internal Server Error! {response.json()}")
             return
 
         # Rendering table with populated values
-        if not pipeline_id:
-            data = response.json().get("results")
-        else:
-            data = [response.json()]
+        data = response.json().get("results")
 
         render_data = []
-        for pipeline in data:
+        for stage in data:
             render_pipeline = {
-                "ID": pipeline.get("id"),
-                "NAME": pipeline.get("name"),
-                "DESCRIPTION": pipeline.get("description"),
-                "STAGES": len(pipeline.get("stages")),
-                "VERSION": pipeline.get("version")
+                "ID": stage.get("id"),
+                "NAME": stage.get("name"),
+                "DESCRIPTION": stage.get("description"),
+                "ORDERING": stage.get("ordering"),
+                "OPERATIONS": len(stage.get("operations")),
+                "VERSION": stage.get("version")
             }
             render_data.append(render_pipeline)
 
-        self.app.render(f"Listing Pipeline! Details: \n")
+        self.app.render(f"Listing Stages for the Pipeline! Details: \n")
         self.app.render(render_data, format=OutputFormat.TABULATED.value, headers="keys", tablefmt="plain")
