@@ -42,6 +42,10 @@ class Device(Controller):
              {'help': 'IMEI number',
               'action': 'store',
               'dest': 'imei'}),
+            (['-se', '--serial'],
+             {'help': 'Serial number',
+              'action': 'store',
+              'dest': 'serial'}),
             (['-b', '--brand'],
              {'help': 'Brand name',
               'action': 'store',
@@ -78,6 +82,7 @@ class Device(Controller):
         name = self.app.pargs.name
         group_name = self.app.pargs.group
         imei = self.app.pargs.imei
+        serial = self.app.pargs.serial
         brand = self.app.pargs.brand
         gms = self.app.pargs.gms
         limit = self.app.pargs.limit
@@ -112,6 +117,9 @@ class Device(Controller):
 
         if imei:
             kwargs['imei'] = imei
+
+        if serial:
+            kwargs['serial'] = serial
 
         if brand:
             kwargs['brand'] = brand
