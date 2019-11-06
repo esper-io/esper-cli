@@ -34,6 +34,7 @@ class DeviceCommandEnum(BaseEnum):
     WIPE = 90
     INSTALL = 210
     UNINSTALL = 220
+    CLEAR_APP_DATA = 260
 
 
 class DeviceCommandState(BaseEnum):
