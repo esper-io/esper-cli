@@ -480,3 +480,74 @@ class DeviceCommand(Controller):
         else:
             renderable = self._command_basic_response(response, OutputFormat.JSON)
             self.app.render(renderable, format=OutputFormat.JSON.value)
+
+    @ex(
+        help='Clear app data',
+        arguments=[
+            (['-d', '--device'],
+             {'help': 'Device name',
+              'action': 'store',
+              'dest': 'device'}),
+            (['-P', '--package-name'],
+             {'help': 'Application package name',
+              'action': 'store',
+              'dest': 'package_name'}),
+            (['-j', '--json'],
+             {'help': 'Render result in Json format',
+              'action': 'store_true',
+              'dest': 'json'}),
+        ]
+    )
+    def clear_app_data(self):
+        validate_creds_exists(self.app)
+        db = DBWrapper(self.app.creds)
+        command_client = APIClient(db.get_configure()).get_command_api_client()
+        enterprise_id = db.get_enterprise_id()
+        device_client = APIClient(db.get_configure()).get_device_api_client()
+
+        if self.app.pargs.device:
+            device_name = self.app.pargs.device
+            kwargs = {'name': device_name}
+            try:
+                search_response = device_client.get_all_devices(enterprise_id, limit=1, offset=0, **kwargs)
+                if not search_response.results or len(search_response.results) == 0:
+                    self.app.log.debug(f'[device-command-clear-app-data] Device does not exist with name {device_name}')
+                    self.app.render(f'Device does not exist with name {device_name}')
+                    return
+                response = search_response.results[0]
+                device_id = response.id
+            except ApiException as e:
+                self.app.log.error(f"[device-command-clear-app-data] Failed to list devices: {e}")
+                self.app.render(f"ERROR: {parse_error_message(self.app, e)}")
+                return
+        else:
+            device = db.get_device()
+            if not device or not device.get('id'):
+                self.app.log.debug('[device-command-clear-app-data] There is no active device.')
+                self.app.render('There is no active device.')
+                return
+
+            device_id = device.get('id')
+
+        package_name = self.app.pargs.package_name
+        if package_name is None:
+            self.app.log.info('[device-command-clear-app-data] Package name is empty')
+            self.app.render('Package name is empty')
+            return
+
+        command_request = CommandRequest(command_args={"package_name": package_name},
+                                         command=DeviceCommandEnum.CLEAR_APP_DATA.name)
+       
+        try:
+            response = command_client.run_command(enterprise_id, device_id, command_request)
+        except ApiException as e:
+            self.app.log.error(f"[device-command-clear-app-data] Failed to fire the CLEAR_APP_DATA command: {e}")
+            self.app.render(f"ERROR: {parse_error_message(self.app, e)}")
+            return
+
+        if not self.app.pargs.json:
+            renderable = self._command_basic_response(response)
+            self.app.render(renderable, format=OutputFormat.TABULATED.value, headers="keys", tablefmt="plain")
+        else:
+            renderable = self._command_basic_response(response, OutputFormat.JSON)
+            self.app.render(renderable, format=OutputFormat.JSON.value)
