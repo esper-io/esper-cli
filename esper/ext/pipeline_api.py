@@ -9,7 +9,7 @@ def get_pipeline_url(environment: str,
                      enterprise_id: str,
                      pipeline_id: str = None) -> str:
     """
-    Build and return telemetry url for scapi endpoint
+    Build and return pipeline url for scapi endpoint
     :param environment:
     :param enterprise_id:
     :param pipeline_id:
@@ -18,10 +18,36 @@ def get_pipeline_url(environment: str,
     :return: Url
     """
 
-    url = f'https://{environment}-api.esper.cloud/api/enterprise/{enterprise_id}/pipeline/'
+    url = f'https://{environment}-api.esper.cloud/api/v1/enterprise/{enterprise_id}/pipeline/'
 
     if pipeline_id:
         url += f'{pipeline_id}/'
+
+    return url
+
+
+def get_pipeline_execute_url(environment: str,
+                             enterprise_id: str,
+                             pipeline_id: str,
+                             execute_id: str = None,
+                             action: str = None) -> str:
+    """
+    Build and return pipeline Execute url for scapi endpoint
+    :param environment:
+    :param enterprise_id:
+    :param pipeline_id:
+    :param execute_id:
+    :param action:
+    :return: Url
+    """
+
+    url = f'https://{environment}-api.esper.cloud/api/v1/enterprise/{enterprise_id}/pipeline/{pipeline_id}/execute/'
+
+    if execute_id:
+        url = f"{url}{execute_id}/"
+
+        if action:
+            url = f"{url}{action}/"
 
     return url
 
@@ -31,7 +57,7 @@ def get_stage_url(environment: str,
                   pipeline_id: str = None,
                   stage_id: str = None) -> str:
     """
-    Build and return telemetry url for scapi endpoint
+    Build and return pipeline url for scapi endpoint
     :param environment:
     :param enterprise_id:
     :param pipeline_id:
@@ -56,7 +82,7 @@ def get_operation_url(environment: str,
                       stage_id: str = None,
                       operation_id: str = None) -> str:
     """
-    Build and return telemetry url for scapi endpoint
+    Build and return pipeline url for scapi endpoint
     :param environment:
     :param enterprise_id:
     :param pipeline_id:
@@ -75,18 +101,35 @@ def get_operation_url(environment: str,
     return url
 
 
-def create_pipeline(url, api_key, pipeline_name, pipeline_desc=None):
+def get_group_command_url(environment: str,
+                          enterprise_id: str,
+                          group_id: str) -> str:
+    """
+    Build and return pipeline url for scapi endpoint
+    :param environment:
+    :param enterprise_id:
+    :param group_id:
+    :return: Url
+    """
+    url = f'https://{environment}-api.esper.cloud/api/enterprise/{enterprise_id}/devicegroup/{group_id}/command/'
+    return url
+
+
+def create_pipeline(url, api_key, pipeline_name, pipeline_desc=None, trigger=None):
     try:
         data = {"name": pipeline_name}
         if pipeline_desc:
             data["description"] = pipeline_desc
+
+        if trigger:
+            data["trigger"] = trigger
 
         response = requests.post(
             url,
             headers={
                 'Authorization': f'Bearer {api_key}'
             },
-            data=data
+            json=data
         )
 
     except Exception as exc:
@@ -115,18 +158,41 @@ def create_stage(url, api_key, stage_name, stage_order, stage_desc=None):
     return response
 
 
-def create_operation(url, api_key, operation_name, operation_action, operation_desc=None):
+def create_operation(url, api_key, operation_name, operation_action, operation_desc=None, group_url=None):
     try:
-        data = {"name": operation_name, "action": operation_action}
+        data = {
+            "name": operation_name,
+            "action": operation_action
+        }
         if operation_desc:
             data["description"] = operation_desc
+
+        if group_url:
+
+            if operation_action == "APP_INSTALL":
+                command = "INSTALL"
+            if operation_action == "APP_UNINSTALL":
+                command = "UNINSTALL"
+            if operation_action == "REBOOT":
+                command = "REBOOT"
+
+            data["action_args"] = {
+                "method": "POST",
+                "url": group_url,
+                "body": {
+                    "command": command,
+                },
+                "headers": {
+                    'Authorization': f'Bearer {api_key}'
+                }
+            }
 
         response = requests.post(
             url,
             headers={
                 'Authorization': f'Bearer {api_key}'
             },
-            data=data
+            json=data
         )
 
     except Exception as exc:
@@ -135,7 +201,7 @@ def create_operation(url, api_key, operation_name, operation_action, operation_d
     return response
 
 
-def edit_pipeline(url, api_key, pipeline_name=None, pipeline_desc=None):
+def edit_pipeline(url, api_key, pipeline_name=None, pipeline_desc=None, trigger=None):
     try:
         data = {}
         if pipeline_name:
@@ -148,7 +214,7 @@ def edit_pipeline(url, api_key, pipeline_name=None, pipeline_desc=None):
             headers={
                 'Authorization': f'Bearer {api_key}'
             },
-            data=data
+            json=data
         )
 
     except Exception as exc:
@@ -291,3 +357,33 @@ def render_single_dict(data):
         )
 
     return render_list
+
+
+def execute_pipeline(url, api_key, data=None):
+    try:
+        response = requests.post(
+            url,
+            data=data,
+            headers={
+                'Authorization': f'Bearer {api_key}'
+            }
+        )
+    except Exception as exc:
+        raise APIException(exc)
+
+    return response
+
+
+def list_execute_pipeline(url, api_key, params=None):
+    try:
+        response = requests.get(
+            url,
+            params=params,
+            headers={
+                'Authorization': f'Bearer {api_key}'
+            }
+        )
+    except Exception as exc:
+        raise APIException(exc)
+
+    return response

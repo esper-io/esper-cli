@@ -1,3 +1,5 @@
+from enum import Enum
+
 from cement import Controller, ex
 from clint.textui import prompt
 
@@ -6,6 +8,13 @@ from esper.ext.db_wrapper import DBWrapper
 from esper.ext.pipeline_api import get_pipeline_url, create_pipeline, edit_pipeline, list_pipelines, fetch_pipelines, \
     APIException, render_single_dict, delete_api
 from esper.ext.utils import validate_creds_exists
+
+
+class TriggerEventType(Enum):
+    NEW_APP_VERSION_EVENT = "NewAppVersionEvent"
+    DEVICE_COMMAND_COMPLETE_EVENT = "DeviceCommandCompleteEvent"
+    GROUP_COMMAND_COMPLETE_EVENT = "GroupCommandCompleteEvent"
+    MANUAL_PIPELINE_START_EVENT = "StartPipelineEvent"
 
 
 class Pipeline(Controller):
@@ -50,13 +59,37 @@ class Pipeline(Controller):
         if not desc:
             desc = input("Description for this Pipeline [optional]: ")
 
+        # Setup Trigger
+        trigger = prompt.options(
+            "What type of trigger do you want for your Pipeline?",
+            options=[
+                {"selector": 1, "prompt": TriggerEventType.NEW_APP_VERSION_EVENT.value,
+                 "return": TriggerEventType.NEW_APP_VERSION_EVENT.name},
+                {"selector": 2, "prompt": "Skip for now...", "return": "skip"}
+            ])
+
+        if trigger != "skip":
+            if trigger == TriggerEventType.NEW_APP_VERSION_EVENT.name:
+                app_name = input("Enter the Application name: ")
+                package_name = input("Enter the Package name: ")
+
+                trigger = {
+                    "trigger_event": TriggerEventType.NEW_APP_VERSION_EVENT.value,
+                    "pre_conditions": {
+                        "application_name": app_name,
+                        "package_name": package_name
+                    }
+                }
+        else:
+            trigger = None
+
         # Calling Pipeline Graphs API
         url = get_pipeline_url(environment, enterprise_id)
         api_key = db.get_configure().get("api_key")
 
         try:
             self.app.log.debug("Creating Pipeline...")
-            response = create_pipeline(url, api_key, name, desc)
+            response = create_pipeline(url, api_key, name, desc, trigger)
         except APIException:
             self.app.render("ERROR in connecting to Environment!")
             return
@@ -122,7 +155,31 @@ class Pipeline(Controller):
         if not pipeline_id:
             pipeline_id = prompt.query("Enter the Pipeline ID: ")
 
-        if not name and not desc:
+        # Setup Trigger
+        trigger = prompt.options(
+            "What type of trigger do you want for your Pipeline?",
+            options=[
+                {"selector": 1, "prompt": TriggerEventType.NEW_APP_VERSION_EVENT.value,
+                 "return": TriggerEventType.NEW_APP_VERSION_EVENT.name},
+                {"selector": 2, "prompt": "Skip for now...", "return": "skip"}
+            ])
+
+        if trigger != "skip":
+            if trigger == TriggerEventType.NEW_APP_VERSION_EVENT.name:
+                app_name = input("Enter the Application name: ")
+                package_name = input("Enter the Package name: ")
+
+                trigger = {
+                    "trigger_event": TriggerEventType.NEW_APP_VERSION_EVENT.value,
+                    "pre_conditions": {
+                        "application_name": app_name,
+                        "package_name": package_name
+                    }
+                }
+        else:
+            trigger = None
+
+        if not name and not desc and not trigger:
             self.app.render("No changes requested. Exiting app!")
             return
 
@@ -132,7 +189,7 @@ class Pipeline(Controller):
 
         try:
             self.app.log.debug("Editing Pipeline...")
-            response = edit_pipeline(url, api_key, name, desc)
+            response = edit_pipeline(url, api_key, name, desc, trigger)
         except APIException:
             self.app.render("ERROR in connecting to Environment!")
             return
@@ -217,12 +274,23 @@ class Pipeline(Controller):
 
         render_data = []
         for pipeline in data:
+            trigger_app = None
+            trigger_name = None
+            trigger = pipeline.get("trigger", None)
+            if trigger:
+                trigger_name = trigger.get("trigger_event")
+                trigger_app = trigger.get("pre_conditions")
+                if trigger_app:
+                    trigger_app = trigger_app.get("application_name")
+
             render_pipeline = {
                 "ID": pipeline.get("id"),
                 "NAME": pipeline.get("name"),
                 "DESCRIPTION": pipeline.get("description"),
                 "STAGES": len(pipeline.get("stages")),
-                "VERSION": pipeline.get("version")
+                "VERSION": pipeline.get("version"),
+                "TRIGGER": trigger_name,
+                "TRIGGER-APP": trigger_app
             }
             render_data.append(render_pipeline)
 

@@ -1,11 +1,27 @@
+from enum import Enum
+
 from cement import Controller, ex
+from cement.utils.shell import Prompt
 from clint.textui import prompt
+from esperclient.models.device_group import DeviceGroup
+from esperclient.rest import ApiException
 
 from esper.controllers.enums import OutputFormat
+from esper.ext.api_client import APIClient
 from esper.ext.db_wrapper import DBWrapper
 from esper.ext.pipeline_api import get_operation_url, create_operation, edit_operation, list_stages, delete_api, \
-    APIException, render_single_dict
-from esper.ext.utils import validate_creds_exists
+    APIException, render_single_dict, get_group_command_url
+from esper.ext.utils import validate_creds_exists, parse_error_message
+
+
+class ActionEnums(Enum):
+    APP_INSTALL = "App Install to a Group of Devices"
+    APP_UNINSTALL = "App Uninstall to a Group of Devices"
+    REBOOT = "Reboot a Group of Devices"
+
+    @classmethod
+    def choices_values(cls):
+        return [member.value for _, member in cls.__members__.items()]
 
 
 class Operation(Controller):
@@ -21,8 +37,45 @@ class Operation(Controller):
         stacked_type = 'nested'
         stacked_on = 'stage'
 
+    def get_groups_list(self, limit=20, offset=0):
+        validate_creds_exists(self.app)
+        db = DBWrapper(self.app.creds)
+        group_client = APIClient(db.get_configure()).get_group_api_client()
+        enterprise_id = db.get_enterprise_id()
+
+        try:
+            response = group_client.get_all_groups(enterprise_id, limit=limit, offset=offset)
+        except ApiException as e:
+            self.app.log.error(f"[group-list] Failed to list groups: {e}")
+            self.app.render(f"ERROR: {parse_error_message(self.app, e)}")
+            return
+
+        groups = []
+        for group in response.results:
+            groups.append(
+                {
+                    'id': group.id,
+                    'name': group.name,
+                    'device_count': group.device_count if group.device_count else 0
+                }
+            )
+        return response.count, groups
+
+    def validate_group_name(self, name) -> DeviceGroup:
+        validate_creds_exists(self.app)
+        db = DBWrapper(self.app.creds)
+        group_client = APIClient(db.get_configure()).get_group_api_client()
+        enterprise_id = db.get_enterprise_id()
+
+        response = group_client.get_all_groups(enterprise_id, name=name)
+
+        if response.count > 0:
+            return response.results[0]
+        else:
+            raise ApiException("No such Group-Name found!")
+
     @ex(
-        help='Add a Stage',
+        help='Add a Operation',
         arguments=[
             (['-p', '--pipeline-id'],
              {'help': 'Pipeline ID',
@@ -48,6 +101,11 @@ class Operation(Controller):
              {'help': 'Action for this Operation',
               'action': 'store',
               'dest': 'action',
+              'default': None}),
+            (['-g, --group'],
+             {'help': 'Group name for against which commands will be created',
+              'action': 'store',
+              'dest': 'group_name',
               'default': None})
         ]
     )
@@ -71,25 +129,37 @@ class Operation(Controller):
 
         action = self.app.pargs.action
         if not action:
-            action = prompt.options(
+            p = Prompt(
                 "Action for this Operation: ",
-                options=[
-                    {"selector": 1, "prompt": "App Install to a Group of Devices", "return": 1},
-                    {"selector": 2, "prompt": "App UnInstall to a Group of Devices", "return": 2},
-                    {"selector": 3, "prompt": "Reboot a Group of Devices", "return": 3},
-                ])
+                options=ActionEnums.choices_values(),
+                numbered=True
+            )
+
+            action = ActionEnums(p.input).name
+
+        group = self.app.pargs.group_name
+        if not group:
+            name = input("Name of the Group (to which the command must be fired): ")
+
+        try:
+            group_obj = self.validate_group_name(name)
+            group_url = get_group_command_url(environment, enterprise_id, group_obj.id)
+
+        except ApiException as e:
+            self.app.log.error(f"[group-list] Failed to find group with name {name}: {e}")
+            return
 
         desc = self.app.pargs.desc
         if not desc:
             desc = input("Description for this Operation [optional]: ")
 
-        # Calling Pipeline Graphs API
+        # Calling Pipeline API
         url = get_operation_url(environment, enterprise_id, pipeline_id, stage_id)
         api_key = db.get_configure().get("api_key")
 
         try:
             self.app.log.debug("Creating Operation...")
-            response = create_operation(url, api_key, name, action, desc)
+            response = create_operation(url, api_key, name, action, desc, group_url)
         except APIException:
             self.app.render("ERROR in connecting to Environment!")
             return
@@ -103,9 +173,10 @@ class Operation(Controller):
                     self.app.log.error(f"Validation Error: {errors}")
                 if response.json().get("errors"):
                     if "The fields pipeline, ordering must make a unique set." in response.json().get("message"):
-                        self.app.log.error(f"Operation Already created for this Stage!")
+                        self.app.log.error(f"Operation with same `name` already created for this Stage!")
                     else:
                         self.app.log.error(f"Validation Error: {response.json().get('errors')}")
+                self.app.log.error(f"400 Errors -> {response.json()}")
 
             if response.status_code == 404:
                 self.app.log.error("Stage URL not found!")
@@ -187,13 +258,14 @@ class Operation(Controller):
             action = prompt.options(
                 "Action for this Operation: ",
                 options=[
-                    {"selector": 1, "prompt": "App Install to a Group of Devices", "return": 1},
-                    {"selector": 2, "prompt": "App UnInstall to a Group of Devices", "return": 2},
-                    {"selector": 3, "prompt": "Reboot a Group of Devices", "return": 3},
+                    {"selector": 1, "prompt": "App Install to a Group of Devices", "return": "APP_INSTALL"},
+                    {"selector": 2, "prompt": "App UnInstall to a Group of Devices", "return": "APP_UNINSTALL"},
+                    {"selector": 3, "prompt": "Reboot a Group of Devices", "return": "REBOOT"},
                 ])
 
         # Calling Pipeline Graphs API
-        url = get_operation_url(environment, enterprise_id, pipeline_id=pipeline_id, stage_id=stage_id, operation_id=operation_id)
+        url = get_operation_url(environment, enterprise_id, pipeline_id=pipeline_id, stage_id=stage_id,
+                                operation_id=operation_id)
         api_key = db.get_configure().get("api_key")
 
         try:
@@ -227,7 +299,7 @@ class Operation(Controller):
         self.app.render(data, format=OutputFormat.TABULATED.value, headers="keys", tablefmt="plain")
 
     @ex(
-        help='List all Stages',
+        help='List all Operations',
         arguments=[
             (['-s', '--stage-id'],
              {'help': 'Stage ID',
