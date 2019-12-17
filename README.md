@@ -1205,12 +1205,35 @@ $ espercli telemetry [SUB-COMMANDS]
 #### 1. get-data
 It fetches the telemetry data for a specific device, for a specific metric aggregated by 
 `hour` or `month` or `day` and is specified by `-p, --period flag`. The statistic function is specified by may be `avg`, `sum` or `count` 
-and is specified by `-s, --statistic` flag. Metric format is `{category}-{metric}`. 
+and is specified by `-s, --statistic` flag. Metric format is `{category}-{metric_name}`. 
 The timespan to fetch telemetry data can be specified using two ways: Using `-l, --last` option or
 `-t, --to` and `-f, --from` combination. 
 
 To use `-l, --last` option use a number to specify number of hours, days, months relative to now for which data is required.
 To specify absolute date range use `-f, --from` and `-t, --to` combination.
+
+Available metric names {category}-{metric_name}
+    
+    battery-level
+    battery-temperature
+    battery-voltage
+    battery-capacity_count
+    battery-current_avg
+    battery-current
+    battery-energy_count
+    battery-low_indicator
+    battery-present
+    battery-level_absolute
+    battery-scale
+    battery-charge_time_remaining
+    memory-available_ram_measured
+    memory-available_internal_storage_measured
+    memory-os_occupied_storage_measured
+    wifi_network-signal_strength
+    wifi_network-link_speed
+    wifi_network-frequency	
+    data_usage-total_data_download
+    data_usage-total_data_upload`
           
 ```sh
 $ espercli telemetry get-data [OPTIONS]
@@ -1219,7 +1242,7 @@ $ espercli telemetry get-data [OPTIONS]
 | Name, shorthand | Default| Description|
 | -------------   |:------:|:----------|
 | --device, -d    |        | Device name |
-| --metric, -m    |        | Metric in format {category}-{metric} |
+| --metric, -m    |        | Metric in format {category}-{metric_name} |
 | --from, -f      |   {2 days since now}     | Start date time of telemetry data |
 | --period, -p    |   hour | Aggregation period |
 | --statistic, -s |   avg  | Statistic function |
