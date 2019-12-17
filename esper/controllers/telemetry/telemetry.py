@@ -27,9 +27,10 @@ class Telemetry(Controller):
     @ex(
         help='Get telemetry data for a device',
         arguments=[
-            (['device_name'],
+            (['-d', '--device'],
              {'help': 'Device name',
-              'action': 'store'}),
+              'action': 'store',
+              'dest': 'device_name'}),
             (['-m', '--metric'],
              {'help': 'Metric name for telemetry data',
               'action': 'store',
@@ -70,6 +71,9 @@ class Telemetry(Controller):
         device_client = APIClient(db.get_configure()).get_device_api_client()
 
         device_name = self.app.pargs.device_name
+        if not device_name:
+            self.app.render(f'No device specified. Use the -d, --device option to specify a device')
+            return
         kwargs = {'name': device_name}
 
         # Fetch device id from device name supplied as parameter

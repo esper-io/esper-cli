@@ -7,7 +7,7 @@ Current stable release versions are
 
     API version: 1.0.0
     SDK version: 0.0.10
-    CLI version: 0.0.7
+    CLI version: 0.0.8
 
 ## Requirements
 
@@ -82,6 +82,7 @@ sub-commands:
     app                 app controller
     device              device controller
     configure           Configure the credentials for `esper.io` API Service
+    telemetry           Get telemtery data for a device over a period
 
 Usage: espercli <sub-command> [--options]
 ```
@@ -1192,6 +1193,59 @@ If adb-tools is installed, please run the command below:
         adb connect 127.0.0.1:62945
 
 Press Ctrl+C to quit!
+
+ ```
+
+### **telemetry**
+This is used to view telemetry data for a device over a period
+```sh
+$ espercli telemetry [SUB-COMMANDS]
+```
+#### Sub commands
+#### 1. get-data
+It fetches the telemetry data for a specific device, for a specific metric aggregated by 
+`hour` or `month` or `day` and is specified by `-p, --period flag`. The statistic function is specified by may be `avg`, `sum` or `count` 
+and is specified by `-s, --statistic` flag. Metric format is `{category}-{metric}`. 
+The timespan to fetch telemetry data can be specified using two ways: Using `-l, --last` option or
+`-t, --to` and `-f, --from` combination. 
+
+To use `-l, --last` option use a number to specify number of hours, days, months relative to now for which data is required.
+To specify absolute date range use `-f, --from` and `-t, --to` combination.
+          
+```sh
+$ espercli telemetry get-data [OPTIONS]
+```
+##### Options
+| Name, shorthand | Default| Description|
+| -------------   |:------:|:----------|
+| --device, -d    |        | Device name |
+| --metric, -m    |        | Metric in format {category}-{metric} |
+| --from, -f      |   {2 days since now}     | Start date time of telemetry data |
+| --period, -p    |   hour | Aggregation period |
+| --statistic, -s |   avg  | Statistic function |
+| --last, -l      |        | Relative time from now. Use -n for n hour\'s since or n days since |
+| --to, -t        |  {now} | End date time of telemetry data |
+
+##### Example
+ ```sh
+ $ espercli telemetry get-data -m battery-level -l 7 -p month -d DEV-ELOP-FXVW
+
+Telemetry data for device DEV-ELOP-FXVD
+Time                    Value
+2019-12-01T00:00:00Z  69.2948
+
+$ espercli telemetry get-data -d DEV-ELOP-FXVD -m battery-level -f 2019-12-15T12:36:36 -t 2019-12-17T12:36:36
+Telemetry data for device DEV-ELOP-FXVD
+Time                    Value
+2019-12-16T04:00:00Z
+2019-12-16T05:00:00Z  26.5333
+2019-12-16T06:00:00Z  41.3333
+2019-12-16T07:00:00Z  48.25
+2019-12-16T08:00:00Z  52
+2019-12-16T09:00:00Z  60
+2019-12-16T11:00:00Z  65
+2019-12-17T06:00:00Z  85.125
+2019-12-17T07:00:00Z  82.4
 
  ```
  
