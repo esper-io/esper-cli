@@ -30,7 +30,7 @@ setup(
         'clint>=0.5.1',
         'colorlog>=4.0.2',
         'crayons>=0.2.0',
-        'esperclient>=0.0.9',
+        'esperclient>=0.0.10',
         'jinja2>=2.10.1',
         'pyyaml>=5.1',
         'requests==2.22.0',

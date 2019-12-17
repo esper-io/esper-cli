@@ -6,8 +6,8 @@ This package provides a unified command line interface to the Esper API Services
 Current stable release versions are
 
     API version: 1.0.0
-    SDK version: 0.0.9
-    CLI version: 0.0.6
+    SDK version: 0.0.10
+    CLI version: 0.0.7
 
 ## Requirements
 
@@ -230,6 +230,7 @@ $ espercli device list [OPTIONS]
 | --name, -n      |        | Filter by device name |
 | --group, -g     |        | Filter by group name |
 | --imei, -im     |        | Filter by device IMEI number |
+| --serial, -se   |        | Filter by device serial number |
 | --brand, -b     |        | Filter by device brand name |
 | --gms, -gm      |        | Filter by GMS and non GMS flag, choices are [true, false] |
 | --json, -j      |        | Render result in JSON format |
@@ -906,7 +907,29 @@ command  WIPE
 state    Command Initiated
 ```
 
-#### 7. show
+#### 7. Clear app data
+Clear app data, active device is used to clear app data if `--device` or `-d` option is not given explicitly.
+```sh
+$ espercli device-command clear-app-data [OPTIONS]
+```
+##### Options
+| Name, shorthand | Default| Description|
+| -------------   |:------:|:----------|
+| --device, -d    |        | Device name |
+| --package-name, -P |        | Package name of app to clear data from |
+| --json, -j      |        | Render result in JSON format |
+
+##### Example
+```sh
+$ espercli device-command clear-app-data -d SNA-SNL-3GQA -P com.google.android.gms.maps
+
+TITLE    DETAILS
+id       8000220d-9bc2-4176-839a-fb690f72f165
+command  CLEAR_APP_DATA
+state    Command Initiated
+```
+
+#### 8. show
 Show device-command information and command id (UUID) is required to show command information. This is used active device to show command if `--device` or `-d` option is not given explicitly.
 ```sh
 $ espercli device-command show [OPTIONS] [command-id]
