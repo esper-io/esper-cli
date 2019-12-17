@@ -2,7 +2,7 @@
 from setuptools import setup, find_packages
 
 
-VERSION = "0.0.6"
+VERSION = "0.0.7"
 
 f = open('README.md', 'r', encoding='utf-8', errors='ignore')
 LONG_DESCRIPTION = f.read()
