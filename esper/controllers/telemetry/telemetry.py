@@ -51,6 +51,10 @@ class Telemetry(Controller):
               'dest': 'statistic',
               'default': 'avg',
               'choices': ['avg', 'sum', 'count']}),
+            (['-l', '--last'],
+             {'help': 'Relative time from now. Use -n for n hour\'s since or n days since',
+              'action': 'store',
+              'dest': 'last',}),
             (['-t', '--to'],
              {'help': 'End date time of telemetry data',
               'action': 'store',
@@ -81,21 +85,38 @@ class Telemetry(Controller):
             self.app.render(f"ERROR: {parse_error_message(self.app, e)}")
             return
 
-        from_time = self.app.pargs.from_time
-        if '.' not in from_time:
-            from_time = from_time + '.0000Z'
-        to_time = self.app.pargs.to_time
-        if '.' not in to_time:
-            to_time = to_time + '.0000Z'
+        last = self.app.pargs.last
         period = self.app.pargs.period
         statistic = self.app.pargs.statistic
+
+        from_time = self.app.pargs.from_time
+        if last:
+            current_date = datetime.now()
+            if period == 'hour':
+                from_time = current_date - timedelta(hours=int(last))
+            elif period == 'day':
+                from_time = current_date - timedelta(days=int(last))
+            else:
+                from_time = current_date.replace(month=datetime.now().date().month - int(last)) #- timedelta(days=int(last))
+        from_time = str(from_time).replace(' ', 'T')
+        if '.' not in from_time:
+            from_time = from_time + '.0000Z'
+        if 'Z' not in from_time:
+            from_time = from_time + 'Z'
+        to_time = self.app.pargs.to_time
+        if last:
+            to_time = datetime.now()
+        to_time = str(to_time).replace(' ', 'T')
+        if '.' not in to_time:
+            to_time = to_time + '.0000Z'
+        if 'Z' not in to_time:
+            to_time = to_time + 'Z'
 
         if '-' not in self.app.pargs.metric:
             self.app.render("ERROR: Metric must be of format {category}-{metric name}")
             return
 
         category, metric = self.app.pargs.metric.split('-')
-
         # Calling Telemetry Graphs API
         url = get_telemetry_url(environment, enterprise_id, device_id, category, metric, from_time, to_time, period,
                                 statistic)
