@@ -193,12 +193,12 @@ class SecureADB(Controller):
 
         except (SecureADBWorkflowError, RemoteADBError) as timeout_exc:
             self.app.log.error(f"[remoteadb-connect] {str(timeout_exc)}")
-            self.app.render(f"[ERROR] Issue in reaching Esper API Service for connection negotiation!")
+            self.app.render(f"[ERROR] Issue in reaching Esper API Service for connection negotiation!\n")
 
         except CaughtSignal as sig:
             self.app.log.debug(f"Recieved Signal: {signal.Signals(sig.signum).name}")
             if sig.signum == signal.SIGINT:
-                self.app.render("Quitting application...")
+                self.app.render("Quitting application...\n")
 
         except Exception as exc:
             self.app.log.error(f"Failed to establish Secure ADB connection to device: {self.app.pargs.device_name}")
@@ -212,7 +212,7 @@ class SecureADB(Controller):
                 relay.cleanup_connections()
 
                 if metrics.get('started') and metrics.get('stopped'):
-                    self.app.render(f"\nSession Duration: {metrics.get('stopped') - metrics.get('started')}")
+                    self.app.render(f"\nSession Duration: {metrics.get('stopped') - metrics.get('started')}\n")
 
                 if metrics.get('bytes'):
                     self.app.render(f"\nTotal Data streamed: {metrics.get('bytes')/1024.0} KB\n")

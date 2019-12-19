@@ -72,7 +72,7 @@ class Telemetry(Controller):
 
         device_name = self.app.pargs.device_name
         if not device_name:
-            self.app.render(f'No device specified. Use the -d, --device option to specify a device')
+            self.app.render(f'No device specified. Use the -d, --device option to specify a device\n')
             return
         kwargs = {'name': device_name}
 
@@ -81,12 +81,12 @@ class Telemetry(Controller):
             response = device_client.get_all_devices(enterprise_id, limit=1, offset=0, **kwargs)
             if not response.results or len(response.results) == 0:
                 self.app.log.debug(f'[device-show] Device does not exist with name {device_name}')
-                self.app.render(f'Device does not exist with name {device_name}')
+                self.app.render(f'Device does not exist with name {device_name}\n')
                 return
             device_id = response.results[0].id
         except ApiException as e:
             self.app.log.error(f"[device-show] Failed to fetch telemetry info for device {device_name}: {e}")
-            self.app.render(f"ERROR: {parse_error_message(self.app, e)}")
+            self.app.render(f"ERROR: {parse_error_message(self.app, e)}\n")
             return
 
         last = self.app.pargs.last
@@ -117,7 +117,7 @@ class Telemetry(Controller):
             to_time = to_time + 'Z'
 
         if '-' not in self.app.pargs.metric:
-            self.app.render("ERROR: Metric must be of format {category}-{metric name}")
+            self.app.render("ERROR: Metric must be of format {category}-{metric name}\n")
             return
 
         category, metric = self.app.pargs.metric.split('-')
@@ -137,12 +137,12 @@ class Telemetry(Controller):
         if response.status_code != 200:
             if response_json.get('meta', {}).get('non_field_errors'):
                 error_list = response_json.get('meta', {}).get('non_field_errors')
-                self.app.render(f"ERRORS: {error_list}")
+                self.app.render(f"ERRORS: {error_list}\n")
             elif response_json.get('errors'):
-                self.app.render(f"ERRORS: {response_json.get('errors')}")
+                self.app.render(f"ERRORS: {response_json.get('errors')}\n")
             else:
                 print(response_json, from_time, to_time)
-                self.app.render(f"ERROR: Unknown error occurred")
+                self.app.render(f"ERROR: Unknown error occurred\n")
             return
 
         data = response.json().get('data', {})
@@ -162,7 +162,7 @@ class Telemetry(Controller):
                 }
             )
         if len(render_data) == 0:
-            self.app.render(f"No telemetry data for device {device_name} found between time range")
+            self.app.render(f"No telemetry data for device {device_name} found between time range\n")
             return
         self.app.render(f"Telemetry data for device {device_name}")
         self.app.render(render_data, format=OutputFormat.TABULATED.value, headers="keys", tablefmt="plain")

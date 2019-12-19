@@ -110,7 +110,7 @@ class Execution(Controller):
             response = execute_pipeline(url, args["api_key"])
 
         except APIException:
-            self.app.render("ERROR in connecting to Environment!")
+            self.app.render("ERROR in connecting to Environment!\n")
             return
 
         if not response.ok:
@@ -163,7 +163,7 @@ class Execution(Controller):
             self.app.log.debug("Stopping Pipeline Execution...")
             response = execute_pipeline(url, args["api_key"], data)
         except APIException:
-            self.app.render("ERROR in connecting to Environment!")
+            self.app.render("ERROR in connecting to Environment!\n")
             return
 
         if not response.ok:
@@ -216,7 +216,7 @@ class Execution(Controller):
             self.app.log.debug("Terminating Pipeline Execution...")
             response = execute_pipeline(url, args["api_key"], data)
         except APIException:
-            self.app.render("ERROR in connecting to Environment!")
+            self.app.render("ERROR in connecting to Environment!\n")
             return
 
         if not response.ok:
@@ -255,7 +255,7 @@ class Execution(Controller):
             response = list_execute_pipeline(url, args["api_key"])
 
         except APIException:
-            self.app.render("ERROR in connecting to Environment!")
+            self.app.render("ERROR in connecting to Environment!\n")
             return
 
         if not response.ok:

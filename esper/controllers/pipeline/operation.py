@@ -47,7 +47,7 @@ class Operation(Controller):
             response = group_client.get_all_groups(enterprise_id, limit=limit, offset=offset)
         except ApiException as e:
             self.app.log.error(f"[group-list] Failed to list groups: {e}")
-            self.app.render(f"ERROR: {parse_error_message(self.app, e)}")
+            self.app.render(f"ERROR: {parse_error_message(self.app, e)}\n")
             return
 
         groups = []
@@ -161,7 +161,7 @@ class Operation(Controller):
             self.app.log.debug("Creating Operation...")
             response = create_operation(url, api_key, name, action, desc, group_url)
         except APIException:
-            self.app.render("ERROR in connecting to Environment!")
+            self.app.render("ERROR in connecting to Environment!\n")
             return
 
         if not response.ok:
@@ -272,7 +272,7 @@ class Operation(Controller):
             self.app.log.debug("Editing Operation...")
             response = edit_operation(url, api_key, name, action, desc)
         except APIException:
-            self.app.render("ERROR in connecting to Environment!")
+            self.app.render("ERROR in connecting to Environment!\n")
             return
 
         if not response.ok:
@@ -336,7 +336,7 @@ class Operation(Controller):
             response = list_stages(url, api_key)
 
         except APIException:
-            self.app.render("ERROR in connecting to Environment!")
+            self.app.render("ERROR in connecting to Environment!\n")
             return
 
         if not response.ok:
@@ -421,7 +421,7 @@ class Operation(Controller):
             self.app.log.debug("Removing Operation...")
             response = delete_api(url, api_key)
         except APIException:
-            self.app.render("ERROR in connecting to Environment!")
+            self.app.render("ERROR in connecting to Environment!\n")
             return
 
         if not response.ok:

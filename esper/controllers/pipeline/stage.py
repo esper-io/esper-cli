@@ -77,7 +77,7 @@ class Stage(Controller):
             self.app.log.debug("Creating Pipeline...")
             response = create_stage(url, api_key, name, order, desc)
         except APIException:
-            self.app.render("ERROR in connecting to Environment!")
+            self.app.render("ERROR in connecting to Environment!\n")
             return
 
         if not response.ok:
@@ -168,7 +168,7 @@ class Stage(Controller):
             self.app.log.debug("Editing Stage...")
             response = edit_stage(url, api_key, name, order, desc)
         except APIException:
-            self.app.render("ERROR in connecting to Environment!")
+            self.app.render("ERROR in connecting to Environment!\n")
             return
 
         if not response.ok:
@@ -223,7 +223,7 @@ class Stage(Controller):
             response = list_stages(url, api_key)
 
         except APIException:
-            self.app.render("ERROR in connecting to Environment!")
+            self.app.render("ERROR in connecting to Environment!\n")
             return
 
         if not response.ok:
@@ -298,7 +298,7 @@ class Stage(Controller):
             self.app.log.debug("Removing Stage...")
             response = delete_api(url, api_key)
         except APIException:
-            self.app.render("ERROR in connecting to Environment!")
+            self.app.render("ERROR in connecting to Environment!\n")
             return
 
         if not response.ok:

@@ -91,7 +91,7 @@ class Pipeline(Controller):
             self.app.log.debug("Creating Pipeline...")
             response = create_pipeline(url, api_key, name, desc, trigger)
         except APIException:
-            self.app.render("ERROR in connecting to Environment!")
+            self.app.render("ERROR in connecting to Environment!\n")
             return
 
         if not response.ok:
@@ -180,7 +180,7 @@ class Pipeline(Controller):
             trigger = None
 
         if not name and not desc and not trigger:
-            self.app.render("No changes requested. Exiting app!")
+            self.app.render("No changes requested. Exiting app!\n")
             return
 
         # Calling Pipeline Graphs API
@@ -191,7 +191,7 @@ class Pipeline(Controller):
             self.app.log.debug("Editing Pipeline...")
             response = edit_pipeline(url, api_key, name, desc, trigger)
         except APIException:
-            self.app.render("ERROR in connecting to Environment!")
+            self.app.render("ERROR in connecting to Environment!\n")
             return
 
         if not response.ok:
@@ -246,7 +246,7 @@ class Pipeline(Controller):
             else:
                 response = list_pipelines(url, api_key)
         except APIException:
-            self.app.render("ERROR in connecting to Environment!")
+            self.app.render("ERROR in connecting to Environment!\n")
             return
 
         if not response.ok:
@@ -325,7 +325,7 @@ class Pipeline(Controller):
             self.app.log.debug("Removing Pipeline...")
             response = delete_api(url, api_key)
         except APIException:
-            self.app.render("ERROR in connecting to Environment!")
+            self.app.render("ERROR in connecting to Environment!\n")
             return
 
         if not response.ok:
