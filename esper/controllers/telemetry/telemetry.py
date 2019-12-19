@@ -141,7 +141,7 @@ class Telemetry(Controller):
             elif response_json.get('errors'):
                 self.app.render(f"ERRORS: {response_json.get('errors')}\n")
             else:
-                print(response_json, from_time, to_time)
+                #print(response_json, from_time, to_time)
                 self.app.render(f"ERROR: Unknown error occurred\n")
             return
 
