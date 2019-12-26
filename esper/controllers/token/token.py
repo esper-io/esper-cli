@@ -65,7 +65,7 @@ class Token(Controller):
             response = token_client.get_token_info()
         except ApiException as e:
             self.app.log.error(f"[token-show] Failed to show details of an token: {e}")
-            self.app.render(f"ERROR: {parse_error_message(self.app, e)}")
+            self.app.render(f"ERROR: {parse_error_message(self.app, e)}\n")
             return
 
         if not self.app.pargs.json:

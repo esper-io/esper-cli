@@ -64,19 +64,19 @@ class DeviceCommand(Controller):
                 search_response = device_client.get_all_devices(enterprise_id, limit=1, offset=0, **kwargs)
                 if not search_response.results or len(search_response.results) == 0:
                     self.app.log.debug(f'[device-command-show] Device does not exist with name {device_name}')
-                    self.app.render(f'Device does not exist with name {device_name}')
+                    self.app.render(f'Device does not exist with name {device_name}\n')
                     return
                 response = search_response.results[0]
                 device_id = response.id
             except ApiException as e:
                 self.app.log.error(f"[device-command-show] Failed to list devices: {e}")
-                self.app.render(f"ERROR: {parse_error_message(self.app, e)}")
+                self.app.render(f"ERROR: {parse_error_message(self.app, e)}\n")
                 return
         else:
             device = db.get_device()
             if not device or not device.get('id'):
                 self.app.log.debug('[device-command-show] There is no active device.')
-                self.app.render('There is no active device.')
+                self.app.render('There is no active device.\n')
                 return
 
             device_id = device.get('id')
@@ -85,7 +85,7 @@ class DeviceCommand(Controller):
             response = command_client.get_command(command_id, device_id, enterprise_id)
         except ApiException as e:
             self.app.log.error(f"[device-command-show] Failed to show details of command: {e}")
-            self.app.render(f"ERROR: {parse_error_message(self.app, e)}")
+            self.app.render(f"ERROR: {parse_error_message(self.app, e)}\n")
             return
 
         if not self.app.pargs.json:
@@ -126,19 +126,19 @@ class DeviceCommand(Controller):
                 search_response = device_client.get_all_devices(enterprise_id, limit=1, offset=0, **kwargs)
                 if not search_response.results or len(search_response.results) == 0:
                     self.app.log.debug(f'[device-command-install] Device does not exist with name {device_name}')
-                    self.app.render(f'Device does not exist with name {device_name}')
+                    self.app.render(f'Device does not exist with name {device_name}\n')
                     return
                 response = search_response.results[0]
                 device_id = response.id
             except ApiException as e:
                 self.app.log.error(f"[device-command-install] Failed to list devices: {e}")
-                self.app.render(f"ERROR: {parse_error_message(self.app, e)}")
+                self.app.render(f"ERROR: {parse_error_message(self.app, e)}\n")
                 return
         else:
             device = db.get_device()
             if not device or not device.get('id'):
                 self.app.log.debug('[device-command-install] There is no active device.')
-                self.app.render('There is no active device.')
+                self.app.render('There is no active device.\n')
                 return
 
             device_id = device.get('id')
@@ -150,7 +150,7 @@ class DeviceCommand(Controller):
             response = command_client.run_command(enterprise_id, device_id, command_request)
         except ApiException as e:
             self.app.log.error(f"[device-command-install] Failed to fire the install command: {e}")
-            self.app.render(f"ERROR: {parse_error_message(self.app, e)}")
+            self.app.render(f"ERROR: {parse_error_message(self.app, e)}\n")
             return
 
         if not self.app.pargs.json:
@@ -191,19 +191,19 @@ class DeviceCommand(Controller):
                 search_response = device_client.get_all_devices(enterprise_id, limit=1, offset=0, **kwargs)
                 if not search_response.results or len(search_response.results) == 0:
                     self.app.log.debug(f'[device-command-uninstall] Device does not exist with name {device_name}')
-                    self.app.render(f'Device does not exist with name {device_name}')
+                    self.app.render(f'Device does not exist with name {device_name}\n')
                     return
                 response = search_response.results[0]
                 device_id = response.id
             except ApiException as e:
                 self.app.log.error(f"[device-command-uninstall] Failed to list devices: {e}")
-                self.app.render(f"ERROR: {parse_error_message(self.app, e)}")
+                self.app.render(f"ERROR: {parse_error_message(self.app, e)}\n")
                 return
         else:
             device = db.get_device()
             if not device or not device.get('id'):
                 self.app.log.debug('[device-command-uninstall] There is no active device.')
-                self.app.render('There is no active device.')
+                self.app.render('There is no active device.\n')
                 return
 
             device_id = device.get('id')
@@ -215,7 +215,7 @@ class DeviceCommand(Controller):
             response = command_client.run_command(enterprise_id, device_id, command_request)
         except ApiException as e:
             self.app.log.error(f"[device-command-uninstall] Failed to fire the uninstall command: {e}")
-            self.app.render(f"ERROR: {parse_error_message(self.app, e)}")
+            self.app.render(f"ERROR: {parse_error_message(self.app, e)}\n")
             return
 
         if not self.app.pargs.json:
@@ -252,19 +252,19 @@ class DeviceCommand(Controller):
                 search_response = device_client.get_all_devices(enterprise_id, limit=1, offset=0, **kwargs)
                 if not search_response.results or len(search_response.results) == 0:
                     self.app.log.debug(f'[device-command-ping] Device does not exist with name {device_name}')
-                    self.app.render(f'Device does not exist with name {device_name}')
+                    self.app.render(f'Device does not exist with name {device_name}\n')
                     return
                 response = search_response.results[0]
                 device_id = response.id
             except ApiException as e:
                 self.app.log.error(f"[device-command-ping] Failed to list devices: {e}")
-                self.app.render(f"ERROR: {parse_error_message(self.app, e)}")
+                self.app.render(f"ERROR: {parse_error_message(self.app, e)}\n")
                 return
         else:
             device = db.get_device()
             if not device or not device.get('id'):
                 self.app.log.debug('[device-command-ping] There is no active device.')
-                self.app.render('There is no active device.')
+                self.app.render('There is no active device.\n')
                 return
 
             device_id = device.get('id')
@@ -274,7 +274,7 @@ class DeviceCommand(Controller):
             response = command_client.run_command(enterprise_id, device_id, command_request)
         except ApiException as e:
             self.app.log.error(f"[device-command-ping] Failed to fire the ping command: {e}")
-            self.app.render(f"ERROR: {parse_error_message(self.app, e)}")
+            self.app.render(f"ERROR: {parse_error_message(self.app, e)}\n")
             return
 
         if not self.app.pargs.json:
@@ -311,19 +311,19 @@ class DeviceCommand(Controller):
                 search_response = device_client.get_all_devices(enterprise_id, limit=1, offset=0, **kwargs)
                 if not search_response.results or len(search_response.results) == 0:
                     self.app.log.debug(f'[device-command-lock] Device does not exist with name {device_name}')
-                    self.app.render(f'Device does not exist with name {device_name}')
+                    self.app.render(f'Device does not exist with name {device_name}\n')
                     return
                 response = search_response.results[0]
                 device_id = response.id
             except ApiException as e:
                 self.app.log.error(f"[device-command-lock] Failed to list devices: {e}")
-                self.app.render(f"ERROR: {parse_error_message(self.app, e)}")
+                self.app.render(f"ERROR: {parse_error_message(self.app, e)}\n")
                 return
         else:
             device = db.get_device()
             if not device or not device.get('id'):
                 self.app.log.debug('[device-command-lock] There is no active device.')
-                self.app.render('There is no active device.')
+                self.app.render('There is no active device.\n')
                 return
 
             device_id = device.get('id')
@@ -333,7 +333,7 @@ class DeviceCommand(Controller):
             response = command_client.run_command(enterprise_id, device_id, command_request)
         except ApiException as e:
             self.app.log.error(f"[device-command-lock] Failed to fire the lock command: {e}")
-            self.app.render(f"ERROR: {parse_error_message(self.app, e)}")
+            self.app.render(f"ERROR: {parse_error_message(self.app, e)}\n")
             return
 
         if not self.app.pargs.json:
@@ -370,19 +370,19 @@ class DeviceCommand(Controller):
                 search_response = device_client.get_all_devices(enterprise_id, limit=1, offset=0, **kwargs)
                 if not search_response.results or len(search_response.results) == 0:
                     self.app.log.debug(f'[device-command-reboot] Device does not exist with name {device_name}')
-                    self.app.render(f'Device does not exist with name {device_name}')
+                    self.app.render(f'Device does not exist with name {device_name}\n')
                     return
                 response = search_response.results[0]
                 device_id = response.id
             except ApiException as e:
                 self.app.log.error(f"[device-command-reboot] Failed to list devices: {e}")
-                self.app.render(f"ERROR: {parse_error_message(self.app, e)}")
+                self.app.render(f"ERROR: {parse_error_message(self.app, e)}\n")
                 return
         else:
             device = db.get_device()
             if not device or not device.get('id'):
                 self.app.log.debug('[device-command-reboot] There is no active device.')
-                self.app.render('There is no active device.')
+                self.app.render('There is no active device.\n')
                 return
 
             device_id = device.get('id')
@@ -392,7 +392,7 @@ class DeviceCommand(Controller):
             response = command_client.run_command(enterprise_id, device_id, command_request)
         except ApiException as e:
             self.app.log.error(f"[device-command-reboot] Failed to fire the reboot command: {e}")
-            self.app.render(f"ERROR: {parse_error_message(self.app, e)}")
+            self.app.render(f"ERROR: {parse_error_message(self.app, e)}\n")
             return
 
         if not self.app.pargs.json:
@@ -437,19 +437,19 @@ class DeviceCommand(Controller):
                 search_response = device_client.get_all_devices(enterprise_id, limit=1, offset=0, **kwargs)
                 if not search_response.results or len(search_response.results) == 0:
                     self.app.log.debug(f'[device-command-wipe] Device does not exist with name {device_name}')
-                    self.app.render(f'Device does not exist with name {device_name}')
+                    self.app.render(f'Device does not exist with name {device_name}\n')
                     return
                 response = search_response.results[0]
                 device_id = response.id
             except ApiException as e:
                 self.app.log.error(f"[device-command-wipe] Failed to list devices: {e}")
-                self.app.render(f"ERROR: {parse_error_message(self.app, e)}")
+                self.app.render(f"ERROR: {parse_error_message(self.app, e)}\n")
                 return
         else:
             device = db.get_device()
             if not device or not device.get('id'):
                 self.app.log.debug('[device-command-wipe] There is no active device.')
-                self.app.render('There is no active device.')
+                self.app.render('There is no active device.\n')
                 return
 
             device_id = device.get('id')
@@ -459,11 +459,11 @@ class DeviceCommand(Controller):
 
         if external_storage is None:
             self.app.log.info('[device-command-wipe] External storage value is empty')
-            self.app.render('External storage value is empty')
+            self.app.render('External storage value is empty\n')
 
         if frp is None:
             self.app.log.info('[device-command-wipe] Factory reset production value is empty')
-            self.app.render('Factory reset production value is empty')
+            self.app.render('Factory reset production value is empty\n')
 
         command_request = CommandRequest(command_args={"wipe_external_storage": external_storage, 'wipe_FRP': frp},
                                          command=DeviceCommandEnum.WIPE.name)
@@ -471,7 +471,7 @@ class DeviceCommand(Controller):
             response = command_client.run_command(enterprise_id, device_id, command_request)
         except ApiException as e:
             self.app.log.error(f"[device-command-wipe] Failed to fire the wipe command: {e}")
-            self.app.render(f"ERROR: {parse_error_message(self.app, e)}")
+            self.app.render(f"ERROR: {parse_error_message(self.app, e)}\n")
             return
 
         if not self.app.pargs.json:
@@ -512,19 +512,19 @@ class DeviceCommand(Controller):
                 search_response = device_client.get_all_devices(enterprise_id, limit=1, offset=0, **kwargs)
                 if not search_response.results or len(search_response.results) == 0:
                     self.app.log.debug(f'[device-command-clear-app-data] Device does not exist with name {device_name}')
-                    self.app.render(f'Device does not exist with name {device_name}')
+                    self.app.render(f'Device does not exist with name {device_name}\n')
                     return
                 response = search_response.results[0]
                 device_id = response.id
             except ApiException as e:
                 self.app.log.error(f"[device-command-clear-app-data] Failed to list devices: {e}")
-                self.app.render(f"ERROR: {parse_error_message(self.app, e)}")
+                self.app.render(f"ERROR: {parse_error_message(self.app, e)}\n")
                 return
         else:
             device = db.get_device()
             if not device or not device.get('id'):
                 self.app.log.debug('[device-command-clear-app-data] There is no active device.')
-                self.app.render('There is no active device.')
+                self.app.render('There is no active device.\n')
                 return
 
             device_id = device.get('id')
@@ -532,7 +532,7 @@ class DeviceCommand(Controller):
         package_name = self.app.pargs.package_name
         if package_name is None:
             self.app.log.info('[device-command-clear-app-data] Package name is empty')
-            self.app.render('Package name is empty')
+            self.app.render('Package name is empty\n')
             return
 
         command_request = CommandRequest(command_args={"package_name": package_name},
@@ -542,7 +542,7 @@ class DeviceCommand(Controller):
             response = command_client.run_command(enterprise_id, device_id, command_request)
         except ApiException as e:
             self.app.log.error(f"[device-command-clear-app-data] Failed to fire the CLEAR_APP_DATA command: {e}")
-            self.app.render(f"ERROR: {parse_error_message(self.app, e)}")
+            self.app.render(f"ERROR: {parse_error_message(self.app, e)}\n")
             return
 
         if not self.app.pargs.json:

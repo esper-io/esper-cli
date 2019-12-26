@@ -238,7 +238,7 @@ class EnterpriseGroup(Controller):
 
         db.unset_group()
         self.app.log.debug(f"[group-active] Unset the active group {group.get('name')}")
-        self.app.render(f"Unset the active group {group.get('name')}")
+        self.app.render(f"Unset the active group {group.get('name')}\n")
 
     @ex(
         help='Create group',

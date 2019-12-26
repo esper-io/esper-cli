@@ -61,18 +61,18 @@ class Configure(Controller):
             except ApiException as e:
                 self.app.log.error(f"[configure] Failed to get token info: {e}")
                 if e.status == HTTPStatus.UNAUTHORIZED:
-                    self.app.render("You are not authorized, invalid API Key.")
+                    self.app.render("You are not authorized, invalid API Key.\n")
                 else:
                     error_message = json.loads(e.body).get('message') if e.body and json.loads(e.body).get(
                         'message') else e.reason
-                    self.app.render(f"ERROR: {error_message}")
+                    self.app.render(f"ERROR: {error_message}\n")
                 return
 
             if response:
                 enterprise_id = response.enterprise
             else:
                 self.app.log.info(f"[configure] API key is not associated with any enterprise.")
-                self.app.render("API key is not associated with any enterprise.")
+                self.app.render("API key is not associated with any enterprise.\n")
                 return
 
             credentials = {
