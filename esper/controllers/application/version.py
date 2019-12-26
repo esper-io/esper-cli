@@ -66,7 +66,7 @@ class ApplicationVersion(Controller):
             application = db.get_application()
             if not application or not application.get('id'):
                 self.app.log.debug('[version-list] There is no active application.')
-                self.app.render('There is no active application.')
+                self.app.render('There is no active application.\n')
                 return
 
             application_id = application.get('id')
@@ -89,7 +89,7 @@ class ApplicationVersion(Controller):
                                                            **kwargs)
         except ApiException as e:
             self.app.log.error(f"[version-list] Failed to list applications: {e}")
-            self.app.render(f"ERROR: {parse_error_message(self.app, e)}")
+            self.app.render(f"ERROR: {parse_error_message(self.app, e)}\n")
             return
 
         self.app.render(f"Total Number of Versions: {response.count}")
@@ -183,7 +183,7 @@ class ApplicationVersion(Controller):
             application = db.get_application()
             if not application or not application.get('id'):
                 self.app.log.debug('[version-show] There is no active application.')
-                self.app.render('There is no active application.')
+                self.app.render('There is no active application.\n')
                 return
 
             application_id = application.get('id')
@@ -192,7 +192,7 @@ class ApplicationVersion(Controller):
             response = application_client.get_app_version(version_id, application_id, enterprise_id)
         except ApiException as e:
             self.app.log.error(f"[version-show] Failed to show details of an version: {e}")
-            self.app.render(f"ERROR: {parse_error_message(self.app, e)}")
+            self.app.render(f"ERROR: {parse_error_message(self.app, e)}\n")
             return
 
         if not self.app.pargs.json:
@@ -228,7 +228,7 @@ class ApplicationVersion(Controller):
             application = db.get_application()
             if not application or not application.get('id'):
                 self.app.log.debug('[version-delete] There is no active application.')
-                self.app.render('There is no active application.')
+                self.app.render('There is no active application.\n')
                 return
 
             application_id = application.get('id')
@@ -236,10 +236,10 @@ class ApplicationVersion(Controller):
         try:
             application_client.delete_app_version(version_id, application_id, enterprise_id)
             self.app.log.debug(f"[version-delete] Version with id : {version_id} deleted successfully")
-            self.app.render(f"Version with id {version_id} deleted successfully")
+            self.app.render(f"Version with id {version_id} deleted successfully\n")
         except ApiException as e:
             self.app.log.error(f"[version-delete] Failed to delete a version: {e}")
-            self.app.render(f"ERROR: {parse_error_message(self.app, e)}")
+            self.app.render(f"ERROR: {parse_error_message(self.app, e)}\n")
             return
 
         # Unset current application if matching
@@ -253,4 +253,4 @@ class ApplicationVersion(Controller):
                     self.app.log.debug(f'[version-delete] Unset the active application {application_id}')
             else:
                 self.app.log.debug(f"[version-delete] Failed to get an application when deleting a version: {e}")
-                self.app.render(f"ERROR: {parse_error_message(self.app, e)}")
+                self.app.render(f"ERROR: {parse_error_message(self.app, e)}\n")

@@ -107,7 +107,7 @@ class Device(Controller):
                         break
             except ApiException as e:
                 self.app.log.error(f"[device-list] Failed to list groups: {e}")
-                self.app.render(f"ERROR: {parse_error_message(self.app, e)}")
+                self.app.render(f"ERROR: {parse_error_message(self.app, e)}\n")
                 return
 
             if not group_id:
@@ -132,7 +132,7 @@ class Device(Controller):
             response = device_client.get_all_devices(enterprise_id, limit=limit, offset=offset, **kwargs)
         except ApiException as e:
             self.app.log.error(f"[device-list] Failed to list devices: {e}")
-            self.app.render(f"ERROR: {parse_error_message(self.app, e)}")
+            self.app.render(f"ERROR: {parse_error_message(self.app, e)}\n")
             return
 
         self.app.render(f"Number of Devices: {response.count}")
@@ -214,12 +214,12 @@ class Device(Controller):
             search_response = device_client.get_all_devices(enterprise_id, limit=1, offset=0, **kwargs)
             if not search_response.results or len(search_response.results) == 0:
                 self.app.log.debug(f'[device-show] Device does not exist with name {device_name}')
-                self.app.render(f'Device does not exist with name {device_name}')
+                self.app.render(f'Device does not exist with name {device_name}\n')
                 return
             response = search_response.results[0]
         except ApiException as e:
             self.app.log.error(f"[device-show] Failed to list devices: {e}")
-            self.app.render(f"ERROR: {parse_error_message(self.app, e)}")
+            self.app.render(f"ERROR: {parse_error_message(self.app, e)}\n")
             return
 
         if self.app.pargs.active:
@@ -258,19 +258,19 @@ class Device(Controller):
                 search_response = device_client.get_all_devices(enterprise_id, limit=1, offset=0, **kwargs)
                 if not search_response.results or len(search_response.results) == 0:
                     self.app.log.debug(f'[device-active] Device does not exist with name {device_name}')
-                    self.app.render(f'Device does not exist with name {device_name}')
+                    self.app.render(f'Device does not exist with name {device_name}\n')
                     return
                 response = search_response.results[0]
                 db.set_device({'id': response.id, 'name': response.device_name})
             except ApiException as e:
                 self.app.log.error(f"[device-active] Failed to list devices: {e}")
-                self.app.render(f"ERROR: {parse_error_message(self.app, e)}")
+                self.app.render(f"ERROR: {parse_error_message(self.app, e)}\n")
                 return
         else:
             device = db.get_device()
             if device is None or device.get('name') is None:
                 self.app.log.debug('[device-active] There is no active device.')
-                self.app.render('There is no active device.')
+                self.app.render('There is no active device.\n')
                 return
 
             device_id = device.get('id')
@@ -278,7 +278,7 @@ class Device(Controller):
                 response = device_client.get_device_by_id(enterprise_id, device_id)
             except ApiException as e:
                 self.app.log.error(f"[device-active] Failed to show active device: {e}")
-                self.app.render(f"ERROR: {parse_error_message(self.app, e)}")
+                self.app.render(f"ERROR: {parse_error_message(self.app, e)}\n")
                 return
 
         if not self.app.pargs.json:
@@ -299,9 +299,9 @@ class Device(Controller):
         device = db.get_device()
         if device is None or device.get('name') is None:
             self.app.log.debug('[device-active] There is no active device.')
-            self.app.render('There is no active device.')
+            self.app.render('There is no active device.\n')
             return
 
         db.unset_device()
         self.app.log.debug(f"[device-active] Unset the active device {device.get('name')}")
-        self.app.render(f"Unset the active device {device.get('name')}")
+        self.app.render(f"Unset the active device {device.get('name')}\n")

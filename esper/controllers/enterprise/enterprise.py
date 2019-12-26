@@ -86,7 +86,7 @@ class Enterprise(Controller):
             response = enterprise_client.get_enterprise(enterprise_id)
         except ApiException as e:
             self.app.log.error(f"[enterprise-show] Failed to show details of an enterprise: {e}")
-            self.app.render(f"ERROR: {parse_error_message(self.app, e)}")
+            self.app.render(f"ERROR: {parse_error_message(self.app, e)}\n")
             return
 
         if not self.app.pargs.json:
@@ -177,7 +177,7 @@ class Enterprise(Controller):
             response = enterprise_client.partial_update_enterprise(enterprise_id, update_dict)
         except ApiException as e:
             self.app.log.error(f"[enterprise-update] Failed to update details of an enterprise: {e}")
-            self.app.render(f"ERROR: {parse_error_message(self.app, e)}")
+            self.app.render(f"ERROR: {parse_error_message(self.app, e)}\n")
             return
 
         if not self.app.pargs.json:

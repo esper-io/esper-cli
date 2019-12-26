@@ -69,19 +69,19 @@ class AppInstall(Controller):
                 search_response = device_client.get_all_devices(enterprise_id, limit=1, offset=0, **kwargs)
                 if not search_response.results or len(search_response.results) == 0:
                     self.app.log.debug(f'[installs-list] Device does not exist with name {device_name}')
-                    self.app.render(f'Device does not exist with name {device_name}')
+                    self.app.render(f'Device does not exist with name {device_name}\n')
                     return
                 response = search_response.results[0]
                 device_id = response.id
             except ApiException as e:
                 self.app.log.error(f"[installs-list] Failed to list devices: {e}")
-                self.app.render(f"ERROR: {parse_error_message(self.app, e)}")
+                self.app.render(f"ERROR: {parse_error_message(self.app, e)}\n")
                 return
         else:
             device = db.get_device()
             if not device or not device.get('id'):
                 self.app.log.debug('[installs-list] There is no active device.')
-                self.app.render('There is no active device.')
+                self.app.render('There is no active device.\n')
                 return
 
             device_id = device.get('id')
@@ -106,7 +106,7 @@ class AppInstall(Controller):
             response = device_client.get_app_installs(enterprise_id, device_id, limit=limit, offset=offset, **kwargs)
         except ApiException as e:
             self.app.log.error(f"[installs-list] Failed to list installs: {e}")
-            self.app.render(f"ERROR: {parse_error_message(self.app, e)}")
+            self.app.render(f"ERROR: {parse_error_message(self.app, e)}\n")
             return
 
         self.app.render(f"Total Number of Installs: {response.count}")
