@@ -49,19 +49,19 @@ class DeviceStatus(Controller):
                 search_response = device_client.get_all_devices(enterprise_id, limit=1, offset=0, **kwargs)
                 if not search_response.results or len(search_response.results) == 0:
                     self.app.log.debug(f'[status-latest] Device does not exist with name {device_name}')
-                    self.app.render(f'Device does not exist with name {device_name}')
+                    self.app.render(f'Device does not exist with name {device_name}\n')
                     return
                 response = search_response.results[0]
                 device_id = response.id
             except ApiException as e:
                 self.app.log.error(f"[status-latest] Failed to list devices: {e}")
-                self.app.render(f"ERROR: {parse_error_message(self.app, e)}")
+                self.app.render(f"ERROR: {parse_error_message(self.app, e)}\n")
                 return
         else:
             device = db.get_device()
             if not device or not device.get('id'):
                 self.app.log.debug('[status-latest] There is no active device.')
-                self.app.render('There is no active device.')
+                self.app.render('There is no active device.\n')
                 return
 
             device_id = device.get('id')
@@ -70,7 +70,7 @@ class DeviceStatus(Controller):
             response = device_client.get_device_event(enterprise_id, device_id, latest_event=1)
         except ApiException as e:
             self.app.log.error(f"[status-latest] Failed to get latest device status: {e}")
-            self.app.render(f"ERROR: {parse_error_message(self.app, e)}")
+            self.app.render(f"ERROR: {parse_error_message(self.app, e)}\n")
             return
 
         battery_level = None

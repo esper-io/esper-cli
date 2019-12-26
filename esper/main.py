@@ -12,12 +12,17 @@ from esper.controllers.device.install import AppInstall
 from esper.controllers.device.status import DeviceStatus
 from esper.controllers.enterprise.enterprise import Enterprise
 from esper.controllers.enterprise.group import EnterpriseGroup
+from esper.controllers.pipeline.execute import Execution
+from esper.controllers.pipeline.operation import Operation
+from esper.controllers.pipeline.pipeline import Pipeline
+from esper.controllers.pipeline.stage import Stage
 from esper.controllers.secureadb.secureadb import SecureADB
+from esper.controllers.telemetry.telemetry import Telemetry
 from esper.controllers.token.token import Token
 from esper.core.exc import EsperError
 from esper.core.output_handler import EsperOutputHandler
-from esper.ext.utils import extend_tinydb
 from esper.ext.certs import init_certs
+from esper.ext.utils import extend_tinydb
 
 # configuration defaults
 CONFIG = init_defaults('esper')
@@ -102,7 +107,12 @@ class Esper(App):
             EnterpriseGroup,
             GroupCommand,
             SecureADB,
-            Token
+            Token,
+            Telemetry,
+            Pipeline,
+            Stage,
+            Operation,
+            Execution
         ]
 
         # hooks
