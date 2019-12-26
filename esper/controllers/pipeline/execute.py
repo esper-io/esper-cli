@@ -177,6 +177,51 @@ class Execution(Controller):
         self.app.render(data, format=OutputFormat.TABULATED.value, headers="keys", tablefmt="plain")
 
     @ex(
+        help='Continue a Pipeline Execution',
+        label="continue",
+        arguments=[
+            (['-p', '--pipeline-id'],
+             {'help': 'Pipeline ID',
+              'action': 'store',
+              'dest': 'pipeline_id',
+              'default': None}),
+            (['-e', '--execution-id'],
+             {'help': 'Execution ID',
+              'action': 'store',
+              'dest': 'execution_id',
+              'default': None})
+        ]
+    )
+    def ex_continue(self):
+        args = self.fetch_args()
+
+        # Calling Pipeline Execute API
+        url = get_pipeline_execute_url(
+            args["environment"],
+            args["enterprise_id"],
+            args["pipeline_id"],
+            args["execution_id"],
+            "continue"
+        )
+
+        try:
+            self.app.log.debug("Continuing Pipeline Execution...")
+            response = execute_pipeline(url, args["api_key"])
+        except APIException:
+            self.app.render("ERROR in connecting to Environment!")
+            return
+
+        if not response.ok:
+            self.handle_response_failure(response)
+            return
+
+        # Rendering table with populated values
+        data = render_single_dict(response.json())
+
+        self.app.render(f"Pipeline execution continuing! Details: \n")
+        self.app.render(data, format=OutputFormat.TABULATED.value, headers="keys", tablefmt="plain")
+
+    @ex(
         help='Terminate a Pipeline Execution',
         arguments=[
             (['-p', '--pipeline-id'],

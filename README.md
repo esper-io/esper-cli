@@ -1269,9 +1269,662 @@ Time                    Value
 2019-12-16T11:00:00Z  65
 2019-12-17T06:00:00Z  85.125
 2019-12-17T07:00:00Z  82.4
+```
+
+
+## **Pipeline**
+Pipelines is used to create workflows consisting of actions to such as APP-INSTALL/APP-UNINSTALL/etc.
+```sh
+$ espercli pipeline
+
+usage: espercli pipeline [-h] {execute,stage,create,edit,remove,show} ...
+
+Pipeline commands
+
+optional arguments:
+  -h, --help            show this help message and exit
+
+sub-commands:
+  {execute,stage,create,edit,remove,show}
+    execute             execute controller
+    stage               stage controller
+    create              Create a pipeline
+    edit                Edit a pipeline(s)
+    remove              Remove a Pipeline
+    show                List or Fetch a pipeline(s)
+
+Usage: espercli pipeline
+```
+#### Sub commands
+#### 1. create
+Create a new Pipeline
+
+
+```sh
+$ espercli pipeline create [OPTIONS]
+```
+##### Options
+| Name, shorthand | Default| Description      |
+|:---------------:|:------:|:----------------:|
+| --name, -n      | [opt] | Name of Pipeline |
+| --desc          | [opt] | Description for Pipeline |
+
+##### Example
+ ```sh
+ $ espercli pipeline create 
+
+Name of the Pipeline: <Pipeline Name>
+Description for this Pipeline [optional]: <BLah>
+What type of trigger do you want for your Pipeline?
+[1] NewAppVersionEvent
+[2] Skip for now...
+
+1
+Enter the Application name: <Blah>
+Enter the Package name: <com.blah>
+
+ ```
+
+#### 2. edit
+Edit an existing Pipeline
+
+```sh
+$ espercli pipeline edit [OPTIONS]
+```
+##### Options
+| Name, shorthand   | Default | Description |
+|:-----------------:|:-------:|:-----------:|
+| --name, -n        | [opt]   | Name of Pipeline |
+| --desc            | [opt]   | Description for Pipeline |
+| --pipeline-id, -p | [opt]   | Pipeline ID |
+
+##### Example
+ ```sh
+ $ espercli pipeline edit 
+
+Change the name of the Pipeline: <blah>
+Change the description for this Pipeline [optional]: <blah>
+Enter the Pipeline ID:
+What type of trigger do you want for your Pipeline?
+[1] NewAppVersionEvent
+[2] Skip for now...
+
+
+ ```
+
+#### 3. remove
+Remove an existing Pipeline
+
+```sh
+$ espercli pipeline remove [OPTIONS]
+```
+##### Options
+| Name, shorthand   | Default | Description |
+|:-----------------:|:-------:|:-----------:|
+| --pipeline-id, -p | [opt]   | Pipeline ID |
+
+##### Example
+ ```sh
+ $ espercli pipeline remove 
+
+Enter the Pipeline ID: ...
+
+ ```
+
+#### 4. show
+List one or all Pipelines
+
+```sh
+$ espercli pipeline show [OPTIONS]
+```
+##### Options
+| Name, shorthand   | Default | Description |
+|:-----------------:|:-------:|:-----------:|
+| --pipeline-id, -p | [opt]   | Pipeline ID |
+
+##### Example
+ ```sh
+ $ espercli pipeline show 
+
+ID                                    NAME              DESCRIPTION    STAGES    VERSION  TRIGGER              TRIGGER-APP
+db26ae3b-dd80-4b91-8a21-e6e7bf3099af  Jeryn CLI                           1          4     NewAppVersionEvent    Firefox
+9c36afa8-b710-4c28-b72f-8555a69fd907  asdcafsd           asdasfd          0          1     NewAppVersionEvent    Candy Crush Saga
+3c7fbc8a-c420-4e14-8036-a6ff4a7efb58  asd                asdas            1          1     NewAppVersionEvent    Candlei
+ ```
+
+## Pipeline Stages
+These sub command are used to add various named Stages to the Pipeline. 
+A Stage is a logical grouping for the various operations. Each stage has a `ordering` field
+that tells in what order the stages have to processed by the pipeline. The pipeline orders the 
+stages in ascending order of `ordering` value, and process accordingly.
+
+Please note this command depends on an existing pipeline. A Pipeline needs to be created first, before 
+the stage sub-commands can be run.
+
+
+```sh
+$ espercli pipeline stage
+
+usage: espercli pipeline stage [-h] {operation,create,edit,remove,show} ...
+
+Pipeline Stage commands
+
+optional arguments:
+  -h, --help            show this help message and exit
+
+sub-commands:
+  {operation,create,edit,remove,show}
+    operation           operation controller
+    create              Add a Stage
+    edit                Edit a Stage
+    remove              Remove a Stage
+    show                List all Stages
+
+Usage: espercli pipeline stage
+```
+
+#### Sub commands
+#### 1. create
+Add a new stage to an existing pipeline
+
+```sh
+$ espercli pipeline stage create [OPTIONS]
+```
+##### Options
+| Name, shorthand   | Default | Description |
+|:-----------------:|:-------:|:-----------:|
+| --pipeline-id, -p | [opt]   | Pipeline ID |
+| --name, -n        | [opt]   | Name of Stage |
+| --desc            | [opt]   | Description for Stage |
+| --ordering        | [opt]   | Ordering for stage |
+
+##### Example
+ ```sh
+ $ espercli pipeline stage create 
+
+Enter the Pipeline ID: <uuid of pipeline>
+Name of the Stage: <name of stage>
+Order of this Stage: 10
+Description for this Stage [optional]:
+Added Stage to Pipeline Successfully! Details:
+
+TITLE        DETAILS
+id           86cd9c84-59be-4c89-a609-d76f85e38d53
+operations   []
+client       f44373cb-1800-43c6-aab3-c81f8b1f435c
+name         blah
+description
+created_on   2019-12-26T05:23:09.185749Z
+updated_on   2019-12-26T05:23:09.185795Z
+version      1
+ordering     10
+pipeline     904bf55d-f39f-4dc7-b085-014712c567fc
+ ```
+ 
+ #### 2. edit
+Edit an existing stage
+
+```sh
+$ espercli pipeline stage edit [OPTIONS]
+```
+##### Options
+| Name, shorthand   | Default | Description |
+|:-----------------:|:-------:|:-----------:|
+| --pipeline-id, -p | [opt]   | Pipeline ID |
+| --stage-id, -s    | [opt]   | Stage ID |
+| --name, -n        | [opt]   | Name of Stage |
+| --desc            | [opt]   | Description for Stage |
+| --ordering        | [opt]   | Ordering for stage |
+
+##### Example
+ ```sh
+ $ espercli pipeline stage edit 
+
+Enter the Pipeline ID: <uuid of pipeline>
+Enter the Stage ID: <uuid>
+Change the name of the Stage:
+Change the description for this Stage [optional]:
+Change the Ordering for this Stage [optional]:
+
+TITLE        DETAILS
+id           <uuid>
+operations   []
+client       <uuid>
+name         blah
+description
+created_on   2019-12-26T05:23:09.185749Z
+updated_on   2019-12-26T05:23:09.185795Z
+version      1
+ordering     10
+pipeline     <uuid>
+
+ ```
+
+#### 3. remove
+Remove an existing Stage
+
+```sh
+$ espercli pipeline stage remove [OPTIONS]
+```
+##### Options
+| Name, shorthand   | Default | Description |
+|:-----------------:|:-------:|:-----------:|
+| --pipeline-id, -p | [opt]   | Pipeline ID |
+| --stage-id, -s    | [opt]   | Stage ID |
+
+
+##### Example
+ ```sh
+ $ espercli pipeline remove 
+
+Enter the Pipeline ID: <uuid of pipeline>
+Enter the Stage ID: <uuid>
+
+ ```
+
+#### 4. show
+List one or all stages in a pipeline
+
+```sh
+$ espercli pipeline stage show [OPTIONS]
+```
+##### Options
+| Name, shorthand   | Default | Description |
+|:-----------------:|:-------:|:-----------:|
+| --pipeline-id, -p | [opt]   | Pipeline ID |
+| --stage-id, -s    | [opt]   | Stage ID    |
+
+##### Example
+ ```sh
+ $ espercli pipeline stage show 
+
+ID            NAME      DESCRIPTION   ORDERING    OPERATIONS  VERSION
+<stage uuid>  2           2           2             0          1
+<stage uuid>  3           3           3             0          1
+<stage uuid>  blah                    10            0          1
 
  ```
  
+## Pipeline Operations
+These sub command are used to add various named Operations to the Stage of a Pipeline. 
+An Operation defines an `Action` - such as `APP_INSTALL`, `APP_UNINSTALL`, ETC. Each operation has a `ordering` field, 
+just like stages. The pipeline orders the operations in ascending order of `ordering` value, within a given stage, 
+and processes them accordingly.
+
+Note:
+    If a `NewAppUploadEvent` trigger has been defined for the pipeline, then `APP_INSTALL`/`APP_UNINSTALL` operations, 
+    will install/uninstall the app from the `NewAppUploadEvent`.
+
+Please note this command depends on an existing Stage. A Stage needs to be created first, before the operations
+sub-commands can be run.
+
+
+```sh
+$ espercli pipeline stage operation
+
+usage: espercli pipeline stage operation [-h] {create,edit,remove,show} ...
+
+Pipeline Stage Operation commands
+
+optional arguments:
+  -h, --help            show this help message and exit
+
+sub-commands:
+  {create,edit,remove,show}
+    create              Add a Operation
+    edit                Edit an Operation
+    remove              Remove an Operation
+    show                List all Operations
+
+Usage: espercli pipeline stage operation
+```
+
+#### Sub commands
+#### 1. create
+Add a new Operation to an existing Stage
+
+```sh
+$ espercli pipeline stage operation create [OPTIONS]
+```
+##### Options
+| Name, shorthand   | Default | Description |
+|:-----------------:|:-------:|:-----------:|
+| --pipeline-id, -p | [opt]   | Pipeline ID |
+| --stage-id, -s    | [opt]   | Stage ID |
+| --name, -n        | [opt]   | Name of Operation |
+| --desc            | [opt]   | Description for Operation |
+| --action, -a       | [opt]   | Action for Operation |
+| --ordering        | [opt]   | Ordering for Operation |
+
+##### Example
+ ```sh
+ $ espercli pipeline stage operation create 
+
+Enter the Pipeline ID: <uuid of pipeline>
+Enter the Stage ID: <uuid of stage>
+Name of the Operation: <name of operation>
+Action for this Operation:
+
+1: App Install to a Group of Devices
+2: App Uninstall to a Group of Devices
+3: Reboot a Group of Devices
+
+Enter the number for your selection: 1
+Name of the Group (to which the command must be fired): <group-name>
+Description for this Operation [optional]: 
+Added Operation to Stage Successfully! Details:
+
+TITLE        DETAILS
+id           <operation uuid>
+action       APP_INSTALL
+action_args  {'url': '<group-command url>', 'body': {'command': 'INSTALL'}, 'method': 'POST', 'headers': {'Authorization': 'Bearer <oauth creds>'}}
+client       f44373cb-1800-43c6-aab3-c81f8b1f435c
+name         <name of operation>
+description  
+created_on   2019-12-26T06:19:50.329913Z
+updated_on   2019-12-26T06:19:50.329944Z
+version      1
+ordering     1
+pipeline     <pipeline uuid>
+stage        <stage uuid>
+ ```
+ 
+ #### 2. edit
+Edit an existing operation
+
+```sh
+$ espercli pipeline stage operation edit [OPTIONS]
+```
+##### Options
+| Name, shorthand   | Default | Description |
+|:-----------------:|:-------:|:-----------:|
+| --pipeline-id, -p | [opt]   | Pipeline ID |
+| --stage-id, -s    | [opt]   | Stage ID |
+| --operation-id, -o| [opt]   | Operation ID |
+| --name, -n        | [opt]   | Name of Operation |
+| --desc            | [opt]   | Description for Operation |
+| --action, -a       | [opt]   | Action for Operation |
+| --ordering        | [opt]   | Ordering for Operation |
+
+##### Example
+ ```sh
+ $ espercli pipeline stage operation edit 
+
+Enter the Pipeline ID: <uuid of pipeline>
+Enter the Stage ID: <uuid of stage>
+Enter the Operation ID: <uuid>
+Change the name of the Operation:
+Change the description for this Operation [optional]:
+Action for this Operation:
+
+1: App Install to a Group of Devices
+2: App Uninstall to a Group of Devices
+3: Reboot a Group of Devices
+
+Enter the number for your selection: 1
+Edited Operation for this Stage Successfully! Details:
+
+TITLE        DETAILS
+id           <operation uuid>
+action       APP_INSTALL
+action_args  {'url': '<group-command url>', 'body': {'command': 'INSTALL'}, 'method': 'POST', 'headers': {'Authorization': 'Bearer <oauth creds>'}}
+client       <uuid>
+name         Jeryn
+description  blah
+created_on   2019-12-26T06:19:50.329913Z
+updated_on   2019-12-26T07:00:54.485012Z
+version      2
+ordering     1
+pipeline     <pipeline uuid>
+stage        <stage uuid>
+ ```
+
+#### 3. remove
+Remove an existing Stage
+
+```sh
+$ espercli pipeline stage remove [OPTIONS]
+```
+##### Options
+| Name, shorthand   | Default | Description |
+|:-----------------:|:-------:|:-----------:|
+| --pipeline-id, -p | [opt]   | Pipeline ID |
+| --stage-id, -s    | [opt]   | Stage ID |
+| --operation-id, -o| [opt]   | Operation ID |
+
+
+##### Example
+ ```sh
+ $ espercli pipeline stage operation remove 
+
+Enter the Pipeline ID: <uuid of pipeline>
+Enter the Stage ID: <uuid of stage>
+Enter the Operation ID: <uuid>
+
+ ```
+
+#### 4. show
+List one or all stages in a pipeline
+
+```sh
+$ espercli pipeline stage show [OPTIONS]
+```
+##### Options
+| Name, shorthand   | Default | Description |
+|:-----------------:|:-------:|:-----------:|
+| --pipeline-id, -p | [opt]   | Pipeline ID |
+| --stage-id, -s    | [opt]   | Stage ID    |
+| --operation-id, -o| [opt]   | Operation ID |
+
+##### Example
+ ```sh
+ $ espercli pipeline stage show 
+
+Listing Operations for the Stage! Details:
+
+ID                 NAME    DESCRIPTION      ORDERING  ACTION         VERSION
+<operation uuid>    Jeryn   blah                    1  APP_INSTALL          2
+ ``` 
+ 
+## Pipeline Execution
+This sub-command is used to manually start/stop/terminate a pipeline execution. 
+
+Note:
+    If trigger is specified for a pipeline, the execution will start automatically when
+    trigger conditions are met.
+
+```sh
+$ espercli pipeline execute
+
+usage: espercli pipeline execute [-h] {show,start,stop,terminate} ...
+
+Pipeline Execute commands
+
+optional arguments:
+  -h, --help            show this help message and exit
+
+sub-commands:
+  {show,start,stop,terminate}
+    show                List all Executions
+    start               Execute pipeline
+    stop                Stop a Pipeline Execution
+    terminate           Terminate a Pipeline Execution
+
+Usage: espercli pipeline execute
+```
+
+#### 1. show
+List all Executions of a Pipeline
+
+```sh
+$ espercli pipeline execute show [OPTIONS]
+```
+##### Options
+| Name, shorthand   | Default | Description |
+|:-----------------:|:-------:|:-----------:|
+| --pipeline-id, -p | [opt]   | Pipeline ID |
+
+##### Example
+ ```sh
+ $ espercli pipeline execute show 
+
+Enter the Pipeline ID: <uuid of pipeline>
+
+Listing Operations for the Stage! Details:
+
+ID                    NAME                    DESCRIPTION    STATE       STATUS      REASON
+<pipeline uuid>       [DONT TOUCH] Jeryn CLI                 TERMINATED  TERMINATED  Dunno
+<pipeline uuid>       [DONT TOUCH] Jeryn CLI                 COMPLETED   FAILURE     Out of 1 devices, Command failed on 1 devices, with 0 inactive devices
+<pipeline uuid>       [DONT TOUCH] Jeryn CLI                 COMPLETED   FAILURE     Out of 1 devices, Command failed on 1 devices, with 0 inactive devices
+ ```
+
+#### 2. start
+Start (or continue) a Manual execution of a Pipeline
+
+```sh
+$ espercli pipeline execute start [OPTIONS]
+```
+##### Options
+| Name, shorthand   | Default | Description |
+|:-----------------:|:-------:|:-----------:|
+| --pipeline-id, -p | [opt]   | Pipeline ID |
+
+##### Example
+ ```sh
+ $ espercli pipeline execute start 
+
+Enter the Pipeline ID: <uuid of pipeline>
+
+Pipeline execution started! Details:
+
+TITLE        DETAILS
+id           <execution uuid>
+state        RUNNING
+status       RUNNING
+reason
+client       <client uuid>
+name         [DONT TOUCH] Jeryn CLI
+description
+version      4
+started_at   2019-12-26T07:31:56.549188Z
+updated_at   2019-12-26T07:31:56.654497Z
+parent       <pipeline uuid>
+ ```
+ 
+#### 2. stop
+Stop an execution of a Pipeline.
+
+Note: A Stopped execution can be restarted with a `start` command
+
+```sh
+$ espercli pipeline execute stop [OPTIONS]
+```
+##### Options
+| Name, shorthand   | Default | Description |
+|:-----------------:|:-------:|:-----------:|
+| --pipeline-id, -p | [opt]   | Pipeline ID |
+| --execution-id, -e| [opt]   | Execution ID |
+| --reason          | [opt]   | Reason to stop the execution |
+
+##### Example
+ ```sh
+ $ espercli pipeline execute stop 
+
+Enter the Pipeline ID: <uuid of pipeline>
+Enter the Execution ID: <uuid of pipeline>
+Why do you want to stop this Execution? : <give a reason>
+
+Pipeline execution Stopped! Details:
+
+TITLE        DETAILS
+id           <execution uuid>
+state        STOPPED
+status       STOPPED
+reason       <given reason>
+client       <client uuid>
+name         <pipeline name>
+description
+version      4
+started_at   2019-12-26T07:31:56.549188Z
+updated_at   2019-12-26T07:31:56.654497Z
+parent       <pipeline uuid>
+ ```
+
+#### 3. terminate
+Terminate an execution of a Pipeline.
+
+Note: A terminated pipeline cant be restarted again.
+
+```sh
+$ espercli pipeline execute terminate [OPTIONS]
+```
+##### Options
+| Name, shorthand   | Default | Description |
+|:-----------------:|:-------:|:-----------:|
+| --pipeline-id, -p | [opt]   | Pipeline ID |
+| --execution-id, -e| [opt]   | Execution ID |
+| --reason          | [opt]   | Reason to stop the execution |
+
+##### Example
+ ```sh
+ $ espercli pipeline execute terminate 
+
+Enter the Pipeline ID: <uuid of pipeline>
+Enter the Execution ID: <uuid of pipeline>
+Why do you want to terminate this Execution? : <give a reason>
+
+Pipeline execution Stopped! Details:
+
+TITLE        DETAILS
+id           <execution uuid>
+state        TERMINATED
+status       TERMINATED
+reason       <given reason>
+client       <uuid>
+name         <pipeline name>
+description
+version      4
+started_at   2019-12-26T07:31:56.549188Z
+updated_at   2019-12-26T07:31:56.654497Z
+parent       <uuid>
+ ```
+
+#### 4. continue
+Continue a Stopped execution of a Pipeline.
+
+```sh
+$ espercli pipeline execute continue [OPTIONS]
+```
+##### Options
+| Name, shorthand   | Default | Description |
+|:-----------------:|:-------:|:-----------:|
+| --pipeline-id, -p | [opt]   | Pipeline ID |
+| --execution-id, -e| [opt]   | Execution ID |
+
+##### Example
+ ```sh
+ $ espercli pipeline execute continue 
+
+Enter the Pipeline ID: <uuid of pipeline>
+Enter the Execution ID: <uuid of pipeline>
+
+Pipeline execution Started! Details:
+
+TITLE        DETAILS
+id           <execution uuid>
+state        RUNNING
+status       RUNNING
+reason       <given reason>
+client       <uuid>
+name         <pipeline name>
+description
+version      4
+started_at   2019-12-26T07:31:56.549188Z
+updated_at   2019-12-26T07:31:56.654497Z
+parent       <uuid>
+ ```
+
+
 We are always in active development and we try our best to keep our documentation up to date. However, if you end up ahead of time you can check our latest documentation on [Github](https://github.com/esper-io/esper-cli).
 
 If you face any issue with CLI usage, we recommend you to reach out to [Esper Dev Support](https://docs.esper.io/home/support.html)

@@ -250,6 +250,7 @@ class Pipeline(Controller):
             return
 
         if not response.ok:
+            self.app.log.debug(f"Response not OK. url: {response.url}")
             self.app.log.debug(f"Response not OK. Status Code: {response.status_code}")
             self.app.log.debug(f"Response not OK. Response: {response.json()}")
             if response.status_code == 400:

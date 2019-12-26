@@ -255,13 +255,13 @@ class Operation(Controller):
 
         action = self.app.pargs.action
         if not action:
-            action = prompt.options(
+            p = Prompt(
                 "Action for this Operation: ",
-                options=[
-                    {"selector": 1, "prompt": "App Install to a Group of Devices", "return": "APP_INSTALL"},
-                    {"selector": 2, "prompt": "App UnInstall to a Group of Devices", "return": "APP_UNINSTALL"},
-                    {"selector": 3, "prompt": "Reboot a Group of Devices", "return": "REBOOT"},
-                ])
+                options=ActionEnums.choices_values(),
+                numbered=True
+            )
+
+            action = ActionEnums(p.input).name
 
         # Calling Pipeline Graphs API
         url = get_operation_url(environment, enterprise_id, pipeline_id=pipeline_id, stage_id=stage_id,
