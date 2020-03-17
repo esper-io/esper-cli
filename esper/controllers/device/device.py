@@ -46,6 +46,14 @@ class Device(Controller):
              {'help': 'Serial number',
               'action': 'store',
               'dest': 'serial'}),
+            (['-t', '--tags'],
+             {'help': 'Tags',
+              'action': 'store',
+              'dest': 'tags'}),
+            (['--search'],
+             {'help': 'Search for device name, alias_name or device id',
+              'action': 'store',
+              'dest': 'search'}),
             (['-b', '--brand'],
              {'help': 'Brand name',
               'action': 'store',
@@ -83,6 +91,8 @@ class Device(Controller):
         group_name = self.app.pargs.group
         imei = self.app.pargs.imei
         serial = self.app.pargs.serial
+        tags = self.app.pargs.tags
+        search = self.app.pargs.search
         brand = self.app.pargs.brand
         gms = self.app.pargs.gms
         limit = self.app.pargs.limit
@@ -121,6 +131,12 @@ class Device(Controller):
         if serial:
             kwargs['serial'] = serial
 
+        if search:
+            kwargs['search'] = search
+
+        if tags:
+            kwargs['tags'] = tags
+
         if brand:
             kwargs['brand'] = brand
 
@@ -143,17 +159,25 @@ class Device(Controller):
                 'id': "ID",
                 'name': "NAME",
                 'model': "MODEL",
-                'state': "CURRENT STATE"
+                'state': "CURRENT STATE",
+                'tags': "TAGS"
             }
 
             for device in response.results:
                 current_state = DeviceState(device.status).name
+                name = device.device_name
+                if device.alias_name and not device.alias_name == '':
+                    name = device.alias_name
+                tags = ''
+                if device.tags and len(device.tags) > 0:
+                    tags = ', '.join(device.tags)
                 devices.append(
                     {
                         label['id']: device.id,
-                        label['name']: device.device_name,
+                        label['name']: name,
                         label['model']: device.hardware_info.get("manufacturer"),
-                        label['state']: current_state
+                        label['state']: current_state,
+                        label['tags']: tags
                     }
                 )
             self.app.render(devices, format=OutputFormat.TABULATED.value, headers="keys", tablefmt="plain")
@@ -161,28 +185,37 @@ class Device(Controller):
             devices = []
             for device in response.results:
                 current_state = DeviceState(device.status).name
+                name = device.device_name
+                if device.alias_name and not device.alias_name == '':
+                    name = device.alias_name
                 devices.append(
                     {
                         'id': device.id,
-                        'device': device.device_name,
+                        'device': name,
                         'model': device.hardware_info.get("manufacturer"),
-                        'state': current_state
+                        'state': current_state,
+                        'tags': device.tags
                     }
                 )
             self.app.render(devices, format=OutputFormat.JSON.value)
 
     def _device_basic_response(self, device, format=OutputFormat.TABULATED):
-        valid_keys = ['id', 'device_name', 'suid', 'api_level', 'template_name', 'is_gms']
+        valid_keys = ['id', 'device_name', 'alias_name', 'suid', 'api_level', 'template_name', 'is_gms']
         current_state = DeviceState(device.status).name
 
         if format == OutputFormat.JSON:
             renderable = {k: v for k, v in device.to_dict().items() if k in valid_keys}
             renderable['state'] = current_state
+            renderable['tags'] = device.tags
         else:
             title = "TITLE"
             details = "DETAILS"
             renderable = [{title: k, details: v} for k, v in device.to_dict().items() if k in valid_keys]
             renderable.append({title: 'state', details: current_state})
+            tags = ''
+            if device.tags and len(device.tags) > 0:
+                tags = ', '.join(device.tags)
+            renderable.append({title: 'tags', details: tags})
         return renderable
 
     @ex(
@@ -223,7 +256,10 @@ class Device(Controller):
             return
 
         if self.app.pargs.active:
-            db.set_device({'id': response.id, 'name': response.device_name})
+            name = response.device_name
+            if response.alias_name and response.alias_name != '':
+                name = response.alias_name
+            db.set_device({'id': response.id, 'name': name})
 
         if not self.app.pargs.json:
             renderable = self._device_basic_response(response)
@@ -261,7 +297,10 @@ class Device(Controller):
                     self.app.render(f'Device does not exist with name {device_name}\n')
                     return
                 response = search_response.results[0]
-                db.set_device({'id': response.id, 'name': response.device_name})
+                name = response.device_name
+                if response.alias_name and response.alias_name != '':
+                    name = response.alias_name
+                db.set_device({'id': response.id, 'name': name})
             except ApiException as e:
                 self.app.log.error(f"[device-active] Failed to list devices: {e}")
                 self.app.render(f"ERROR: {parse_error_message(self.app, e)}\n")

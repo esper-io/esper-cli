@@ -663,28 +663,40 @@ class EnterpriseGroup(Controller):
                 'id': "ID",
                 'name': "NAME",
                 'model': "MODEL",
-                'state': "CURRENT STATE"
+                'state': "CURRENT STATE",
+                'tags': "TAGS"
             }
 
             for device in response.results:
+                name = device.device_name
+                if device.alias_name and device.alias_name != '':
+                    name = device.alias_name
+                tags = ''
+                if device.tags and len(device.tags) > 0:
+                    tags = ', '.join(device.tags)
                 devices.append(
                     {
                         label['id']: device.id,
-                        label['name']: device.device_name,
+                        label['name']: name,
                         label['model']: device.hardware_info.get("manufacturer"),
-                        label['state']: DeviceState(device.status).name
+                        label['state']: DeviceState(device.status).name,
+                        label['tags']: tags
                     }
                 )
             self.app.render(devices, format=OutputFormat.TABULATED.value, headers="keys", tablefmt="plain")
         else:
             devices = []
             for device in response.results:
+                name = device.device_name
+                if device.alias_name and device.alias_name != '':
+                    name = device.alias_name
                 devices.append(
                     {
                         'id': device.id,
-                        'device': device.device_name,
+                        'device': name,
                         'model': device.hardware_info.get("manufacturer"),
-                        'state': DeviceState(device.status).name
+                        'state': DeviceState(device.status).name,
+                        'tags': device.tags
                     }
                 )
             self.app.render(devices, format=OutputFormat.JSON.value)

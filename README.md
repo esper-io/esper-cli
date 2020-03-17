@@ -6,8 +6,8 @@ This package provides a unified command line interface to the Esper API Services
 Current stable release versions are
 
     API version: 1.0.0
-    SDK version: 0.0.10
-    CLI version: 0.0.8
+    SDK version: 0.0.12
+    CLI version: 0.0.9
 
 ## Requirements
 
@@ -231,6 +231,8 @@ $ espercli device list [OPTIONS]
 | --name, -n      |        | Filter by device name |
 | --group, -g     |        | Filter by group name |
 | --imei, -im     |        | Filter by device IMEI number |
+| --tags, -t      |        | Filter by a tag  |
+| --search        |        | Search by device name, alias name or device id  |
 | --serial, -se   |        | Filter by device serial number |
 | --brand, -b     |        | Filter by device brand name |
 | --gms, -gm      |        | Filter by GMS and non GMS flag, choices are [true, false] |
@@ -241,13 +243,13 @@ $ espercli device list [OPTIONS]
 $ espercli device list -gm false
 Number of Devices: 10
 
-ID                                    NAME          MODEL     CURRENT STATE
+ID                                    NAME          MODEL     CURRENT STATE  TAGS
 62d42cff-6979-48ed-bedf-8b25052a74d0  SNA-SNL-FZH5  QUALCOMM  INACTIVE
-9877c1f0-0435-4185-a41b-e896e33bd438  SNA-SNL-V84B  QUALCOMM  INACTIVE
-1bab8bf7-4b12-426e-a35b-00a718ec3490  SNA-SNL-XA05  POSBANK   INACTIVE
+9877c1f0-0435-4185-a41b-e896e33bd438  SNA-SNL-V84B  QUALCOMM  INACTIVE       kiosk, cust
+1bab8bf7-4b12-426e-a35b-00a718ec3490  SNA-SNL-XA05  POSBANK   INACTIVE       
 9cdb45ed-5bc7-433a-b08b-1c0cffffebec  SNA-SNL-N7XY  Esper     DISABLED
-d89a88f3-de5c-4acc-9eae-0868bd2fad15  SNA-SNL-U1K1  EMDOOR    INACTIVE
-fc3af4e3-79f4-483f-986e-3af60bb58809  SNA-SNL-T1PX  Vertex    DISABLED
+d89a88f3-de5c-4acc-9eae-0868bd2fad15  SNA-SNL-U1K1  EMDOOR    INACTIVE       EM
+fc3af4e3-79f4-483f-986e-3af60bb58809  SNA-SNL-T1PX  Vertex    DISABLED       ModelV, Prod, Beta
 e2a7d069-b536-4700-b07b-4db9d9d9236c  SNA-SNL-B424  Esper     INACTIVE
 218b37c5-b1cf-4768-8340-b2bc5f701b54  SNA-SNL-BGD3  EMDOOR    INACTIVE
 647ef365-0b68-4fbd-aa11-febe54d668b1  SNA-SNL-8QJG  Intel     INACTIVE
@@ -273,11 +275,13 @@ $ espercli device show -a SNA-SNL-FZH5
 TITLE          DETAILS
 id             62d42cff-6979-48ed-bedf-8b25052a74d0
 device_name    SNA-SNL-FZH5
+alias_name     sample
 suid           tFxCx1wRMnMIk7kO3GpkgX--VQEI_FQxC13D1Bh4yRA
 api_level      28
 template_name  NonGMS
 is_gms         False
 state          INACTIVE
+tags           kiosk, cust
 ```
 
 #### 3. set-active
@@ -298,11 +302,13 @@ $ espercli device set-active -n SNA-SNL-FZH5
 TITLE          DETAILS
 id             62d42cff-6979-48ed-bedf-8b25052a74d0
 device_name    SNA-SNL-FZH5
+alias_name    sample
 suid           tFxCx1wRMnMIk7kO3GpkgX--VQEI_FQxC13D1Bh4yRA
 api_level      28
 template_name  NonGMS
 is_gms         False
 state          INACTIVE
+tags           kiosk, cust
 ```
 
 #### 4. unset-active
@@ -516,9 +522,9 @@ $ espercli group devices [OPTIONS] [group-name]
 $ espercli group devices -g 5G
 Number of Devices: 2
 
-ID                                    NAME          MODEL     CURRENT STATE
+ID                                    NAME          MODEL     CURRENT STATE  TAGS
 3ebc3afd-249b-4f10-8561-fa1a9ddb1bb7  SNA-SNL-KX37  Shoonya   ACTIVE
-c8efa083-f325-4e3b-8d20-71b7a2927ffb  SNA-SNL-3606  QUALCOMM  INACTIVE
+c8efa083-f325-4e3b-8d20-71b7a2927ffb  SNA-SNL-3606  QUALCOMM  INACTIVE       kiosk
 ```
 
 ### **App**
