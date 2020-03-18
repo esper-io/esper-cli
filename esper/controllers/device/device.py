@@ -22,6 +22,16 @@ class Device(Controller):
         stacked_type = 'nested'
         stacked_on = 'base'
 
+    @staticmethod
+    def get_name_and_tags_from_device(device):
+        """
+        Returns device name and tags
+        :param device: Device objects response
+        :return: name, tags
+        """
+        return device.alias_name if device.alias_name else device.device_name, \
+               ', '.join(device.tags) if device.tags and len(device.tags) > 0 else ''
+
     @ex(
         help='List devices',
         arguments=[
@@ -165,12 +175,8 @@ class Device(Controller):
 
             for device in response.results:
                 current_state = DeviceState(device.status).name
-                name = device.device_name
-                if device.alias_name and not device.alias_name == '':
-                    name = device.alias_name
-                tags = ''
-                if device.tags and len(device.tags) > 0:
-                    tags = ', '.join(device.tags)
+                name, tags = self.get_name_and_tags_from_device(device)
+
                 devices.append(
                     {
                         label['id']: device.id,
@@ -185,9 +191,7 @@ class Device(Controller):
             devices = []
             for device in response.results:
                 current_state = DeviceState(device.status).name
-                name = device.device_name
-                if device.alias_name and not device.alias_name == '':
-                    name = device.alias_name
+                name, _ = self.get_name_and_tags_from_device(device)
                 devices.append(
                     {
                         'id': device.id,
@@ -212,9 +216,7 @@ class Device(Controller):
             details = "DETAILS"
             renderable = [{title: k, details: v} for k, v in device.to_dict().items() if k in valid_keys]
             renderable.append({title: 'state', details: current_state})
-            tags = ''
-            if device.tags and len(device.tags) > 0:
-                tags = ', '.join(device.tags)
+            _, tags = self.get_name_and_tags_from_device(device)
             renderable.append({title: 'tags', details: tags})
         return renderable
 
@@ -256,9 +258,7 @@ class Device(Controller):
             return
 
         if self.app.pargs.active:
-            name = response.device_name
-            if response.alias_name and response.alias_name != '':
-                name = response.alias_name
+            name, _ = self.get_name_and_tags_from_device(response)
             db.set_device({'id': response.id, 'name': name})
 
         if not self.app.pargs.json:
@@ -297,9 +297,7 @@ class Device(Controller):
                     self.app.render(f'Device does not exist with name {device_name}\n')
                     return
                 response = search_response.results[0]
-                name = response.device_name
-                if response.alias_name and response.alias_name != '':
-                    name = response.alias_name
+                name, _ = self.get_name_and_tags_from_device(response)
                 db.set_device({'id': response.id, 'name': name})
             except ApiException as e:
                 self.app.log.error(f"[device-active] Failed to list devices: {e}")
