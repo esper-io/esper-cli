@@ -35,6 +35,7 @@ class DeviceCommandEnum(BaseEnum):
     INSTALL = 210
     UNINSTALL = 220
     CLEAR_APP_DATA = 260
+    INITIATE_CONFERENCE_CALL = 280
 
 
 class DeviceCommandState(BaseEnum):

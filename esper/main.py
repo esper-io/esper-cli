@@ -18,6 +18,7 @@ from esper.controllers.pipeline.pipeline import Pipeline
 from esper.controllers.pipeline.stage import Stage
 from esper.controllers.secureadb.secureadb import SecureADB
 from esper.controllers.telemetry.telemetry import Telemetry
+from esper.controllers.conference.conference import Conference
 from esper.controllers.token.token import Token
 from esper.core.exc import EsperError
 from esper.core.output_handler import EsperOutputHandler
@@ -112,7 +113,8 @@ class Esper(App):
             Pipeline,
             Stage,
             Operation,
-            Execution
+            Execution,
+            Conference
         ]
 
         # hooks
