@@ -31,7 +31,7 @@ def get_telemetry_url(environment: str,
     :return:
     """
 
-    url = f'https://{environment}-api.shoonyacloud.com/api/graph/{category}/{metric}/?from_time={from_time}&' \
+    url = f'https://{environment}-api.esper.cloud/api/graph/{category}/{metric}/?from_time={from_time}&' \
           f'to_time={to_time}&period={period}&statistic={statistic}&device_id={device_id}&enterprise_id=' \
           f'{enterprise_id}'
 
