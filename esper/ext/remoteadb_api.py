@@ -23,7 +23,7 @@ def get_remoteadb_url(environment: str,
     :return:
     """
 
-    host = f'https://{environment}-api.shoonyacloud.com'
+    host = f'https://{environment}-api.esper.cloud'
     url = f'{host}/api/v0/enterprise/{enterprise_id}/device/{device_id}/remoteadb/'
 
     if remoteadb_id:
