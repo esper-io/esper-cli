@@ -8,7 +8,7 @@ class APIClient:
         self.config = Configuration()
         self.config.api_key['Authorization'] = credential["api_key"]
         self.config.api_key_prefix['Authorization'] = 'Bearer'
-        self.config.host = f"https://{credential['environment']}-api.shoonyacloud.com/api"
+        self.config.host = f"https://{credential['environment']}-api.esper.cloud/api"
 
     def get_enterprise_api_client(self):
         return client.EnterpriseApi(client.ApiClient(self.config))
