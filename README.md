@@ -769,6 +769,27 @@ $ espercli version delete -a 630dbfab-7d85-4f81-9f3b-ffb038b0df72 54436edb-9b43-
 Version with id 54436edb-9b43-4e2c-8107-2c6fa90e2a9e deleted successfully
 ```
 
+#### 4. devices
+Returns the list of devices with the specified app version installed. Here, version id (UUID) is required to list devices. 
+```sh
+$ espercli version devices [OPTIONS] [version-id]
+```
+
+##### Options
+| Name, shorthand | Default| Description|
+| -------------   |:------:|:----------|
+| --app, -a       |        | Application id (UUID) |
+| --json, -j      |        | Render result in JSON format |
+
+##### Example
+```sh
+$ espercli version devices 'ea8ed7ae-db18-464b-81f3-e9562c40b0a8' --app 'a5f14399-c358-43f2-9e6f-06033db0d742' 
+
+Total Number of Devices: 1
+ID                                    DEVICE NAME    ALIAS NAME    GROUP NAME
+333d9856-303d-4487-91d5-be447971ead3  DEV-ELOP-FZC3                12125364365etc
+```
+
 ### **Device-command**
 Device-command command used to fire different actions on device like lock, ping, reboot, deploy application and wipe.
 ```sh
