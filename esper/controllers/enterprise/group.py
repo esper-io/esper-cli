@@ -104,13 +104,19 @@ class EnterpriseGroup(Controller):
             renderable = [
                 {title: 'id', details: group.id},
                 {title: 'name', details: group.name},
-                {title: 'device_count', details: group.device_count}
+                {title: 'parent', details: group.parent},
+                {title: 'device_count', details: group.device_count},
+                {title: 'path', details: group.path},
+                {title: 'children_count', details: group.children_count},                
             ]
         else:
             renderable = {
                 'id': group.id,
                 'name': group.name,
-                'device_count': group.device_count
+                'parent': group.parent,
+                'device_count': group.device_count,
+                'path': group.path,
+                'children_count': group.children_count,  
             }
 
         return renderable
@@ -247,6 +253,10 @@ class EnterpriseGroup(Controller):
              {'help': 'Group name',
               'action': 'store',
               'dest': 'name'}),
+            (['-p', '--parent'],
+             {'help': 'Parent Id',
+              'action': 'store',
+              'dest': 'parent'}),
             (['-j', '--json'],
              {'help': 'Render result in Json format',
               'action': 'store_true',
@@ -260,7 +270,10 @@ class EnterpriseGroup(Controller):
         enterprise_id = db.get_enterprise_id()
 
         if self.app.pargs.name:
-            data = DeviceGroup(name=self.app.pargs.name)
+            if self.app.pargs.parent:
+                data = DeviceGroup(name=self.app.pargs.name, parent=self.app.pargs.parent)
+            else:
+                data = DeviceGroup(name=self.app.pargs.name)
         else:
             self.app.log.debug('[group-create] name cannot be empty.')
             self.app.render('name cannot be empty.')
@@ -700,3 +713,82 @@ class EnterpriseGroup(Controller):
                     }
                 )
             self.app.render(devices, format=OutputFormat.JSON.value)
+
+    @ex(
+        help='Move a group',
+        arguments=[
+            (['-g', '--group'],
+             {'help': 'Group name',
+              'action': 'store',
+              'dest': 'group'}),
+            (['-p', '--parent'],
+             {'help': 'Parent Id',
+              'action': 'store',
+              'dest': 'parent'}),
+            (['-j', '--json'],
+             {'help': 'Render result in Json format',
+              'action': 'store_true',
+              'dest': 'json'})
+        ]
+    )
+    def move(self):
+        validate_creds_exists(self.app)
+        db = DBWrapper(self.app.creds)
+        group_client = APIClient(db.get_configure()).get_group_api_client()
+        enterprise_id = db.get_enterprise_id()
+        action = 'move'
+
+        if self.app.pargs.group:
+            group_name = self.app.pargs.group
+            kwargs = {'name': group_name}
+            try:
+                search_response = group_client.get_all_groups(enterprise_id, limit=1, offset=0, **kwargs)
+                if not search_response.results or len(search_response.results) == 0:
+                    self.app.log.debug(f'[group-move] Group does not exist with name {group_name}')
+                    self.app.render(f'Group does not exist with name {group_name}')
+                    return
+                response = search_response.results[0]
+                group_id = response.id
+            except ApiException as e:
+                self.app.log.error(f"[group-move] Failed to list groups: {e}")
+                self.app.render(f"ERROR: {parse_error_message(self.app, e)}")
+                return
+
+        else:
+            group = db.get_group()
+            if group is None or group.get('name') is None:
+                self.app.log.debug('[group-move] There is no active group.')
+                self.app.render('There is no active group.')
+                return
+
+            group_id = group.get('id')
+
+        if self.app.pargs.parent:
+            parent_id = self.app.pargs.parent
+            try:
+                search_response = group_client.get_group_by_id(parent_id, enterprise_id)
+            except ApiException as e:
+                self.app.log.error(f"[group-move] Failed to list parent group: {e}")
+                self.app.render(f"ERROR: {parse_error_message(self.app, e)}")
+                return
+
+        if self.app.pargs.parent:
+            data = DeviceGroupUpdate(name=self.app.pargs.group, parent=self.app.pargs.parent)
+        else:
+            self.app.log.debug('[group-move] parent cannot be empty.')
+            self.app.render('parent cannot be empty.')
+            return
+
+        try:
+            response = group_client.partial_update_group(group_id, enterprise_id, data, action=action)
+        except ApiException as e:
+            self.app.log.error(f"[group-remove] Failed to remove device from group: {e}")
+            self.app.render(f"ERROR: {parse_error_message(self.app, e)}")
+            return
+
+        if not self.app.pargs.json:
+            renderable = self._group_basic_response(response)
+            self.app.render(renderable, format=OutputFormat.TABULATED.value, headers="keys", tablefmt="plain")
+        else:
+            renderable = self._group_basic_response(response, OutputFormat.JSON)
+            self.app.render(renderable, format=OutputFormat.JSON.value)
