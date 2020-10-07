@@ -370,7 +370,7 @@ $ espercli group show -a 5G
 TITLE           DETAILS
 id              2e5efca2-7776-442e-a5ef-c2758d4a45a3
 name            5G
-parent          https://foo-api.esper.cloud/api/enterprise/f44373cb-1800-43c6-aab3-c81f8b1f435c/devicegroup/5275a3b7-635c-405b-b187-b7f1dd8dfe88/
+parent_id       5275a3b7-635c-405b-b187-b7f1dd8dfe88
 device_count    2
 path            All devices/5G
 children_count  0
@@ -394,7 +394,7 @@ $ espercli group set-active -n 5G
 TITLE           DETAILS
 id              2e5efca2-7776-442e-a5ef-c2758d4a45a3
 name            5G
-parent          https://foo-api.esper.cloud/api/enterprise/f44373cb-1800-43c6-aab3-c81f8b1f435c/devicegroup/5275a3b7-635c-405b-b187-b7f1dd8dfe88/
+parent_id       5275a3b7-635c-405b-b187-b7f1dd8dfe88
 device_count    2
 path            All devices/5G
 children_count  0
@@ -431,7 +431,7 @@ $ espercli group create -n "Sub" -p "5275a3b7-635c-405b-b187-b7f1dd8dfe88"
 TITLE           DETAILS
 id              a8c07087-4fb5-477f-aa9f-b775fb9c5564
 name            Sub
-parent          https://foo-api.esper.cloud/api/enterprise/f44373cb-1800-43c6-aab3-c81f8b1f435c/devicegroup/5275a3b7-635c-405b-b187-b7f1dd8dfe88/
+parent_id       5275a3b7-635c-405b-b187-b7f1dd8dfe88
 device_count    0
 path            All devices/Test/Sub
 children_count  0
@@ -455,7 +455,7 @@ $ espercli group update -n 4G 5G
 TITLE           DETAILS
 id              2e5efca2-7776-442e-a5ef-c2758d4a45a3
 name            4G
-parent          https://foo-api.esper.cloud/api/enterprise/f44373cb-1800-43c6-aab3-c81f8b1f435c/devicegroup/5275a3b7-635c-405b-b187-b7f1dd8dfe88/
+parent_id       5275a3b7-635c-405b-b187-b7f1dd8dfe88
 device_count    2
 path            All devices/4G
 children_count  0
@@ -492,7 +492,7 @@ $ espercli group add -g 5G -d SNA-SNL-73YE SNA-SNL-NYWL
 TITLE           DETAILS
 id              2e5efca2-7776-442e-a5ef-c2758d4a45a3
 name            5G
-parent          https://foo-api.esper.cloud/api/enterprise/f44373cb-1800-43c6-aab3-c81f8b1f435c/devicegroup/5275a3b7-635c-405b-b187-b7f1dd8dfe88/
+parent_id       5275a3b7-635c-405b-b187-b7f1dd8dfe88
 device_count    2
 path            All devices/5G
 children_count  0
@@ -517,7 +517,7 @@ $ espercli group remove -g 5G -d SNA-SNL-73YE SNA-SNL-NYWL
 TITLE           DETAILS
 id              2e5efca2-7776-442e-a5ef-c2758d4a45a3
 name            5G
-parent          https://foo-api.esper.cloud/api/enterprise/f44373cb-1800-43c6-aab3-c81f8b1f435c/devicegroup/5275a3b7-635c-405b-b187-b7f1dd8dfe88/
+parent_id       5275a3b7-635c-405b-b187-b7f1dd8dfe88
 device_count    0
 path            All devices/5G
 children_count  0
@@ -565,7 +565,7 @@ $ espercli group move -g "Sub" -p "5275a3b7-635c-405b-b187-b7f1dd8dfe88"
 TITLE           DETAILS
 id              43e99aad-4bfd-4481-b54f-952d0dc18cc0
 name            Test
-parent          https://foo-api.esper.cloud/api/enterprise/f44373cb-1800-43c6-aab3-c81f8b1f435c/devicegroup/5275a3b7-635c-405b-b187-b7f1dd8dfe88/
+parent_id       5275a3b7-635c-405b-b187-b7f1dd8dfe88
 device_count    0
 path            All devices/Test/Sub
 children_count  0
