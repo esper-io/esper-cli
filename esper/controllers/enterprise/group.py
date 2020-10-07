@@ -1,5 +1,5 @@
 from cement import Controller, ex
-from esperclient import DeviceGroup, DeviceGroupUpdate
+from esperclient import DeviceGroup, DeviceGroupUpdate, DeviceGroupPartialUpdate
 from esperclient.rest import ApiException
 
 from esper.controllers.enums import OutputFormat, DeviceState
@@ -104,7 +104,7 @@ class EnterpriseGroup(Controller):
             renderable = [
                 {title: 'id', details: group.id},
                 {title: 'name', details: group.name},
-                {title: 'parent', details: group.parent},
+                {title: 'parent_id', details: group.parent.split('/')[-2]},
                 {title: 'device_count', details: group.device_count},
                 {title: 'path', details: group.path},
                 {title: 'children_count', details: group.children_count},                
@@ -113,7 +113,7 @@ class EnterpriseGroup(Controller):
             renderable = {
                 'id': group.id,
                 'name': group.name,
-                'parent': group.parent,
+                'parent_id': group.parent.split('/')[-2],
                 'device_count': group.device_count,
                 'path': group.path,
                 'children_count': group.children_count,  
@@ -124,8 +124,8 @@ class EnterpriseGroup(Controller):
     @ex(
         help='Show group details and set as active group',
         arguments=[
-            (['group_name'],
-             {'help': 'Group name',
+            (['group_id'],
+             {'help': 'Group Id',
               'action': 'store'}),
             (['-a', '--active'],
              {'help': 'Set this group as active for further group specific commands',
@@ -143,27 +143,16 @@ class EnterpriseGroup(Controller):
         group_client = APIClient(db.get_configure()).get_group_api_client()
         enterprise_id = db.get_enterprise_id()
 
-        group_name = self.app.pargs.group_name
-        kwargs = {'name': group_name}
-        try:
-            search_response = group_client.get_all_groups(enterprise_id, limit=1, offset=0, **kwargs)
-            response = None
-            for group in search_response.results:
-                if group.name == group_name:
-                    response = group
-                    break
-
-            if not response:
-                self.app.log.info(f'[group-show] Group does not exist with name {group_name}')
-                self.app.render(f'Group does not exist with name {group_name}')
-                return
+        group_id = self.app.pargs.group_id
+        try: 
+            response = group_client.get_group_by_id(group_id, enterprise_id)
         except ApiException as e:
-            self.app.log.error(f"[group-show] Failed to list groups: {e}")
+            self.app.log.error(f"[group-show] Group does not exist with id {group_id}: {e}")
             self.app.render(f"ERROR: {parse_error_message(self.app, e)}")
             return
-
+        
         if self.app.pargs.active:
-            db.set_group({'id': response.id, 'name': group_name})
+            db.set_group({'id': group_id, 'name': response.name})
 
         if not self.app.pargs.json:
             renderable = self._group_basic_response(response)
@@ -175,10 +164,10 @@ class EnterpriseGroup(Controller):
     @ex(
         help='Set or show the active group',
         arguments=[
-            (['-n', '--name'],
-             {'help': 'Group name.',
+            (['-g', '--group'],
+             {'help': 'Group Id',
               'action': 'store',
-              'dest': 'name'}),
+              'dest': 'group_id'}),
             (['-j', '--json'],
              {'help': 'Render result in Json format',
               'action': 'store_true',
@@ -191,19 +180,13 @@ class EnterpriseGroup(Controller):
         group_client = APIClient(db.get_configure()).get_group_api_client()
         enterprise_id = db.get_enterprise_id()
 
-        if self.app.pargs.name:
-            group_name = self.app.pargs.name
-            kwargs = {'name': group_name}
-            try:
-                search_response = group_client.get_all_groups(enterprise_id, limit=1, offset=0, **kwargs)
-                if not search_response.results or len(search_response.results) == 0:
-                    self.app.log.info(f'[group-active] Group does not exist with name {group_name}')
-                    self.app.render(f'Group does not exist with name {group_name}')
-                    return
-                response = search_response.results[0]
-                db.set_group({'id': response.id, 'name': group_name})
+        if self.app.pargs.group_id:
+            group_id = self.app.pargs.group_id
+            try: 
+                response = group_client.get_group_by_id(group_id, enterprise_id)
+                db.set_group({'id': group_id, 'name': response.name})
             except ApiException as e:
-                self.app.log.error(f"[group-active] Failed to list groups: {e}")
+                self.app.log.error(f"[group-active] Group does not exist with id {group_id}: {e}")
                 self.app.render(f"ERROR: {parse_error_message(self.app, e)}")
                 return
         else:
@@ -296,8 +279,8 @@ class EnterpriseGroup(Controller):
     @ex(
         help='Update group details',
         arguments=[
-            (['name'],
-             {'help': 'Group current name',
+            (['id'],
+             {'help': 'Group id',
               'action': 'store'}),
             (['-n', '--name'],
              {'help': 'Group new name',
@@ -314,25 +297,17 @@ class EnterpriseGroup(Controller):
         db = DBWrapper(self.app.creds)
         group_client = APIClient(db.get_configure()).get_group_api_client()
         enterprise_id = db.get_enterprise_id()
-        data = DeviceGroupUpdate()
-
-        group_name = self.app.pargs.name
-        kwargs = {'name': group_name}
-        try:
-            search_response = group_client.get_all_groups(enterprise_id, limit=1, offset=0, **kwargs)
-            if not search_response.results or len(search_response.results) == 0:
-                self.app.log.debug(f'[group-update] Group does not exist with name {group_name}')
-                self.app.render(f'Group does not exist with name {group_name}')
-                return
-            response = search_response.results[0]
-            group_id = response.id
+        
+        group_id = self.app.pargs.id
+        try: 
+            response = group_client.get_group_by_id(group_id, enterprise_id)
         except ApiException as e:
-            self.app.log.error(f"[group-update] Failed to list groups: {e}")
+            self.app.log.error(f"[group-update] Group does not exist with id {group_id}: {e}")
             self.app.render(f"ERROR: {parse_error_message(self.app, e)}")
             return
 
         if self.app.pargs.new_name:
-            data.name = self.app.pargs.new_name
+            data = DeviceGroupUpdate(name=self.app.pargs.new_name)
         else:
             self.app.log.debug('[group-update] name cannot be empty.')
             self.app.render('name cannot be empty.')
@@ -355,8 +330,8 @@ class EnterpriseGroup(Controller):
     @ex(
         help='Delete group',
         arguments=[
-            (['name'],
-             {'help': 'Group name',
+            (['id'],
+             {'help': 'Group Id',
               'action': 'store'}),
         ]
     )
@@ -366,33 +341,26 @@ class EnterpriseGroup(Controller):
         group_client = APIClient(db.get_configure()).get_group_api_client()
         enterprise_id = db.get_enterprise_id()
 
-        group_name = self.app.pargs.name
-        kwargs = {'name': group_name}
-        try:
-            search_response = group_client.get_all_groups(enterprise_id, limit=1, offset=0, **kwargs)
-            if not search_response.results or len(search_response.results) == 0:
-                self.app.log.debug(f'[group-delete] Group does not exist with name {group_name}')
-                self.app.render(f'Group does not exist with name {group_name}')
-                return
-            response = search_response.results[0]
-            group_id = response.id
+        group_id = self.app.pargs.id
+        try: 
+            response = group_client.get_group_by_id(group_id, enterprise_id)
         except ApiException as e:
-            self.app.log.error(f"[group-update] Failed to list groups: {e}")
+            self.app.log.error(f"[group-delete] Group does not exist with id {group_id}: {e}")
             self.app.render(f"ERROR: {parse_error_message(self.app, e)}")
             return
 
         try:
             group_client.delete_group(group_id, enterprise_id)
-            self.app.log.debug(f"[group-update] Group with name {group_name} deleted successfully")
-            self.app.render(f"Group with name {group_name} deleted successfully")
+            self.app.log.debug(f"[group-delete] Group with id {group_id} deleted successfully")
+            self.app.render(f"Group with id {group_id} deleted successfully")
 
             # Unset current group if matching
             group = db.get_group()
             if group and group.get('id') and group_id == group.get('id'):
                 db.unset_group()
-                self.app.log.debug(f'[group-update] Unset the active group {group_name}')
+                self.app.log.debug(f'[group-delete] Unset the active group with id {group_id}')
         except ApiException as e:
-            self.app.log.error(f"[group-update] Failed to delete group: {e}")
+            self.app.log.error(f"[group-delete] Failed to delete group: {e}")
             self.app.render(f"ERROR: {parse_error_message(self.app, e)}")
             return
 
@@ -420,7 +388,7 @@ class EnterpriseGroup(Controller):
         help='Add devices to group',
         arguments=[
             (['-g', '--group'],
-             {'help': 'Group name',
+             {'help': 'Group Id',
               'action': 'store',
               'dest': 'group'}),
             (['-d', '--devices'],
@@ -439,21 +407,14 @@ class EnterpriseGroup(Controller):
         db = DBWrapper(self.app.creds)
         group_client = APIClient(db.get_configure()).get_group_api_client()
         enterprise_id = db.get_enterprise_id()
-        data = DeviceGroupUpdate()
+        data = DeviceGroupPartialUpdate()
 
         if self.app.pargs.group:
-            group_name = self.app.pargs.group
-            kwargs = {'name': group_name}
-            try:
-                search_response = group_client.get_all_groups(enterprise_id, limit=1, offset=0, **kwargs)
-                if not search_response.results or len(search_response.results) == 0:
-                    self.app.log.debug(f'[group-add] Group does not exist with name {group_name}')
-                    self.app.render(f'Group does not exist with name {group_name}')
-                    return
-                response = search_response.results[0]
-                group_id = response.id
+            group_id = self.app.pargs.group
+            try: 
+                response = group_client.get_group_by_id(group_id, enterprise_id)
             except ApiException as e:
-                self.app.log.error(f"[group-add] Failed to list groups: {e}")
+                self.app.log.error(f"[group-add] Group does not exist with id {group_id}: {e}")
                 self.app.render(f"ERROR: {parse_error_message(self.app, e)}")
                 return
 
@@ -532,21 +493,15 @@ class EnterpriseGroup(Controller):
         db = DBWrapper(self.app.creds)
         group_client = APIClient(db.get_configure()).get_group_api_client()
         enterprise_id = db.get_enterprise_id()
-        data = DeviceGroupUpdate()
+        data = DeviceGroupPartialUpdate()
+        action = 'remove'
 
         if self.app.pargs.group:
-            group_name = self.app.pargs.group
-            kwargs = {'name': group_name}
-            try:
-                search_response = group_client.get_all_groups(enterprise_id, limit=1, offset=0, **kwargs)
-                if not search_response.results or len(search_response.results) == 0:
-                    self.app.log.debug(f'[group-remove] Group does not exist with name {group_name}')
-                    self.app.render(f'Group does not exist with name {group_name}')
-                    return
-                response = search_response.results[0]
-                group_id = response.id
+            group_id = self.app.pargs.group
+            try: 
+                response = group_client.get_group_by_id(group_id, enterprise_id)
             except ApiException as e:
-                self.app.log.error(f"[group-remove] Failed to list groups: {e}")
+                self.app.log.error(f"[group-add] Group does not exist with id {group_id}: {e}")
                 self.app.render(f"ERROR: {parse_error_message(self.app, e)}")
                 return
 
@@ -586,11 +541,11 @@ class EnterpriseGroup(Controller):
         current_device_ids = self._get_group_device_ids(device_client, enterprise_id, group_id)
         if current_device_ids is None:
             return
-
-        latest_devices = list(set(current_device_ids) - set(request_device_ids))
-        data.device_ids = latest_devices
+        
+        data.device_ids = request_device_ids
+       
         try:
-            response = group_client.partial_update_group(group_id, enterprise_id, data)
+            response = group_client.partial_update_group(group_id, enterprise_id, data, action=action)
         except ApiException as e:
             self.app.log.error(f"[group-remove] Failed to remove device from group: {e}")
             self.app.render(f"ERROR: {parse_error_message(self.app, e)}")
@@ -607,7 +562,7 @@ class EnterpriseGroup(Controller):
         help='List group devices',
         arguments=[
             (['-g', '--group'],
-             {'help': 'Group name',
+             {'help': 'Group Id',
               'action': 'store',
               'dest': 'group'}),
             (['-l', '--limit'],
@@ -634,18 +589,11 @@ class EnterpriseGroup(Controller):
         enterprise_id = db.get_enterprise_id()
 
         if self.app.pargs.group:
-            group_name = self.app.pargs.group
-            kwargs = {'name': group_name}
-            try:
-                search_response = group_client.get_all_groups(enterprise_id, limit=1, offset=0, **kwargs)
-                if not search_response.results or len(search_response.results) == 0:
-                    self.app.log.debug(f'[group-devices] Group does not exist with name {group_name}')
-                    self.app.render(f'Group does not exist with name {group_name}')
-                    return
-                response = search_response.results[0]
-                group_id = response.id
+            group_id = self.app.pargs.group
+            try: 
+                response = group_client.get_group_by_id(group_id, enterprise_id)
             except ApiException as e:
-                self.app.log.error(f"[group-devices] Failed to list groups: {e}")
+                self.app.log.error(f"[group-devices] Group does not exist with id {group_id}: {e}")
                 self.app.render(f"ERROR: {parse_error_message(self.app, e)}")
                 return
 
@@ -718,7 +666,7 @@ class EnterpriseGroup(Controller):
         help='Move a group',
         arguments=[
             (['-g', '--group'],
-             {'help': 'Group name',
+             {'help': 'Group Id',
               'action': 'store',
               'dest': 'group'}),
             (['-p', '--parent'],
@@ -739,18 +687,11 @@ class EnterpriseGroup(Controller):
         action = 'move'
 
         if self.app.pargs.group:
-            group_name = self.app.pargs.group
-            kwargs = {'name': group_name}
-            try:
-                search_response = group_client.get_all_groups(enterprise_id, limit=1, offset=0, **kwargs)
-                if not search_response.results or len(search_response.results) == 0:
-                    self.app.log.debug(f'[group-move] Group does not exist with name {group_name}')
-                    self.app.render(f'Group does not exist with name {group_name}')
-                    return
-                response = search_response.results[0]
-                group_id = response.id
+            group_id = self.app.pargs.group
+            try: 
+                response = group_client.get_group_by_id(group_id, enterprise_id)
             except ApiException as e:
-                self.app.log.error(f"[group-move] Failed to list groups: {e}")
+                self.app.log.error(f"[group-move] Group does not exist with id {group_id}: {e}")
                 self.app.render(f"ERROR: {parse_error_message(self.app, e)}")
                 return
 
@@ -768,7 +709,7 @@ class EnterpriseGroup(Controller):
             try:
                 search_response = group_client.get_group_by_id(parent_id, enterprise_id)
             except ApiException as e:
-                self.app.log.error(f"[group-move] Failed to list parent group: {e}")
+                self.app.log.error(f"[group-move] Group does not exist with id {parent_id}: {e}")
                 self.app.render(f"ERROR: {parse_error_message(self.app, e)}")
                 return
 
