@@ -355,7 +355,7 @@ ID                                    NAME      DEVICE COUNT
 Show the details of the group. Here, `group-name` is required to show group information. 
 Use the `--active` or `-a` flag to mark this group as the active group. This will allow you to call further group commands without specifying the group.
 ```sh
-$ espercli group show [OPTIONS] [group-name]
+$ espercli group show [OPTIONS] [group-id]
 ```
 ##### Options
 | Name, shorthand | Default| Description|
@@ -365,7 +365,7 @@ $ espercli group show [OPTIONS] [group-name]
 
 ##### Example
 ```sh
-$ espercli group show -a 5G
+$ espercli group show -a 2e5efca2-7776-442e-a5ef-c2758d4a45a3
 
 TITLE           DETAILS
 id              2e5efca2-7776-442e-a5ef-c2758d4a45a3
@@ -384,12 +384,12 @@ $ espercli group set-active [OPTIONS]
 ##### Options
 | Name, shorthand | Default| Description|
 | -------------   |:------:|:----------|
-| --name, -n      |        | Group name |
+| --group, -g     |        | Group Id |
 | --json, -j      |        | Render result in JSON format |
 
 ##### Example
 ```sh
-$ espercli group set-active -n 5G
+$ espercli group set-active -n 2e5efca2-7776-442e-a5ef-c2758d4a45a3
 
 TITLE           DETAILS
 id              2e5efca2-7776-442e-a5ef-c2758d4a45a3
@@ -426,7 +426,7 @@ $ espercli group create [OPTIONS]
 
 ##### Example
 ```sh
-$ espercli group create -n "Sub" -p "5275a3b7-635c-405b-b187-b7f1dd8dfe88"
+$ espercli group create -n Sub -p 5275a3b7-635c-405b-b187-b7f1dd8dfe88
 
 TITLE           DETAILS
 id              a8c07087-4fb5-477f-aa9f-b775fb9c5564
@@ -440,7 +440,7 @@ children_count  0
 #### 6. update
 Modify group information.
 ```sh
-$ espercli group update [OPTIONS] [group-name]
+$ espercli group update [OPTIONS] [group-id]
 ```
 ##### Options
 | Name, shorthand | Default| Description|
@@ -450,7 +450,7 @@ $ espercli group update [OPTIONS] [group-name]
 
 ##### Example
 ```sh
-$ espercli group update -n 4G 5G
+$ espercli group update -n 4G 2e5efca2-7776-442e-a5ef-c2758d4a45a3
 
 TITLE           DETAILS
 id              2e5efca2-7776-442e-a5ef-c2758d4a45a3
@@ -464,13 +464,13 @@ children_count  0
 #### 7. delete
 Remove particular group.
 ```sh
-$ espercli group delete [group-name]
+$ espercli group delete [group-id]
 ```
 
 ##### Example
 ```sh
-$ espercli group delete 5G
-Group with name 5G deleted successfully
+$ espercli group delete 2e5efca2-7776-442e-a5ef-c2758d4a45a3
+Group with id 2e5efca2-7776-442e-a5ef-c2758d4a45a3 deleted successfully
 ```
 
 #### 8. add
@@ -481,13 +481,13 @@ $ espercli group add [OPTIONS]
 ##### Options
 | Name, shorthand | Default| Description|
 | -------------   |:------:|:----------|
-| --group, -g     |        | Group name |
+| --group, -g     |        | Group Id |
 | --devices, -d   |        | List of device names, list format is space separated |
 | --json, -j      |        | Render result in JSON format |
 
 ##### Example
 ```sh
-$ espercli group add -g 5G -d SNA-SNL-73YE SNA-SNL-NYWL 
+$ espercli group add -g 2e5efca2-7776-442e-a5ef-c2758d4a45a3 -d SNA-SNL-73YE SNA-SNL-NYWL 
 
 TITLE           DETAILS
 id              2e5efca2-7776-442e-a5ef-c2758d4a45a3
@@ -506,13 +506,13 @@ $ espercli group remove [OPTIONS]
 ##### Options
 | Name, shorthand | Default| Description|
 | -------------   |:------:|:----------|
-| --group, -g     |        | Group name |
+| --group, -g     |        | Group Id |
 | --devices, -d   |        | List of device names, list format is space separated |
 | --json, -j      |        | Render result in JSON format |
 
 ##### Example
 ```sh
-$ espercli group remove -g 5G -d SNA-SNL-73YE SNA-SNL-NYWL 
+$ espercli group remove -g 2e5efca2-7776-442e-a5ef-c2758d4a45a3 -d SNA-SNL-73YE SNA-SNL-NYWL 
 
 TITLE           DETAILS
 id              2e5efca2-7776-442e-a5ef-c2758d4a45a3
@@ -533,12 +533,12 @@ $ espercli group devices [OPTIONS] [group-name]
 | -------------   |:------:|:----------|
 | --limit, -l     |20      | Number of results to return per page |
 | --offset, -i    |0       | The initial index from which to return the results |
-| --group, -g     |        | Group name |
+| --group, -g     |        | Group Id |
 | --json, -j      |        | Render result in JSON format |
 
 ##### Example
 ```sh
-$ espercli group devices -g 5G
+$ espercli group devices -g 2e5efca2-7776-442e-a5ef-c2758d4a45a3
 Number of Devices: 2
 
 ID                                    NAME          MODEL     CURRENT STATE  TAGS
@@ -554,13 +554,13 @@ $ espercli group move [OPTIONS]
 ##### Options
 | Name, shorthand | Default| Description|
 | -------------   |:------:|:----------|
-| --group, -g     |        | Group name |
+| --group, -g     |        | Group Id |
 | --parent, -p    |        | Parent Id |
 | --json, -j      |        | Render result in JSON format |
 
 ##### Example
 ```sh
-$ espercli group move -g "Sub" -p "5275a3b7-635c-405b-b187-b7f1dd8dfe88" 
+$ espercli group move -g 43e99aad-4bfd-4481-b54f-952d0dc18cc0 -p 5275a3b7-635c-405b-b187-b7f1dd8dfe88
 
 TITLE           DETAILS
 id              43e99aad-4bfd-4481-b54f-952d0dc18cc0

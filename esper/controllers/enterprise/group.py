@@ -474,7 +474,7 @@ class EnterpriseGroup(Controller):
         help='Remove devices from group',
         arguments=[
             (['-g', '--group'],
-             {'help': 'Group name',
+             {'help': 'Group Id',
               'action': 'store',
               'dest': 'group'}),
             (['-d', '--devices'],
