@@ -98,13 +98,18 @@ class EnterpriseGroup(Controller):
             self.app.render(groups, format=OutputFormat.JSON.value)
 
     def _group_basic_response(self, group, format=OutputFormat.TABULATED):
+        if group.parent:
+            parent = group.parent.split('/')[-2]
+        else:
+            parent = group.parent
+
         if format == OutputFormat.TABULATED:
             title = "TITLE"
             details = "DETAILS"
             renderable = [
                 {title: 'id', details: group.id},
                 {title: 'name', details: group.name},
-                {title: 'parent_id', details: group.parent.split('/')[-2]},
+                {title: 'parent_id', details: parent},
                 {title: 'device_count', details: group.device_count},
                 {title: 'path', details: group.path},
                 {title: 'children_count', details: group.children_count},                
