@@ -84,8 +84,8 @@ class Token(Controller):
             renderable = [
                 {title: 'Id', details: token.id},
                 {title: 'User', details: token.user},
-                {title: 'Enterprise Id', details: token.enterprise},
-                {title: 'Developer App', details: token.developerapp},
+                {title: 'Enterprise Id', details: token.enterprise.split('[')[1].split(']')[0]},
+                {title: 'Developer App', details: token.developerapp.split('(')[1].split(')')[0]},    
                 {title: 'Token', details: token.token},
                 {title: 'Scope', details: token.scope},
                 {title: 'Created On', details: token.created_on},
@@ -96,8 +96,8 @@ class Token(Controller):
             renderable = {
                 'Id': token.id,
                 'User': token.user,
-                'Enterprise Id': token.enterprise,
-                'Developer App': token.developerapp,
+                'Enterprise Id': token.enterprise.split('[')[1].split(']')[0],
+                'Developer App': token.developerapp.split('(')[1].split(')')[0],
                 'Token': token.token,
                 'Scope': token.scope,
                 'Created On': str(token.created_on),

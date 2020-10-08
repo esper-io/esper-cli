@@ -160,8 +160,8 @@ $ espercli token renew -d 5fa87c46-bef7-4c1f-9ca8-ebf022d118b6 -t mzbrCDAKVyHcnN
 TITLE          DETAILS
 Id             570
 User           bindya
-Enterprise Id  Esper [f44373cb-1800-43c6-aab3-c81f8b1f435c]
-Developer App  DeveloperApp object (5fa87c46-bef7-4c1f-9ca8-ebf022d118b6)
+Enterprise Id  f44373cb-1800-43c6-aab3-c81f8b1f435c
+Developer App  5fa87c46-bef7-4c1f-9ca8-ebf022d118b6
 Token          hP7CacqL7NJeNIWoSsRoUibHipC4el
 Scope          read write update introspection sdk register
 Created On     2020-10-06 04:29:31.638430+00:00
@@ -169,7 +169,7 @@ Updated On     2020-10-06 04:29:31.638462+00:00
 Expires On     2023-07-03 04:29:31.631839+00:00
 
 $ espercli token renew -d 5fa87c46-bef7-4c1f-9ca8-ebf022d118b6 -t mzbrCDAKVyHcnNye7zdYuuLVVr22Pm -j
-{"Id": "571", "User": "bindya", "Enterprise Id": "Esper [f44373cb-1800-43c6-aab3-c81f8b1f435c]", "Developer App": "DeveloperApp object (5fa87c46-bef7-4c1f-9ca8-ebf022d118b6)", "Token": "xBs7nTgIjmswBKEuYMxVNYBeLa6or5", "Scope": "read write update introspection sdk register", "Created On": "2020-10-06 04:29:53.906764+00:00", "Updated On": "2020-10-06 04:29:53.906934+00:00", "Expires On": "2023-07-03 04:29:53.906020+00:00"}%
+{"Id": "571", "User": "bindya", "Enterprise Id": "f44373cb-1800-43c6-aab3-c81f8b1f435c", "Developer App": "5fa87c46-bef7-4c1f-9ca8-ebf022d118b6", "Token": "xBs7nTgIjmswBKEuYMxVNYBeLa6or5", "Scope": "read write update introspection sdk register", "Created On": "2020-10-06 04:29:53.906764+00:00", "Updated On": "2020-10-06 04:29:53.906934+00:00", "Expires On": "2023-07-03 04:29:53.906020+00:00"}%
 ```
 
 ### **Enterprise**
