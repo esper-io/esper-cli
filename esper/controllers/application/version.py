@@ -266,6 +266,20 @@ class ApplicationVersion(Controller):
              {'help': 'Application id',
               'action': 'store',
               'dest': 'application'}),
+            (['-s', '--search'],
+             {'help': 'A search term',
+              'action': 'store',
+              'dest': 'search'}),
+            (['-l', '--limit'],
+             {'help': 'Number of results to return per page',
+              'action': 'store',
+              'default': 20,
+              'dest': 'limit'}),
+            (['-o', '--offset'],
+             {'help': 'The initial index from which to return the results',
+              'action': 'store',
+              'default': 0,
+              'dest': 'offset'}),
             (['-j', '--json'],
              {'help': 'Render result in Json format',
               'action': 'store_true',
@@ -278,6 +292,13 @@ class ApplicationVersion(Controller):
         db = DBWrapper(self.app.creds)
         application_client = APIClient(db.get_configure()).get_application_api_client()
         enterprise_id = db.get_enterprise_id()
+
+        limit = self.app.pargs.limit
+        offset = self.app.pargs.offset
+
+        kwargs = {}
+        if self.app.pargs.search:
+            kwargs['search'] = self.app.pargs.search
 
         if self.app.pargs.application:
             application_id = self.app.pargs.application
@@ -298,7 +319,7 @@ class ApplicationVersion(Controller):
             return 
 
         try:
-            response = application_client.get_install_devices(version_id, application_id, enterprise_id)
+            response = application_client.get_install_devices(version_id, application_id, enterprise_id, limit=limit, offset=offset, **kwargs)
         except ApiException as e:
             self.app.log.error(f"[version-devices] Failed to list devices: {e}")
             self.app.render(f"ERROR: {parse_error_message(self.app, e)}\n")
