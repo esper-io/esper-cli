@@ -78,14 +78,16 @@ class Token(Controller):
 
 
     def renew_token_basic_response(self, token, format=OutputFormat.TABULATED):
+        enterprise_id = token.enterprise.split('[')[1].split(']')[0]
+        developer_app = token.developerapp.split('(')[1].split(')')[0]
         if format == OutputFormat.TABULATED:
             title = "TITLE"
             details = "DETAILS"
             renderable = [
                 {title: 'Id', details: token.id},
                 {title: 'User', details: token.user},
-                {title: 'Enterprise Id', details: token.enterprise.split('[')[1].split(']')[0]},
-                {title: 'Developer App', details: token.developerapp.split('(')[1].split(')')[0]},    
+                {title: 'Enterprise Id', details: enterprise_id},
+                {title: 'Developer App', details: developer_app},    
                 {title: 'Token', details: token.token},
                 {title: 'Scope', details: token.scope},
                 {title: 'Created On', details: token.created_on},
@@ -96,8 +98,8 @@ class Token(Controller):
             renderable = {
                 'Id': token.id,
                 'User': token.user,
-                'Enterprise Id': token.enterprise.split('[')[1].split(']')[0],
-                'Developer App': token.developerapp.split('(')[1].split(')')[0],
+                'Enterprise Id': enterprise_id,
+                'Developer App': developer_app,
                 'Token': token.token,
                 'Scope': token.scope,
                 'Created On': str(token.created_on),
