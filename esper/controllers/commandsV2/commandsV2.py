@@ -116,7 +116,7 @@ class CommandsV2(Controller):
     @ex(
         help='List command requests',
         arguments=[
-            (['-ct', '--command_type'],
+            (['-ct', '--commandtype'],
              {'help': 'Filter by type of command request',
               'action': 'store',
               'choices': CommandRequestTypeEnum.choice_list_lower(),
@@ -125,7 +125,7 @@ class CommandsV2(Controller):
              {'help': 'Filter by device name.',
               'action': 'store',
               'dest': 'device'}),
-            (['-dt', '--device_type'],
+            (['-dt', '--devicetype'],
              {'help': 'Filter by device type.',
               'action': 'store',
               'choices': CommandDeviceTypeEnum.choice_list_lower(),
@@ -135,7 +135,7 @@ class CommandsV2(Controller):
               'action': 'store',
               'choices': CommandEnum.choice_list_lower(),
               'dest': 'command'}),
-            (['-i', '--issued_by'],
+            (['-i', '--issuedby'],
              {'help': 'Filter by user id.',
               'action': 'store',
               'dest': 'issued_by'}),
@@ -154,6 +154,7 @@ class CommandsV2(Controller):
     def list(self):
         validate_creds_exists(self.app)
         db = DBWrapper(self.app.creds)
+        device_client = APIClient(db.get_configure()).get_device_api_client()
         commandsV2_client = APIClient(db.get_configure()).get_commandsV2_api_client()
         enterprise_id = db.get_enterprise_id()
 
@@ -162,20 +163,20 @@ class CommandsV2(Controller):
             kwargs['command_type'] = self.app.pargs.command_type.upper()
 
         if self.app.pargs.device:
-            device = self.app.pargs.device
-            device_client = APIClient(db.get_configure()).get_device_api_client()
-            kw = {'name': device}
+            device_name = self.app.pargs.device
+            kw = {'name': device_name}
             try:
                 search_response = device_client.get_all_devices(enterprise_id, limit=1, offset=0, **kw)
                 if not search_response.results or len(search_response.results) == 0:
-                    self.app.debug(f'[group-add] Device does not exist with name {device_name}')
+                    self.app.log.debug(f"[commandsV2-list] Device does not exist with name {device_name}")
+                    self.app.render(f'Device does not exist with name {device_name}\n')
                     return
                 response = search_response.results[0]
+                kwargs['devices'] = response.id
             except ApiException as e:
-                self.app.log.error(f"[group-add] Failed to list devices: {e}")
+                self.app.log.error(f"[commandsV2-list] Failed to list devices: {e}")
                 self.app.render(f"ERROR: {parse_error_message(self.app, e)}")
                 return
-            kwargs['devices'] = response.id
 
         if self.app.pargs.device_type:
             kwargs['device_type'] = self.app.pargs.device_type
@@ -224,11 +225,13 @@ class CommandsV2(Controller):
             for commandreq in response.results:
                 if(count_req < limit):
                     commandreqs.append(
-                        {
+                        {   
                             'id': commandreq.id,
                             'command': commandreq.command,
+                            'command_type': commandreq.command_type,
                             'issued_by': commandreq.issued_by,
                             "devices": commandreq.devices,
+                            "device_type": commandreq.device_type,
                             "groups": commandreq.groups,
                             "created_on": str(commandreq.created_on),
                             "status": str(commandreq.status)
@@ -284,13 +287,19 @@ class CommandsV2(Controller):
 
         kwargs = {}
         if self.app.pargs.device:
+            device_name = self.app.pargs.device
+            kw = {'name': device_name}
             try:
-                device_id = self.app.pargs.device
-                response = device_client.get_device_by_id(enterprise_id, device_id)
-                kwargs['device'] = device_id
+                search_response = device_client.get_all_devices(enterprise_id, limit=1, offset=0, **kw)
+                if not search_response.results or len(search_response.results) == 0:
+                    self.app.log.debug(f'[commandsV2-status] Device does not exist with name {device_name}')
+                    self.app.render(f'Device does not exist with name {device_name}\n')
+                    return
+                response = search_response.results[0]
+                kwargs['device'] = response.id
             except ApiException as e:
-                self.app.log.error(f"[commandsV2-status] Device does not exist with id {device_id}: {e}")
-                self.app.render(f"ERROR: {parse_error_message(self.app, e)}\n")
+                self.app.log.error(f"[commandsV2-status] Failed to list devices: {e}")
+                self.app.render(f"ERROR: {parse_error_message(self.app, e)}")
                 return
 
         if self.app.pargs.state:
@@ -347,16 +356,23 @@ class CommandsV2(Controller):
         enterprise_id = db.get_enterprise_id()
 
         if self.app.pargs.device:
+            device_name = self.app.pargs.device
+            kw = {'name': device_name}
             try:
-                response = device_client.get_device_by_id(enterprise_id, self.app.pargs.device)
-                device_id = self.app.pargs.device
+                search_response = device_client.get_all_devices(enterprise_id, limit=1, offset=0, **kw)
+                if not search_response.results or len(search_response.results) == 0:
+                    self.app.log.debug(f'[commandsV2-history] Device does not exist with name {device_name}')
+                    self.app.render(f'Device does not exist with name {device_name}\n')
+                    return
+                response = search_response.results[0]
+                device_id = response.id
             except ApiException as e:
-                self.app.log.error(f"[device-active] Failed to show active device: {e}")
-                self.app.render(f"ERROR: {parse_error_message(self.app, e)}\n")
+                self.app.log.error(f"[commandsV2-history] Failed to list devices: {e}")
+                self.app.render(f"ERROR: {parse_error_message(self.app, e)}")
                 return
         else:
-            self.app.log.debug('device id is not given')
-            self.app.render('device id is not given\n')
+            self.app.log.debug('Device name is not given')
+            self.app.render('Device name is not given\n')
             return 
 
         kwargs = {}
@@ -384,7 +400,7 @@ class CommandsV2(Controller):
     @ex(
         help='Fire commands to devices and groups',
         arguments=[
-            (['-ct', '--command_type'],
+            (['-ct', '--commandtype'],
              {'help': 'Command type.',
               'action': 'store',
               'choices': ['device', 'group', 'dynamic'],
@@ -399,7 +415,7 @@ class CommandsV2(Controller):
               'nargs': "*",
               'type': str,
               'dest': 'groups'}),
-            (['-dt', '--device_type'],
+            (['-dt', '--devicetype'],
              {'help': 'Device type.',
               'action': 'store',
               'choices': ['active', 'inactive', 'all'],
@@ -427,7 +443,7 @@ class CommandsV2(Controller):
              {'help': 'End date-time.',
               'action': 'store',
               'dest': 'end_datetime'}),
-            (['-tt', '--type'],
+            (['-tt', '--timetype'],
              {'help': 'Time type.',
               'action': 'store',
               'choices': ['console', 'device'],
@@ -465,11 +481,11 @@ class CommandsV2(Controller):
               'action': 'store',
               'dest': 'device_alias_name'}),
             (['-m', '--message'],
-             {'help': '',
+             {'help': 'Message',
               'action': 'store',
               'dest': 'message'}),
             (['-pk', '--package'],
-             {'help': '',
+             {'help': 'Package name',
               'action': 'store',
               'dest': 'package_name'}),
             (['-po', '--policy'],
@@ -624,7 +640,6 @@ class CommandsV2(Controller):
 
         try:
             response = commandsV2_client.create_command(enterprise_id, command_request)
-            print(response)
         except ApiException as e:
             self.app.log.error(f"[commandsV2-command] Failed to fire the command {command}: {e}")
             self.app.render(f"ERROR: {parse_error_message(self.app, e)}\n")
