@@ -477,7 +477,7 @@ children_count  0
 ```
 
 #### 7. delete
-Remove particular group. Here, if `group-name` is given, the first group from the response list with the given name will be removed. If `--groupid` or `-gid` option and `group-name` is given, the corresponding group will be removed.
+Remove particular group. Here, if `group-name` is given, the first group from the response list with the given name will be removed. If `--groupid` or `-id` option and `group-name` is given, the corresponding group will be removed.
 ```sh
 $ espercli group delete [OPTIONS] [group-name] 
 ```
@@ -493,7 +493,7 @@ Group with name Test-BB deleted successfully
 ```
 
 #### 8. add
-Add devices into a group, active group is used to add devices if `--group` or `-g` option is not given explicitly.
+Add devices into a group, active group is used to add devices if `--group` or `-g` option is not given explicitly. A maximum of 1000 devices can be added at a time.
 Here, if `--group` or `-g` is given, devices will be added to the first group from the response list with the given name. If `--groupid` or `-id` is also given, then devices will be added to corresponding group.
 ```sh
 $ espercli group add [OPTIONS]
@@ -520,7 +520,7 @@ children_count  1
 ```
 
 #### 9. remove
-Remove devices from a group, active group is used to add devices if `--group` or `-g` option is not given explicitly.
+Remove devices from a group, active group is used to add devices if `--group` or `-g` option is not given explicitly. A maximum of 1000 devices can be removed at a time.
 Here, if `--group` or `-g` is given, devices will be removed from the first group from the response list with the given name. If `--groupid` or `-id` is also given, then devices will be removed from the corresponding group.
 ```sh
 $ espercli group remove [OPTIONS]

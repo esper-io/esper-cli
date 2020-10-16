@@ -583,6 +583,11 @@ class EnterpriseGroup(Controller):
             self.app.render('devices cannot be empty. \n')
             return
 
+        if len(devices) > 1000:
+            self.app.log.debug('[group-add] Cannot add more than 1000 devices at a time.')
+            self.app.render('Cannot add more than 1000 devices at a time. \n')
+            return
+
         device_client = APIClient(db.get_configure()).get_device_api_client()
         request_device_ids = []
         for device_name in devices:
@@ -693,6 +698,11 @@ class EnterpriseGroup(Controller):
         if not devices or len(devices) == 0:
             self.app.log.debug('[group-remove] devices cannot be empty.')
             self.app.render('devices cannot be empty. \n')
+            return
+        
+        if len(devices) > 1000:
+            self.app.log.debug('[group-remove] Cannot remove more than 1000 devices at a time.')
+            self.app.render('Cannot remove more than 1000 devices at a time. \n')
             return
 
         device_client = APIClient(db.get_configure()).get_device_api_client()
