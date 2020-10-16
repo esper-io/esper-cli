@@ -1,3 +1,5 @@
+import json
+
 from cement import ex, Controller
 from esperclient import V0CommandRequest
 from esperclient.rest import ApiException
@@ -116,7 +118,7 @@ class CommandsV2(Controller):
     @ex(
         help='List command requests',
         arguments=[
-            (['-ct', '--commandtype'],
+            (['-ct', '--command_type'],
              {'help': 'Filter by type of command request',
               'action': 'store',
               'choices': CommandRequestTypeEnum.choice_list_lower(),
@@ -125,7 +127,7 @@ class CommandsV2(Controller):
              {'help': 'Filter by device name.',
               'action': 'store',
               'dest': 'device'}),
-            (['-dt', '--devicetype'],
+            (['-dt', '--device_type'],
              {'help': 'Filter by device type.',
               'action': 'store',
               'choices': CommandDeviceTypeEnum.choice_list_lower(),
@@ -135,10 +137,6 @@ class CommandsV2(Controller):
               'action': 'store',
               'choices': CommandEnum.choice_list_lower(),
               'dest': 'command'}),
-            (['-i', '--issuedby'],
-             {'help': 'Filter by user id.',
-              'action': 'store',
-              'dest': 'issued_by'}),
             (['-l', '--limit'],
              {'help': 'No. of results',
               'action': 'store',
@@ -183,9 +181,6 @@ class CommandsV2(Controller):
 
         if self.app.pargs.command:
             kwargs['command'] = self.app.pargs.command.upper()
-
-        if self.app.pargs.issued_by:
-            kwargs['issued_by'] = self.app.pargs.issued_by
             
         try:
             response = commandsV2_client.list_command_request(enterprise_id, **kwargs)
@@ -209,12 +204,14 @@ class CommandsV2(Controller):
 
             for commandreq in response.results:
                 if(count_req < limit):
+                    issued_by = commandreq.issued_by.replace("'",'"')
+                    issued_by_json = json.loads(issued_by)
                     commandreqs.append(
                         {
                             label['id']: commandreq.id,
                             label['command']: commandreq.command,
-                            label['status']: commandreq.status,
-                            label['issued_by']: commandreq.issued_by,
+                            label['status']: commandreq.status[0].state,
+                            label['issued_by']: issued_by_json["username"],
                         }
                     )
                     count_req+=1
@@ -233,6 +230,7 @@ class CommandsV2(Controller):
                             "devices": commandreq.devices,
                             "device_type": commandreq.device_type,
                             "groups": commandreq.groups,
+                            "schedule": commandreq.schedule,
                             "created_on": str(commandreq.created_on),
                             "status": str(commandreq.status)
                         }
@@ -400,7 +398,7 @@ class CommandsV2(Controller):
     @ex(
         help='Fire commands to devices and groups',
         arguments=[
-            (['-ct', '--commandtype'],
+            (['-ct', '--command_type'],
              {'help': 'Command type.',
               'action': 'store',
               'choices': ['device', 'group', 'dynamic'],
@@ -415,10 +413,11 @@ class CommandsV2(Controller):
               'nargs': "*",
               'type': str,
               'dest': 'groups'}),
-            (['-dt', '--devicetype'],
+            (['-dt', '--device_type'],
              {'help': 'Device type.',
               'action': 'store',
               'choices': ['active', 'inactive', 'all'],
+              'default': 'active',
               'dest': 'device_type'}),
             (['-c', '--command'],
              {'help': 'Command name.',
@@ -431,7 +430,7 @@ class CommandsV2(Controller):
               'choices': ['immediate', 'window', 'recurring'],
               'default': 'immediate',
               'dest': 'schedule'}),
-            (['-sn', '--schedname'],
+            (['-sn', '--schedule_name'],
              {'help': 'Schedule name.',
               'action': 'store',
               'dest': 'schedule_name'}),
@@ -443,17 +442,17 @@ class CommandsV2(Controller):
              {'help': 'End date-time.',
               'action': 'store',
               'dest': 'end_datetime'}),
-            (['-tt', '--timetype'],
+            (['-tt', '--time_type'],
              {'help': 'Time type.',
               'action': 'store',
               'choices': ['console', 'device'],
               'default': 'console',
               'dest': 'time_type'}),
-            (['-ws', '--windowstart'],
+            (['-ws', '--window_start'],
              {'help': 'Window start time.',
               'action': 'store',
               'dest': 'window_start_time'}),
-            (['-we', '--windowend'],
+            (['-we', '--window_end'],
              {'help': 'Window end time.',
               'action': 'store',
               'dest': 'window_end_time'}),
@@ -464,19 +463,19 @@ class CommandsV2(Controller):
               'choices': ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday', 'all'],
               'default': ['all'],
               'dest': 'days'}),
-            (['-as', '--appstate'],
+            (['-as', '--app_state'],
              {'help': 'App state',
               'action': 'store',
               'dest': 'app_state'}),
-            (['-av', '--appversion'],
-             {'help': '',
+            (['-av', '--app_version'],
+             {'help': 'App version',
               'action': 'store',
               'dest': 'app_version'}),
-            (['-cs', '--customconfig'],
-             {'help': '',
+            (['-cs', '--custom_config'],
+             {'help': 'Custom settings config',
               'action': 'store',
               'dest': 'custom_settings_config'}),
-            (['-dv', '--devalias'],
+            (['-dv', '--device_alias'],
              {'help': 'Device alias name',
               'action': 'store',
               'dest': 'device_alias_name'}),
@@ -484,11 +483,11 @@ class CommandsV2(Controller):
              {'help': 'Message',
               'action': 'store',
               'dest': 'message'}),
-            (['-pk', '--package'],
+            (['-pk', '--package_name'],
              {'help': 'Package name',
               'action': 'store',
               'dest': 'package_name'}),
-            (['-po', '--policy'],
+            (['-po', '--policy_url'],
              {'help': 'Policy URL',
               'action': 'store',
               'dest': 'policy_url'}),
@@ -496,7 +495,7 @@ class CommandsV2(Controller):
              {'help': 'State',
               'action': 'store',
               'dest': 'state'}),
-            (['-wap', '--wifiacc'],
+            (['-wap', '--wifi_access_points'],
              {'help': 'Wifi access points',
               'action': 'store',
               'dest': 'wifi_access_points'}),
@@ -513,6 +512,7 @@ class CommandsV2(Controller):
         enterprise_id = db.get_enterprise_id()
 
         devices = self.app.pargs.devices
+        device_type = self.app.pargs.device_type
         groups = self.app.pargs.groups
         schedule = self.app.pargs.schedule.upper()
 
@@ -522,14 +522,6 @@ class CommandsV2(Controller):
             self.app.log.debug('[commandsV2-command] command cannot be empty.')
             self.app.render('command cannot be empty.')
             return
-
-        if self.app.pargs.device_type:
-            device_type = self.app.pargs.device_type
-        else:
-            self.app.log.debug('[commandsV2-command] device type cannot be empty.')
-            self.app.render('device type cannot be empty.')
-            return
-            
 
         if self.app.pargs.command_type:
             command_type = self.app.pargs.command_type.upper()
