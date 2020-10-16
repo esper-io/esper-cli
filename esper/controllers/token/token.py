@@ -141,11 +141,11 @@ class Token(Controller):
             self.app.render('There is no token given to renew.\n')
             return 
 
-        if self.app.pargs.token:
+        if self.app.pargs.dev_app_id:
             developer_app_id = self.app.pargs.dev_app_id
         else:
-            self.app.log.debug('DeveloperApp id is not given')
-            self.app.render('DeveloperApp id is not given\n')
+            self.app.log.debug('DeveloperApp id is not given.')
+            self.app.render('DeveloperApp id is not given.\n')
             return 
 
         try:
