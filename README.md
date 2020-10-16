@@ -330,7 +330,7 @@ $ espercli group [SUB-COMMANDS]
 ```
 #### Sub commands
 #### 1. list
-List sub command used to list all groups and can filter results by using different options listed below. Pagination used to limit the number of results, default is 20 results per page.
+List sub command is used to list all groups and can filter results by using different options listed below. Pagination is used to limit the number of results, default is 20 results per page.
 ```sh
 $ espercli group list [OPTIONS]
 ```
@@ -361,7 +361,7 @@ $ espercli group show [OPTIONS] [group-name]
 | Name, shorthand | Default| Description|
 | -------------   |:------:|:----------|
 | --groupid, -id  |        | Group id  |
-| --active, -a    |        | Set group as active for further device specific commands |
+| --active, -a    |        | Set group as active for further group specific commands |
 | --json, -j      |        | Render result in JSON format |
 
 ##### Example
@@ -477,7 +477,7 @@ children_count  0
 ```
 
 #### 7. delete
-Remove particular group. Here, if `group-name` is given, the first group from the response list with the given name will be removed. If `--groupid` or `-id` option and `group-name` is given, the corresponding group will be removed.
+Remove particular group. Here, if `group-name` is given, the first group from the response list with the given name will be removed. If `--groupid` or `-id` option is also given, the corresponding group will be removed.
 ```sh
 $ espercli group delete [OPTIONS] [group-name] 
 ```
@@ -520,7 +520,7 @@ children_count  1
 ```
 
 #### 9. remove
-Remove devices from a group, active group is used to add devices if `--group` or `-g` option is not given explicitly. A maximum of 1000 devices can be removed at a time.
+Remove devices from a group, active group is used to add devices if `--group` or `-g` option is not given explicitly. The devices will be removed from the group and will be added to its immediate parent. A maximum of 1000 devices can be removed at a time.
 Here, if `--group` or `-g` is given, devices will be removed from the first group from the response list with the given name. If `--groupid` or `-id` is also given, then devices will be removed from the corresponding group.
 ```sh
 $ espercli group remove [OPTIONS]
@@ -573,13 +573,11 @@ babc9cf5-2dbb-4382-bb9d-d6245941db35  DEV-ELOP-UULA  vivo     INACTIVE
 Move a group. 
 Here, if `--group` or `-g` is given, the first group from the response list with the given name will be moved. If `--groupid` or `-id` is also given, then the corresponding group will be moved. If `--parent` or `-p` is given, the first group from the response list with the given name will be the parent group. If `--parentid` or `-pid` is also given, then the corresponding group will be the parent group.
 ```sh
-$ espercli group devices [OPTIONS] [group-name]
+$ espercli group move [OPTIONS]
 ```
 ##### Options
 | Name, shorthand | Default| Description|
 | -------------   |:------:|:----------|
-| --limit, -l     |20      | Number of results to return per page |
-| --offset, -i    |0       | The initial index from which to return the results |
 | --group, -g     |        | Group name |
 | --groupid, -id  |        | Group id   |
 | --parent, -p    |        | Parent group name |
