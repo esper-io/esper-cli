@@ -200,18 +200,24 @@ class CommandsV2(Controller):
                 'command': "COMMAND",
                 'status': "STATUS",
                 'issued_by': "ISSUED BY",
+                'command_type': "COMMAND TYPE",
+                'created_on': "CREATED ON"
             }
 
             for commandreq in response.results:
                 if(count_req < limit):
                     issued_by = commandreq.issued_by.replace("'",'"')
                     issued_by_json = json.loads(issued_by)
+                    if len(commandreq.status) != 0:
+                        state = commandreq.status[0].state
                     commandreqs.append(
                         {
                             label['id']: commandreq.id,
                             label['command']: commandreq.command,
-                            label['status']: commandreq.status[0].state,
+                            label['status']: state,
                             label['issued_by']: issued_by_json["username"],
+                            label['command_type']: commandreq.command_type,
+                            label['created_on']: commandreq.created_on
                         }
                     )
                     count_req+=1
