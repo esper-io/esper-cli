@@ -1955,28 +1955,27 @@ $ espercli commandsV2 list [OPTIONS]
 
 ##### Example
 ```sh
-$ espercli commandsV2 list 
-Total Number of Command Requests: 12779
+$ espercli commandsV2 list
+Total Number of Command Requests: 12795
 
-RQUEST ID                             COMMAND               STATUS           ISSUED BY
-7cc3f5bd-c056-4c0e-b5b4-9e5d333d8a29  WIPE                  Command Success  purushotham
-d4477faf-1b44-4adc-8868-b6fbda6d6119  WIPE                  Command Success  kiran
-f30c2aac-d778-4850-bd68-f1c4f8021203  SET_NEW_POLICY        Command Success  kiran
-5ac44394-c6a0-4f15-a7dd-3a6d2a2f80f3  UPDATE_DEVICE_CONFIG  Command Success  kiran
-21e97337-bd01-4852-8716-e6988fde4588  SET_NEW_POLICY        Command Success  kiran
-163f28d9-738a-439e-92a1-5f81fa2863ba  SET_APP_STATE         Command Success  jitesh
-34b6f447-36cb-4e9b-922c-6e2e2140e817  SET_BRIGHTNESS_SCALE  Command Success  kirannew
-04a3946b-9236-4ad5-94dd-37a4402be9aa  WIPE                  Command Success  kiran
-ba17ef37-0cd4-489f-bc27-da2428ae3696  UPDATE_HEARTBEAT      Command Success  kiran
-c0eae4f0-6d87-4726-be0b-49813d6c4748  SET_KIOSK_APP         Command Success  kiran
+RQUEST ID                             COMMAND         STATUS             ISSUED BY    COMMAND TYPE    CREATED ON
+d6e93682-a1be-40dd-b649-8e3bb1276a58  REBOOT          Command Failure    mihir        DEVICE          2020-10-17 08:49:15.381964+00:00
+19f20392-e5d3-4a84-afde-59160b291eb8  REBOOT          Command Failure    mihir        DEVICE          2020-10-17 08:48:35.781932+00:00
+26906c24-434e-4e43-88b7-0ee8cc5a4844  REBOOT          Command Success    mihir        DEVICE          2020-10-17 08:22:29.220613+00:00
+5665f6f8-1135-461e-9c4f-8f662f436cba  REBOOT          Command Success    mihir        DEVICE          2020-10-17 08:21:56.817691+00:00
+13b8eb81-9e95-473c-84e4-0f4c3c4bd373  SET_NEW_POLICY  Command TimeOut    mihir        DYNAMIC         2020-10-17 08:16:14.963148+00:00
+e9f620d2-72e6-4531-af47-9e920b174bfc  REBOOT          Command TimeOut    mihir        DEVICE          2020-10-17 08:08:42.194861+00:00
+9ccf8e9f-3309-4bc5-9f1d-93bc7e94047d  REBOOT          Command TimeOut    mihir        DEVICE          2020-10-17 07:03:12.938932+00:00
+ea3b7347-09ee-459b-a0a8-489149076be6  REBOOT          Command TimeOut    mihir        DEVICE          2020-10-17 07:02:04.548724+00:00
+f6bcf2b6-59ed-423f-8b57-46a2a1671b70  WIPE            Command Success    kiran        DEVICE          2020-10-16 10:58:18.463484+00:00
+949a07b0-d7b0-476a-9302-db901ce7701b  WIPE            Command Cancelled  kiran        DEVICE          2020-10-16 10:43:27.613400+00:00
 
 $ espercli commandsV2 list -ct device -d DEV-ELOP-W57Z -dt active -c set_kiosk_app -l 2
 Total Number of Command Requests: 21
 
-RQUEST ID                             COMMAND        STATUS           ISSUED BY
-4854906d-6f76-4b58-88f9-295d481f02e4  SET_KIOSK_APP  Command Success  alok
-6c540c8e-3078-4f9c-85b1-d2d39f3dec5a  SET_KIOSK_APP  Command Success  alok
-
+RQUEST ID                             COMMAND        STATUS           ISSUED BY    COMMAND TYPE    CREATED ON
+4854906d-6f76-4b58-88f9-295d481f02e4  SET_KIOSK_APP  Command Success  alok         DEVICE          2020-10-14 09:05:52.430365+00:00
+6c540c8e-3078-4f9c-85b1-d2d39f3dec5a  SET_KIOSK_APP  Command Success  alok         DEVICE          2020-10-14 09:05:10.526865+00:00
 ```
 
 #### 2. status
