@@ -355,13 +355,13 @@ Unset the active device SNA-SNL-FZH5
 ```
 
 ### **Group**
-Group used to manage a group like list, show, create and update. Also can list devices in a group, add devices to group, remove devices and set group as active for further commands.
+Group is used to manage a group like list, show, create and update. Also can list devices in a group, add devices to group, remove devices, move a group and set group as active for further commands.
 ```sh
 $ espercli group [SUB-COMMANDS]
 ```
 #### Sub commands
 #### 1. list
-List sub command used to list all groups and can filter results by using different options listed below. Pagination used to limit the number of results, default is 20 results per page.
+List sub command is used to list all groups and can filter results by using different options listed below. Pagination is used to limit the number of results, default is 20 results per page.
 ```sh
 $ espercli group list [OPTIONS]
 ```
@@ -375,15 +375,15 @@ $ espercli group list [OPTIONS]
 
 ##### Example
 ```sh
-$ espercli group list -n 5G
-Number of Groups: 1
-
-ID                                    NAME      DEVICE COUNT
-2e5efca2-7776-442e-a5ef-c2758d4a45a3  5G                   2
+$ espercli group list -n TestBB 
+Number of Groups: 2
+ID                                    NAME      DEVICE COUNT  PARENT ID
+bb6be630-a2fc-4b57-bafa-fdda92433684  TestBB               0  685484fa-eb6a-4ef9-a0f1-63f6febf7ce3
+5fd4e150-7a91-4d73-a379-cac0795bd949  TestBB               0  bb6be630-a2fc-4b57-bafa-fdda92433684
 ```
 
 #### 2. show
-Show the details of the group. Here, `group-name` is required to show group information. 
+Shows the details of the group. Here, `group-name` is required and will return the information of the first group from the response list with the given name. Since nested groups allow the same name in different hierarchy levels, `group-name` and `--groupid` or `-id` option can be given together to show the corresponding group information.
 Use the `--active` or `-a` flag to mark this group as the active group. This will allow you to call further group commands without specifying the group.
 ```sh
 $ espercli group show [OPTIONS] [group-name]
@@ -391,21 +391,36 @@ $ espercli group show [OPTIONS] [group-name]
 ##### Options
 | Name, shorthand | Default| Description|
 | -------------   |:------:|:----------|
-| --active, -a    |        | Set device as active for further device specific commands |
+| --groupid, -id  |        | Group id  |
+| --active, -a    |        | Set group as active for further group specific commands |
 | --json, -j      |        | Render result in JSON format |
 
 ##### Example
 ```sh
-$ espercli group show -a 5G
+$ espercli group show TestBB -a
 
-TITLE         DETAILS
-id            2e5efca2-7776-442e-a5ef-c2758d4a45a3
-name          5G
-device_count  2
+TITLE           DETAILS
+id              bb6be630-a2fc-4b57-bafa-fdda92433684
+name            TestBB
+parent_id       685484fa-eb6a-4ef9-a0f1-63f6febf7ce3
+device_count    0
+path            All devices/TestBB
+children_count  1
+
+$ espercli group show TestBB -id 5fd4e150-7a91-4d73-a379-cac0795bd949 -a
+
+TITLE           DETAILS
+id              5fd4e150-7a91-4d73-a379-cac0795bd949
+name            TestBB
+parent_id       bb6be630-a2fc-4b57-bafa-fdda92433684
+device_count    0
+path            All devices/TestBB/TestBB
+children_count  0
 ```
 
 #### 3. set-active
-The set-active sub command used to set a group as the active group and show the details of the current active group with no options.
+The set-active sub command is used to set a group as the active group and show the details of the current active group with no options. 
+Here, if `--name` or `-n` option is given, the first group from the response list with the given name will be set as the active group. If `--groupid` or `-id` option is also given, the corresponding group will be set as the active group.
 ```sh
 $ espercli group set-active [OPTIONS]
 ```
@@ -413,16 +428,20 @@ $ espercli group set-active [OPTIONS]
 | Name, shorthand | Default| Description|
 | -------------   |:------:|:----------|
 | --name, -n      |        | Group name |
+| --groupid, -id  |        | Group id |
 | --json, -j      |        | Render result in JSON format |
 
 ##### Example
 ```sh
-$ espercli group set-active -n 5G
+$ espercli group set-active -n TestBB -id 5fd4e150-7a91-4d73-a379-cac0795bd949 
 
-TITLE         DETAILS
-id            2e5efca2-7776-442e-a5ef-c2758d4a45a3
-name          5G
-device_count  2
+TITLE           DETAILS
+id              5fd4e150-7a91-4d73-a379-cac0795bd949
+name            TestBB
+parent_id       bb6be630-a2fc-4b57-bafa-fdda92433684
+device_count    0
+path            All devices/TestBB/TestBB
+children_count  0
 ```
 
 #### 4. unset-active
@@ -434,11 +453,11 @@ $ espercli group unset-active
 ##### Example
 ```sh
 $ espercli group unset-active
-Unset the active group 5G
+Unset the active group with id: bb6be630-a2fc-4b57-bafa-fdda92433684 and name: TestBB
 ```
 
 #### 5. create
-Create new group.
+Create a new group.
 ```sh
 $ espercli group create [OPTIONS]
 ```
@@ -446,20 +465,25 @@ $ espercli group create [OPTIONS]
 | Name, shorthand | Default| Description|
 | -------------   |:------:|:----------|
 | --name, -n      |        | Group name |
+| --parentid, -pid|        | Parent id  |
 | --json, -j      |        | Render result in JSON format |
 
 ##### Example
 ```sh
-$ espercli group create -n 5G
+$ espercli group create -n Test-BB -pid bb6be630-a2fc-4b57-bafa-fdda92433684
 
-TITLE         DETAILS
-id            2e5efca2-7776-442e-a5ef-c2758d4a45a3
-name          5G
-device_count  0
+TITLE           DETAILS
+id              69f5f7ac-c182-4f31-a6bc-f895bdc44a70
+name            Test-BB
+parent_id       bb6be630-a2fc-4b57-bafa-fdda92433684
+device_count    0
+path            All devices/TestBB/Test-BB
+children_count  0
 ```
 
 #### 6. update
 Modify group information.
+Here, if `group-name` is given, the first group from the response list with the given name will be modified. If `--groupid` or `-id` option is also given, the corresponding group will be modified.
 ```sh
 $ espercli group update [OPTIONS] [group-name]
 ```
@@ -467,32 +491,41 @@ $ espercli group update [OPTIONS] [group-name]
 | Name, shorthand | Default| Description|
 | -------------   |:------:|:----------|
 | --name, -n      |        | Group new name |
+| --groupid, -id  |        | Group id       |
 | --json, -j      |        | Render result in JSON format |
 
 ##### Example
 ```sh
-$ espercli group update -n 4G 5G
+espercli group update TestBB -id 5fd4e150-7a91-4d73-a379-cac0795bd949 -n TestB
 
-TITLE         DETAILS
-id            2e5efca2-7776-442e-a5ef-c2758d4a45a3
-name          4G
-device_count  2
+TITLE           DETAILS
+id              5fd4e150-7a91-4d73-a379-cac0795bd949
+name            TestB
+parent_id       bb6be630-a2fc-4b57-bafa-fdda92433684
+device_count    0
+path            All devices/TestB/TestBB
+children_count  0
 ```
 
 #### 7. delete
-Remove particular group.
+Remove particular group. Here, if `group-name` is given, the first group from the response list with the given name will be removed. If `--groupid` or `-id` option is also given, the corresponding group will be removed.
 ```sh
-$ espercli group delete [group-name]
+$ espercli group delete [OPTIONS] [group-name] 
 ```
+##### Options
+| Name, shorthand | Default| Description|
+| -------------   |:------:|:----------|
+| --groupid, -id  |        | Group id  |
 
 ##### Example
 ```sh
-$ espercli group delete 5G
-Group with name 5G deleted successfully
+$ espercli group delete -id 69f5f7ac-c182-4f31-a6bc-f895bdc44a70 Test-BB
+Group with name Test-BB deleted successfully
 ```
 
 #### 8. add
-Add devices into a group, active group is used to add devices if `--group` or `-g` option is not given explicitly.
+Add devices into a group, active group is used to add devices if `--group` or `-g` option is not given explicitly. A maximum of 1000 devices can be added at a time.
+Here, if `--group` or `-g` is given, devices will be added to the first group from the response list with the given name. If `--groupid` or `-id` is also given, then devices will be added to corresponding group.
 ```sh
 $ espercli group add [OPTIONS]
 ```
@@ -500,21 +533,26 @@ $ espercli group add [OPTIONS]
 | Name, shorthand | Default| Description|
 | -------------   |:------:|:----------|
 | --group, -g     |        | Group name |
+| --groupid, -id  |        | Group id   |
 | --devices, -d   |        | List of device names, list format is space separated |
 | --json, -j      |        | Render result in JSON format |
 
 ##### Example
 ```sh
-$ espercli group add -g 5G -d SNA-SNL-73YE SNA-SNL-NYWL 
+$ espercli group add -g TestBB -id bb6be630-a2fc-4b57-bafa-fdda92433684 -d DEV-ELOP-UULA
 
-TITLE         DETAILS
-id            2e5efca2-7776-442e-a5ef-c2758d4a45a3
-name          5G
-device_count  2
+TITLE           DETAILS
+id              bb6be630-a2fc-4b57-bafa-fdda92433684
+name            TestBB
+parent_id       685484fa-eb6a-4ef9-a0f1-63f6febf7ce3
+device_count    1
+path            All devices/TestBB
+children_count  1
 ```
 
 #### 9. remove
-Remove devices from a group, active group is used to add devices if `--group` or `-g` option is not given explicitly.
+Remove devices from a group, active group is used to add devices if `--group` or `-g` option is not given explicitly. The devices will be removed from the group and will be added to its immediate parent. A maximum of 1000 devices can be removed at a time.
+Here, if `--group` or `-g` is given, devices will be removed from the first group from the response list with the given name. If `--groupid` or `-id` is also given, then devices will be removed from the corresponding group.
 ```sh
 $ espercli group remove [OPTIONS]
 ```
@@ -522,21 +560,26 @@ $ espercli group remove [OPTIONS]
 | Name, shorthand | Default| Description|
 | -------------   |:------:|:----------|
 | --group, -g     |        | Group name |
+| --groupid, -id  |        | Group id   |
 | --devices, -d   |        | List of device names, list format is space separated |
 | --json, -j      |        | Render result in JSON format |
 
 ##### Example
 ```sh
-$ espercli group remove -g 5G -d SNA-SNL-73YE SNA-SNL-NYWL 
+$ espercli group remove -g TestBB -id bb6be630-a2fc-4b57-bafa-fdda92433684 -d DEV-ELOP-UULA
 
-TITLE         DETAILS
-id            2e5efca2-7776-442e-a5ef-c2758d4a45a3
-name          5G
-device_count  0
+TITLE           DETAILS
+id              bb6be630-a2fc-4b57-bafa-fdda92433684
+name            TestBB
+parent_id       685484fa-eb6a-4ef9-a0f1-63f6febf7ce3
+device_count    0
+path            All devices/TestBB
+children_count  1
 ```
 
 #### 10. devices
 List devices in a particular group, active group is used to add devices if `--group` or `-g` option is not given explicitly. Pagination used to limit the number of results, default is 20 results per page.
+Here, if `--group` or `-g` is given, devices will be listed from the first group of the response list with the given name. If `--groupid` or `-id` is also given, then devices will be listed from the corresponding group.
 ```sh
 $ espercli group devices [OPTIONS] [group-name]
 ```
@@ -546,16 +589,43 @@ $ espercli group devices [OPTIONS] [group-name]
 | --limit, -l     |20      | Number of results to return per page |
 | --offset, -i    |0       | The initial index from which to return the results |
 | --group, -g     |        | Group name |
+| --groupid, -id  |        | Group id   |
 | --json, -j      |        | Render result in JSON format |
 
 ##### Example
 ```sh
-$ espercli group devices -g 5G
-Number of Devices: 2
+$ espercli group devices -id bb6be630-a2fc-4b57-bafa-fdda92433684 -g TestBB
+Number of Devices: 1
+ID                                    NAME           MODEL    CURRENT STATE    TAGS
+babc9cf5-2dbb-4382-bb9d-d6245941db35  DEV-ELOP-UULA  vivo     INACTIVE
+```
 
-ID                                    NAME          MODEL     CURRENT STATE  TAGS
-3ebc3afd-249b-4f10-8561-fa1a9ddb1bb7  SNA-SNL-KX37  Shoonya   ACTIVE
-c8efa083-f325-4e3b-8d20-71b7a2927ffb  SNA-SNL-3606  QUALCOMM  INACTIVE       kiosk
+#### 11. move
+Move a group. 
+Here, if `--group` or `-g` is given, the first group from the response list with the given name will be moved. If `--groupid` or `-id` is also given, then the corresponding group will be moved. If `--parent` or `-p` is given, the first group from the response list with the given name will be the parent group. If `--parentid` or `-pid` is also given, then the corresponding group will be the parent group.
+```sh
+$ espercli group move [OPTIONS]
+```
+##### Options
+| Name, shorthand | Default| Description|
+| -------------   |:------:|:----------|
+| --group, -g     |        | Group name |
+| --groupid, -id  |        | Group id   |
+| --parent, -p    |        | Parent group name |
+| --parentid, -pid|        | Parent group id   |
+| --json, -j      |        | Render result in JSON format |
+
+##### Example
+```sh
+$ espercli group move -g TestBB -id bb6be630-a2fc-4b57-bafa-fdda92433684 -pid ad3f5e01-2748-4771-bf84-e51616cdbd9b -p Test-BB
+
+TITLE           DETAILS
+id              bb6be630-a2fc-4b57-bafa-fdda92433684
+name            TestBB
+parent_id       ad3f5e01-2748-4771-bf84-e51616cdbd9b
+device_count    1
+path            All devices/Test-BB/TestBB
+children_count  1
 ```
 
 ### **App**
