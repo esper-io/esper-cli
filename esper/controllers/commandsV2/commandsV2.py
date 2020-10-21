@@ -32,6 +32,34 @@ class CommandsV2(Controller):
         stacked_on = 'base'
 
     def _request_basic_response(self, request, format=OutputFormat.TABULATED):
+        if request.schedule_args is None:
+                schedule_args = None
+        else:
+            start_datetime = request.schedule_args.start_datetime
+            end_datetime = request.schedule_args.end_datetime
+            schedule_args = {
+                "name": request.schedule_args.name,
+                "start_datetime": str(start_datetime),
+                "end_datetime": str(end_datetime),
+                "time_type": request.schedule_args.time_type,
+                "window_start_time": str(request.schedule_args.window_start_time),
+                "window_end_time": str(request.schedule_args.window_end_time),
+                "days": request.schedule_args.days
+            }
+
+        command_args = {
+            "app_state": request.command_args.app_state,
+            "app_version": request.command_args.app_version,
+            "custom_settings_config": request.command_args.custom_settings_config,
+            "device_alias_name": request.command_args.device_alias_name,
+            "message": request.command_args.message,
+            "package_name": request.command_args.package_name,
+            "policy_url": request.command_args.policy_url,
+            "state": request.command_args.state,
+            "wifi_access_points": request.command_args.wifi_access_points
+        }
+        if len(request.status) != 0:
+            state = request.status[0].state
         if format == OutputFormat.TABULATED:
             title = "TITLE"
             details = "DETAILS"
@@ -43,24 +71,26 @@ class CommandsV2(Controller):
                 {title: 'Devices', details: request.devices},
                 {title: 'Groups', details: request.groups},
                 {title: 'Device Type', details: request.device_type},
-                {title: 'Status', details: request.status},
+                {title: 'Status', details: state},
                 {title: 'Issued by', details: request.issued_by},
                 {title: 'Schedule', details: request.schedule},
-                {title: 'Schedule Args', details: request.schedule_args},
+                {title: 'Schedule Args', details: schedule_args},
                 {title: 'Created On', details: request.created_on}
             ]
             
         else:
             renderable = {
-                    'id': request.id,
-                    'command': request.command,
-                    'command_type': request.command_type,
+                    "id": request.id,
+                    "command": request.command,
+                    "command_type": request.command_type,
+                    "command_args": command_args,
                     "devices": request.devices,
                     "groups": request.groups,
                     "device_type": request.device_type,
                     "status": str(request.status),
                     "issued_by": request.issued_by,
                     "schedule": request.schedule,
+                    "schedule_args": schedule_args,
                     "created_on": str(request.created_on),
                 }
 
@@ -198,7 +228,6 @@ class CommandsV2(Controller):
             label = {
                 'id': "RQUEST ID",
                 'command': "COMMAND",
-                'status': "STATUS",
                 'issued_by': "ISSUED BY",
                 'command_type': "COMMAND TYPE",
                 'created_on': "CREATED ON"
@@ -208,13 +237,10 @@ class CommandsV2(Controller):
                 if(count_req < limit):
                     issued_by = commandreq.issued_by.replace("'",'"')
                     issued_by_json = json.loads(issued_by)
-                    if len(commandreq.status) != 0:
-                        state = commandreq.status[0].state
                     commandreqs.append(
                         {
                             label['id']: commandreq.id,
                             label['command']: commandreq.command,
-                            label['status']: state,
                             label['issued_by']: issued_by_json["username"],
                             label['command_type']: commandreq.command_type,
                             label['created_on']: commandreq.created_on
@@ -227,6 +253,30 @@ class CommandsV2(Controller):
             count_req = 0
             for commandreq in response.results:
                 if(count_req < limit):
+                    if commandreq.schedule_args is None:
+                        schedule_args = None
+                    else:
+                        schedule_args = {
+                            "name": commandreq.schedule_args.name,
+                            "start_datetime": str(commandreq.schedule_args.start_datetime),
+                            "end_datetime": str(commandreq.schedule_args.end_datetime),
+                            "time_type": commandreq.schedule_args.time_type,
+                            "window_start_time": str(commandreq.schedule_args.window_start_time),
+                            "window_end_time": str(commandreq.schedule_args.window_end_time),
+                            "days": commandreq.schedule_args.days
+                        }
+                    command_args = {
+                        "app_state": commandreq.command_args.app_state,
+                        "app_version": commandreq.command_args.app_version,
+                        "custom_settings_config": commandreq.command_args.custom_settings_config,
+                        "device_alias_name": commandreq.command_args.device_alias_name,
+                        "message": commandreq.command_args.message,
+                        "package_name": commandreq.command_args.package_name,
+                        "policy_url": commandreq.command_args.policy_url,
+                        "state": commandreq.command_args.state,
+                        "wifi_access_points": commandreq.command_args.wifi_access_points
+                    }
+
                     commandreqs.append(
                         {   
                             'id': commandreq.id,
@@ -236,7 +286,9 @@ class CommandsV2(Controller):
                             "devices": commandreq.devices,
                             "device_type": commandreq.device_type,
                             "groups": commandreq.groups,
+                            "command_args": command_args,
                             "schedule": commandreq.schedule,
+                            "schedule_args": schedule_args,
                             "created_on": str(commandreq.created_on),
                             "status": str(commandreq.status)
                         }
@@ -565,16 +617,18 @@ class CommandsV2(Controller):
                 day = WeekDays[day.upper()].value
                 days.append(day)
             
-            
-        schedule_args = {
-            'name': schedule_name,
-            'start_datetime': start_datetime,
-            'end_datetime': end_datetime,
-            'window_start_time': window_start_time,
-            'window_end_time': window_end_time,
-            'time_type': time_type,
-            'days': days
-        }  
+        if schedule_name is None:
+            schedule_args = None 
+        else:
+            schedule_args = {
+                'name': schedule_name,
+                'start_datetime': start_datetime,
+                'end_datetime': end_datetime,
+                'window_start_time': window_start_time,
+                'window_end_time': window_end_time,
+                'time_type': time_type,
+                'days': days
+            }  
     
         device_client = APIClient(db.get_configure()).get_device_api_client()
         device_ids = []
@@ -605,28 +659,22 @@ class CommandsV2(Controller):
                     self.app.render(f"ERROR: {parse_error_message(self.app, e)}")
                     return
 
-        app_state = self.app.pargs.app_state
-        app_version = self.app.pargs.app_version
-        custom_settings_config = self.app.pargs.custom_settings_config
-        device_alias_name = self.app.pargs.device_alias_name
-        message = self.app.pargs.message
-        package_name = self.app.pargs.package_name
-        policy_url = self.app.pargs.policy_url
-        state = self.app.pargs.state
-        wifi_access_points = self.app.pargs.wifi_access_points
-
-        command_args = {
-            'app_state': app_state,
-            'app_version': app_version,
-            'custom_settings_config': custom_settings_config,
-            'device_alias_name': device_alias_name,
-            'message': message,
-            'package_name': package_name,
-            'policy_url': policy_url,
-            'state': state,
-            'wifi_access_points': wifi_access_points
+        command_args_ = {
+            "app_state": self.app.pargs.app_state,
+            "app_version": self.app.pargs.app_version,
+            "custom_settings_config": self.app.pargs.custom_settings_config,
+            "device_alias_name": self.app.pargs.device_alias_name,
+            "message": self.app.pargs.message,
+            "package_name": self.app.pargs.package_name,
+            "policy_url": self.app.pargs.policy_url,
+            "state": self.app.pargs.state,
+            "wifi_access_points": self.app.pargs.wifi_access_points
         }
-        
+        command_args = {}
+        for key, value in command_args_.items():
+            if(value is not None):
+                command_args[key] = value
+
         command_request = V0CommandRequest( command_type=command_type,
                                             devices=device_ids,
                                             device_type=device_type,

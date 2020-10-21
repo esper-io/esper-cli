@@ -1956,26 +1956,26 @@ $ espercli commandsV2 list [OPTIONS]
 ##### Example
 ```sh
 $ espercli commandsV2 list
-Total Number of Command Requests: 12795
+Total Number of Command Requests: 12916
 
-RQUEST ID                             COMMAND         STATUS             ISSUED BY    COMMAND TYPE    CREATED ON
-d6e93682-a1be-40dd-b649-8e3bb1276a58  REBOOT          Command Failure    mihir        DEVICE          2020-10-17 08:49:15.381964+00:00
-19f20392-e5d3-4a84-afde-59160b291eb8  REBOOT          Command Failure    mihir        DEVICE          2020-10-17 08:48:35.781932+00:00
-26906c24-434e-4e43-88b7-0ee8cc5a4844  REBOOT          Command Success    mihir        DEVICE          2020-10-17 08:22:29.220613+00:00
-5665f6f8-1135-461e-9c4f-8f662f436cba  REBOOT          Command Success    mihir        DEVICE          2020-10-17 08:21:56.817691+00:00
-13b8eb81-9e95-473c-84e4-0f4c3c4bd373  SET_NEW_POLICY  Command TimeOut    mihir        DYNAMIC         2020-10-17 08:16:14.963148+00:00
-e9f620d2-72e6-4531-af47-9e920b174bfc  REBOOT          Command TimeOut    mihir        DEVICE          2020-10-17 08:08:42.194861+00:00
-9ccf8e9f-3309-4bc5-9f1d-93bc7e94047d  REBOOT          Command TimeOut    mihir        DEVICE          2020-10-17 07:03:12.938932+00:00
-ea3b7347-09ee-459b-a0a8-489149076be6  REBOOT          Command TimeOut    mihir        DEVICE          2020-10-17 07:02:04.548724+00:00
-f6bcf2b6-59ed-423f-8b57-46a2a1671b70  WIPE            Command Success    kiran        DEVICE          2020-10-16 10:58:18.463484+00:00
-949a07b0-d7b0-476a-9302-db901ce7701b  WIPE            Command Cancelled  kiran        DEVICE          2020-10-16 10:43:27.613400+00:00
+RQUEST ID                             COMMAND           ISSUED BY    COMMAND TYPE    CREATED ON
+5054d1d0-45c4-4a7d-b897-798af05edf75  WIPE              aneesha      DEVICE          2020-10-21 12:12:51.662946+00:00
+b1256407-1c10-43b7-9f90-85b835430f08  UPDATE_HEARTBEAT  aneesha      DEVICE          2020-10-21 12:11:32.603833+00:00
+d41fcaff-0d7a-4151-9c87-2b1ba471b8ea  SET_KIOSK_APP     aneesha      DEVICE          2020-10-21 12:11:26.573396+00:00
+03d903d5-6236-424c-832c-350a0feb00a4  WIPE              aneesha      DEVICE          2020-10-21 12:07:19.449655+00:00
+101482a9-5094-453e-affc-3985334403cf  WIPE              aneesha      DEVICE          2020-10-21 12:05:56.745790+00:00
+8b42dc16-7162-4a0a-bdcf-8265eab1b65e  UPDATE_HEARTBEAT  aneesha      DEVICE          2020-10-21 12:05:22.767914+00:00
+4d2731e5-6a89-4826-9b3c-9cdaff0002dc  SET_KIOSK_APP     aneesha      DEVICE          2020-10-21 12:05:17.930897+00:00
+6276758a-1f40-425e-bd3d-7159b53ca850  WIPE              aneesha      DEVICE          2020-10-21 12:03:37.860293+00:00
+3ddd792d-2fbd-418d-a27a-4339fccf8e44  WIPE              mihir        DEVICE          2020-10-21 11:56:24.611128+00:00
+773a72f8-3bdd-4176-975e-e5473f2ee42a  SET_APP_STATE     mihir        DEVICE          2020-10-21 11:52:16.225932+00:00
 
 $ espercli commandsV2 list -ct device -d DEV-ELOP-W57Z -dt active -c set_kiosk_app -l 2
 Total Number of Command Requests: 21
 
-RQUEST ID                             COMMAND        STATUS           ISSUED BY    COMMAND TYPE    CREATED ON
-4854906d-6f76-4b58-88f9-295d481f02e4  SET_KIOSK_APP  Command Success  alok         DEVICE          2020-10-14 09:05:52.430365+00:00
-6c540c8e-3078-4f9c-85b1-d2d39f3dec5a  SET_KIOSK_APP  Command Success  alok         DEVICE          2020-10-14 09:05:10.526865+00:00
+RQUEST ID                             COMMAND        ISSUED BY    COMMAND TYPE    CREATED ON
+4854906d-6f76-4b58-88f9-295d481f02e4  SET_KIOSK_APP  alok         DEVICE          2020-10-14 09:05:52.430365+00:00
+6c540c8e-3078-4f9c-85b1-d2d39f3dec5a  SET_KIOSK_APP  alok         DEVICE          2020-10-14 09:05:10.526865+00:00
 ```
 
 #### 2. status
@@ -2100,7 +2100,7 @@ $ espercli commandsV2 command [OPTIONS]
 $ espercli commandsV2 command -c update_heartbeat -ct device -d DEV-ELOP-UULA
 
 TITLE          DETAILS
-Id             34dae2cb-a790-4912-b3a2-1630da8fea90
+Id             ba36ea4d-1744-43a9-a42f-8e60d24946f8
 Command        UPDATE_HEARTBEAT
 Command Args   {'app_state': None,
                 'app_version': None,
@@ -2118,19 +2118,13 @@ Device Type    active
 Status         []
 Issued by      {'id': 12000, 'username': 'bindya'}
 Schedule       IMMEDIATE
-Schedule Args  {'days': ['All days'],
-                'end_datetime': None,
-                'name': None,
-                'start_datetime': None,
-                'time_type': 'console',
-                'window_end_time': None,
-                'window_start_time': None}
-Created On     2020-10-16 08:37:04.090196+00:00
+Schedule Args
+Created On     2020-10-21 12:18:04.194833+00:00
 
-espercli commandsV2 command -c update_heartbeat -ct device -d DEV-ELOP-W57Z -dt all -s window -sn scheduling -st 2020-10-13T13:15:00Z -en 2020-10-13T14:15:00Z -ws 13:15:00 -we 14:15:00 -tt device
+$ espercli commandsV2 command -c update_heartbeat -ct device -d DEV-ELOP-W57Z -dt all -s window -sn scheduling -st 2020-10-21T20:15:00Z -en 2020-10-21T21:15:00Z -ws 13:15:00 -we 14:15:00 -tt device
 
 TITLE          DETAILS
-Id             2b5df1f9-e695-448d-86cf-15068c548f67
+Id             21e64cf7-680c-4d75-ab65-373850e4aced
 Command        UPDATE_HEARTBEAT
 Command Args   {'app_state': None,
                 'app_version': None,
@@ -2145,17 +2139,11 @@ Command Type   DEVICE
 Devices        ['2d110b9c-6f65-430f-869d-fefb2a576dd3']
 Groups         []
 Device Type    all
-Status         [{'state': 'Command Scheduled', 'total': 1}]
+Status         Command Scheduled
 Issued by      {'id': 12000, 'username': 'bindya'}
 Schedule       WINDOW
-Schedule Args  {'days': ['All days'],
-                'end_datetime': datetime.datetime(2020, 10, 13, 14, 15, tzinfo=tzutc()),
-                'name': 'scheduling',
-                'start_datetime': datetime.datetime(2020, 10, 13, 13, 15, tzinfo=tzutc()),
-                'time_type': 'device',
-                'window_end_time': '14:15:00',
-                'window_start_time': '13:15:00'}
-Created On     2020-10-12 06:14:33.623189+00:00
+Schedule Args  {'name': 'scheduling', 'start_datetime': '2020-10-21 20:15:00+00:00', 'end_datetime': '2020-10-21 21:15:00+00:00', 'time_type': 'device', 'window_start_time': '13:15:00', 'window_end_time': '14:15:00', 'days': ['All days']}
+Created On     2020-10-21 12:19:52.519940+00:00
 
 
 ```
