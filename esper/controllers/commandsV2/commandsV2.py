@@ -47,17 +47,12 @@ class CommandsV2(Controller):
                 "days": request.schedule_args.days
             }
 
-        command_args = {
-            "app_state": request.command_args.app_state,
-            "app_version": request.command_args.app_version,
-            "custom_settings_config": request.command_args.custom_settings_config,
-            "device_alias_name": request.command_args.device_alias_name,
-            "message": request.command_args.message,
-            "package_name": request.command_args.package_name,
-            "policy_url": request.command_args.policy_url,
-            "state": request.command_args.state,
-            "wifi_access_points": request.command_args.wifi_access_points
-        }
+        dict_ = request.command_args.__dict__
+        command_args = {}
+        for key, value in dict_.items():
+            if(value is not None):
+                command_args[key[1:]] = value
+
         if len(request.status) != 0:
             state = request.status[0].state
         else:
@@ -68,7 +63,7 @@ class CommandsV2(Controller):
             renderable = [
                 {title: 'Id', details: request.id},
                 {title: 'Command', details: request.command},
-                {title: 'Command Args', details: request.command_args},
+                {title: 'Command Args', details: command_args},
                 {title: 'Command Type', details: request.command_type},
                 {title: 'Devices', details: request.devices},
                 {title: 'Groups', details: request.groups},

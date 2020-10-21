@@ -2102,15 +2102,7 @@ $ espercli commandsV2 command -c update_heartbeat -ct device -d DEV-ELOP-UULA
 TITLE          DETAILS
 Id             ba36ea4d-1744-43a9-a42f-8e60d24946f8
 Command        UPDATE_HEARTBEAT
-Command Args   {'app_state': None,
-                'app_version': None,
-                'custom_settings_config': None,
-                'device_alias_name': None,
-                'message': None,
-                'package_name': None,
-                'policy_url': None,
-                'state': None,
-                'wifi_access_points': None}
+Command Args   {}
 Command Type   DEVICE
 Devices        ['babc9cf5-2dbb-4382-bb9d-d6245941db35']
 Groups         []
@@ -2121,20 +2113,12 @@ Schedule       IMMEDIATE
 Schedule Args
 Created On     2020-10-21 12:18:04.194833+00:00
 
-$ espercli commandsV2 command -c update_heartbeat -ct device -d DEV-ELOP-W57Z -dt all -s window -sn scheduling -st 2020-10-21T20:15:00Z -en 2020-10-21T21:15:00Z -ws 13:15:00 -we 14:15:00 -tt device
+$ espercli commandsV2 command -c set_app_state -as SHOW -pk com.asana.app -ct device -d DEV-ELOP-W57Z -dt all -s window -sn scheduling -st 2020-10-21T20:15:00Z -en 2020-10-21T21:15:00Z -ws 13:15:00 -we 14:15:00 -tt device
 
 TITLE          DETAILS
-Id             21e64cf7-680c-4d75-ab65-373850e4aced
-Command        UPDATE_HEARTBEAT
-Command Args   {'app_state': None,
-                'app_version': None,
-                'custom_settings_config': None,
-                'device_alias_name': None,
-                'message': None,
-                'package_name': None,
-                'policy_url': None,
-                'state': None,
-                'wifi_access_points': None}
+Id             4c91045c-1113-424c-9f57-baae7d8dd0a7
+Command        SET_APP_STATE
+Command Args   {'package_name': 'com.asana.app', 'app_state': 'SHOW'}
 Command Type   DEVICE
 Devices        ['2d110b9c-6f65-430f-869d-fefb2a576dd3']
 Groups         []
@@ -2143,7 +2127,7 @@ Status         Command Scheduled
 Issued by      {'id': 12000, 'username': 'bindya'}
 Schedule       WINDOW
 Schedule Args  {'name': 'scheduling', 'start_datetime': '2020-10-21 20:15:00+00:00', 'end_datetime': '2020-10-21 21:15:00+00:00', 'time_type': 'device', 'window_start_time': '13:15:00', 'window_end_time': '14:15:00', 'days': ['All days']}
-Created On     2020-10-21 12:19:52.519940+00:00
+Created On     2020-10-21 14:07:27.601095+00:00
 
 
 ```
