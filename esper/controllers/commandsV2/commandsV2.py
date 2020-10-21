@@ -60,6 +60,8 @@ class CommandsV2(Controller):
         }
         if len(request.status) != 0:
             state = request.status[0].state
+        else:
+            state = None
         if format == OutputFormat.TABULATED:
             title = "TITLE"
             details = "DETAILS"
@@ -679,7 +681,7 @@ class CommandsV2(Controller):
                                             devices=device_ids,
                                             device_type=device_type,
                                             command=command,
-                                            command_args=command_args, 
+                                            command_args=None, 
                                             schedule=schedule,
                                             schedule_args=schedule_args
                                         )
