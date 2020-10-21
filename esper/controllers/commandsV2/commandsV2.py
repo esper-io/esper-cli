@@ -681,7 +681,7 @@ class CommandsV2(Controller):
                                             devices=device_ids,
                                             device_type=device_type,
                                             command=command,
-                                            command_args=None, 
+                                            command_args=command_args, 
                                             schedule=schedule,
                                             schedule_args=schedule_args
                                         )
