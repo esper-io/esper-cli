@@ -1931,6 +1931,141 @@ parent       <uuid>
  ```
 
 
+### **Content**
+Content command can be used to list, show, upload, modify and delete content.
+```sh
+$ espercli content [SUB-COMMANDS]
+```
+#### Sub commands
+#### 1. list
+List all contents.
+Pagination used to limit the number of results, default is 20 results per page.
+```sh
+$ espercli content list [OPTIONS]
+```
+##### Options
+| Name, shorthand | Default| Description|
+| -------------   |:------:|:----------|
+| --limit, -l     |20      | Number of results to return per page |
+| --offset, -i    |0       | The initial index from which to return the results |
+| --search, -s    |        | Searches by name/tags/description |
+| --json, -j      |        | Render result in JSON format |
+
+##### Example
+```sh
+$ espercli content list -l 5
+Total Number of Contents: 52
+  ID  NAME                                            DESCRIPTION    TAGS            SIZE  CREATED ON
+  61  ss.png                                                         []              9768  2020-10-23 08:52:09.506002+00:00
+  59  gh.jpg                                                         []             79604  2020-10-23 06:29:24.743538+00:00
+  58  {CDE0DFC1-79F7-4D5A-A777-6D376F417F60}.png.jpg                 []             60712  2020-10-23 06:28:32.900106+00:00
+  57  1.har                                                          []            208492  2020-10-23 02:12:58.777150+00:00
+  49  download.jpg                                                   ['download']    7947  2020-10-21 05:27:41.413469+00:00
+
+$ espercli content list -l 2 -i 1 -s screenshot
+Total Number of Contents: 3
+  ID  NAME                                      DESCRIPTION    TAGS      SIZE  CREATED ON
+  51  Screenshot 2020-06-05 at 11.28.51 AM.png                 []       24037  2020-10-21 07:13:21.466780+00:00
+  50  Screenshot 2020-04-07 at 8.46.31 AM.png                  []       14202  2020-10-21 07:03:07.817152+00:00
+```
+
+#### 2. show
+Show the details of a content. Here, `content_id` is required to show the content information.
+
+```sh
+$ espercli content show [OPTIONS] [content_id]
+```
+##### Options
+| Name, shorthand | Default| Description|
+| -------------   |:------:|:----------|
+| --json, -j      |        | Render result in JSON format |
+
+##### Example
+```
+$ espercli content show 61
+
+TITLE        DETAILS
+id           61
+name         ss.png
+is_dir       False
+kind         image/png
+hash         _hNmIrB4PnQ4ov77q1PccbPcuGrqH2TDUOpcvjlDv5g
+size         9768
+path         /root/
+permissions  777
+tags         []
+description
+created      2020-10-23 08:52:09.506002+00:00
+modified     2020-10-23 08:52:09.506024+00:00
+enterprise   f44373cb-1800-43c6-aab3-c81f8b1f435c
+owner        bindya
+
+```
+#### 3. upload
+Upload content. Here, content file path is required to upload the content.
+
+```sh
+$ espercli content upload [OPTIONS] [content_file]
+```
+##### Options
+| Name, shorthand | Default| Description|
+| -------------   |:------:|:----------|
+| --json, -j      |        | Render result in JSON format |
+
+##### Example
+```
+
+```
+
+#### 4. modify
+Modify a content information. Here, `content_id` is required to modify the content and only the tags and description can be modified.
+
+```sh
+$ espercli content modify [OPTIONS] [content_id]
+```
+##### Options
+| Name, shorthand   | Default| Description|
+| ------------------|:------:|:----------|
+| --tags, -t        |        | List of tags, space separated|
+| --description, -d |        | Description |
+| --json, -j        |        | Render result in JSON format |
+
+##### Example
+```
+$ espercli content modify 61 -t screenshot new -d screenshots
+
+TITLE        DETAILS
+id           61
+name         ss.png
+is_dir       False
+kind         image/png
+hash         _hNmIrB4PnQ4ov77q1PccbPcuGrqH2TDUOpcvjlDv5g
+size         9768
+path         /root/
+permissions  777
+tags         ['screenshot', 'new']
+description  screenshots
+created      2020-10-23 08:52:09.506002+00:00
+modified     2020-10-23 08:57:44.658128+00:00
+enterprise   f44373cb-1800-43c6-aab3-c81f8b1f435c
+owner        bindya
+
+```
+
+
+#### 5. delete
+Delete a content. Here, `content_id` is required to delete the content.
+
+```sh
+$ espercli content delete [OPTIONS] [content_id]
+```
+
+##### Example
+```
+$ espercli content delete 61
+Content with id 61 deleted successfully.
+```
+
 We are always in active development and we try our best to keep our documentation up to date. However, if you end up ahead of time you can check our latest documentation on [Github](https://github.com/esper-io/esper-cli).
 
 If you face any issue with CLI usage, we recommend you to reach out to [Esper Dev Support](https://docs.esper.io/home/support.html)
