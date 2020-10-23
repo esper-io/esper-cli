@@ -2053,6 +2053,208 @@ parent       <uuid>
  ```
 
 
+### **Commands V2**
+Commands V2.0 is used to list the command requests, statuses, fire different actions on devices or groups like ping, reboot etc. It provides advanced device command capabilities like queuing, support for offline devices, dynamic device set for commands and command history.
+
+```sh
+$ espercli commandsV2 [SUB-COMMANDS]
+```
+#### Sub commands
+#### 1. list
+List and filter command requests.
+```sh
+$ espercli commandsV2 list [OPTIONS]
+```
+##### Options
+| Name, shorthand     | Default| Description|
+| ------------------- |:------:|:----------|
+| --command_type, -ct |        | Filter by type of command request |
+| --device, -d        |        | Filter by device name |
+| --device_type, -dt  |        | Filter by device type |
+| --command, -c       |        | Filter by command name |
+| --limit, -l         | 10     | Number of results to return |
+| --json, -j          |        | Render result in JSON format |
+
+##### Example
+```sh
+$ espercli commandsV2 list
+Total Number of Command Requests: 12916
+
+RQUEST ID                             COMMAND           ISSUED BY    COMMAND TYPE    CREATED ON
+5054d1d0-45c4-4a7d-b897-798af05edf75  WIPE              aneesha      DEVICE          2020-10-21 12:12:51.662946+00:00
+b1256407-1c10-43b7-9f90-85b835430f08  UPDATE_HEARTBEAT  aneesha      DEVICE          2020-10-21 12:11:32.603833+00:00
+d41fcaff-0d7a-4151-9c87-2b1ba471b8ea  SET_KIOSK_APP     aneesha      DEVICE          2020-10-21 12:11:26.573396+00:00
+03d903d5-6236-424c-832c-350a0feb00a4  WIPE              aneesha      DEVICE          2020-10-21 12:07:19.449655+00:00
+101482a9-5094-453e-affc-3985334403cf  WIPE              aneesha      DEVICE          2020-10-21 12:05:56.745790+00:00
+8b42dc16-7162-4a0a-bdcf-8265eab1b65e  UPDATE_HEARTBEAT  aneesha      DEVICE          2020-10-21 12:05:22.767914+00:00
+4d2731e5-6a89-4826-9b3c-9cdaff0002dc  SET_KIOSK_APP     aneesha      DEVICE          2020-10-21 12:05:17.930897+00:00
+6276758a-1f40-425e-bd3d-7159b53ca850  WIPE              aneesha      DEVICE          2020-10-21 12:03:37.860293+00:00
+3ddd792d-2fbd-418d-a27a-4339fccf8e44  WIPE              mihir        DEVICE          2020-10-21 11:56:24.611128+00:00
+773a72f8-3bdd-4176-975e-e5473f2ee42a  SET_APP_STATE     mihir        DEVICE          2020-10-21 11:52:16.225932+00:00
+
+$ espercli commandsV2 list -ct device -d DEV-ELOP-W57Z -dt active -c set_kiosk_app -l 2
+Total Number of Command Requests: 21
+
+RQUEST ID                             COMMAND        ISSUED BY    COMMAND TYPE    CREATED ON
+4854906d-6f76-4b58-88f9-295d481f02e4  SET_KIOSK_APP  alok         DEVICE          2020-10-14 09:05:52.430365+00:00
+6c540c8e-3078-4f9c-85b1-d2d39f3dec5a  SET_KIOSK_APP  alok         DEVICE          2020-10-14 09:05:10.526865+00:00
+```
+
+#### 2. status
+
+List and filter command request status.
+```sh
+$ espercli commandsV2 status [OPTIONS]
+```
+##### Options
+| Name, shorthand     | Default| Description|
+| ------------------- |:------:|:----------|
+| --request, -r       |        | Command request id |
+| --device, -d        |        | Filter by device name |
+| --state, -s         |        | Filter by command state |
+| --limit, -l         | 10     | Number of results to return |
+| --json, -j          |        | Render result in JSON format |
+
+##### Example
+```sh
+$ espercli commandsV2 status -r b39da444-6adf-4241-a4b4-2831dbbee264 
+Total Number of Statuses: 1
+
+STATUS ID                             DEVICE ID                             STATE            REASON
+45e35f8a-bd47-4a9d-9991-e88fd5ba58ca  2d110b9c-6f65-430f-869d-fefb2a576dd3  Command Success
+
+$ espercli commandsV2 status -r b39da444-6adf-4241-a4b4-2831dbbee264 -d DEV-ELOP-W57Z -s success -l 1
+
+Total Number of Statuses: 1
+
+STATUS ID                             DEVICE ID                             STATE            REASON
+45e35f8a-bd47-4a9d-9991-e88fd5ba58ca  2d110b9c-6f65-430f-869d-fefb2a576dd3  Command Success
+
+```
+
+#### 3. history
+
+Get and filter command history.
+```sh
+$ espercli commandsV2 history [OPTIONS]
+```
+##### Options
+| Name, shorthand     | Default| Description|
+| ------------------- |:------:|:----------|
+| --device, -d        |        | Device name |
+| --state, -s         |        | Filter by command state |
+| --limit, -l         | 10     | Number of results to return |
+| --json, -j          |        | Render result in JSON format |
+
+##### Example
+```sh
+$ espercli commandsV2 history -d  DEV-ELOP-W57Z -l 3
+Total Number of Statuses: 343
+
+STATUS ID                             DEVICE ID                             STATE              REASON
+b9f57e76-7ef4-49db-b43e-9c0d7be3c0b1  2d110b9c-6f65-430f-869d-fefb2a576dd3  Command Scheduled  Command scheduled by None
+05f42317-f768-4949-bece-cdafecd8e443  2d110b9c-6f65-430f-869d-fefb2a576dd3  Command Scheduled  Command scheduled by None
+5730a1ff-d65d-4658-a69e-9973b8244930  2d110b9c-6f65-430f-869d-fefb2a576dd3  Command Scheduled  Command scheduled by None
+
+$ espercli commandsV2 history -d  DEV-ELOP-W57Z -s success -l 2
+Total Number of Statuses: 150
+
+STATUS ID                             DEVICE ID                             STATE            REASON
+7d9a3382-e1ac-4483-847c-198de35ca92c  2d110b9c-6f65-430f-869d-fefb2a576dd3  Command Success  DPC Update Command issued successfully
+553f44e7-0a2b-4269-90a5-04e111e225c4  2d110b9c-6f65-430f-869d-fefb2a576dd3  Command Success  DPC Update Command issued successfully
+
+```
+#### 4. command
+
+Create a command request for devices or groups.
+
+```sh
+$ espercli commandsV2 command [OPTIONS]
+```
+##### Options
+| Name, shorthand     | Default| Description|
+| ------------------- |:------:|:----------|
+| --command_type, -ct |        | Command type |
+| --devices, -d       |        | List of device names, space separated |
+| --groups, -g        |        | List of group ids, space separated |
+| --device_type, -dt  | active | Device type |
+| --command, -c       |        | Command name |
+| --schedule, -s      |immediate| Schedule type |
+| --schedule_name, -sn|        | Schedule name |
+| --start, -st        |        | Schedule start date-time |
+| --end, -en          |        | Schedlue end date-time |
+| --time_type, -tt    |        | Time type |
+| --window_start, -ws |        | Window start time |
+| --window_end, -we   |        | Window end time |
+| --days, -dy         | all    | List of days, space separated |
+| --app_state, -as    |        | App state |
+| --app_version, -av  |        | App version |
+| --custom_config, -cs|        | Custom settings config |
+| --device_alias, -dv |        | Device alias name |
+| --message, -m       |        | Message |
+| --package_name, -pk |        | Package name |
+| --policy_url, -po   |        | Policy url |
+| --state, -se        |        | State |
+| --wifi_access_points, -wap|        | Wifi access points |
+| --json, -j          |        | Render result in JSON format |
+
+##### Commands 
+
+| Command Name     |  Description     | Details           |
+| -----------------|:----------------:|:------------------|
+| reboot           | Reboot a device  |                   |
+| update_heartbeat | Ping a device    |                   |
+| update_device_config | Push additional configurations to the Device | Requires `custom_config` where `custom_config` is the data with the custom settings config |
+| install          | Install an app on a device | Requires `app_version` where `app_version` is the version id of app uploaded on Esper |
+| uninstall        |  Uninstall an app from device | Requires `package_name` where `package_name` is the name of the app package uploaded on Esper |
+| set_new_policy   |  Apply policy on device | Requires `policy_url` where `policy_url` is the URL to the policy |
+| add_wifi_ap      | Add wifi access points for device | Requires `wifi_access_points` where `wifi_access_points` is the data with access points |
+| remove_wifi_ap   | Remove Wifi access points for device | Requires `wifi_access_points` where `wifi_access_points` is the data with access points |
+| set_kiosk_app     | Command to set the Kiosk app for a device | Requires `package_name` where `package_name` is the name of the app package uploaded on Esper |
+| set_device_lockdown_state | Set lockdown state for a device | Requires `state` and `message` where `state` is LOCKED/UNLOCKED and `message` is the message to be added with command |
+| set_app_state     | Set the state of an app | Requries `app_state` and `package_name` where `app_state` is the state of app - SHOW/HIDE/DISABLE and `package_name` is the name of the app package uploaded on Esper |
+| wipe              | Wipes the device | | 
+| update_latest_dpc | Prompt device to update the DPC app to the latest versions | | 
+
+
+##### Example
+```sh
+$ espercli commandsV2 command -c update_heartbeat -ct device -d DEV-ELOP-UULA
+
+TITLE          DETAILS
+Id             ba36ea4d-1744-43a9-a42f-8e60d24946f8
+Command        UPDATE_HEARTBEAT
+Command Args   {}
+Command Type   DEVICE
+Devices        ['babc9cf5-2dbb-4382-bb9d-d6245941db35']
+Groups         []
+Device Type    active
+Status         []
+Issued by      bindya
+Schedule       IMMEDIATE
+Schedule Args
+Created On     2020-10-21 12:18:04.194833+00:00
+
+$ espercli commandsV2 command -c set_app_state -as SHOW -pk com.asana.app -ct device -d DEV-ELOP-W57Z -dt all -s window -sn scheduling -st 2020-10-21T20:15:00Z -en 2020-10-21T21:15:00Z -ws 13:15:00 -we 14:15:00 -tt device
+
+TITLE          DETAILS
+Id             4c91045c-1113-424c-9f57-baae7d8dd0a7
+Command        SET_APP_STATE
+Command Args   {'package_name': 'com.asana.app', 'app_state': 'SHOW'}
+Command Type   DEVICE
+Devices        ['2d110b9c-6f65-430f-869d-fefb2a576dd3']
+Groups         []
+Device Type    all
+Status         Command Scheduled
+Issued by      bindya
+Schedule       WINDOW
+Schedule Args  {'name': 'scheduling', 'start_datetime': '2020-10-21 20:15:00+00:00', 'end_datetime': '2020-10-21 21:15:00+00:00', 'time_type': 'device', 'window_start_time': '13:15:00', 'window_end_time': '14:15:00', 'days': ['All days']}
+Created On     2020-10-21 14:07:27.601095+00:00
+
+
+```
+
+
 We are always in active development and we try our best to keep our documentation up to date. However, if you end up ahead of time you can check our latest documentation on [Github](https://github.com/esper-io/esper-cli).
 
 If you face any issue with CLI usage, we recommend you to reach out to [Esper Dev Support](https://docs.esper.io/home/support.html)
