@@ -2108,7 +2108,7 @@ Devices        ['babc9cf5-2dbb-4382-bb9d-d6245941db35']
 Groups         []
 Device Type    active
 Status         []
-Issued by      {'id': 12000, 'username': 'bindya'}
+Issued by      bindya
 Schedule       IMMEDIATE
 Schedule Args
 Created On     2020-10-21 12:18:04.194833+00:00
@@ -2124,7 +2124,7 @@ Devices        ['2d110b9c-6f65-430f-869d-fefb2a576dd3']
 Groups         []
 Device Type    all
 Status         Command Scheduled
-Issued by      {'id': 12000, 'username': 'bindya'}
+Issued by      bindya
 Schedule       WINDOW
 Schedule Args  {'name': 'scheduling', 'start_datetime': '2020-10-21 20:15:00+00:00', 'end_datetime': '2020-10-21 21:15:00+00:00', 'time_type': 'device', 'window_start_time': '13:15:00', 'window_end_time': '14:15:00', 'days': ['All days']}
 Created On     2020-10-21 14:07:27.601095+00:00

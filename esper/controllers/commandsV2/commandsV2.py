@@ -57,6 +57,7 @@ class CommandsV2(Controller):
             state = request.status[0].state
         else:
             state = None
+        issued_by = request.issued_by.split("'")[-2]
         if format == OutputFormat.TABULATED:
             title = "TITLE"
             details = "DETAILS"
@@ -69,7 +70,7 @@ class CommandsV2(Controller):
                 {title: 'Groups', details: request.groups},
                 {title: 'Device Type', details: request.device_type},
                 {title: 'Status', details: state},
-                {title: 'Issued by', details: request.issued_by},
+                {title: 'Issued by', details: issued_by},
                 {title: 'Schedule', details: request.schedule},
                 {title: 'Schedule Args', details: schedule_args},
                 {title: 'Created On', details: request.created_on}
