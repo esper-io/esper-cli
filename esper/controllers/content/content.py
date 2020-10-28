@@ -1,5 +1,8 @@
 import os
 import random
+import time
+from tqdm import tqdm
+from pathlib import Path
 
 from cement import ex, Controller
 from esperclient.rest import ApiException
@@ -218,20 +221,19 @@ class Content(Controller):
         content_client = APIClient(db.get_configure()).get_content_api_client()
         enterprise_id = db.get_enterprise_id()
 
-        key = self.app.pargs.content_file
+        content_file = self.app.pargs.content_file
 
         try:
             filesize = os.path.getsize(content_file)
             random_no = random.randint(1, 50)
-            response = content_client.post_content(enterprise_id, key)
             with tqdm(total=int(filesize), unit='B', unit_scale=True, miniters=1, desc='Uploading......',
                       unit_divisor=1024) as pbar:
                 for i in range(100):
                     if i == random_no:
-                        response = application_client.upload(enterprise_id, application_file)
+                        response = content_client.post_content(enterprise_id, content_file)
 
                     time.sleep(0.07)
-                    pbar.set_postfix(file=Path(application_file).name, refresh=False)
+                    pbar.set_postfix(file=Path(content_file).name, refresh=False)
                     pbar.update(int(filesize / 100))
         except ApiException as e:
             self.app.log.error(f"[content-upload] Failed to upload content: {e}")
