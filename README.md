@@ -2136,6 +2136,24 @@ $ espercli content upload [OPTIONS] [content_file]
 
 ##### Example
 ```
+$ espercli content upload screen.png
+Uploading......: 100%|█████████▉| 144k/144k [00:13<00:00, 11.2kB/s, file=screen.png]
+
+TITLE        DETAILS
+id           71
+name         screen.png
+is_dir       False
+kind         image/png
+hash         kbFYPWUuFfy4bZHEMHPcLioNee7amOCkMR4crYTE-lQ
+size         147483
+path         /root/
+permissions  777
+tags         []
+description
+created      2020-10-28 04:04:18.394138+00:00
+modified     2020-10-28 04:04:18.394161+00:00
+enterprise   f44373cb-1800-43c6-aab3-c81f8b1f435c
+owner        bindya
 
 ```
 
@@ -2154,7 +2172,7 @@ $ espercli content modify [OPTIONS] [content_id]
 
 ##### Example
 ```
-$ espercli content modify 61 -t screenshot new -d screenshots
+$ espercli content modify 61 -t screenshots new -d screenshot
 
 TITLE        DETAILS
 id           61
@@ -2165,8 +2183,8 @@ hash         _hNmIrB4PnQ4ov77q1PccbPcuGrqH2TDUOpcvjlDv5g
 size         9768
 path         /root/
 permissions  777
-tags         ['screenshot', 'new']
-description  screenshots
+tags         ['screenshots', 'new']
+description  screenshot
 created      2020-10-23 08:52:09.506002+00:00
 modified     2020-10-23 08:57:44.658128+00:00
 enterprise   f44373cb-1800-43c6-aab3-c81f8b1f435c
@@ -2179,7 +2197,7 @@ owner        bindya
 Delete a content. Here, `content_id` is required to delete the content.
 
 ```sh
-$ espercli content delete [OPTIONS] [content_id]
+$ espercli content delete [content_id]
 ```
 
 ##### Example
