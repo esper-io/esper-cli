@@ -19,6 +19,7 @@ from esper.controllers.pipeline.stage import Stage
 from esper.controllers.secureadb.secureadb import SecureADB
 from esper.controllers.telemetry.telemetry import Telemetry
 from esper.controllers.token.token import Token
+from esper.controllers.content.content import Content
 from esper.controllers.commandsV2.commandsV2 import CommandsV2
 from esper.core.exc import EsperError
 from esper.core.output_handler import EsperOutputHandler
@@ -114,6 +115,7 @@ class Esper(App):
             Stage,
             Operation,
             Execution,
+            Content,
             CommandsV2
         ]
 
