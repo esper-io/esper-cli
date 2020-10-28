@@ -2103,7 +2103,7 @@ $ espercli content show [OPTIONS] [content_id]
 | --json, -j      |        | Render result in JSON format |
 
 ##### Example
-```
+```sh
 $ espercli content show 61
 
 TITLE        DETAILS
@@ -2135,7 +2135,7 @@ $ espercli content upload [OPTIONS] [content_file]
 | --json, -j      |        | Render result in JSON format |
 
 ##### Example
-```
+```sh
 $ espercli content upload screen.png
 Uploading......: 100%|█████████▉| 144k/144k [00:13<00:00, 11.2kB/s, file=screen.png]
 
@@ -2171,7 +2171,7 @@ $ espercli content modify [OPTIONS] [content_id]
 | --json, -j        |        | Render result in JSON format |
 
 ##### Example
-```
+```sh
 $ espercli content modify 61 -t screenshots new -d screenshot
 
 TITLE        DETAILS
@@ -2201,7 +2201,7 @@ $ espercli content delete [content_id]
 ```
 
 ##### Example
-```
+```sh
 $ espercli content delete 61
 Content with id 61 deleted successfully.
 ```
