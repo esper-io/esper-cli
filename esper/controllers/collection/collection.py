@@ -42,10 +42,9 @@ class Collection(Controller):
         if not eql_string:
             self.app.render(f'No query specified. Use the -q, --query option to specify the query string\n')
             return
-        # map app_name, app_version, package name to app_list
         
         try:
-            ok, response = eql_search(eql_string)
+            ok, response = eql_search(environment, enterprise_id, scapi_api_key, eql_string)
             if not ok:
                 self.app.log.debug(f"Response not OK. {response}")
                 self.app.render(f"Failed to query for devices.\n")
