@@ -21,6 +21,7 @@ from esper.controllers.telemetry.telemetry import Telemetry
 from esper.controllers.token.token import Token
 from esper.controllers.content.content import Content
 from esper.controllers.commandsV2.commandsV2 import CommandsV2
+from esper.controllers.collection.collection import Collection
 from esper.core.exc import EsperError
 from esper.core.output_handler import EsperOutputHandler
 from esper.ext.certs import init_certs
@@ -116,7 +117,8 @@ class Esper(App):
             Operation,
             Execution,
             Content,
-            CommandsV2
+            CommandsV2,
+            Collection
         ]
 
         # hooks
