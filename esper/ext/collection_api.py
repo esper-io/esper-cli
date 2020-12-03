@@ -49,4 +49,3 @@ def eql_search(environment: str, enterprise_id: str, api_key: str, eql_query: st
 
     return response.ok, response.json()
 
-
