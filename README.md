@@ -2421,7 +2421,7 @@ $ espercli eql [SUB-COMMANDS]
 #### 1. search
 Command to query the devices in an entrprise.
 ```sh
-$ espercli eql search [OPTIONS]
+$ espercli eql search [OPTIONS] [eql query]
 ```
 ##### Options
 | Name, shorthand     | Default| Description|
