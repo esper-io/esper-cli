@@ -29,6 +29,16 @@ class Collection(Controller):
              {'help': 'Render result in Json format',
               'action': 'store_true',
               'dest': 'json'}),
+            (['-l', '--limit'],
+             {'help': 'Number of results to return per page',
+              'action': 'store',
+              'default': 20,
+              'dest': 'limit'}),
+            (['-i', '--offset'],
+             {'help': 'The initial index from which to return the results',
+              'action': 'store',
+              'default': 0,
+              'dest': 'offset'}),
         ]
     )
     def search(self):
@@ -39,12 +49,15 @@ class Collection(Controller):
         scapi_api_key = db.get_configure().get("api_key")
 
         eql_string = self.app.pargs.eql_string
+        limit = self.app.pargs.limit
+        offset = self.app.pargs.offset
+
         if not eql_string:
             self.app.render(f'No query specified. Use the -q, --query option to specify the query string\n')
             return
         
         try:
-            ok, response = eql_search(environment, enterprise_id, scapi_api_key, eql_string)
+            ok, response = eql_search(environment, enterprise_id, scapi_api_key, eql_string, limit=limit, offset=offset)
             if not ok:
                 self.app.log.debug(f"Response not OK. {response}")
                 self.app.render(f"Failed to query for devices.\n")

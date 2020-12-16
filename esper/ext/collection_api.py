@@ -33,9 +33,13 @@ def get_eql_search_url(environment: str,enterprise_id: str) -> str:
     return url
 
 
-def eql_search(environment: str, enterprise_id: str, api_key: str, eql_query: str) -> str:
+def eql_search(environment: str, enterprise_id: str, api_key: str, eql_query: str, **kwargs) -> str:
     url = get_eql_search_url(environment,enterprise_id)
-    query_params = {"q" : eql_query}
+    query_params = {
+        "q" : eql_query,
+        "limit" : kwargs["limit"],
+        "offset" : kwargs["offset"]
+        }
     try:
         response = requests.get(
             url,
