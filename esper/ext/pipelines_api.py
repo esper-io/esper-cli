@@ -105,3 +105,15 @@ class PipelinesApiAdapter():
         path = '/pipelines/{0}'.format(pipeline_id)
 
         return self._call(method, path)
+
+    def get_stages(self, pipeline_id):
+        method = 'GET'
+        path = '/pipelines/{0}/stages/'.format(pipeline_id)
+
+        return self._call(method, path)
+
+    def create_stage(self, pipeline_id, data):
+        method = 'POST'
+        path = '/pipelines/{0}/stages/'.format(pipeline_id)
+
+        return self._call(method, path, data)

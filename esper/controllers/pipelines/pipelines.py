@@ -110,7 +110,7 @@ class Pipelines(Controller):
     @ex(
         help='Set or show the active Pipeline',
         arguments=[
-            (['-id', '--pipeline-id'],
+            (['-p', '--pipeline-id'],
              {'help': 'Pipeline id.',
               'action': 'store',
               'dest': 'pipeline_id'}),
