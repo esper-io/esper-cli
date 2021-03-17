@@ -82,15 +82,26 @@ class PipelinesApiAdapter():
     def _parse_response(self, raw_response):
         return raw_response
 
+    def create_pipeline(self, data):
+        method = 'POST'
+        path = '/pipelines/'
+
+        return self._call(method, path, data)
+
     def get_pipeline(self, pipeline_id):
         method = 'GET'
         path = '/pipelines/{0}'.format(pipeline_id)
 
         return self._call(method, path)
+
     def get_pipelines(self):
         method = 'GET'
         path = '/pipelines/'
 
         return self._call(method, path)
 
+    def delete_pipeline(self, pipeline_id):
+        method = 'DELETE'
+        path = '/pipelines/{0}'.format(pipeline_id)
 
+        return self._call(method, path)

@@ -27,7 +27,7 @@ class Pipelines(Controller):
               'action': 'store',
               'dest': 'name',
               'default': None}),
-            (['--desc'],
+            (['--description'],
              {'help': 'Pipeline Description',
               'action': 'store',
               'dest': 'desc',
@@ -38,7 +38,8 @@ class Pipelines(Controller):
         validate_creds_exists(self.app)
         db = DBWrapper(self.app.creds)
         environment = db.get_configure().get("environment")
-        enterprise_id = db.get_enterprise_id()
+        api_key = db.get_configure().get("api_key")
+        adapter = PipelinesApiAdapter(environment, api_key)
 
         name = self.app.pargs.name
         if not name:
@@ -48,15 +49,24 @@ class Pipelines(Controller):
         if not desc:
             desc = input("Description for this Pipeline [optional]: ")
 
-        api_key = db.get_configure().get("api_key")
-
-
-        data = {
-            'foo': 'bar'
+        pipelines_data = {
+            'name': name,
+            'description': desc,
         }
 
+        pipeline = adapter.create_pipeline(pipelines_data)
+        pipeline = pipeline['content']
+
+        pipeline_render = [{
+            'Id': pipeline['id'],
+            'Name': pipeline['name'],
+            'Description': pipeline['description'],
+            'Created At': pipeline['created_at'],
+        }]
+
+
         self.app.render(f"Created Pipeline Successfully! Details: \n")
-        self.app.render(data, format=OutputFormat.TABULATED.value, headers="keys", tablefmt="plain")
+        self.app.render(pipeline_render, format=OutputFormat.TABULATED.value, headers="keys", tablefmt="plain")
 
     @ex(
         help='List or Fetch a pipeline(s)',
@@ -72,11 +82,10 @@ class Pipelines(Controller):
         validate_creds_exists(self.app)
         db = DBWrapper(self.app.creds)
         environment = db.get_configure().get("environment")
-
-        pipeline_id = self.app.pargs.pipeline_id
-
         api_key = db.get_configure().get("api_key")
         adapter = PipelinesApiAdapter(environment, api_key)
+
+        pipeline_id = self.app.pargs.pipeline_id
 
         pipelines_list = []
         if pipeline_id:
@@ -110,7 +119,6 @@ class Pipelines(Controller):
     def set_active(self):
         validate_creds_exists(self.app)
         db = DBWrapper(self.app.creds)
-
         environment = db.get_configure().get("environment")
         api_key = db.get_configure().get("api_key")
         adapter = PipelinesApiAdapter(environment, api_key)
@@ -170,10 +178,14 @@ class Pipelines(Controller):
         validate_creds_exists(self.app)
         db = DBWrapper(self.app.creds)
         environment = db.get_configure().get("environment")
-        enterprise_id = db.get_enterprise_id()
+        api_key = db.get_configure().get("api_key")
+        adapter = PipelinesApiAdapter(environment, api_key)
 
         pipeline_id = self.app.pargs.pipeline_id
         if not pipeline_id:
-            pipeline_id = prompt.query("Enter the Pipeline ID: ")
+            self.app.render('Missing arguments! Provide a pipeline id to delete.')
+            return
+
+        adapter.delete_pipeline(pipeline_id)
 
         self.app.render(f"Removed Pipeline Successfully! \n")
