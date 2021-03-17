@@ -66,9 +66,9 @@ class Stage(Controller):
         # Rendering table with populated values
         stage_render = [{
             'Id': stage['id'],
-            'Pipeline': stage['pipeline_id'],
             'Name': stage['name'],
             'Description': stage['description'],
+            'Pipeline': stage['pipeline_id'],
             'Created At': stage['created_at'],
         }]
 
@@ -98,9 +98,9 @@ class Stage(Controller):
         for stage in stages:
             stage_render = {
                 "Id": stage['id'],
-                "Pipeline": stage['pipeline_id'],
                 "Name": stage["name"],
                 "Description": stage["description"],
+                "Pipeline": stage['pipeline_id'],
                 "Created At": stage["created_at"],
             }
             render_data.append(stage_render)

@@ -123,3 +123,24 @@ class PipelinesApiAdapter():
         path = '/pipelines/{0}/stages/{1}/'.format(pipeline_id, stage_id)
 
         return self._call(method, path)
+
+    def create_targetlist(self, pipeline_id, data):
+        method = 'POST'
+        path = '/pipelines/{0}/targetlists/'.format(pipeline_id)
+
+        return self._call(method, path, data)
+
+    def get_stage_target_lists(self, stage_id):
+        method = 'GET'
+        path = '/stages/{0}/targetlists/'.format(stage_id)
+
+        return self._call(method, path)
+
+    def add_stage_target_list(self, stage_id, targetlist_id):
+        method = 'POST'
+        path = '/stages/{0}/targetlists/'.format(stage_id)
+        data = {
+            'target_list_id': targetlist_id,
+        }
+
+        return self._call(method, path, data)
