@@ -4,6 +4,7 @@ from clint.textui import prompt
 from esper.controllers.enums import OutputFormat
 from esper.ext.db_wrapper import DBWrapper
 from esper.ext.utils import validate_creds_exists
+from esper.ext.pipelines_api import PipelinesApiAdapter
 
 class Pipelines(Controller):
     class Meta:
@@ -40,6 +41,16 @@ class Pipelines(Controller):
         environment = db.get_configure().get("environment")
         enterprise_id = db.get_enterprise_id()
 
+        name = self.app.pargs.name
+        if not name:
+            name = prompt.query("Name of the Pipeline: ")
+
+        desc = self.app.pargs.desc
+        if not desc:
+            desc = input("Description for this Pipeline [optional]: ")
+
+        api_key = db.get_configure().get("api_key")
+
 
         data = {
             'foo': 'bar'
@@ -62,13 +73,24 @@ class Pipelines(Controller):
         validate_creds_exists(self.app)
         db = DBWrapper(self.app.creds)
         environment = db.get_configure().get("environment")
-        enterprise_id = db.get_enterprise_id()
 
         pipeline_id = self.app.pargs.pipeline_id
 
-        render_data = {
-            'showing': 'showing all pipelines'
-        }
+        api_key = db.get_configure().get("api_key")
+        adapter = PipelinesApiAdapter(environment, api_key)
+
+        pipelines_list = adapter.get_pipelines()
+
+        render_data = []
+        for pipeline in pipelines_list['content']['results']:
+            pipeline_render = {
+                'Id': pipeline['id'],
+                'Name': pipeline['name'],
+                'Description': pipeline['description'],
+                'Created At': pipeline['created_at'],
+            }
+            render_data.append(pipeline_render)
+
         self.app.render(f"Listing Pipeline! Details: \n")
         self.app.render(render_data, format=OutputFormat.TABULATED.value, headers="keys", tablefmt="plain")
 
