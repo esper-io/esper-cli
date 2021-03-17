@@ -15,6 +15,7 @@ from esper.controllers.enterprise.group import EnterpriseGroup
 from esper.controllers.pipeline.execute import Execution
 from esper.controllers.pipeline.operation import Operation
 from esper.controllers.pipeline.pipeline import Pipeline
+from esper.controllers.pipelines.pipelines import Pipelines
 from esper.controllers.pipeline.stage import Stage
 from esper.controllers.secureadb.secureadb import SecureADB
 from esper.controllers.telemetry.telemetry import Telemetry
@@ -112,6 +113,8 @@ class Esper(App):
             Token,
             Telemetry,
             Pipeline,
+            Pipelines,
+
             Stage,
             Operation,
             Execution,
