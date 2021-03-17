@@ -34,7 +34,6 @@ class Pipelines(Controller):
               'default': None})
         ]
     )
-
     def create(self):
         validate_creds_exists(self.app)
         db = DBWrapper(self.app.creds)
@@ -79,10 +78,15 @@ class Pipelines(Controller):
         api_key = db.get_configure().get("api_key")
         adapter = PipelinesApiAdapter(environment, api_key)
 
-        pipelines_list = adapter.get_pipelines()
+        pipelines_list = []
+        if pipeline_id:
+            pipeline = adapter.get_pipeline(pipeline_id)
+            pipelines_list.append(pipeline['content'])
+        else:
+            pipelines_list = adapter.get_pipelines()['content']['results']
 
         render_data = []
-        for pipeline in pipelines_list['content']['results']:
+        for pipeline in pipelines_list:
             pipeline_render = {
                 'Id': pipeline['id'],
                 'Name': pipeline['name'],
