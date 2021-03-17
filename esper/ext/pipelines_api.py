@@ -117,3 +117,9 @@ class PipelinesApiAdapter():
         path = '/pipelines/{0}/stages/'.format(pipeline_id)
 
         return self._call(method, path, data)
+
+    def delete_stage(self, pipeline_id, stage_id):
+        method = 'DELETE'
+        path = '/pipelines/{0}/stages/{1}/'.format(pipeline_id, stage_id)
+
+        return self._call(method, path)

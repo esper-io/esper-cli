@@ -107,3 +107,35 @@ class Stage(Controller):
 
         self.app.render(f"Listing Stages for the Pipeline! Details: \n")
         self.app.render(render_data, format=OutputFormat.TABULATED.value, headers="keys", tablefmt="plain")
+
+    @ex(
+        help='Remove a Stage',
+        arguments=[
+            (['-s', '--stage-id'],
+             {'help': 'Stage ID',
+              'action': 'store',
+              'dest': 'stage_id',
+              'default': None})
+        ]
+    )
+    def remove(self):
+        validate_creds_exists(self.app)
+        db = DBWrapper(self.app.creds)
+        environment = db.get_configure().get("environment")
+        api_key = db.get_configure().get("api_key")
+        adapter = PipelinesApiAdapter(environment, api_key)
+
+        stage_id = self.app.pargs.stage_id
+        if not stage_id:
+            self.app.render('Missing arguments! Provide a stage id to delete.')
+            return
+
+        pipeline = db.get_pipeline()
+        if pipeline is None or pipeline.get('id') is None:
+            self.app.log.debug('[pipeline-active] There is no active pipeline.')
+            self.app.render('There is no active pipeline. Please set an active pipeline before getting a Stage')
+            return
+
+        adapter.delete_stage(pipeline['id'], stage_id)
+
+        self.app.render(f"Deleted Stage Successfully! \n")
