@@ -97,3 +97,26 @@ class DBWrapper:
     def unset_group(self):
         Group = Query()
         self.db.remove(Group.group.exists())
+
+    def set_pipeline(self, pipeline):
+        Pipeline = Query()
+
+        if self.db.get(Pipeline.pipeline.exists()):
+            self.db.remove(Pipeline.pipeline.exists())
+
+        self.db.insert({'pipeline': pipeline})
+
+    def get_pipeline(self):
+        Pipeline = Query()
+
+        db_result = self.db.get(Pipeline.pipeline.exists())
+
+        pipeline = None
+        if db_result:
+            pipeline = db_result['pipeline']
+
+        return pipeline
+
+    def unset_pipeline(self):
+        Pipeline = Query()
+        self.db.remove(Pipeline.pipeline.exists())

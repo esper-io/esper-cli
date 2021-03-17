@@ -99,6 +99,64 @@ class Pipelines(Controller):
         self.app.render(render_data, format=OutputFormat.TABULATED.value, headers="keys", tablefmt="plain")
 
     @ex(
+        help='Set or show the active Pipeline',
+        arguments=[
+            (['-id', '--pipeline-id'],
+             {'help': 'Pipeline id.',
+              'action': 'store',
+              'dest': 'pipeline_id'}),
+        ]
+    )
+    def set_active(self):
+        validate_creds_exists(self.app)
+        db = DBWrapper(self.app.creds)
+
+        environment = db.get_configure().get("environment")
+        api_key = db.get_configure().get("api_key")
+        adapter = PipelinesApiAdapter(environment, api_key)
+
+        pipeline_id = self.app.pargs.pipeline_id
+        if pipeline_id:
+            pipeline = adapter.get_pipeline(pipeline_id)
+            if not pipeline:
+                self.app.render(f'Pipeline does not exist with ID {pipeline_id} \n')
+                return
+
+            db.set_pipeline(
+                {
+                    'id': pipeline['content']['id'],
+                    'name': pipeline['content']['name'],
+                }
+            )
+        else:
+            pipeline = db.get_pipeline()
+            if pipeline is None or pipeline.get('id') is None:
+                self.app.log.debug('[pipeline-active] There is no active pipeline.')
+                self.app.render('There is no active pipeline.')
+                return
+
+            pipeline_id = pipeline.get('id')
+
+        self.app.render(f'Active Pipeline ID {pipeline_id} \n')
+
+    @ex(
+        help='Unset the current active pipeline',
+        arguments=[]
+    )
+    def unset_active(self):
+        validate_creds_exists(self.app)
+        db = DBWrapper(self.app.creds)
+
+        pipeline = db.get_pipeline()
+        if pipeline is None or pipeline.get('id') is None:
+            self.app.log.debug('[pipeline-active] There is no active pipeline.')
+            self.app.render('There is no active pipeline.')
+            return
+
+        db.unset_pipeline()
+        self.app.render(f"Unset the active pipeline \n")
+
+    @ex(
         help='Remove a Pipeline',
         arguments=[
             (['-p', '--pipeline-id'],
