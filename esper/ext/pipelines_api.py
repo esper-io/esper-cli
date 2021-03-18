@@ -220,3 +220,27 @@ class PipelinesApiAdapter():
         path = '/operationlists/{0}/operations/{1}/'.format(operationlist_id, operation_id)
 
         return self._call(method, path)
+
+    def get_pipeline_runs(self, pipeline_id):
+        method = 'GET'
+        path = '/pipelines/{0}/runs/'.format(pipeline_id)
+
+        return self._call(method, path)
+
+    def get_pipeline_run(self, pipeline_id, run_id):
+        method = 'GET'
+        path = '/pipelines/{0}/runs/{1}/'.format(pipeline_id, run_id)
+
+        return self._call(method, path)
+
+    def get_pipeline_run_stage_runs(self, run_id):
+        method = 'GET'
+        path = '/runs/{0}/stageruns/'.format(run_id)
+
+        return self._call(method, path)
+
+    def get_stage_run_target_runs(self, stage_run_id):
+        method = 'GET'
+        path = '/stageruns/{0}/targetruns/'.format(stage_run_id)
+
+        return self._call(method, path)
