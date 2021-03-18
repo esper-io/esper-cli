@@ -17,7 +17,8 @@ class PipelinesApiAdapter():
 
     def __init__(self, environment, api_key):
         self.base_url = 'https://{0}-api.esper.cloud/api/pipelines/v0'.format(environment)
-        self.headers['Authorization'] = 'Bearer {0}'.format(api_key)
+        self.headers['Authorization'] = 'Token {0}'.format(api_key)
+
 
     def _call(self, method, path, data={}):
         error_message = None
@@ -124,9 +125,27 @@ class PipelinesApiAdapter():
 
         return self._call(method, path)
 
+    def get_targetlist(self, pipeline_id, targetlist_id):
+        method = 'GET'
+        path = '/pipelines/{0}/targetlists/{1}/'.format(pipeline_id, targetlist_id)
+
+        return self._call(method, path)
+
     def create_targetlist(self, pipeline_id, data):
         method = 'POST'
         path = '/pipelines/{0}/targetlists/'.format(pipeline_id)
+
+        return self._call(method, path, data)
+
+    def add_targetlist_device(self, pipeline_id, targetlist_id, data):
+        method = 'POST'
+        path = '/pipelines/{0}/targetlists/{1}/targets/'.format(pipeline_id, targetlist_id)
+
+        return self._call(method, path, data)
+
+    def add_targetlist_device_group(self, pipeline_id, targetlist_id, data):
+        method = 'POST'
+        path = '/pipelines/{0}/targetlists/{1}/devicegroups/'.format(pipeline_id, targetlist_id)
 
         return self._call(method, path, data)
 
@@ -150,3 +169,36 @@ class PipelinesApiAdapter():
         path = '/stages/{0}/targetlists/{1}/'.format(stage_id, targetlist_id)
 
         return self._call(method, path)
+
+    def get_targetlist_targets(self, pipeline_id, targetlist_id):
+        method = 'GET'
+        path = '/pipelines/{0}/targetlists/{1}/targets/'.format(pipeline_id, targetlist_id)
+
+        return self._call(method, path)
+
+    def get_targetlist_devicegroups(self, pipeline_id, targetlist_id):
+        method = 'GET'
+        path = '/pipelines/{0}/targetlists/{1}/devicegroups/'.format(pipeline_id, targetlist_id)
+
+        return self._call(method, path)
+
+    def get_targetlist_devicegroup_devices(self, pipeline_id, targetlist_id, devicegroup_id):
+        method = 'GET'
+        path = '/pipelines/{0}/targetlists/{1}/devicegroups/{2}/devices/'.format(pipeline_id, targetlist_id, devicegroup_id)
+        data = {
+            'offset': 0,
+            'limit': 10,
+        }
+
+        result = []
+        next_page = True
+        while next_page:
+            response = self._call(method, path, data)
+            result.extend(response['content']['results'])
+
+            if not response['content']['next']:
+                next_page = False
+            else:
+                data['offset'] = data['limit'] * (data['offset'] + 1)
+
+        return result

@@ -19,6 +19,20 @@ class Pipelines(Controller):
         stacked_type = 'nested'
         stacked_on = 'base'
 
+    def _configure_auth_token(self):
+        validate_creds_exists(self.app)
+        db = DBWrapper(self.app.creds)
+        auth_token = db.get_auth_token()
+        if auth_token is None or auth_token.get('auth_token') is None:
+            self.app.log.debug('[pipeline-token] There is no auth token.')
+
+            new_auth_token = prompt.query("Auth token Id: ")
+            db.set_auth_token(
+                {
+                    'auth_token': new_auth_token,
+                }
+            )
+
     @ex(
         help='Create a pipeline',
         arguments=[
@@ -38,8 +52,9 @@ class Pipelines(Controller):
         validate_creds_exists(self.app)
         db = DBWrapper(self.app.creds)
         environment = db.get_configure().get("environment")
-        api_key = db.get_configure().get("api_key")
-        adapter = PipelinesApiAdapter(environment, api_key)
+        self._configure_auth_token()
+        auth_token = db.get_auth_token()
+        adapter = PipelinesApiAdapter(environment, auth_token['auth_token'])
 
         name = self.app.pargs.name
         if not name:
@@ -82,8 +97,9 @@ class Pipelines(Controller):
         validate_creds_exists(self.app)
         db = DBWrapper(self.app.creds)
         environment = db.get_configure().get("environment")
-        api_key = db.get_configure().get("api_key")
-        adapter = PipelinesApiAdapter(environment, api_key)
+        self._configure_auth_token()
+        auth_token = db.get_auth_token()
+        adapter = PipelinesApiAdapter(environment, auth_token['auth_token'])
 
         pipeline_id = self.app.pargs.pipeline_id
 
@@ -120,8 +136,9 @@ class Pipelines(Controller):
         validate_creds_exists(self.app)
         db = DBWrapper(self.app.creds)
         environment = db.get_configure().get("environment")
-        api_key = db.get_configure().get("api_key")
-        adapter = PipelinesApiAdapter(environment, api_key)
+        self._configure_auth_token()
+        auth_token = db.get_auth_token()
+        adapter = PipelinesApiAdapter(environment, auth_token['auth_token'])
 
         pipeline_id = self.app.pargs.pipeline_id
         if pipeline_id:
@@ -178,8 +195,9 @@ class Pipelines(Controller):
         validate_creds_exists(self.app)
         db = DBWrapper(self.app.creds)
         environment = db.get_configure().get("environment")
-        api_key = db.get_configure().get("api_key")
-        adapter = PipelinesApiAdapter(environment, api_key)
+        self._configure_auth_token()
+        auth_token = db.get_auth_token()
+        adapter = PipelinesApiAdapter(environment, auth_token['auth_token'])
 
         pipeline_id = self.app.pargs.pipeline_id
         if not pipeline_id:

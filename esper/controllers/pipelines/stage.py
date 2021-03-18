@@ -38,8 +38,8 @@ class Stage(Controller):
         validate_creds_exists(self.app)
         db = DBWrapper(self.app.creds)
         environment = db.get_configure().get("environment")
-        api_key = db.get_configure().get("api_key")
-        adapter = PipelinesApiAdapter(environment, api_key)
+        auth_token = db.get_auth_token()
+        adapter = PipelinesApiAdapter(environment, auth_token['auth_token'])
 
         pipeline = db.get_pipeline()
         if pipeline is None or pipeline.get('id') is None:
@@ -83,8 +83,8 @@ class Stage(Controller):
         validate_creds_exists(self.app)
         db = DBWrapper(self.app.creds)
         environment = db.get_configure().get("environment")
-        api_key = db.get_configure().get("api_key")
-        adapter = PipelinesApiAdapter(environment, api_key)
+        auth_token = db.get_auth_token()
+        adapter = PipelinesApiAdapter(environment, auth_token['auth_token'])
 
         pipeline = db.get_pipeline()
         if pipeline is None or pipeline.get('id') is None:
@@ -122,8 +122,8 @@ class Stage(Controller):
         validate_creds_exists(self.app)
         db = DBWrapper(self.app.creds)
         environment = db.get_configure().get("environment")
-        api_key = db.get_configure().get("api_key")
-        adapter = PipelinesApiAdapter(environment, api_key)
+        auth_token = db.get_auth_token()
+        adapter = PipelinesApiAdapter(environment, auth_token['auth_token'])
 
         stage_id = self.app.pargs.stage_id
         if not stage_id:

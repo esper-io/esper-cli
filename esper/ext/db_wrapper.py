@@ -120,3 +120,26 @@ class DBWrapper:
     def unset_pipeline(self):
         Pipeline = Query()
         self.db.remove(Pipeline.pipeline.exists())
+
+    def unset_pipeline(self):
+        Pipeline = Query()
+        self.db.remove(Pipeline.pipeline.exists())
+
+    def set_auth_token(self, auth_token):
+        AuthToken = Query()
+
+        if self.db.get(AuthToken.auth_token.exists()):
+            self.db.remove(AuthToken.auth_token.exists())
+
+        self.db.insert({'auth_token': auth_token})
+
+    def get_auth_token(self):
+        AuthToken = Query()
+
+        db_result = self.db.get(AuthToken.auth_token.exists())
+
+        auth_token = None
+        if db_result:
+            auth_token = db_result['auth_token']
+
+        return auth_token
