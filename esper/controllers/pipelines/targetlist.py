@@ -7,10 +7,6 @@ from esper.ext.pipelines_api import PipelinesApiAdapter
 from esper.ext.utils import validate_creds_exists
 
 class TargetList(Controller):
-    # TODO
-    # - add "targetlist add --type = device|group|collection, --id = <id>"
-    #   - should either create a target, targetlistdevicegroup, or targetlistcollection
-    # - update show command to show the devices/groups/collections in the target list
 
     class Meta:
         label = 'targetlist'

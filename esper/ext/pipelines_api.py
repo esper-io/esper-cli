@@ -202,3 +202,21 @@ class PipelinesApiAdapter():
                 data['offset'] = data['limit'] * (data['offset'] + 1)
 
         return result
+
+    def get_stage_operationlists(self, stage_id):
+        method = 'GET'
+        path = '/stages/{0}/operationlists/'.format(stage_id)
+
+        return self._call(method, path)
+
+    def get_operationlist_operations(self, operation_list_id):
+        method = 'GET'
+        path = '/operationlists/{0}/operations/'.format(operation_list_id)
+
+        return self._call(method, path)
+
+    def get_operationlist_operation(self, operationlist_id, operation_id):
+        method = 'GET'
+        path = '/operationlists/{0}/operations/{1}/'.format(operationlist_id, operation_id)
+
+        return self._call(method, path)
