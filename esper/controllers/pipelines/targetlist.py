@@ -7,6 +7,12 @@ from esper.ext.pipelines_api import PipelinesApiAdapter
 from esper.ext.utils import validate_creds_exists
 
 class TargetList(Controller):
+    # TODO
+    # - add target list remove command to delete targetlist from stage and completely too
+    # - add "targetlist add --type = device|group|collection, --id = <id>"
+    #   - should either create a target, targetlistdevicegroup, or targetlistcollection
+    # - update show command to show the devices/groups/collections in the target list
+
     class Meta:
         label = 'targetlist'
 
@@ -120,7 +126,7 @@ class TargetList(Controller):
         for targetlist in targetlists:
             targetlist_render = {
                 'Id': targetlist['id'],
-                'Pipeline': targetlist['pipeline_id'],
+                'Stage': stage_id,
                 'Name': targetlist['name'],
                 'Created At': targetlist['created_at'],
             }
@@ -128,3 +134,45 @@ class TargetList(Controller):
 
         self.app.render(f"Listing targetlists for the Stage! Details: \n")
         self.app.render(render_data, format=OutputFormat.TABULATED.value, headers="keys", tablefmt="plain")
+
+    @ex(
+        help='Remove a Target List',
+        arguments=[
+            (['-s', '--stage'],
+             {'help': 'Stage to attach this list to',
+              'action': 'store',
+              'dest': 'stage',
+              'default': None}),
+            (['-t', '--targetlist-id'],
+             {'help': 'Targetlist ID',
+              'action': 'store',
+              'dest': 'targetlist_id',
+              'default': None})
+        ]
+    )
+    def remove(self):
+        validate_creds_exists(self.app)
+        db = DBWrapper(self.app.creds)
+        environment = db.get_configure().get("environment")
+        api_key = db.get_configure().get("api_key")
+        adapter = PipelinesApiAdapter(environment, api_key)
+
+        stage_id = self.app.pargs.stage
+        if not stage_id:
+            self.app.render('Missing arguments! Provide a stage id to delete. ')
+            stage_id = input("Id of the Stage: ")
+
+        targetlist_id = self.app.pargs.targetlist_id
+        if not targetlist_id:
+            self.app.render('Missing arguments! Provide a targetlist id to delete. ')
+            targetlist_id = input("Id of the Targetlist: ")
+
+        pipeline = db.get_pipeline()
+        if pipeline is None or pipeline.get('id') is None:
+            self.app.log.debug('[pipeline-active] There is no active pipeline.')
+            self.app.render('There is no active pipeline. Please set an active pipeline before deleting a target list')
+            return
+
+        adapter.delete_stage_target_list(stage_id, targetlist_id)
+
+        self.app.render(f"Deleted Targetlist from stage Successfully! \n")
