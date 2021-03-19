@@ -50,10 +50,9 @@ class TargetRuns(Controller):
             stage_run_id = input("Id of the Stage run: ")
 
         result = adapter.get_stage_run_target_runs(stage_run_id)
-        result = result['content']['results']
-
         for target_run in result:
             target_run_render = {
+                'Target Id': target_run['target_id'],
                 'Status': target_run['status'],
                 'Command Status': target_run['command_status'],
                 'Command Info': target_run['command_meta'],

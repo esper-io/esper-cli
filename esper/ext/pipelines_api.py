@@ -199,7 +199,7 @@ class PipelinesApiAdapter():
             if not response['content']['next']:
                 next_page = False
             else:
-                data['offset'] = data['limit'] * (data['offset'] + 1)
+                data['offset'] = data['offset'] + data['limit']
 
         return result
 
@@ -243,4 +243,21 @@ class PipelinesApiAdapter():
         method = 'GET'
         path = '/stageruns/{0}/targetruns/'.format(stage_run_id)
 
-        return self._call(method, path)
+        data = {
+            'offset': 0,
+            'limit': 10,
+        }
+
+        result = []
+        next_page = True
+        while next_page:
+            response = self._call(method, path, data)
+
+            result.extend(response['content']['results'])
+
+            if not response['content']['next']:
+                next_page = False
+            else:
+                data['offset'] = data['offset'] + data['limit']
+
+        return result
