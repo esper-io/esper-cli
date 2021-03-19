@@ -209,14 +209,32 @@ class PipelinesApiAdapter():
 
         return self._call(method, path)
 
+    def create_stage_operationlist(self, stage_id, data):
+        method = 'POST'
+        path = '/stages/{0}/operationlists/'.format(stage_id, data)
+
+        return self._call(method, path)
+
     def get_operationlist_operations(self, operation_list_id):
         method = 'GET'
         path = '/operationlists/{0}/operations/'.format(operation_list_id)
 
         return self._call(method, path)
 
+    def create_operationlist_operation(self, operation_list_id, data):
+        method = 'POST'
+        path = '/operationlists/{0}/operations/'.format(operation_list_id, data)
+
+        return self._call(method, path, data)
+
     def get_operationlist_operation(self, operationlist_id, operation_id):
         method = 'GET'
+        path = '/operationlists/{0}/operations/{1}/'.format(operationlist_id, operation_id)
+
+        return self._call(method, path)
+
+    def delete_operationlist_operation(self, operationlist_id, operation_id):
+        method = 'DELETE'
         path = '/operationlists/{0}/operations/{1}/'.format(operationlist_id, operation_id)
 
         return self._call(method, path)
