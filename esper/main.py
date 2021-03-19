@@ -16,6 +16,13 @@ from esper.controllers.pipeline.execute import Execution
 from esper.controllers.pipeline.operation import Operation
 from esper.controllers.pipeline.pipeline import Pipeline
 from esper.controllers.pipeline.stage import Stage
+from esper.controllers.pipelines.pipelines import Pipelines
+from esper.controllers.pipelines.stage import Stage as PipelinesStage
+from esper.controllers.pipelines.targetlist import TargetList
+from esper.controllers.pipelines.operation import Operations
+from esper.controllers.pipelines.runs import Runs
+from esper.controllers.pipelines.stage_runs import StageRuns
+from esper.controllers.pipelines.target_runs import TargetRuns
 from esper.controllers.secureadb.secureadb import SecureADB
 from esper.controllers.telemetry.telemetry import Telemetry
 from esper.controllers.token.token import Token
@@ -112,13 +119,18 @@ class Esper(App):
             SecureADB,
             Token,
             Telemetry,
-            Pipeline,
-            Stage,
-            Operation,
-            Execution,
+
             Content,
             CommandsV2,
-            Collection
+            Collection,
+
+            Pipelines,
+            PipelinesStage,
+            TargetList,
+            Operations,
+            Runs,
+            StageRuns,
+            TargetRuns,
         ]
 
         # hooks
