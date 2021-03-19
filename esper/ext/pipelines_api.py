@@ -211,9 +211,9 @@ class PipelinesApiAdapter():
 
     def create_stage_operationlist(self, stage_id, data):
         method = 'POST'
-        path = '/stages/{0}/operationlists/'.format(stage_id, data)
+        path = '/stages/{0}/operationlists/'.format(stage_id)
 
-        return self._call(method, path)
+        return self._call(method, path, data)
 
     def get_operationlist_operations(self, operation_list_id):
         method = 'GET'
@@ -245,17 +245,36 @@ class PipelinesApiAdapter():
 
         return self._call(method, path)
 
+    def create_pipeline_run(self, pipeline_id):
+        method = 'POST'
+        data = {}
+        path = '/pipelines/{0}/runs/'.format(pipeline_id, data)
+
+        return self._call(method, path)
+
     def get_pipeline_run(self, pipeline_id, run_id):
         method = 'GET'
         path = '/pipelines/{0}/runs/{1}/'.format(pipeline_id, run_id)
 
         return self._call(method, path)
 
+    def update_pipeline_run(self, pipeline_id, run_id, data):
+        method = 'PUT'
+        path = '/pipelines/{0}/runs/{1}/'.format(pipeline_id, run_id)
+
+        return self._call(method, path, data)
+
     def get_pipeline_run_stage_runs(self, run_id):
         method = 'GET'
         path = '/runs/{0}/stageruns/'.format(run_id)
 
         return self._call(method, path)
+
+    def update_pipeline_run_stage_runs(self, run_id, stage_run_id, data):
+        method = 'PUT'
+        path = '/runs/{0}/stageruns/{1}/'.format(run_id, stage_run_id)
+
+        return self._call(method, path, data)
 
     def get_stage_run_target_runs(self, stage_run_id):
         method = 'GET'

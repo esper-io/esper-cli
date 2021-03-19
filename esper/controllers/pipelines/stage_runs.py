@@ -56,10 +56,121 @@ class StageRuns(Controller):
             stage_render = {
                 'Run Number': stage_run['run_number'],
                 'Status': stage_run['status'],
-                'Id': stage_run['id'],
+                'Stage Run Id': stage_run['id'],
+                'Pipeline Run': stage_run['pipeline_run_id'],
                 'Created At': stage_run['created_at'],
                 }
             render_data.append(stage_render)
+
+        self.app.render(f"Listing runs for the Pipeline! Details: \n")
+        self.app.render(render_data, format=OutputFormat.TABULATED.value, headers="keys", tablefmt="plain")
+
+    @ex(
+        help='Promote a stage run',
+        arguments=[
+            (['-p', '--pipeline-run'],
+             {'help': 'pipeline run id',
+              'action': 'store',
+              'dest': 'run',
+              'default': None}),
+            (['-s', '--stage-run'],
+             {'help': 'stage run id',
+              'action': 'store',
+              'dest': 'stage_run',
+              'default': None}),
+        ]
+    )
+    def promote(self):
+        validate_creds_exists(self.app)
+        db = DBWrapper(self.app.creds)
+        environment = db.get_configure().get("environment")
+        auth_token = db.get_auth_token()
+        adapter = PipelinesApiAdapter(environment, auth_token['auth_token'])
+
+        pipeline = db.get_pipeline()
+        if pipeline is None or pipeline.get('id') is None:
+            self.app.log.debug('[pipeline-active] There is no active pipeline.')
+            self.app.render('There is no active pipeline. Please set an active pipeline before getting a Stage')
+            return
+
+        pipeline_run_id = self.app.pargs.run
+        if not pipeline_run_id:
+            pipeline_run_id = input("Id of the Pipeline run: ")
+
+        stage_run_id = self.app.pargs.stage_run
+        if not stage_run_id:
+            stage_run_id = input("Id of the Stage run: ")
+
+        promote_data = {
+            'status': 'QUEUED'
+        }
+
+        result = adapter.update_pipeline_run_stage_runs(pipeline_run_id, stage_run_id, promote_data)
+        stage_run = result['content']
+
+        render_data = []
+        stage_run_render = {
+            'Run Number': stage_run['run_number'],
+            'Status': stage_run['status'],
+            'Id': stage_run['id'],
+            'Created At': stage_run['created_at'],
+            }
+        render_data.append(stage_run_render)
+
+        self.app.render(f"Listing runs for the Pipeline! Details: \n")
+        self.app.render(render_data, format=OutputFormat.TABULATED.value, headers="keys", tablefmt="plain")
+
+    @ex(
+        help='Cancel a stage run',
+        arguments=[
+            (['-s', '--stage-run'],
+             {'help': 'stage run id',
+              'action': 'store',
+              'dest': 'stage_run',
+              'default': None}),
+            (['-p', '--pipeline-run'],
+             {'help': 'pipeline run id',
+              'action': 'store',
+              'dest': 'run',
+              'default': None}),
+        ]
+    )
+    def cancel(self):
+        validate_creds_exists(self.app)
+        db = DBWrapper(self.app.creds)
+        environment = db.get_configure().get("environment")
+        auth_token = db.get_auth_token()
+        adapter = PipelinesApiAdapter(environment, auth_token['auth_token'])
+
+        pipeline = db.get_pipeline()
+        if pipeline is None or pipeline.get('id') is None:
+            self.app.log.debug('[pipeline-active] There is no active pipeline.')
+            self.app.render('There is no active pipeline. Please set an active pipeline before getting a Stage')
+            return
+
+        pipeline_run_id = self.app.pargs.run
+        if not pipeline_run_id:
+            pipeline_run_id = input("Id of the Pipeline run: ")
+
+        stage_run_id = self.app.pargs.stage_run
+        if not stage_run_id:
+            stage_run_id = input("Id of the Stage run: ")
+
+        promote_data = {
+            'status': 'CANCELLED'
+        }
+
+        result = adapter.update_pipeline_run_stage_runs(pipeline_run_id, stage_run_id, promote_data)
+        stage_run = result['content']
+
+        render_data = []
+        stage_run_render = {
+            'Run Number': stage_run['run_number'],
+            'Status': stage_run['status'],
+            'Id': stage_run['id'],
+            'Created At': stage_run['created_at'],
+            }
+        render_data.append(stage_run_render)
 
         self.app.render(f"Listing runs for the Pipeline! Details: \n")
         self.app.render(render_data, format=OutputFormat.TABULATED.value, headers="keys", tablefmt="plain")

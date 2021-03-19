@@ -8,7 +8,7 @@ from esper.ext.utils import validate_creds_exists
 
 class Stage(Controller):
     class Meta:
-        label = 'stage'
+        label = 'stages'
 
         # text displayed at the top of --help output
         description = 'Pipeline Stage commands'
@@ -27,7 +27,7 @@ class Stage(Controller):
               'action': 'store',
               'dest': 'name',
               'default': None}),
-            (['--desc'],
+            (['--description'],
              {'help': 'Stage Description',
               'action': 'store',
               'dest': 'desc',

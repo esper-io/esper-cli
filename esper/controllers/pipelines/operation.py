@@ -48,9 +48,18 @@ class Operations(Controller):
             stage_id = input("Id of the Stage: ")
 
         operationlists = adapter.get_stage_operationlists(stage_id)
-        operationlist = operationlists['content']['results'][0]
 
+        if not operationlists['content']['results']:
+            self.app.render('No operations exist for the stage')
+            return
+
+        operationlist = operationlists['content']['results'][0]
         operations = adapter.get_operationlist_operations(operationlist['id'])
+
+        if not operations['content']['results']:
+            self.app.render('No operations exist for the stage')
+            return
+
         operations = operations['content']['results']
 
         render_data = []
@@ -140,7 +149,7 @@ class Operations(Controller):
             app_name = input("App Name(optional) e.g. Road Runner: ")
 
         operationlists = adapter.get_stage_operationlists(stage_id)
-        operationlist = operationlists['content']['results'][0]
+        operationlist = operationlists['content']['results']
         if not operationlist:
             # create operation list
             operationlist_data = {
@@ -150,6 +159,8 @@ class Operations(Controller):
             }
             operationlist = adapter.create_stage_operationlist(stage_id, operationlist_data)
             operationlist = operationlist['content']
+        else:
+            operationlist = operationlist[0]
 
         operations = adapter.get_operationlist_operations(operationlist['id'])
         if operations['content']['count'] > 0:
