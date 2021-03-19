@@ -2410,3 +2410,39 @@ Created On     2020-10-21 14:07:27.601095+00:00
 We are always in active development and we try our best to keep our documentation up to date. However, if you end up ahead of time you can check our latest documentation on [Github](https://github.com/esper-io/esper-cli).
 
 If you face any issue with CLI usage, we recommend you to reach out to [Esper Dev Support](https://docs.esper.io/home/support.html)
+
+### **Collection**
+Collection is the ability to dynamically fetch a set of devices based on a query. The query will span across static and dynamic attributes of devices including apps and telemetry.
+
+```sh
+$ espercli eql [SUB-COMMANDS]
+```
+#### Sub commands
+#### 1. search
+Command to query the devices in an entrprise.
+```sh
+$ espercli eql search [OPTIONS] [eql query]
+```
+##### Options
+| Name, shorthand     | Default| Description|
+| ------------------- |:------:|:----------|
+| --json, -j          |        | Render result in JSON format |
+
+##### Example
+```sh
+$ espercli eql search 'software.android_version IN ("8.1.0", "9") AND status:"offline"'
+Number of Devices: 1118
+
+DEVICE         GROUP                  BRAND        DPC Version    STATE                           STATUS
+DEV-ELOP-0E5M  Ayush                  google       v7.3.0         POLICY_APPLICATION_IN_PROGRESS  offline
+DEV-ELOP-FXVD  All devices            Lenovo       v7.4.6374      ACTIVE                          offline
+DEV-ELOP-L31G  12125364365etc         google       v7.0.0         ACTIVE                          offline
+DEV-ELOP-6JJC  12125364365etc         Android-x86  v7.0.5420      ACTIVE                          offline
+DEV-ELOP-X6GV  Jitesh                 ROKiT        v6.0.1735      ACTIVE                          offline
+DEV-ELOP-XKGJ  All devices            motorola     v7.0.5157      ACTIVE                          offline
+DEV-ELOP-2AB8  12125364365etc         vivo         v7.0.0         ACTIVE                          offline
+DEV-ELOP-KQ94  develop_test_schedule  Shoonya      v6.0.1368      ACTIVE                          offline
+DEV-ELOP-1G29  ashok-test             ROKiT        v12.34.0       ACTIVE                          offline
+DEV-ELOP-NWB3  All devices            samsung      v7.3.5997      ACTIVE                          offline
+
+```
