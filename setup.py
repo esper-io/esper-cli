@@ -39,6 +39,6 @@ setup(
         'tabulate>=0.8.3',
         'tinydb>=3.13.0',
         'tqdm>=4.32.1',
-        'pyOpenSSL==19.0.0'
+        'pyOpenSSL==22.0.0'
     ],
 )
