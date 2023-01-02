@@ -660,7 +660,7 @@ class CommandsV2(Controller):
         command_args_ = {
             "app_state": self.app.pargs.app_state,
             "app_version": self.app.pargs.app_version,
-            "custom_settings_config": self.app.pargs.custom_settings_config,
+            "custom_settings_config": json.loads(self.app.pargs.custom_settings_config),
             "device_alias_name": self.app.pargs.device_alias_name,
             "message": self.app.pargs.message,
             "package_name": self.app.pargs.package_name,
