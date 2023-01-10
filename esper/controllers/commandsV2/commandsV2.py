@@ -657,10 +657,19 @@ class CommandsV2(Controller):
                     self.app.render(f"ERROR: {parse_error_message(self.app, e)}")
                     return
 
+        if self.app.pargs.custom_settings_config:
+            try:
+                parsed_custom_config = json.loads(self.app.pargs.custom_settings_config)
+            except Exception as e:
+                self.app.log.error(f"Could not parse JSON, '{self.app.pargs.custom_settings_config}': {e}")
+                self.app.render(f"ERROR: {parse_error_message(self.app, e)}")
+                return
+
+
         command_args_ = {
             "app_state": self.app.pargs.app_state,
             "app_version": self.app.pargs.app_version,
-            "custom_settings_config": json.loads(self.app.pargs.custom_settings_config),
+            "custom_settings_config": parsed_custom_config,
             "device_alias_name": self.app.pargs.device_alias_name,
             "message": self.app.pargs.message,
             "package_name": self.app.pargs.package_name,
