@@ -35,7 +35,7 @@ setup(
         'esperclient>=0.1.2',
         'jinja2>=2.10.1',
         'pyyaml>=5.1',
-        'requests==2.26.0',
+        'requests==2.31.0',
         'tabulate>=0.8.3',
         'tinydb>=3.13.0',
         'tqdm>=4.32.1',
