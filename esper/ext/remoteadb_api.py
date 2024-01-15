@@ -1,6 +1,7 @@
 import time
 from logging import Logger
 from typing import Tuple
+import socket
 
 import requests
 
@@ -104,6 +105,15 @@ def fetch_relay_endpoint(environment: str,
         if is_ok:
             host = remoteadb_session.get("ip")
             port = remoteadb_session.get("client_port")
+            remoteadb_host = remoteadb_session.get("remoteadb_host")
+
+            if remoteadb_host:
+                try:
+                    ip_address = socket.gethostbyname(remoteadb_host)
+                    host = ip_address
+                except socket.error as e:
+                    log.debug(f"[remoteadb-connect] Could not resolve ip address of '{remoteadb_host}', falling back to {host}. Error was: {e}")
+                    raise e
 
             if host and port:
                 port = int(port)
