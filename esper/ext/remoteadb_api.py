@@ -113,7 +113,7 @@ def fetch_relay_endpoint(environment: str,
                     host = ip_address
                 except socket.error as e:
                     log.error(f"[remoteadb-connect] Could not resolve ip address of '{remoteadb_host}'. Error was: {e}")
-                    raise e
+                    raise Exception('Could not resolve ip address of remoteadb host. Please try again later.')
 
             if host and port:
                 port = int(port)
