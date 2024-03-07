@@ -18,6 +18,9 @@ def init_certs(app):
     app.extend('local_cert', fs.abspath(app.config.get('esper', 'local_cert')))
     app.extend('device_cert', fs.abspath(app.config.get('esper', 'device_cert')))
 
+def get_ssh_key(app):
+    return fs.abspath(app.config.get('esper', 'ssh_key'))
+
 
 def cleanup_certs(app):
     '''

@@ -34,6 +34,7 @@ CONFIG['esper']['certs_folder'] = '~/.esper/certs'
 CONFIG['esper']['local_key'] = '~/.esper/certs/local.key'
 CONFIG['esper']['local_cert'] = '~/.esper/certs/local.pem'
 CONFIG['esper']['device_cert'] = '~/.esper/certs/device.pem'
+CONFIG['esper']['ssh_key'] = '~/.ssh/id_rsa.pub'
 
 # meta defaults
 META = init_defaults('log.colorlog')

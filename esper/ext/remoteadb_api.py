@@ -28,7 +28,7 @@ def get_remoteadb_url(environment: str,
     url = f'{host}/api/v0/enterprise/{enterprise_id}/device/{device_id}/remoteadb/'
 
     if remoteadb_id:
-        url = f'{url}{remoteadb_id}'
+        url = f'{url}{remoteadb_id}/'
 
     return url
 
@@ -67,6 +67,50 @@ def get_remoteadb_connection_details(environment: str,
     )
 
     return response.ok, response.json()
+
+def fetch_remotessh_ip(environment: str,
+                        enterprise_id: str,
+                        device_id: str,
+                        remoteadb_id: str,
+                        api_key: str,
+                        log: Logger) -> str:
+    """
+    Poll the remoteadb-connection till state is CONNECTED and fetch the remotessh ip
+    """
+    timeout = 160.0
+    sleeper = exponential_sleep()
+
+    if log:
+        log.debug(f"[remoteadb-connect] Acquiring remotessh ip... [attempting for {timeout}s]...")
+
+    # Start the timer
+    start = time.time()
+
+    # Iterate for given duration
+    while time.time() - start < timeout:
+
+            is_ok, remoteadb_session = get_remoteadb_connection_details(
+                environment, enterprise_id, device_id, remoteadb_id, api_key, log
+            )
+
+            if is_ok:
+                state = remoteadb_session.get("state")
+                log.info(f"[remoteadb-connect] Recieved remotessh state -> {state}")
+                if state == "CONNECTED":
+                    log.info(f"[remoteadb-connect] Recieved remotessh state -> CONNECTED")
+                    ipaddress = remoteadb_session.get("ip")
+                    log.info(f"[remoteadb-connect] Recieved remotessh ip -> {ipaddress}")
+                    if ipaddress:
+                        return ipaddress
+                if state == "FAILED" or state == "CLOSED":
+                    log.error(f"[remoteadb-connect] Failed to connect remotessh")
+                    raise RemoteADBError(f"Failed to initiate remotessh")
+
+            # Retry with exponential backoff
+            next(sleeper)
+
+    # If the method didnt return, then it failed to fetch the details from SCAPI endpoint
+    raise RemoteADBError(f"Failed to acquire remotessh ip in {timeout}  secs")
 
 
 def fetch_relay_endpoint(environment: str,
@@ -177,6 +221,7 @@ def initiate_remoteadb_connection(environment: str,
                                   device_id: str,
                                   api_key: str,
                                   client_cert_path: str,
+                                  public_key_path: str,
                                   log: Logger) -> str:
     """
     Create a Remote ADB session for given enterprise and device, and return its id.
@@ -190,28 +235,40 @@ def initiate_remoteadb_connection(environment: str,
 
     url = get_remoteadb_url(environment, enterprise_id, device_id)
 
-    client_cert = ""
-    with open(client_cert_path, 'rb') as f:
-        client_cert = f.read()
+    data = {}
 
-    # Convert byte stream to utf-8
-    client_cert = client_cert.decode('utf-8')
+    client_cert = ""
+    if client_cert_path:
+        with open(client_cert_path, 'rb') as f:
+            client_cert = f.read()
+
+        # Convert byte stream to utf-8
+        client_cert = client_cert.decode('utf-8')
+
+        data['client_certificate'] = client_cert
+
+    if public_key_path:
+        with open(public_key_path, 'rb') as f:
+            public_key = f.read()
+
+        # Convert byte stream to utf-8
+        public_key = public_key.decode('utf-8')
+
+        data['adb_pub_key'] = public_key
 
     log.debug("Initiating RemoteADB connection...")
     log.debug(f"Creating RemoteADB session at {url}")
 
     response = requests.post(
         url,
-        json={
-            'client_certificate': client_cert
-        },
+        json=data,
         headers={
             'Authorization': f'Bearer {api_key}'
         }
     )
 
     if not response.ok:
-        log.debug(f"[remoteadb-connect] Error in Remote ADB connection. [{response.status_code}] -> {response.content}")
+        log.error(f"[remoteadb-connect] Error in Remote ADB connection. [{response.status_code}] -> {response.content}")
         raise RemoteADBError("Failed to create Remote ADB Connection")
 
     return response.json().get('id')
