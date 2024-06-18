@@ -2,7 +2,7 @@
 from setuptools import setup, find_packages
 
 
-VERSION = "0.0.12"
+VERSION = "0.0.13"
 
 f = open('README.md', 'r', encoding='utf-8', errors='ignore')
 LONG_DESCRIPTION = f.read()
@@ -26,7 +26,7 @@ setup(
         espercli = esper.main:main
     """,
     install_requires=[
-        'pip==20.2.4',
+        'pip==21.1',
         'wheel',
         'cement==3.0.2',
         'clint>=0.5.1',
@@ -34,11 +34,11 @@ setup(
         'crayons>=0.2.0',
         'esperclient>=0.1.2',
         'jinja2>=2.10.1',
-        'pyyaml>=5.1',
-        'requests==2.26.0',
+        'pyyaml>=5.4',
+        'requests==2.32.2',
         'tabulate>=0.8.3',
         'tinydb>=3.13.0',
         'tqdm>=4.32.1',
-        'pyOpenSSL==22.0.0'
+        'pyOpenSSL==24.1.0'
     ],
 )
