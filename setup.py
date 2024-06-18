@@ -34,11 +34,11 @@ setup(
         'crayons>=0.2.0',
         'esperclient>=0.1.2',
         'jinja2>=2.10.1',
-        'pyyaml>=5.1',
+        'pyyaml>=5.4',
         'requests==2.32.2',
         'tabulate>=0.8.3',
         'tinydb>=3.13.0',
         'tqdm>=4.32.1',
-        'pyOpenSSL==22.0.0'
+        'pyOpenSSL==24.1.0'
     ],
 )
