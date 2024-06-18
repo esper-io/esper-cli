@@ -7,7 +7,7 @@ Current stable release versions are
 
     API version: 1.0.0
     SDK version: 0.0.12
-    CLI version: 0.0.10
+    CLI version: 0.0.12
 
 ## Requirements
 
@@ -124,7 +124,7 @@ $ espercli token show [OPTIONS]
 | Name, shorthand| Default| Description|
 | ------------- |:-------------:|:-----|
 | --json, -j     |  | Render result in JSON format |
-
+     
 ##### Example
 ```sh
 $ espercli token show
@@ -139,6 +139,37 @@ Updated On     2019-08-20 08:02:16.640275+00:00
 
 $ espercli token show -j
 {"Enterprise": "f44373cb-1800-43c6-aab3-c81f8b1f435c", "Developer App": "5b4ececb-b446-4f47-9e6f-0b47760763be", "Token": "U1XEFTNS1ujAMK2Q7Gl3hfPclCclhX", "Expires On": ["read", "write", "update", "introspection", "sdk", "register"], "Created On": "2019-08-20 08:02:16.640250+00:00", "Updated On": "2019-08-20 08:02:16.640275+00:00"}%
+```
+
+#### 2. renew
+Renew token
+```sh
+$ espercli token renew [OPTIONS]
+```
+##### Options
+| Name, shorthand     | Default | Description|
+| --------------------|:-------:|:-----------|
+| --developerapp, -d  |         | Developer App Id |       
+| --token, -t         |         | Token to renew |
+| --json, -j          |         | Render result in JSON format |
+
+##### Example
+```sh
+$ espercli token renew -d 5fa87c46-bef7-4c1f-9ca8-ebf022d118b6 -t mzbrCDAKVyHcnNye7zdYuuLVVr22Pm
+
+TITLE          DETAILS
+Id             570
+User           bindya
+Enterprise Id  f44373cb-1800-43c6-aab3-c81f8b1f435c
+Developer App  5fa87c46-bef7-4c1f-9ca8-ebf022d118b6
+Token          hP7CacqL7NJeNIWoSsRoUibHipC4el
+Scope          read write update introspection sdk register
+Created On     2020-10-06 04:29:31.638430+00:00
+Updated On     2020-10-06 04:29:31.638462+00:00
+Expires On     2023-07-03 04:29:31.631839+00:00
+
+$ espercli token renew -d 5fa87c46-bef7-4c1f-9ca8-ebf022d118b6 -t mzbrCDAKVyHcnNye7zdYuuLVVr22Pm -j
+{"Id": "571", "User": "bindya", "Enterprise Id": "f44373cb-1800-43c6-aab3-c81f8b1f435c", "Developer App": "5fa87c46-bef7-4c1f-9ca8-ebf022d118b6", "Token": "xBs7nTgIjmswBKEuYMxVNYBeLa6or5", "Scope": "read write update introspection sdk register", "Created On": "2020-10-06 04:29:53.906764+00:00", "Updated On": "2020-10-06 04:29:53.906934+00:00", "Expires On": "2023-07-03 04:29:53.906020+00:00"}%
 ```
 
 ### **Enterprise**
@@ -324,13 +355,13 @@ Unset the active device SNA-SNL-FZH5
 ```
 
 ### **Group**
-Group used to manage a group like list, show, create and update. Also can list devices in a group, add devices to group, remove devices and set group as active for further commands.
+Group is used to manage a group like list, show, create and update. Also can list devices in a group, add devices to group, remove devices, move a group and set group as active for further commands.
 ```sh
 $ espercli group [SUB-COMMANDS]
 ```
 #### Sub commands
 #### 1. list
-List sub command used to list all groups and can filter results by using different options listed below. Pagination used to limit the number of results, default is 20 results per page.
+List sub command is used to list all groups and can filter results by using different options listed below. Pagination is used to limit the number of results, default is 20 results per page.
 ```sh
 $ espercli group list [OPTIONS]
 ```
@@ -344,15 +375,15 @@ $ espercli group list [OPTIONS]
 
 ##### Example
 ```sh
-$ espercli group list -n 5G
-Number of Groups: 1
-
-ID                                    NAME      DEVICE COUNT
-2e5efca2-7776-442e-a5ef-c2758d4a45a3  5G                   2
+$ espercli group list -n TestBB 
+Number of Groups: 2
+ID                                    NAME      DEVICE COUNT  PARENT ID
+bb6be630-a2fc-4b57-bafa-fdda92433684  TestBB               0  685484fa-eb6a-4ef9-a0f1-63f6febf7ce3
+5fd4e150-7a91-4d73-a379-cac0795bd949  TestBB               0  bb6be630-a2fc-4b57-bafa-fdda92433684
 ```
 
 #### 2. show
-Show the details of the group. Here, `group-name` is required to show group information. 
+Shows the details of the group. Here, `group-name` is required and will return the information of the first group from the response list with the given name. Since nested groups allow the same name in different hierarchy levels, `group-name` and `--groupid` or `-id` option can be given together to show the corresponding group information.
 Use the `--active` or `-a` flag to mark this group as the active group. This will allow you to call further group commands without specifying the group.
 ```sh
 $ espercli group show [OPTIONS] [group-name]
@@ -360,21 +391,36 @@ $ espercli group show [OPTIONS] [group-name]
 ##### Options
 | Name, shorthand | Default| Description|
 | -------------   |:------:|:----------|
-| --active, -a    |        | Set device as active for further device specific commands |
+| --groupid, -id  |        | Group id  |
+| --active, -a    |        | Set group as active for further group specific commands |
 | --json, -j      |        | Render result in JSON format |
 
 ##### Example
 ```sh
-$ espercli group show -a 5G
+$ espercli group show TestBB -a
 
-TITLE         DETAILS
-id            2e5efca2-7776-442e-a5ef-c2758d4a45a3
-name          5G
-device_count  2
+TITLE           DETAILS
+id              bb6be630-a2fc-4b57-bafa-fdda92433684
+name            TestBB
+parent_id       685484fa-eb6a-4ef9-a0f1-63f6febf7ce3
+device_count    0
+path            All devices/TestBB
+children_count  1
+
+$ espercli group show TestBB -id 5fd4e150-7a91-4d73-a379-cac0795bd949 -a
+
+TITLE           DETAILS
+id              5fd4e150-7a91-4d73-a379-cac0795bd949
+name            TestBB
+parent_id       bb6be630-a2fc-4b57-bafa-fdda92433684
+device_count    0
+path            All devices/TestBB/TestBB
+children_count  0
 ```
 
 #### 3. set-active
-The set-active sub command used to set a group as the active group and show the details of the current active group with no options.
+The set-active sub command is used to set a group as the active group and show the details of the current active group with no options. 
+Here, if `--name` or `-n` option is given, the first group from the response list with the given name will be set as the active group. If `--groupid` or `-id` option is also given, the corresponding group will be set as the active group.
 ```sh
 $ espercli group set-active [OPTIONS]
 ```
@@ -382,16 +428,20 @@ $ espercli group set-active [OPTIONS]
 | Name, shorthand | Default| Description|
 | -------------   |:------:|:----------|
 | --name, -n      |        | Group name |
+| --groupid, -id  |        | Group id |
 | --json, -j      |        | Render result in JSON format |
 
 ##### Example
 ```sh
-$ espercli group set-active -n 5G
+$ espercli group set-active -n TestBB -id 5fd4e150-7a91-4d73-a379-cac0795bd949 
 
-TITLE         DETAILS
-id            2e5efca2-7776-442e-a5ef-c2758d4a45a3
-name          5G
-device_count  2
+TITLE           DETAILS
+id              5fd4e150-7a91-4d73-a379-cac0795bd949
+name            TestBB
+parent_id       bb6be630-a2fc-4b57-bafa-fdda92433684
+device_count    0
+path            All devices/TestBB/TestBB
+children_count  0
 ```
 
 #### 4. unset-active
@@ -403,11 +453,11 @@ $ espercli group unset-active
 ##### Example
 ```sh
 $ espercli group unset-active
-Unset the active group 5G
+Unset the active group with id: bb6be630-a2fc-4b57-bafa-fdda92433684 and name: TestBB
 ```
 
 #### 5. create
-Create new group.
+Create a new group.
 ```sh
 $ espercli group create [OPTIONS]
 ```
@@ -415,20 +465,25 @@ $ espercli group create [OPTIONS]
 | Name, shorthand | Default| Description|
 | -------------   |:------:|:----------|
 | --name, -n      |        | Group name |
+| --parentid, -pid|        | Parent id  |
 | --json, -j      |        | Render result in JSON format |
 
 ##### Example
 ```sh
-$ espercli group create -n 5G
+$ espercli group create -n Test-BB -pid bb6be630-a2fc-4b57-bafa-fdda92433684
 
-TITLE         DETAILS
-id            2e5efca2-7776-442e-a5ef-c2758d4a45a3
-name          5G
-device_count  0
+TITLE           DETAILS
+id              69f5f7ac-c182-4f31-a6bc-f895bdc44a70
+name            Test-BB
+parent_id       bb6be630-a2fc-4b57-bafa-fdda92433684
+device_count    0
+path            All devices/TestBB/Test-BB
+children_count  0
 ```
 
 #### 6. update
 Modify group information.
+Here, if `group-name` is given, the first group from the response list with the given name will be modified. If `--groupid` or `-id` option is also given, the corresponding group will be modified.
 ```sh
 $ espercli group update [OPTIONS] [group-name]
 ```
@@ -436,32 +491,41 @@ $ espercli group update [OPTIONS] [group-name]
 | Name, shorthand | Default| Description|
 | -------------   |:------:|:----------|
 | --name, -n      |        | Group new name |
+| --groupid, -id  |        | Group id       |
 | --json, -j      |        | Render result in JSON format |
 
 ##### Example
 ```sh
-$ espercli group update -n 4G 5G
+espercli group update TestBB -id 5fd4e150-7a91-4d73-a379-cac0795bd949 -n TestB
 
-TITLE         DETAILS
-id            2e5efca2-7776-442e-a5ef-c2758d4a45a3
-name          4G
-device_count  2
+TITLE           DETAILS
+id              5fd4e150-7a91-4d73-a379-cac0795bd949
+name            TestB
+parent_id       bb6be630-a2fc-4b57-bafa-fdda92433684
+device_count    0
+path            All devices/TestB/TestBB
+children_count  0
 ```
 
 #### 7. delete
-Remove particular group.
+Remove particular group. Here, if `group-name` is given, the first group from the response list with the given name will be removed. If `--groupid` or `-id` option is also given, the corresponding group will be removed.
 ```sh
-$ espercli group delete [group-name]
+$ espercli group delete [OPTIONS] [group-name] 
 ```
+##### Options
+| Name, shorthand | Default| Description|
+| -------------   |:------:|:----------|
+| --groupid, -id  |        | Group id  |
 
 ##### Example
 ```sh
-$ espercli group delete 5G
-Group with name 5G deleted successfully
+$ espercli group delete -id 69f5f7ac-c182-4f31-a6bc-f895bdc44a70 Test-BB
+Group with name Test-BB deleted successfully
 ```
 
 #### 8. add
-Add devices into a group, active group is used to add devices if `--group` or `-g` option is not given explicitly.
+Add devices into a group, active group is used to add devices if `--group` or `-g` option is not given explicitly. A maximum of 1000 devices can be added at a time.
+Here, if `--group` or `-g` is given, devices will be added to the first group from the response list with the given name. If `--groupid` or `-id` is also given, then devices will be added to corresponding group.
 ```sh
 $ espercli group add [OPTIONS]
 ```
@@ -469,21 +533,26 @@ $ espercli group add [OPTIONS]
 | Name, shorthand | Default| Description|
 | -------------   |:------:|:----------|
 | --group, -g     |        | Group name |
+| --groupid, -id  |        | Group id   |
 | --devices, -d   |        | List of device names, list format is space separated |
 | --json, -j      |        | Render result in JSON format |
 
 ##### Example
 ```sh
-$ espercli group add -g 5G -d SNA-SNL-73YE SNA-SNL-NYWL 
+$ espercli group add -g TestBB -id bb6be630-a2fc-4b57-bafa-fdda92433684 -d DEV-ELOP-UULA
 
-TITLE         DETAILS
-id            2e5efca2-7776-442e-a5ef-c2758d4a45a3
-name          5G
-device_count  2
+TITLE           DETAILS
+id              bb6be630-a2fc-4b57-bafa-fdda92433684
+name            TestBB
+parent_id       685484fa-eb6a-4ef9-a0f1-63f6febf7ce3
+device_count    1
+path            All devices/TestBB
+children_count  1
 ```
 
 #### 9. remove
-Remove devices from a group, active group is used to add devices if `--group` or `-g` option is not given explicitly.
+Remove devices from a group, active group is used to add devices if `--group` or `-g` option is not given explicitly. The devices will be removed from the group and will be added to its immediate parent. A maximum of 1000 devices can be removed at a time.
+Here, if `--group` or `-g` is given, devices will be removed from the first group from the response list with the given name. If `--groupid` or `-id` is also given, then devices will be removed from the corresponding group.
 ```sh
 $ espercli group remove [OPTIONS]
 ```
@@ -491,21 +560,26 @@ $ espercli group remove [OPTIONS]
 | Name, shorthand | Default| Description|
 | -------------   |:------:|:----------|
 | --group, -g     |        | Group name |
+| --groupid, -id  |        | Group id   |
 | --devices, -d   |        | List of device names, list format is space separated |
 | --json, -j      |        | Render result in JSON format |
 
 ##### Example
 ```sh
-$ espercli group remove -g 5G -d SNA-SNL-73YE SNA-SNL-NYWL 
+$ espercli group remove -g TestBB -id bb6be630-a2fc-4b57-bafa-fdda92433684 -d DEV-ELOP-UULA
 
-TITLE         DETAILS
-id            2e5efca2-7776-442e-a5ef-c2758d4a45a3
-name          5G
-device_count  0
+TITLE           DETAILS
+id              bb6be630-a2fc-4b57-bafa-fdda92433684
+name            TestBB
+parent_id       685484fa-eb6a-4ef9-a0f1-63f6febf7ce3
+device_count    0
+path            All devices/TestBB
+children_count  1
 ```
 
 #### 10. devices
 List devices in a particular group, active group is used to add devices if `--group` or `-g` option is not given explicitly. Pagination used to limit the number of results, default is 20 results per page.
+Here, if `--group` or `-g` is given, devices will be listed from the first group of the response list with the given name. If `--groupid` or `-id` is also given, then devices will be listed from the corresponding group.
 ```sh
 $ espercli group devices [OPTIONS] [group-name]
 ```
@@ -515,16 +589,43 @@ $ espercli group devices [OPTIONS] [group-name]
 | --limit, -l     |20      | Number of results to return per page |
 | --offset, -i    |0       | The initial index from which to return the results |
 | --group, -g     |        | Group name |
+| --groupid, -id  |        | Group id   |
 | --json, -j      |        | Render result in JSON format |
 
 ##### Example
 ```sh
-$ espercli group devices -g 5G
-Number of Devices: 2
+$ espercli group devices -id bb6be630-a2fc-4b57-bafa-fdda92433684 -g TestBB
+Number of Devices: 1
+ID                                    NAME           MODEL    CURRENT STATE    TAGS
+babc9cf5-2dbb-4382-bb9d-d6245941db35  DEV-ELOP-UULA  vivo     INACTIVE
+```
 
-ID                                    NAME          MODEL     CURRENT STATE  TAGS
-3ebc3afd-249b-4f10-8561-fa1a9ddb1bb7  SNA-SNL-KX37  Shoonya   ACTIVE
-c8efa083-f325-4e3b-8d20-71b7a2927ffb  SNA-SNL-3606  QUALCOMM  INACTIVE       kiosk
+#### 11. move
+Move a group. 
+Here, if `--group` or `-g` is given, the first group from the response list with the given name will be moved. If `--groupid` or `-id` is also given, then the corresponding group will be moved. If `--parent` or `-p` is given, the first group from the response list with the given name will be the parent group. If `--parentid` or `-pid` is also given, then the corresponding group will be the parent group.
+```sh
+$ espercli group move [OPTIONS]
+```
+##### Options
+| Name, shorthand | Default| Description|
+| -------------   |:------:|:----------|
+| --group, -g     |        | Group name |
+| --groupid, -id  |        | Group id   |
+| --parent, -p    |        | Parent group name |
+| --parentid, -pid|        | Parent group id   |
+| --json, -j      |        | Render result in JSON format |
+
+##### Example
+```sh
+$ espercli group move -g TestBB -id bb6be630-a2fc-4b57-bafa-fdda92433684 -pid ad3f5e01-2748-4771-bf84-e51616cdbd9b -p Test-BB
+
+TITLE           DETAILS
+id              bb6be630-a2fc-4b57-bafa-fdda92433684
+name            TestBB
+parent_id       ad3f5e01-2748-4771-bf84-e51616cdbd9b
+device_count    1
+path            All devices/Test-BB/TestBB
+children_count  1
 ```
 
 ### **App**
@@ -767,6 +868,27 @@ $ espercli version delete [OPTIONS] [version-id]
 ```sh
 $ espercli version delete -a 630dbfab-7d85-4f81-9f3b-ffb038b0df72 54436edb-9b43-4e2c-8107-2c6fa90e2a9e
 Version with id 54436edb-9b43-4e2c-8107-2c6fa90e2a9e deleted successfully
+```
+
+#### 4. devices
+Returns the list of devices with the specified app version installed. Here, version id (UUID) is required to list devices. 
+```sh
+$ espercli version devices [OPTIONS] [version-id]
+```
+
+##### Options
+| Name, shorthand | Default| Description|
+| -------------   |:------:|:----------|
+| --app, -a       |        | Application id (UUID) |
+| --json, -j      |        | Render result in JSON format |
+
+##### Example
+```sh
+$ espercli version devices 'ea8ed7ae-db18-464b-81f3-e9562c40b0a8' --app 'a5f14399-c358-43f2-9e6f-06033db0d742' 
+
+Total Number of Devices: 1
+ID                                    DEVICE NAME    ALIAS NAME    GROUP NAME
+333d9856-303d-4487-91d5-be447971ead3  DEV-ELOP-FZC3                12125364365etc
 ```
 
 ### **Device-command**
@@ -1929,6 +2051,360 @@ started_at   2019-12-26T07:31:56.549188Z
 updated_at   2019-12-26T07:31:56.654497Z
 parent       <uuid>
  ```
+
+
+### **Content**
+Content command can be used to list, show, upload, modify and delete content.
+```sh
+$ espercli content [SUB-COMMANDS]
+```
+#### Sub commands
+#### 1. list
+List all contents.
+Pagination used to limit the number of results, default is 20 results per page.
+```sh
+$ espercli content list [OPTIONS]
+```
+##### Options
+| Name, shorthand | Default| Description|
+| -------------   |:------:|:----------|
+| --limit, -l     |20      | Number of results to return per page |
+| --offset, -i    |0       | The initial index from which to return the results |
+| --search, -s    |        | Searches by name/tags/description |
+| --json, -j      |        | Render result in JSON format |
+
+##### Example
+```sh
+$ espercli content list -l 5
+Total Number of Contents: 52
+  ID  NAME                                            DESCRIPTION    TAGS            SIZE  CREATED ON
+  61  ss.png                                                         []              9768  2020-10-23 08:52:09.506002+00:00
+  59  gh.jpg                                                         []             79604  2020-10-23 06:29:24.743538+00:00
+  58  {CDE0DFC1-79F7-4D5A-A777-6D376F417F60}.png.jpg                 []             60712  2020-10-23 06:28:32.900106+00:00
+  57  1.har                                                          []            208492  2020-10-23 02:12:58.777150+00:00
+  49  download.jpg                                                   ['download']    7947  2020-10-21 05:27:41.413469+00:00
+
+$ espercli content list -l 2 -i 1 -s screenshot
+Total Number of Contents: 3
+  ID  NAME                                      DESCRIPTION    TAGS      SIZE  CREATED ON
+  51  Screenshot 2020-06-05 at 11.28.51 AM.png                 []       24037  2020-10-21 07:13:21.466780+00:00
+  50  Screenshot 2020-04-07 at 8.46.31 AM.png                  []       14202  2020-10-21 07:03:07.817152+00:00
+```
+
+#### 2. show
+Show the details of a content. Here, `content_id` is required to show the content information.
+
+```sh
+$ espercli content show [OPTIONS] [content_id]
+```
+##### Options
+| Name, shorthand | Default| Description|
+| -------------   |:------:|:----------|
+| --json, -j      |        | Render result in JSON format |
+
+##### Example
+```sh
+$ espercli content show 61
+
+TITLE        DETAILS
+id           61
+name         ss.png
+is_dir       False
+kind         image/png
+hash         _hNmIrB4PnQ4ov77q1PccbPcuGrqH2TDUOpcvjlDv5g
+size         9768
+path         /root/
+permissions  777
+tags         []
+description
+created      2020-10-23 08:52:09.506002+00:00
+modified     2020-10-23 08:52:09.506024+00:00
+enterprise   f44373cb-1800-43c6-aab3-c81f8b1f435c
+owner        bindya
+
+```
+#### 3. upload
+Upload content. Here, content file path is required to upload the content.
+
+```sh
+$ espercli content upload [OPTIONS] [content_file]
+```
+##### Options
+| Name, shorthand | Default| Description|
+| -------------   |:------:|:----------|
+| --json, -j      |        | Render result in JSON format |
+
+##### Example
+```sh
+$ espercli content upload screen.png
+Uploading......: 100%|█████████▉| 144k/144k [00:13<00:00, 11.2kB/s, file=screen.png]
+
+TITLE        DETAILS
+id           71
+name         screen.png
+is_dir       False
+kind         image/png
+hash         kbFYPWUuFfy4bZHEMHPcLioNee7amOCkMR4crYTE-lQ
+size         147483
+path         /root/
+permissions  777
+tags         []
+description
+created      2020-10-28 04:04:18.394138+00:00
+modified     2020-10-28 04:04:18.394161+00:00
+enterprise   f44373cb-1800-43c6-aab3-c81f8b1f435c
+owner        bindya
+
+```
+
+#### 4. modify
+Modify a content information. Here, `content_id` is required to modify the content and only the tags and description can be modified.
+
+```sh
+$ espercli content modify [OPTIONS] [content_id]
+```
+##### Options
+| Name, shorthand   | Default| Description|
+| ------------------|:------:|:----------|
+| --tags, -t        |        | List of tags, space separated|
+| --description, -d |        | Description |
+| --json, -j        |        | Render result in JSON format |
+
+##### Example
+```sh
+$ espercli content modify 61 -t screenshots new -d screenshot
+
+TITLE        DETAILS
+id           61
+name         ss.png
+is_dir       False
+kind         image/png
+hash         _hNmIrB4PnQ4ov77q1PccbPcuGrqH2TDUOpcvjlDv5g
+size         9768
+path         /root/
+permissions  777
+tags         ['screenshots', 'new']
+description  screenshot
+created      2020-10-23 08:52:09.506002+00:00
+modified     2020-10-23 08:57:44.658128+00:00
+enterprise   f44373cb-1800-43c6-aab3-c81f8b1f435c
+owner        bindya
+
+```
+
+
+#### 5. delete
+Delete a content. Here, `content_id` is required to delete the content.
+
+```sh
+$ espercli content delete [content_id]
+```
+
+##### Example
+```sh
+$ espercli content delete 61
+Content with id 61 deleted successfully.
+```
+### **Commands V2**
+Commands V2.0 is used to list the command requests, statuses, fire different actions on devices or groups like ping, reboot etc. It provides advanced device command capabilities like queuing, support for offline devices, dynamic device set for commands and command history.
+
+```sh
+$ espercli commandsV2 [SUB-COMMANDS]
+```
+#### Sub commands
+#### 1. list
+List and filter command requests.
+```sh
+$ espercli commandsV2 list [OPTIONS]
+```
+##### Options
+| Name, shorthand     | Default| Description|
+| ------------------- |:------:|:----------|
+| --command_type, -ct |        | Filter by type of command request |
+| --device, -d        |        | Filter by device name |
+| --device_type, -dt  |        | Filter by device type |
+| --command, -c       |        | Filter by command name |
+| --limit, -l         | 10     | Number of results to return |
+| --json, -j          |        | Render result in JSON format |
+
+##### Example
+```sh
+$ espercli commandsV2 list
+Total Number of Command Requests: 12916
+
+RQUEST ID                             COMMAND           ISSUED BY    COMMAND TYPE    CREATED ON
+5054d1d0-45c4-4a7d-b897-798af05edf75  WIPE              aneesha      DEVICE          2020-10-21 12:12:51.662946+00:00
+b1256407-1c10-43b7-9f90-85b835430f08  UPDATE_HEARTBEAT  aneesha      DEVICE          2020-10-21 12:11:32.603833+00:00
+d41fcaff-0d7a-4151-9c87-2b1ba471b8ea  SET_KIOSK_APP     aneesha      DEVICE          2020-10-21 12:11:26.573396+00:00
+03d903d5-6236-424c-832c-350a0feb00a4  WIPE              aneesha      DEVICE          2020-10-21 12:07:19.449655+00:00
+101482a9-5094-453e-affc-3985334403cf  WIPE              aneesha      DEVICE          2020-10-21 12:05:56.745790+00:00
+8b42dc16-7162-4a0a-bdcf-8265eab1b65e  UPDATE_HEARTBEAT  aneesha      DEVICE          2020-10-21 12:05:22.767914+00:00
+4d2731e5-6a89-4826-9b3c-9cdaff0002dc  SET_KIOSK_APP     aneesha      DEVICE          2020-10-21 12:05:17.930897+00:00
+6276758a-1f40-425e-bd3d-7159b53ca850  WIPE              aneesha      DEVICE          2020-10-21 12:03:37.860293+00:00
+3ddd792d-2fbd-418d-a27a-4339fccf8e44  WIPE              mihir        DEVICE          2020-10-21 11:56:24.611128+00:00
+773a72f8-3bdd-4176-975e-e5473f2ee42a  SET_APP_STATE     mihir        DEVICE          2020-10-21 11:52:16.225932+00:00
+
+$ espercli commandsV2 list -ct device -d DEV-ELOP-W57Z -dt active -c set_kiosk_app -l 2
+Total Number of Command Requests: 21
+
+RQUEST ID                             COMMAND        ISSUED BY    COMMAND TYPE    CREATED ON
+4854906d-6f76-4b58-88f9-295d481f02e4  SET_KIOSK_APP  alok         DEVICE          2020-10-14 09:05:52.430365+00:00
+6c540c8e-3078-4f9c-85b1-d2d39f3dec5a  SET_KIOSK_APP  alok         DEVICE          2020-10-14 09:05:10.526865+00:00
+```
+
+#### 2. status
+
+List and filter command request status.
+```sh
+$ espercli commandsV2 status [OPTIONS]
+```
+##### Options
+| Name, shorthand     | Default| Description|
+| ------------------- |:------:|:----------|
+| --request, -r       |        | Command request id |
+| --device, -d        |        | Filter by device name |
+| --state, -s         |        | Filter by command state |
+| --limit, -l         | 10     | Number of results to return |
+| --json, -j          |        | Render result in JSON format |
+
+##### Example
+```sh
+$ espercli commandsV2 status -r b39da444-6adf-4241-a4b4-2831dbbee264 
+Total Number of Statuses: 1
+
+STATUS ID                             DEVICE ID                             STATE            REASON
+45e35f8a-bd47-4a9d-9991-e88fd5ba58ca  2d110b9c-6f65-430f-869d-fefb2a576dd3  Command Success
+
+$ espercli commandsV2 status -r b39da444-6adf-4241-a4b4-2831dbbee264 -d DEV-ELOP-W57Z -s success -l 1
+
+Total Number of Statuses: 1
+
+STATUS ID                             DEVICE ID                             STATE            REASON
+45e35f8a-bd47-4a9d-9991-e88fd5ba58ca  2d110b9c-6f65-430f-869d-fefb2a576dd3  Command Success
+
+```
+
+#### 3. history
+
+Get and filter command history.
+```sh
+$ espercli commandsV2 history [OPTIONS]
+```
+##### Options
+| Name, shorthand     | Default| Description|
+| ------------------- |:------:|:----------|
+| --device, -d        |        | Device name |
+| --state, -s         |        | Filter by command state |
+| --limit, -l         | 10     | Number of results to return |
+| --json, -j          |        | Render result in JSON format |
+
+##### Example
+```sh
+$ espercli commandsV2 history -d  DEV-ELOP-W57Z -l 3
+Total Number of Statuses: 343
+
+STATUS ID                             DEVICE ID                             STATE              REASON
+b9f57e76-7ef4-49db-b43e-9c0d7be3c0b1  2d110b9c-6f65-430f-869d-fefb2a576dd3  Command Scheduled  Command scheduled by None
+05f42317-f768-4949-bece-cdafecd8e443  2d110b9c-6f65-430f-869d-fefb2a576dd3  Command Scheduled  Command scheduled by None
+5730a1ff-d65d-4658-a69e-9973b8244930  2d110b9c-6f65-430f-869d-fefb2a576dd3  Command Scheduled  Command scheduled by None
+
+$ espercli commandsV2 history -d  DEV-ELOP-W57Z -s success -l 2
+Total Number of Statuses: 150
+
+STATUS ID                             DEVICE ID                             STATE            REASON
+7d9a3382-e1ac-4483-847c-198de35ca92c  2d110b9c-6f65-430f-869d-fefb2a576dd3  Command Success  DPC Update Command issued successfully
+553f44e7-0a2b-4269-90a5-04e111e225c4  2d110b9c-6f65-430f-869d-fefb2a576dd3  Command Success  DPC Update Command issued successfully
+
+```
+#### 4. command
+
+Create a command request for devices or groups.
+
+```sh
+$ espercli commandsV2 command [OPTIONS]
+```
+##### Options
+| Name, shorthand     | Default| Description|
+| ------------------- |:------:|:----------|
+| --command_type, -ct |        | Command type |
+| --devices, -d       |        | List of device names, space separated |
+| --groups, -g        |        | List of group ids, space separated |
+| --device_type, -dt  | active | Device type |
+| --command, -c       |        | Command name |
+| --schedule, -s      |immediate| Schedule type |
+| --schedule_name, -sn|        | Schedule name |
+| --start, -st        |        | Schedule start date-time |
+| --end, -en          |        | Schedlue end date-time |
+| --time_type, -tt    |        | Time type |
+| --window_start, -ws |        | Window start time |
+| --window_end, -we   |        | Window end time |
+| --days, -dy         | all    | List of days, space separated |
+| --app_state, -as    |        | App state |
+| --app_version, -av  |        | App version |
+| --custom_config, -cs|        | Custom settings config |
+| --device_alias, -dv |        | Device alias name |
+| --message, -m       |        | Message |
+| --package_name, -pk |        | Package name |
+| --policy_url, -po   |        | Policy url |
+| --state, -se        |        | State |
+| --wifi_access_points, -wap|        | Wifi access points |
+| --json, -j          |        | Render result in JSON format |
+
+##### Commands 
+
+| Command Name     |  Description     | Details           |
+| -----------------|:----------------:|:------------------|
+| reboot           | Reboot a device  |                   |
+| update_heartbeat | Ping a device    |                   |
+| update_device_config | Push additional configurations to the Device | Requires `custom_config` where `custom_config` is the data with the custom settings config |
+| install          | Install an app on a device | Requires `app_version` where `app_version` is the version id of app uploaded on Esper |
+| uninstall        |  Uninstall an app from device | Requires `package_name` where `package_name` is the name of the app package uploaded on Esper |
+| set_new_policy   |  Apply policy on device | Requires `policy_url` where `policy_url` is the URL to the policy |
+| add_wifi_ap      | Add wifi access points for device | Requires `wifi_access_points` where `wifi_access_points` is the data with access points |
+| remove_wifi_ap   | Remove Wifi access points for device | Requires `wifi_access_points` where `wifi_access_points` is the data with access points |
+| set_kiosk_app     | Command to set the Kiosk app for a device | Requires `package_name` where `package_name` is the name of the app package uploaded on Esper |
+| set_device_lockdown_state | Set lockdown state for a device | Requires `state` and `message` where `state` is LOCKED/UNLOCKED and `message` is the message to be added with command |
+| set_app_state     | Set the state of an app | Requries `app_state` and `package_name` where `app_state` is the state of app - SHOW/HIDE/DISABLE and `package_name` is the name of the app package uploaded on Esper |
+| wipe              | Wipes the device | | 
+| update_latest_dpc | Prompt device to update the DPC app to the latest versions | | 
+
+
+##### Example
+```sh
+$ espercli commandsV2 command -c update_heartbeat -ct device -d DEV-ELOP-UULA
+
+TITLE          DETAILS
+Id             ba36ea4d-1744-43a9-a42f-8e60d24946f8
+Command        UPDATE_HEARTBEAT
+Command Args   {}
+Command Type   DEVICE
+Devices        ['babc9cf5-2dbb-4382-bb9d-d6245941db35']
+Groups         []
+Device Type    active
+Status         []
+Issued by      bindya
+Schedule       IMMEDIATE
+Schedule Args
+Created On     2020-10-21 12:18:04.194833+00:00
+
+$ espercli commandsV2 command -c set_app_state -as SHOW -pk com.asana.app -ct device -d DEV-ELOP-W57Z -dt all -s window -sn scheduling -st 2020-10-21T20:15:00Z -en 2020-10-21T21:15:00Z -ws 13:15:00 -we 14:15:00 -tt device
+
+TITLE          DETAILS
+Id             4c91045c-1113-424c-9f57-baae7d8dd0a7
+Command        SET_APP_STATE
+Command Args   {'package_name': 'com.asana.app', 'app_state': 'SHOW'}
+Command Type   DEVICE
+Devices        ['2d110b9c-6f65-430f-869d-fefb2a576dd3']
+Groups         []
+Device Type    all
+Status         Command Scheduled
+Issued by      bindya
+Schedule       WINDOW
+Schedule Args  {'name': 'scheduling', 'start_datetime': '2020-10-21 20:15:00+00:00', 'end_datetime': '2020-10-21 21:15:00+00:00', 'time_type': 'device', 'window_start_time': '13:15:00', 'window_end_time': '14:15:00', 'days': ['All days']}
+Created On     2020-10-21 14:07:27.601095+00:00
+
+
+```
 
 
 We are always in active development and we try our best to keep our documentation up to date. However, if you end up ahead of time you can check our latest documentation on [Github](https://github.com/esper-io/esper-cli).

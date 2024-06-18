@@ -44,8 +44,8 @@ class Token(Controller):
             }
 
         return renderable
-
-
+        
+        
 
     @ex(
         help='Show token details',
@@ -73,4 +73,91 @@ class Token(Controller):
             self.app.render(renderable, format=OutputFormat.TABULATED.value, headers="keys", tablefmt="plain")
         else:
             renderable = self._token_basic_response(response, OutputFormat.JSON)
+            self.app.render(renderable, format=OutputFormat.JSON.value)
+
+
+
+    def renew_token_basic_response(self, token, format=OutputFormat.TABULATED):
+        enterprise_id = token.enterprise.split('[')[1].split(']')[0]
+        developer_app = token.developerapp.split('(')[1].split(')')[0]
+        if format == OutputFormat.TABULATED:
+            title = "TITLE"
+            details = "DETAILS"
+            renderable = [
+                {title: 'Id', details: token.id},
+                {title: 'User', details: token.user},
+                {title: 'Enterprise Id', details: enterprise_id},
+                {title: 'Developer App', details: developer_app},    
+                {title: 'Token', details: token.token},
+                {title: 'Scope', details: token.scope},
+                {title: 'Created On', details: token.created_on},
+                {title: 'Updated On', details: token.updated_on},
+                {title: 'Expires On', details: token.expires_at},
+            ]
+        else:
+            renderable = {
+                'Id': token.id,
+                'User': token.user,
+                'Enterprise Id': enterprise_id,
+                'Developer App': developer_app,
+                'Token': token.token,
+                'Scope': token.scope,
+                'Created On': str(token.created_on),
+                'Updated On': str(token.updated_on),
+                'Expires On': str(token.expires_at),
+            }
+
+        return renderable
+
+
+
+    @ex(
+        help='Renew Token',
+        arguments=[
+            (['-d','--developerappid'],
+             {'help': 'DeveloperApp id',
+              'action': 'store',
+              'dest': 'dev_app_id'}),
+            (['-t','--token'],
+             {'help': 'Token to renew',
+              'action': 'store',
+              'dest': 'token'}),
+            (['-j', '--json'],
+             {'help': 'Render result in Json format',
+              'action': 'store_true',
+              'dest': 'json'})
+        ]
+    )
+    def renew(self):
+        validate_creds_exists(self.app)
+        db = DBWrapper(self.app.creds)
+        token_client = APIClient(db.get_configure()).get_token_api_client()
+        enterprise_id = db.get_enterprise_id()
+
+        if self.app.pargs.token:
+            token_to_renew = self.app.pargs.token
+        else:
+            self.app.log.debug('There is no token given to renew.')
+            self.app.render('There is no token given to renew.\n')
+            return 
+
+        if self.app.pargs.dev_app_id:
+            developer_app_id = self.app.pargs.dev_app_id
+        else:
+            self.app.log.debug('DeveloperApp id is not given.')
+            self.app.render('DeveloperApp id is not given.\n')
+            return 
+
+        try:
+            response = token_client.renew_token(enterprise_id, developer_app_id, token_to_renew)
+        except ApiException as e:
+            self.app.log.error(f"[token-show] Failed to renew token: {e}")
+            self.app.render(f"ERROR: {parse_error_message(self.app, e)}\n")
+            return
+ 
+        if not self.app.pargs.json:
+            renderable = self.renew_token_basic_response(response)
+            self.app.render(renderable, format=OutputFormat.TABULATED.value, headers="keys", tablefmt="plain")
+        else:
+            renderable = self.renew_token_basic_response(response, OutputFormat.JSON)
             self.app.render(renderable, format=OutputFormat.JSON.value)

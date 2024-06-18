@@ -33,3 +33,9 @@ class APIClient:
 
     def get_token_api_client(self):
         return client.TokenApi(client.ApiClient(self.config))
+
+    def get_content_api_client(self):
+        return client.ContentApi(client.ApiClient(self.config))
+        
+    def get_commandsV2_api_client(self):
+        return client.CommandsV2Api(client.ApiClient(self.config))

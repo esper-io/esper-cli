@@ -254,3 +254,107 @@ class ApplicationVersion(Controller):
             else:
                 self.app.log.debug(f"[version-delete] Failed to get an application when deleting a version: {e}")
                 self.app.render(f"ERROR: {parse_error_message(self.app, e)}\n")
+
+
+    @ex(
+        help='List devices with the app version installed',
+        arguments=[
+            (['version_id'],
+             {'help': 'Version id',
+              'action': 'store'}),
+            (['-a', '--app'],
+             {'help': 'Application id',
+              'action': 'store',
+              'dest': 'application'}),
+            (['-s', '--search'],
+             {'help': 'A search term',
+              'action': 'store',
+              'dest': 'search'}),
+            (['-l', '--limit'],
+             {'help': 'Number of results to return per page',
+              'action': 'store',
+              'default': 20,
+              'dest': 'limit'}),
+            (['-o', '--offset'],
+             {'help': 'The initial index from which to return the results',
+              'action': 'store',
+              'default': 0,
+              'dest': 'offset'}),
+            (['-j', '--json'],
+             {'help': 'Render result in Json format',
+              'action': 'store_true',
+              'dest': 'json'}),
+        ]
+    )
+    def devices(self):
+
+        validate_creds_exists(self.app)
+        db = DBWrapper(self.app.creds)
+        application_client = APIClient(db.get_configure()).get_application_api_client()
+        enterprise_id = db.get_enterprise_id()
+
+        limit = self.app.pargs.limit
+        offset = self.app.pargs.offset
+
+        kwargs = {}
+        if self.app.pargs.search:
+            kwargs['search'] = self.app.pargs.search
+
+        if self.app.pargs.application:
+            application_id = self.app.pargs.application
+        else:
+            application = db.get_application()
+            if not application or not application.get('id'):
+                self.app.log.debug('[version-devices] There is no active application.')
+                self.app.render('There is no active application.\n')
+                return
+
+            application_id = application.get('id')
+
+        if self.app.pargs.version_id:
+            version_id = self.app.pargs.version_id
+        else:
+            self.app.log.debug('version id is not given')
+            self.app.render('version id is not given\n')
+            return 
+
+        try:
+            response = application_client.get_install_devices(version_id, application_id, enterprise_id, limit=limit, offset=offset, **kwargs)
+        except ApiException as e:
+            self.app.log.error(f"[version-devices] Failed to list devices: {e}")
+            self.app.render(f"ERROR: {parse_error_message(self.app, e)}\n")
+            return
+        
+        self.app.render(f"Total Number of Devices: {response.count}\n")
+        if not self.app.pargs.json:
+            devices = []
+
+            label = {
+                'id': "ID",
+                'device_name': "DEVICE NAME",
+                'alias_name': "ALIAS NAME",
+                'group_name': "GROUP NAME",
+            }
+
+            for device in response.results:
+                devices.append(
+                    {
+                        label['id']: device.id,
+                        label['device_name']: device.device_name,
+                        label['alias_name']: device.alias_name,
+                        label['group_name']: device.group_name,
+                    }
+                )
+            self.app.render(devices, format=OutputFormat.TABULATED.value, headers="keys", tablefmt="plain")
+        else:
+            devices = []
+            for device in response.results:
+                devices.append(
+                    {
+                        'id': device.id,
+                        'device_name': device.device_name,
+                        'alias_name': device.alias_name,
+                        'group_name': device.group_name,
+                    }
+                )
+            self.app.render(devices, format=OutputFormat.JSON.value)
