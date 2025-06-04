@@ -17,3 +17,7 @@ Adds support for:
 - Content Management
 
 Updated dependencies
+
+## 0.0.14
+
+- Add support for new device states
