@@ -10,7 +10,7 @@ tabulate==0.8.3
 tinydb==3.13.0
 tqdm==4.66.3
 markupsafe==2.0.1
-cryptography==43.0.1
+cryptography==44.0.1
 
 # For Secure ADB
 pyOpenSSL==24.1.0
