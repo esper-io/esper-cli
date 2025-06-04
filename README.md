@@ -7,7 +7,7 @@ Current stable release versions are
 
     API version: 1.0.0
     SDK version: 0.1.2
-    CLI version: 0.0.13
+    CLI version: 0.0.14
 
 ## Requirements
 
