@@ -26,7 +26,7 @@ setup(
         espercli = esper.main:main
     """,
     install_requires=[
-        'pip==21.1',
+        'pip==23.3',
         'wheel',
         'cement==3.0.2',
         'clint>=0.5.1',
