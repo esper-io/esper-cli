@@ -769,13 +769,22 @@ category
 content_rating    0.0
 compatibility
 ```
-Below example listing versions of current active app,
+Below example listing versions of current active app (default legacy format),
 ```sh
 $ espercli version list
 Total Number of Versions: 1
 
 ID                                    VERSION CODE      BUILD NUMBER    SIZE IN MB  RELEASE TRACK      INSTALLED COUNT
 54436edb-9b43-4e2c-8107-2c6fa90e2a9e  6.4.5                      189       9.36421                                   1
+```
+
+To use the new standardized format with `VERSION NAME` instead of `BUILD NUMBER`:
+```sh
+$ espercli version list --legacy-format false
+Total Number of Versions: 1
+
+ID                                    VERSION NAME    VERSION CODE    SIZE IN MB  RELEASE TRACK      INSTALLED COUNT
+54436edb-9b43-4e2c-8107-2c6fa90e2a9e  6.4.5          30204           9.36421                                   1
 ```
 
 #### 7. unset-active
@@ -809,9 +818,11 @@ $ espercli version list [OPTIONS]
 | --app, -a       |        | Application id (UUID) |
 | --code, -c      |        | Filter by version code |
 | --number, -n    |        | Filter by build number |
+| --legacy-format, -lf |true | Use legacy format, choices are [true, false] |
 | --json, -j      |        | Render result in JSON format |
 
 ##### Example
+**Default behavior (legacy format):**
 ```sh
 $ espercli version list -a 630dbfab-7d85-4f81-9f3b-ffb038b0df72
 Total Number of Versions: 1
@@ -819,6 +830,16 @@ Total Number of Versions: 1
 ID                                    VERSION CODE      BUILD NUMBER    SIZE IN MB  RELEASE TRACK      INSTALLED COUNT
 54436edb-9b43-4e2c-8107-2c6fa90e2a9e  6.4.5                      189       9.36421                                   1
 ```
+
+**New standardized format (with --legacy-format false):**
+```sh
+$ espercli version list -a 630dbfab-7d85-4f81-9f3b-ffb038b0df72 --legacy-format false
+Total Number of Versions: 1
+
+ID                                    VERSION NAME    VERSION CODE    SIZE IN MB  RELEASE TRACK      INSTALLED COUNT
+54436edb-9b43-4e2c-8107-2c6fa90e2a9e  6.4.5          30204           9.36421                                   1
+```
+
 For list of versions if active application is set,
 ```sh
 $ espercli version list
@@ -827,6 +848,8 @@ Total Number of Versions: 1
 ID                                    VERSION CODE      BUILD NUMBER    SIZE IN MB  RELEASE TRACK      INSTALLED COUNT
 54436edb-9b43-4e2c-8107-2c6fa90e2a9e  6.4.5                      189       9.36421                                   1
 ```
+
+> **Note:** By default, the CLI uses legacy format (`--legacy-format true`) which displays `BUILD NUMBER` column. Use `--legacy-format false` to get the new standardized format with `VERSION NAME` column. The new format uses `version_name` (human-readable) and `version_code` (internal identifier) instead of the legacy `build_number` and `version_code` system.
 
 #### 2. show
 Show application version information, here version id (UUID) is required to show version information.
@@ -838,9 +861,11 @@ $ espercli version show [OPTIONS] [version-id]
 | Name, shorthand | Default| Description|
 | -------------   |:------:|:----------|
 | --app, -a       |        | Application id (UUID) |
+| --legacy-format, -lf |true | Use legacy format, choices are [true, false] |
 | --json, -j      |        | Render result in JSON format |
 
 ##### Example
+**Default behavior (legacy format):**
 ```sh
 $ espercli version show -a 630dbfab-7d85-4f81-9f3b-ffb038b0df72 54436edb-9b43-4e2c-8107-2c6fa90e2a9e
 
@@ -852,6 +877,21 @@ size_in_mb       9.36421394348145
 release_track
 installed_count  1
 ```
+
+**New standardized format (with --legacy-format false):**
+```sh
+$ espercli version show -a 630dbfab-7d85-4f81-9f3b-ffb038b0df72 54436edb-9b43-4e2c-8107-2c6fa90e2a9e --legacy-format false
+
+TITLE            DETAILS
+id               54436edb-9b43-4e2c-8107-2c6fa90e2a9e
+version_name     6.4.5
+version_code     30204
+size_in_mb       9.36421394348145
+release_track
+installed_count  1
+```
+
+> **Note:** By default, the CLI uses legacy format (`--legacy-format true`) which displays `build_number`. Use `--legacy-format false` to get the new standardized format with `version_name` (human-readable version string) and `version_code` (internal unique identifier).
 
 #### 3. delete
 Delete sub command used to delete particular application version. Here, version id (UUID) is required to delete version. Application will be also deleted if application contains one version and unset active application if it is set as active

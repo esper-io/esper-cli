@@ -219,7 +219,11 @@ class Application(Controller):
                 version = application.versions[0]
                 renderable.append({title: 'version_id', details: version.id})
                 renderable.append({title: 'version_code', details: version.version_code})
-                renderable.append({title: 'build_number', details: version.build_number})
+                # Show version_name if available (new format), otherwise fallback to build_number (legacy format)
+                if hasattr(version, 'version_name') and version.version_name:
+                    renderable.append({title: 'version_name', details: version.version_name})
+                elif hasattr(version, 'build_number') and version.build_number:
+                    renderable.append({title: 'build_number', details: version.build_number})
 
             self.app.render(renderable, format=OutputFormat.TABULATED.value, headers="keys", tablefmt="plain")
         else:
@@ -228,7 +232,11 @@ class Application(Controller):
                 version = application.versions[0]
                 renderable['version_id'] = version.id
                 renderable['version_code'] = version.version_code
-                renderable['build_number'] = version.build_number
+                # Show version_name if available (new format), otherwise fallback to build_number (legacy format)
+                if hasattr(version, 'version_name') and version.version_name:
+                    renderable['version_name'] = version.version_name
+                elif hasattr(version, 'build_number') and version.build_number:
+                    renderable['build_number'] = version.build_number
 
             self.app.render(renderable, format=OutputFormat.JSON.value)
 
