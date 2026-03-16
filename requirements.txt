@@ -13,4 +13,4 @@ markupsafe==2.0.1
 cryptography==44.0.1
 
 # For Secure ADB
-pyOpenSSL==24.1.0
+pyOpenSSL==26.0.0
