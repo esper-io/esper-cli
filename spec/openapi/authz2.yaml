@@ -192,7 +192,7 @@
         "x-esper-destructive": false,
         "x-esper-pagination": "none",
         "x-esper-verb": "list",
-        "x-esper-noun": "user-group",
+        "x-esper-noun": "group",
         "x-esper-scope-parent": "user"
       }
     },
@@ -766,7 +766,7 @@
         "x-esper-destructive": false,
         "x-esper-pagination": "none",
         "x-esper-verb": "update",
-        "x-esper-noun": "role-scope"
+        "x-esper-noun": "scope"
       },
       "get": {
         "x-badges": [
@@ -837,7 +837,7 @@
         "x-esper-destructive": false,
         "x-esper-pagination": "none",
         "x-esper-verb": "list",
-        "x-esper-noun": "role-scope",
+        "x-esper-noun": "scope",
         "x-esper-scope-parent": "role"
       }
     }

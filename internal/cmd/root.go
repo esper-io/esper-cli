@@ -1,17 +1,12 @@
 package cmd
 
 import (
+	"github.com/esper-io/esper-cli/internal/cmd/generated"
+	esperruntime "github.com/esper-io/esper-cli/internal/runtime"
 	"github.com/spf13/cobra"
 )
 
-type GlobalOptions struct {
-	JSON        bool
-	Yes         bool
-	Verbose     bool
-	NoColor     bool
-	Environment string
-	APIKey      string
-}
+type GlobalOptions = esperruntime.GlobalOptions
 
 func NewRootCommand() *cobra.Command {
 	options := &GlobalOptions{}
@@ -28,5 +23,6 @@ func NewRootCommand() *cobra.Command {
 	flags.BoolVar(&options.NoColor, "no-color", false, "disable colored output")
 	flags.StringVar(&options.Environment, "environment", "", "Esper environment (overrides ESPER_ENVIRONMENT)")
 	flags.StringVar(&options.APIKey, "api-key", "", "Esper API key (overrides ESPER_API_KEY)")
+	generated.AddCommands(command, options)
 	return command
 }

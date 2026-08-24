@@ -697,7 +697,7 @@
         "x-esper-destructive": false,
         "x-esper-pagination": "limit-offset",
         "x-esper-verb": "list",
-        "x-esper-noun": "app-version",
+        "x-esper-noun": "version",
         "x-esper-scope-parent": "application"
       }
     },
@@ -1273,7 +1273,7 @@
         "x-esper-destructive": false,
         "x-esper-pagination": "limit-offset",
         "x-esper-verb": "list",
-        "x-esper-noun": "install-device",
+        "x-esper-noun": "installdevice",
         "x-esper-scope-parent": "version"
       }
     },
@@ -1846,7 +1846,7 @@
         "x-esper-destructive": false,
         "x-esper-pagination": "limit-offset",
         "x-esper-verb": "list",
-        "x-esper-noun": "device-app",
+        "x-esper-noun": "app",
         "x-esper-scope-parent": "device"
       }
     },
@@ -2110,7 +2110,7 @@
         "x-esper-destructive": false,
         "x-esper-pagination": "limit-offset",
         "x-esper-verb": "list",
-        "x-esper-noun": "app-install",
+        "x-esper-noun": "install",
         "x-esper-scope-parent": "device"
       }
     },
@@ -2236,7 +2236,7 @@
         "x-esper-destructive": false,
         "x-esper-pagination": "none",
         "x-esper-verb": "get",
-        "x-esper-noun": "device-event"
+        "x-esper-noun": "status"
       }
     },
     "/enterprise/{enterprise_id}/device/{device_id}/download/eventfeed/": {
@@ -2617,7 +2617,7 @@
         "x-esper-destructive": false,
         "x-esper-pagination": "limit-offset",
         "x-esper-verb": "list",
-        "x-esper-noun": "group",
+        "x-esper-noun": "device-group",
         "x-esper-scope-parent": "enterprise"
       },
       "post": {
@@ -2715,7 +2715,7 @@
         "x-esper-destructive": false,
         "x-esper-pagination": "none",
         "x-esper-verb": "create",
-        "x-esper-noun": "group",
+        "x-esper-noun": "device-group",
         "x-esper-scope-parent": "enterprise"
       }
     },
@@ -5637,7 +5637,7 @@
         "x-esper-pagination": "none",
         "x-esper-verb": "list",
         "x-esper-noun": "blueprint",
-        "x-esper-scope-parent": "group"
+        "x-esper-scope-parent": "devicegroup"
       },
       "post": {
         "x-badges": [
@@ -5718,7 +5718,7 @@
         "x-esper-pagination": "none",
         "x-esper-verb": "create",
         "x-esper-noun": "blueprint",
-        "x-esper-scope-parent": "group"
+        "x-esper-scope-parent": "devicegroup"
       }
     },
     "/enterprise/{enterprise_id}/devicegroup/{group_id}/blueprint/{blueprint_id}/": {
@@ -6004,7 +6004,7 @@
         "x-esper-destructive": false,
         "x-esper-pagination": "none",
         "x-esper-verb": "list",
-        "x-esper-noun": "blueprint-revision",
+        "x-esper-noun": "revision",
         "x-esper-scope-parent": "blueprint"
       }
     },
@@ -6510,8 +6510,8 @@
         "x-esper-destructive": false,
         "x-esper-pagination": "limit-offset",
         "x-esper-verb": "list",
-        "x-esper-noun": "legacy-device-group-command",
-        "x-esper-scope-parent": "group"
+        "x-esper-noun": "command",
+        "x-esper-scope-parent": "devicegroup"
       },
       "post": {
         "operationId": "createLegacyDeviceGroupCommand",
@@ -6637,8 +6637,8 @@
         "x-esper-destructive": false,
         "x-esper-pagination": "none",
         "x-esper-verb": "create",
-        "x-esper-noun": "legacy-device-group-command",
-        "x-esper-scope-parent": "group"
+        "x-esper-noun": "command",
+        "x-esper-scope-parent": "devicegroup"
       }
     },
     "/enterprise/{enterprise_id}/devicegroup/{group_id}/command/{command_id}/": {

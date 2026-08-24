@@ -44,6 +44,10 @@ func NewHTTPClient(credentials Credentials) *HTTPClient {
 }
 
 func (client *HTTPClient) Do(ctx context.Context, method, requestPath string, query url.Values, body []byte) ([]byte, error) {
+	return client.DoWithContentType(ctx, method, requestPath, query, body, "application/json")
+}
+
+func (client *HTTPClient) DoWithContentType(ctx context.Context, method, requestPath string, query url.Values, body []byte, contentType string) ([]byte, error) {
 	base := strings.TrimRight(client.BaseURL, "/")
 	requestURL := base + "/" + strings.TrimLeft(requestPath, "/")
 	if len(query) > 0 {
@@ -63,7 +67,7 @@ func (client *HTTPClient) Do(ctx context.Context, method, requestPath string, qu
 		request.Header.Set("Accept", "application/json")
 		request.Header.Set("User-Agent", client.UserAgent)
 		if len(body) > 0 {
-			request.Header.Set("Content-Type", "application/json")
+			request.Header.Set("Content-Type", contentType)
 		}
 
 		response, err := client.Client.Do(request)

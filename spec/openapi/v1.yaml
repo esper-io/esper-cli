@@ -198,7 +198,7 @@
         "x-esper-destructive": false,
         "x-esper-pagination": "none",
         "x-esper-verb": "get",
-        "x-esper-noun": "min-app-info"
+        "x-esper-noun": "application-minimal"
       }
     },
     "/v1/enterprise/{enterprise_id}/device/{device_id}/report/eventfeed/": {
@@ -456,7 +456,7 @@
         "x-esper-destructive": false,
         "x-esper-pagination": "limit-offset",
         "x-esper-verb": "list",
-        "x-esper-noun": "alert-channel",
+        "x-esper-noun": "alertchannel",
         "x-esper-scope-parent": "enterprise"
       },
       "post": {
@@ -553,7 +553,7 @@
         "x-esper-destructive": false,
         "x-esper-pagination": "none",
         "x-esper-verb": "create",
-        "x-esper-noun": "alert-channel",
+        "x-esper-noun": "alertchannel",
         "x-esper-scope-parent": "enterprise"
       }
     },
@@ -1106,7 +1106,7 @@
         "x-esper-destructive": false,
         "x-esper-pagination": "limit-offset",
         "x-esper-verb": "list",
-        "x-esper-noun": "alarm-rule",
+        "x-esper-noun": "alarmrule",
         "x-esper-scope-parent": "enterprise"
       },
       "post": {
@@ -1203,7 +1203,8 @@
         "x-esper-destructive": false,
         "x-esper-pagination": "none",
         "x-esper-verb": "add",
-        "x-esper-noun": "alarm-rule"
+        "x-esper-noun": "alarmrule",
+        "x-esper-scope-parent": "enterprise"
       }
     },
     "/v1/enterprise/{enterprise_id}/alarmrules/{alarm_id}/": {
@@ -1684,7 +1685,7 @@
         "x-esper-destructive": false,
         "x-esper-pagination": "none",
         "x-esper-verb": "get",
-        "x-esper-noun": "alarm-history"
+        "x-esper-noun": "alarmhistory"
       }
     },
     "/v1/enterprise/{enterprise_id}/wallpaper/": {
@@ -1966,7 +1967,8 @@
         "x-esper-destructive": false,
         "x-esper-pagination": "none",
         "x-esper-verb": "add",
-        "x-esper-noun": "wallpaper"
+        "x-esper-noun": "wallpaper",
+        "x-esper-scope-parent": "enterprise"
       }
     },
     "/v1/enterprise/{enterprise_id}/wallpaper/{wallpaper_id}/": {
@@ -2445,7 +2447,8 @@
         "x-esper-destructive": false,
         "x-esper-pagination": "none",
         "x-esper-verb": "add",
-        "x-esper-noun": "tile-icon"
+        "x-esper-noun": "tile-icon",
+        "x-esper-scope-parent": "enterprise"
       }
     },
     "/v1/enterprise/{enterprise_id}/tile-icons/{tileicons_id}/": {
@@ -2728,7 +2731,7 @@
         "x-esper-destructive": false,
         "x-esper-pagination": "none",
         "x-esper-verb": "apply",
-        "x-esper-noun": "tile-icon"
+        "x-esper-noun": "tile-icon-apply"
       }
     },
     "/v1/enterprise/{enterprise_id}/tile-icon-unapply/": {
@@ -2839,7 +2842,7 @@
         "x-esper-destructive": false,
         "x-esper-pagination": "none",
         "x-esper-verb": "remove",
-        "x-esper-noun": "tile-icon"
+        "x-esper-noun": "tile-icon-unapply"
       }
     },
     "/v1/enterprise/{enterprise_id}/report/location/": {
@@ -4081,7 +4084,7 @@
         "x-esper-destructive": false,
         "x-esper-pagination": "limit-offset",
         "x-esper-verb": "list",
-        "x-esper-noun": "applications-v1",
+        "x-esper-noun": "application",
         "x-esper-scope-parent": "enterprise"
       }
     },
@@ -4170,7 +4173,7 @@
         "x-esper-destructive": false,
         "x-esper-pagination": "none",
         "x-esper-verb": "get",
-        "x-esper-noun": "applicationv1"
+        "x-esper-noun": "application"
       },
       "delete": {
         "x-badges": [
@@ -4259,7 +4262,7 @@
         "x-esper-destructive": true,
         "x-esper-pagination": "none",
         "x-esper-verb": "delete",
-        "x-esper-noun": "application-v1"
+        "x-esper-noun": "application"
       }
     },
     "/v1/enterprise/{enterprise_id}/application/{application_id}/version/": {
@@ -4481,7 +4484,7 @@
         "x-esper-destructive": false,
         "x-esper-pagination": "limit-offset",
         "x-esper-verb": "list",
-        "x-esper-noun": "app-versions-v1",
+        "x-esper-noun": "version",
         "x-esper-scope-parent": "application"
       }
     },
@@ -4580,7 +4583,7 @@
         "x-esper-destructive": false,
         "x-esper-pagination": "none",
         "x-esper-verb": "get",
-        "x-esper-noun": "app-version-v1"
+        "x-esper-noun": "app-version"
       },
       "delete": {
         "x-badges": [
@@ -4707,7 +4710,7 @@
         "x-esper-destructive": true,
         "x-esper-pagination": "none",
         "x-esper-verb": "delete",
-        "x-esper-noun": "app-version-v1"
+        "x-esper-noun": "app-version"
       },
       "patch": {
         "x-badges": [
@@ -4871,7 +4874,7 @@
         "x-esper-destructive": false,
         "x-esper-pagination": "none",
         "x-esper-verb": "patch",
-        "x-esper-noun": "app-version-v1"
+        "x-esper-noun": "app-version"
       }
     },
     "/v1/enterprise/{enterprise_id}/application/{application_id}/version/{version_id}/installdevices": {
@@ -5032,7 +5035,7 @@
         "x-esper-destructive": false,
         "x-esper-pagination": "limit-offset",
         "x-esper-verb": "list",
-        "x-esper-noun": "install-devices-v1",
+        "x-esper-noun": "installdevice",
         "x-esper-scope-parent": "version"
       }
     },

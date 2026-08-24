@@ -106,8 +106,8 @@
         "x-esper-destructive": false,
         "x-esper-pagination": "none",
         "x-esper-verb": "create",
-        "x-esper-noun": "tenant-user-invite",
-        "x-esper-scope-parent": "enterprise"
+        "x-esper-noun": "invite",
+        "x-esper-scope-parent": "tenant"
       },
       "get": {
         "x-badges": [
@@ -178,8 +178,8 @@
         "x-esper-destructive": false,
         "x-esper-pagination": "none",
         "x-esper-verb": "list",
-        "x-esper-noun": "tenant-user-invite",
-        "x-esper-scope-parent": "enterprise"
+        "x-esper-noun": "invite",
+        "x-esper-scope-parent": "tenant"
       }
     },
     "/authn2/v0/tenant/{enterprise_id}/invite/{invite_id}": {
@@ -457,7 +457,7 @@
         "x-esper-pagination": "none",
         "x-esper-verb": "list",
         "x-esper-noun": "connection",
-        "x-esper-scope-parent": "enterprise"
+        "x-esper-scope-parent": "tenant"
       }
     },
     "/authn2/v0/tenant/{enterprise_id}/connection/{connection_id}": {
