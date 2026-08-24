@@ -1,0 +1,20 @@
+{
+  "sourcePathCount": 205,
+  "addedPathCount": 5,
+  "excludedPaths": [
+    "/device/v0/devices/",
+    "/sys/health"
+  ],
+  "emittedPathCount": 208,
+  "operationCount": 338,
+  "generations": {
+    "authn2": 9,
+    "authz2": 5,
+    "foundry": 5,
+    "legacy": 38,
+    "pipelines-v0": 29,
+    "v0": 48,
+    "v1": 27,
+    "v2": 47
+  }
+}

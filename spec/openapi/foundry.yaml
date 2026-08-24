@@ -1,0 +1,1083 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "ESPER API REFERENCE - foundry",
+    "version": "1.0.0",
+    "x-esper-generation": "foundry",
+    "x-esper-auth": "bearer"
+  },
+  "servers": [
+    {
+      "url": "https://{foo}-api.esper.cloud/api",
+      "variables": {
+        "foo": {
+          "default": "develop",
+          "description": "Custom end point"
+        }
+      }
+    }
+  ],
+  "tags": [
+    {
+      "name": "9_FoundryBuilds",
+      "x-displayName": "FoundryBuilds"
+    },
+    {
+      "name": "9_FoundryDeviceModels",
+      "x-displayName": "FoundryDeviceModels"
+    },
+    {
+      "name": "9_FoundryEvents",
+      "x-displayName": "FoundryEvents"
+    }
+  ],
+  "paths": {
+    "/v1/foundry/builds/": {
+      "get": {
+        "summary": "Get Foundry builds",
+        "description": "Returns a list of all specified builds.",
+        "security": [
+          {
+            "AuthToken": []
+          }
+        ],
+        "operationId": "getFoundryBuilds",
+        "tags": [
+          "9_FoundryBuilds"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "foundation_major_number",
+            "description": "Filter by Esper Foundation Major Number, Foundation Numbers are integers starting at 1.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "build_arch",
+            "description": "Filter by build architecture name, build architectures {arm, arm64, x86_64, x86}",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "android_major_version",
+            "description": "Filter by Android Major Version, Android Major Versions are integers starting at 1 and going to Current Android Release",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "device_model_id",
+            "description": "Device model id",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "in": "query",
+            "name": "approved",
+            "description": "Filter builds which have been approved for OTA update",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "offset",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "ordering",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "locked",
+            "description": "Filter the locked builds. To be used with build_fingerprint_hash and device_model_id",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "build_fingerprint_hash",
+            "description": "hash of the build fingerprint of the existing build",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of Foundry builds",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "integer",
+                      "description": "returned response code"
+                    },
+                    "content": {
+                      "properties": {
+                        "count": {
+                          "type": "integer",
+                          "description": "counter of number of builds retrieved"
+                        },
+                        "next": {
+                          "type": "string",
+                          "format": "url",
+                          "description": "url of the next ten builds"
+                        },
+                        "previous": {
+                          "type": "string",
+                          "format": "url",
+                          "description": "url of the previous ten builds"
+                        },
+                        "results": {
+                          "items": {
+                            "$ref": "#/components/schemas/Build_V1"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_401_Unauthorized"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_500_Internal_Server_Error"
+                }
+              }
+            }
+          }
+        },
+        "x-esper-destructive": false,
+        "x-esper-pagination": "limit-offset",
+        "x-esper-verb": "list",
+        "x-esper-noun": "foundry-build"
+      }
+    },
+    "/v1/foundry/builds/{build_id}/": {
+      "get": {
+        "summary": "Get Foundry Build",
+        "description": "Get a Foundry Build by unique ID",
+        "security": [
+          {
+            "AuthToken": []
+          }
+        ],
+        "tags": [
+          "9_FoundryBuilds"
+        ],
+        "parameters": [
+          {
+            "name": "build_id",
+            "in": "path",
+            "description": "A build UUID specifying the Foundry Build",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Specified Foundry build",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "content": {
+                      "$ref": "#/components/schemas/Build_V1"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_401_Unauthorized"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Build not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_404_Not_Found"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_500_Internal_Server_Error"
+                }
+              }
+            }
+          }
+        },
+        "x-esper-destructive": false,
+        "x-esper-pagination": "none",
+        "x-esper-verb": "get",
+        "x-esper-noun": "foundry-build"
+      },
+      "put": {
+        "summary": "Update Foundry build",
+        "description": "Update a Foundry build based on given parameters",
+        "security": [
+          {
+            "AuthToken": []
+          }
+        ],
+        "operationId": "updateFoundryBuild",
+        "tags": [
+          "9_FoundryBuilds"
+        ],
+        "parameters": [
+          {
+            "name": "build_id",
+            "in": "path",
+            "description": "A build UUID specifying the Foundry Build",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Foundry_Build_PUT_Request_V1"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/Build_V1"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_400_Bad_Data"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_401_Unauthorized"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Builds not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_404_Not_Found"
+                }
+              }
+            }
+          }
+        },
+        "x-esper-destructive": false,
+        "x-esper-pagination": "none",
+        "x-esper-verb": "update",
+        "x-esper-noun": "foundry-build"
+      }
+    },
+    "/v1/foundry/device-models/": {
+      "get": {
+        "summary": "Get device models",
+        "description": "Get a list of device models",
+        "security": [
+          {
+            "AuthToken": []
+          }
+        ],
+        "tags": [
+          "9_FoundryDeviceModels"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "offset",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "manufacturer",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "model",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "profile_name",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "profile_variant",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "update_compatible_android_api_level_begin",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "update_compatible_android_api_level_end",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of DeviceModels associated with the TenantId coming from the header",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "integer",
+                      "description": "returned response code"
+                    },
+                    "content": {
+                      "properties": {
+                        "count": {
+                          "type": "integer",
+                          "description": "counter of number of device models retrieved"
+                        },
+                        "next": {
+                          "type": "string",
+                          "format": "url",
+                          "description": "url of the next ten device models"
+                        },
+                        "previous": {
+                          "type": "string",
+                          "format": "url",
+                          "description": "url of the previous ten device models"
+                        },
+                        "results": {
+                          "items": {
+                            "$ref": "#/components/schemas/Device_Model_V1"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_401_Unauthorized"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_500_Internal_Server_Error"
+                }
+              }
+            }
+          }
+        },
+        "x-esper-destructive": false,
+        "x-esper-pagination": "limit-offset",
+        "x-esper-verb": "list",
+        "x-esper-noun": "foundry-device-model"
+      }
+    },
+    "/v1/foundry/device-models/{device_model_id}/": {
+      "put": {
+        "summary": "Update Tenant Device Model",
+        "description": "Update a Tenant Device Model based on given parameters",
+        "security": [
+          {
+            "AuthToken": []
+          }
+        ],
+        "tags": [
+          "9_FoundryDeviceModels"
+        ],
+        "parameters": [
+          {
+            "name": "device_model_id",
+            "in": "path",
+            "description": "An UUID specifying the Device Model",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Device_Model_PUT_Request_V1"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/Build_V1"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_400_Bad_Data"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_401_Unauthorized"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "locked_build_id not approved",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_403_Forbidden"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "DeviceModel not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_404_Not_Found"
+                }
+              }
+            }
+          }
+        },
+        "x-esper-destructive": false,
+        "x-esper-pagination": "none",
+        "x-esper-verb": "update",
+        "x-esper-noun": "foundry-device-model"
+      }
+    },
+    "/v1/foundry/events/": {
+      "get": {
+        "summary": "Get Foundry events",
+        "description": "Get a list of Foundry events",
+        "security": [
+          {
+            "AuthToken": []
+          }
+        ],
+        "tags": [
+          "9_FoundryEvents"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "offset",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of Foundry events in reverse chronological order",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "content": {
+                      "properties": {
+                        "count": {
+                          "type": "integer",
+                          "description": "counter of number of events retrieved"
+                        },
+                        "next": {
+                          "type": "string",
+                          "format": "url",
+                          "description": "url of the next ten events"
+                        },
+                        "previous": {
+                          "type": "string",
+                          "format": "url",
+                          "description": "url of the previous ten events"
+                        },
+                        "results": {
+                          "items": {
+                            "$ref": "#/components/schemas/Foundry_Event_V1"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_400_Bad_Data"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_401_Unauthorized"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_500_Internal_Server_Error"
+                }
+              }
+            }
+          }
+        },
+        "x-esper-destructive": false,
+        "x-esper-pagination": "limit-offset",
+        "x-esper-verb": "list",
+        "x-esper-noun": "foundry-event"
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Foundry_Event_V1": {
+        "type": "object",
+        "properties": {
+          "stack": {
+            "type": "string"
+          },
+          "tenant": {
+            "type": "string"
+          },
+          "enterprise_id": {
+            "type": "string"
+          },
+          "actor": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              }
+            }
+          },
+          "event_message": {
+            "type": "string"
+          },
+          "event_type": {
+            "type": "string"
+          },
+          "resource": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "type": {
+                "type": "string"
+              }
+            }
+          },
+          "meta": {
+            "type": "object",
+            "properties": {
+              "user_remarks": {
+                "type": "string"
+              },
+              "change_type": {
+                "type": "string"
+              },
+              "device_model": {
+                "type": "string"
+              }
+            }
+          },
+          "created_timestamp": {
+            "type": "integer"
+          }
+        }
+      },
+      "Error_403_Forbidden": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer",
+            "format": "int32",
+            "default": 403
+          },
+          "message": {
+            "type": "string"
+          },
+          "content": {
+            "type": "object"
+          }
+        },
+        "required": [
+          "code",
+          "message"
+        ]
+      },
+      "Device_Model_PUT_Request_V1": {
+        "type": "object",
+        "properties": {
+          "auto_update": {
+            "type": "boolean",
+            "description": "Enables/disables automatic updates for the device model. The other properties (latest and locked_build_id) are processed only if autoupdate is set to true."
+          },
+          "latest": {
+            "type": "boolean",
+            "description": "Configures Foundry service to automatically lock to the latest approved build (whenever available) if set to true."
+          },
+          "locked_build_id": {
+            "type": "string",
+            "description": "Specifies the UUID of the build which needs to be locked for automatic updates."
+          }
+        }
+      },
+      "Device_Model_V1": {
+        "type": "object",
+        "properties": {
+          "model_display_name": {
+            "type": "string",
+            "example": "Motorola Edge 20 - T2E20"
+          },
+          "manufacturer": {
+            "type": "string",
+            "example": "Motorola"
+          },
+          "model": {
+            "type": "string",
+            "example": "Edge 20"
+          },
+          "profile_name": {
+            "type": "string",
+            "example": "Tacobell"
+          },
+          "profile_variant": {
+            "type": "string",
+            "example": "T2E20"
+          },
+          "update_compatible_android_api_level_begin": {
+            "type": "integer",
+            "example": 11
+          },
+          "device_model_id": {
+            "type": "string",
+            "format": "uuid",
+            "example": "eb566c45-f841-41e5-a0af-435e90a96cae"
+          },
+          "auto_update": {
+            "type": "boolean",
+            "example": false
+          },
+          "latest": {
+            "type": "boolean",
+            "example": false
+          },
+          "locked_build_id": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2023-12-07T17:14:46.419449+05:30"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2023-12-07T17:14:46.419449+05:30"
+          },
+          "created_by": {
+            "type": "string",
+            "example": "FoundryAdmin"
+          },
+          "updated_by": {
+            "type": "string",
+            "example": "FoundryAdmin"
+          }
+        }
+      },
+      "Error_400_Bad_Data": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer",
+            "format": "int32",
+            "default": 400
+          },
+          "message": {
+            "type": "string"
+          },
+          "content": {
+            "type": "object"
+          }
+        },
+        "required": [
+          "code",
+          "message"
+        ]
+      },
+      "Foundry_Build_PUT_Request_V1": {
+        "type": "object",
+        "properties": {
+          "approve": {
+            "type": "boolean"
+          },
+          "user_remarks": {
+            "type": "string"
+          }
+        }
+      },
+      "Error_404_Not_Found": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer",
+            "format": "int32",
+            "default": 404
+          },
+          "message": {
+            "type": "string"
+          },
+          "content": {
+            "type": "object"
+          }
+        },
+        "required": [
+          "code",
+          "message"
+        ]
+      },
+      "Error_500_Internal_Server_Error": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer",
+            "format": "int32",
+            "default": 500
+          },
+          "message": {
+            "type": "string"
+          },
+          "content": {
+            "type": "object"
+          }
+        },
+        "required": [
+          "code",
+          "message"
+        ]
+      },
+      "Error_401_Unauthorized": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer",
+            "format": "int32",
+            "default": 401
+          },
+          "message": {
+            "type": "string"
+          },
+          "content": {
+            "type": "object"
+          }
+        },
+        "required": [
+          "code",
+          "message"
+        ]
+      },
+      "Build_V1": {
+        "type": "object",
+        "properties": {
+          "build_id": {
+            "type": "string"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "deprecated_on": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "created_by": {
+            "type": "string"
+          },
+          "updated_by": {
+            "type": "string"
+          },
+          "ab_update": {
+            "type": "boolean"
+          },
+          "android_major_version": {
+            "type": "integer"
+          },
+          "android_minimum_sdk_level": {
+            "type": "integer"
+          },
+          "android_minor_version": {
+            "type": "string"
+          },
+          "android_sdk_level": {
+            "type": "integer"
+          },
+          "build_arch": {
+            "type": "string"
+          },
+          "build_flavor": {
+            "type": "string"
+          },
+          "build_hash": {
+            "type": "string"
+          },
+          "build_ota_hash": {
+            "type": "string"
+          },
+          "build_job_url": {
+            "type": "string"
+          },
+          "build_job_id": {
+            "type": "integer"
+          },
+          "build_fingerprint_hash": {
+            "type": "string"
+          },
+          "build_type": {
+            "type": "string"
+          },
+          "build_url": {
+            "type": "string",
+            "format": "url"
+          },
+          "build_update_meta_data": {
+            "type": "string",
+            "format": "json"
+          },
+          "build_update_url": {
+            "type": "string",
+            "format": "url"
+          },
+          "file_size_kb": {
+            "type": "integer"
+          },
+          "foundation_build_number": {
+            "type": "integer"
+          },
+          "foundation_major_number": {
+            "type": "integer"
+          },
+          "foundation_minor_number": {
+            "type": "integer"
+          },
+          "foundation_name": {
+            "type": "string"
+          },
+          "model_display_name": {
+            "type": "string"
+          },
+          "build_job_params": {
+            "type": "string",
+            "format": "json"
+          },
+          "prebuilt_app_info": {
+            "type": "string",
+            "format": "json"
+          },
+          "release_notes": {
+            "type": "string",
+            "format": "json"
+          },
+          "release_rating": {
+            "type": "string"
+          },
+          "source_build_id": {
+            "type": "string"
+          },
+          "build_state": {
+            "type": "string",
+            "enum": [
+              "released",
+              "to_be_deprecated",
+              "unavailable"
+            ]
+          },
+          "device_model_id": {
+            "type": "string"
+          },
+          "approved": {
+            "type": "boolean"
+          }
+        }
+      }
+    },
+    "securitySchemes": {
+      "AuthToken": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "Authorization"
+      }
+    }
+  }
+}
