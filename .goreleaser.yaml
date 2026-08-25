@@ -1,0 +1,68 @@
+version: 2
+
+project_name: espercli
+
+builds:
+  - id: espercli
+    main: ./cmd/espercli
+    binary: espercli
+    env:
+      - CGO_ENABLED=0
+    flags:
+      - -trimpath
+    ldflags:
+      - >-
+        -s -w
+        -X github.com/esper-io/esper-cli/internal/version.Version={{.Version}}
+        -X github.com/esper-io/esper-cli/internal/version.Commit={{.Commit}}
+        -X github.com/esper-io/esper-cli/internal/version.Date={{.CommitDate}}
+    goos:
+      - darwin
+      - linux
+      - windows
+    goarch:
+      - amd64
+      - arm64
+    mod_timestamp: "{{ .CommitTimestamp }}"
+
+archives:
+  - id: espercli
+    ids:
+      - espercli
+    formats:
+      - tar.gz
+    format_overrides:
+      - goos: windows
+        formats:
+          - zip
+    name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+
+checksum:
+  name_template: checksums.txt
+
+snapshot:
+  version_template: "0.0.0-{{ .ShortCommit }}"
+
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - "^docs:"
+      - "^test:"
+
+brews:
+  - name: espercli
+    ids:
+      - espercli
+    repository:
+      owner: esper-io
+      name: homebrew-tap
+    directory: Formula
+    homepage: https://github.com/esper-io/esper-cli
+    description: Command-line interface for the Esper device management API
+    license: Apache-2.0
+    skip_upload: true
+    install: |
+      bin.install "espercli"
+    test: |
+      system "#{bin}/espercli", "version"
