@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"github.com/esper-io/esper-cli/internal/cmd/generated"
+	"github.com/esper-io/esper-cli/internal/cmd/secureadb"
 	esperruntime "github.com/esper-io/esper-cli/internal/runtime"
 	"github.com/spf13/cobra"
 )
@@ -24,5 +25,6 @@ func NewRootCommand() *cobra.Command {
 	flags.StringVar(&options.Environment, "environment", "", "Esper environment (overrides ESPER_ENVIRONMENT)")
 	flags.StringVar(&options.APIKey, "api-key", "", "Esper API key (overrides ESPER_API_KEY)")
 	generated.AddCommands(command, options)
+	command.AddCommand(secureadb.NewCommand(options))
 	return command
 }
