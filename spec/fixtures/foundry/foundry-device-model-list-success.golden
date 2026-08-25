@@ -1,0 +1,36 @@
+[
+  {
+    "auto_update": false,
+    "created_at": "2026-08-24T10:00:00Z",
+    "created_by": "foundry-admin",
+    "device_model_id": "22222222-2222-4222-8222-222222222222",
+    "latest": false,
+    "locked_build_id": null,
+    "manufacturer": "Acme",
+    "model": "Kiosk X1",
+    "model_display_name": "Acme Kiosk",
+    "profile_name": "retail",
+    "profile_variant": "standard",
+    "update_compatible_android_api_level_begin": 30,
+    "update_compatible_android_api_level_end": 35,
+    "updated_at": "2026-08-24T11:00:00Z",
+    "updated_by": "foundry-admin"
+  },
+  {
+    "auto_update": true,
+    "created_at": "2026-08-24T12:00:00Z",
+    "created_by": "foundry-admin",
+    "device_model_id": "44444444-4444-4444-8444-444444444444",
+    "latest": true,
+    "locked_build_id": null,
+    "manufacturer": "Acme",
+    "model": "Kiosk X2",
+    "model_display_name": "Acme Kiosk Plus",
+    "profile_name": "retail",
+    "profile_variant": "plus",
+    "update_compatible_android_api_level_begin": 30,
+    "update_compatible_android_api_level_end": 35,
+    "updated_at": "2026-08-24T13:00:00Z",
+    "updated_by": "foundry-admin"
+  }
+]

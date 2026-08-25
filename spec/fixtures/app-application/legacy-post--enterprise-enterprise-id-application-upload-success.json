@@ -1,0 +1,30 @@
+{
+  "application": {
+    "application_name": "fixture-legacy-post--enterprise-enterprise-id-application-upload-success-application-application_name",
+    "category": "fixture-legacy-post--enterprise-enterprise-id-application-upload-success-application-category",
+    "compatibility": "fixture-legacy-post--enterprise-enterprise-id-application-upload-success-application-compatibility",
+    "content_rating": "fixture-legacy-post--enterprise-enterprise-id-application-upload-success-application-content_rating",
+    "created_on": "2026-08-24T12:00:00Z",
+    "developer": "fixture-legacy-post--enterprise-enterprise-id-application-upload-success-application-developer",
+    "enterprise": "https://fixture.example.test/packet-3",
+    "id": "00000000-0000-4000-8000-000000000001",
+    "is_active": true,
+    "is_hidden": true,
+    "package_name": "fixture-legacy-post--enterprise-enterprise-id-application-upload-success-application-package_name",
+    "updated_on": "2026-08-24T12:00:00Z",
+    "versions": [
+      {
+        "build_number": "fixture-legacy-post--enterprise-enterprise-id-application-upload-success-application-versions-build_number",
+        "download_url": "https://fixture.example.test/packet-3",
+        "hash_string": "fixture-legacy-post--enterprise-enterprise-id-application-upload-success-application-versions-hash_string",
+        "icon_url": "https://fixture.example.test/packet-3",
+        "id": "00000000-0000-4000-8000-000000000001",
+        "min_sdk_version": "fixture-legacy-post--enterprise-enterprise-id-application-upload-success-application-versions-min_sdk_version",
+        "release_comments": "fixture-legacy-post--enterprise-enterprise-id-application-upload-success-application-versions-release_comments",
+        "release_name": "fixture-legacy-post--enterprise-enterprise-id-application-upload-success-application-versions-release_name",
+        "target_sdk_version": "fixture-legacy-post--enterprise-enterprise-id-application-upload-success-application-versions-target_sdk_version",
+        "version_code": "fixture-legacy-post--enterprise-enterprise-id-application-upload-success-application-versions-version_code"
+      }
+    ]
+  }
+}

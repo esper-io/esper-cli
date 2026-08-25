@@ -75,3 +75,19 @@ func TestHTTPClientDoesNotRetryPost(t *testing.T) {
 		t.Fatalf("attempts = %d, want 1", attempts)
 	}
 }
+
+func TestHTTPClientUsesSelectedResponseMedia(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
+		if got := request.Header.Get("Accept"); got != "application/x-pem-file" {
+			t.Errorf("Accept = %q", got)
+		}
+		writer.WriteHeader(http.StatusOK)
+	}))
+	defer server.Close()
+
+	client := &HTTPClient{BaseURL: server.URL, Client: server.Client()}
+	_, err := client.DoWithContentTypeAndHeaders(context.Background(), http.MethodGet, "/certificate", nil, nil, nil, "application/json", "application/x-pem-file")
+	if err != nil {
+		t.Fatal(err)
+	}
+}

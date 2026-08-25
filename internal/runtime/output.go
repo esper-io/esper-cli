@@ -11,6 +11,10 @@ import (
 )
 
 func WriteJSON(writer io.Writer, data []byte) error {
+	if len(bytes.TrimSpace(data)) == 0 {
+		_, err := fmt.Fprintln(writer, "null")
+		return err
+	}
 	var value any
 	if err := json.Unmarshal(data, &value); err != nil {
 		return fmt.Errorf("decode JSON output: %w", err)
@@ -24,6 +28,9 @@ func WriteJSON(writer io.Writer, data []byte) error {
 }
 
 func WriteHuman(writer io.Writer, data []byte) error {
+	if len(bytes.TrimSpace(data)) == 0 {
+		return nil
+	}
 	var value any
 	if err := json.Unmarshal(data, &value); err != nil {
 		return fmt.Errorf("decode human output: %w", err)

@@ -215,6 +215,43 @@
             "apiKey": []
           }
         ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "name",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "role_type",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "offset",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "sort",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "Request Succeded",
@@ -232,7 +269,11 @@
                         "$ref": "#/components/schemas/RoleResponse"
                       }
                     }
-                  }
+                  },
+                  "required": [
+                    "count",
+                    "roles"
+                  ]
                 }
               }
             }
@@ -286,13 +327,13 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/Role"
+                "$ref": "#/components/schemas/CreateRole"
               }
             }
           }
         },
         "responses": {
-          "200": {
+          "201": {
             "description": "Request Succeded",
             "content": {
               "application/json": {
@@ -383,6 +424,16 @@
                 }
               }
             }
+          },
+          "404": {
+            "description": "Role not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenericErrorResponse"
+                }
+              }
+            }
           }
         },
         "x-esper-destructive": false,
@@ -418,7 +469,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/Role"
+                "$ref": "#/components/schemas/UpdateRole"
               }
             }
           }
@@ -446,6 +497,16 @@
           },
           "401": {
             "description": "Unauthorized request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenericErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Role not found",
             "content": {
               "application/json": {
                 "schema": {
@@ -543,7 +604,8 @@
                   "scope_ids": {
                     "type": "array",
                     "items": {
-                      "type": "string"
+                      "type": "string",
+                      "format": "uuid"
                     }
                   },
                   "scope_names": {
@@ -728,16 +790,16 @@
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "count": {
-                      "type": "integer"
-                    },
                     "scopes": {
                       "type": "array",
                       "items": {
                         "$ref": "#/components/schemas/ScopeResponse"
                       }
                     }
-                  }
+                  },
+                  "required": [
+                    "scopes"
+                  ]
                 }
               }
             }
@@ -761,12 +823,23 @@
                 }
               }
             }
+          },
+          "404": {
+            "description": "Role or scopes not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenericErrorResponse"
+                }
+              }
+            }
           }
         },
         "x-esper-destructive": false,
         "x-esper-pagination": "none",
         "x-esper-verb": "update",
-        "x-esper-noun": "scope"
+        "x-esper-noun": "scope",
+        "x-esper-scope-parent": "role"
       },
       "get": {
         "x-badges": [
@@ -797,17 +870,9 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "count": {
-                      "type": "integer"
-                    },
-                    "scopes": {
-                      "type": "array",
-                      "items": {
-                        "$ref": "#/components/schemas/ScopeResponse"
-                      }
-                    }
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ScopeResponse"
                   }
                 }
               }
@@ -832,6 +897,16 @@
                 }
               }
             }
+          },
+          "404": {
+            "description": "Role not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenericErrorResponse"
+                }
+              }
+            }
           }
         },
         "x-esper-destructive": false,
@@ -848,7 +923,8 @@
         "type": "object",
         "properties": {
           "id": {
-            "type": "string"
+            "type": "string",
+            "format": "uuid"
           },
           "name": {
             "type": "string"
@@ -858,10 +934,35 @@
           },
           "scope_type": {
             "type": "integer"
+          },
+          "organization_type": {
+            "type": "integer"
           }
-        }
+        },
+        "required": [
+          "id",
+          "name",
+          "description",
+          "scope_type",
+          "organization_type"
+        ]
       },
-      "Role": {
+      "CreateRole": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "description"
+        ]
+      },
+      "UpdateRole": {
         "type": "object",
         "properties": {
           "name": {
@@ -876,7 +977,8 @@
         "type": "object",
         "properties": {
           "id": {
-            "type": "string"
+            "type": "string",
+            "format": "uuid"
           },
           "name": {
             "type": "string"
@@ -886,8 +988,18 @@
           },
           "role_type": {
             "type": "integer"
+          },
+          "organization_type": {
+            "type": "integer"
           }
-        }
+        },
+        "required": [
+          "id",
+          "name",
+          "description",
+          "role_type",
+          "organization_type"
+        ]
       },
       "UserGroups": {
         "type": "object",

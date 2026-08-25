@@ -1,0 +1,8 @@
+{
+  "device": [
+    {
+      "androidId": "android-1",
+      "managementType": "managedDevice"
+    }
+  ]
+}

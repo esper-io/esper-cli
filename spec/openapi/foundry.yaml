@@ -51,7 +51,7 @@
             "name": "foundation_major_number",
             "description": "Filter by Esper Foundation Major Number, Foundation Numbers are integers starting at 1.",
             "schema": {
-              "type": "string"
+              "type": "integer"
             }
           },
           {
@@ -133,34 +133,57 @@
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "code": {
-                      "type": "integer",
-                      "description": "returned response code"
-                    },
                     "content": {
+                      "type": "object",
                       "properties": {
                         "count": {
                           "type": "integer",
                           "description": "counter of number of builds retrieved"
                         },
                         "next": {
-                          "type": "string",
+                          "type": [
+                            "string",
+                            "null"
+                          ],
                           "format": "url",
                           "description": "url of the next ten builds"
                         },
-                        "previous": {
-                          "type": "string",
+                        "prev": {
+                          "type": [
+                            "string",
+                            "null"
+                          ],
                           "format": "url",
                           "description": "url of the previous ten builds"
                         },
                         "results": {
+                          "type": "array",
                           "items": {
                             "$ref": "#/components/schemas/Build_V1"
                           }
                         }
-                      }
+                      },
+                      "required": [
+                        "count",
+                        "next",
+                        "prev",
+                        "results"
+                      ]
                     }
-                  }
+                  },
+                  "required": [
+                    "content"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_400_Bad_Data"
                 }
               }
             }
@@ -187,7 +210,7 @@
           }
         },
         "x-esper-destructive": false,
-        "x-esper-pagination": "limit-offset",
+        "x-esper-pagination": "apps-envelope",
         "x-esper-verb": "list",
         "x-esper-noun": "foundry-build"
       }
@@ -211,7 +234,8 @@
             "description": "A build UUID specifying the Foundry Build",
             "required": true,
             "schema": {
-              "type": "string"
+              "type": "string",
+              "format": "uuid"
             }
           }
         ],
@@ -226,7 +250,20 @@
                     "content": {
                       "$ref": "#/components/schemas/Build_V1"
                     }
-                  }
+                  },
+                  "required": [
+                    "content"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_400_Bad_Data"
                 }
               }
             }
@@ -286,7 +323,8 @@
             "description": "A build UUID specifying the Foundry Build",
             "required": true,
             "schema": {
-              "type": "string"
+              "type": "string",
+              "format": "uuid"
             }
           }
         ],
@@ -308,10 +346,13 @@
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "data": {
+                    "content": {
                       "$ref": "#/components/schemas/Build_V1"
                     }
-                  }
+                  },
+                  "required": [
+                    "content"
+                  ]
                 }
               }
             }
@@ -370,14 +411,14 @@
             "in": "query",
             "name": "limit",
             "schema": {
-              "type": "string"
+              "type": "integer"
             }
           },
           {
             "in": "query",
             "name": "offset",
             "schema": {
-              "type": "string"
+              "type": "integer"
             }
           },
           {
@@ -412,14 +453,43 @@
             "in": "query",
             "name": "update_compatible_android_api_level_begin",
             "schema": {
-              "type": "string"
+              "type": "integer"
             }
           },
           {
             "in": "query",
             "name": "update_compatible_android_api_level_end",
             "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "device_model_id",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "in": "query",
+            "name": "device_android_api_level",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "device_display_name",
+            "schema": {
               "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "device_foundation_major_number",
+            "schema": {
+              "type": "integer"
             }
           }
         ],
@@ -431,34 +501,57 @@
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "code": {
-                      "type": "integer",
-                      "description": "returned response code"
-                    },
                     "content": {
+                      "type": "object",
                       "properties": {
                         "count": {
                           "type": "integer",
                           "description": "counter of number of device models retrieved"
                         },
                         "next": {
-                          "type": "string",
+                          "type": [
+                            "string",
+                            "null"
+                          ],
                           "format": "url",
                           "description": "url of the next ten device models"
                         },
-                        "previous": {
-                          "type": "string",
+                        "prev": {
+                          "type": [
+                            "string",
+                            "null"
+                          ],
                           "format": "url",
                           "description": "url of the previous ten device models"
                         },
                         "results": {
+                          "type": "array",
                           "items": {
                             "$ref": "#/components/schemas/Device_Model_V1"
                           }
                         }
-                      }
+                      },
+                      "required": [
+                        "count",
+                        "next",
+                        "prev",
+                        "results"
+                      ]
                     }
-                  }
+                  },
+                  "required": [
+                    "content"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_400_Bad_Data"
                 }
               }
             }
@@ -485,7 +578,7 @@
           }
         },
         "x-esper-destructive": false,
-        "x-esper-pagination": "limit-offset",
+        "x-esper-pagination": "apps-envelope",
         "x-esper-verb": "list",
         "x-esper-noun": "foundry-device-model"
       }
@@ -532,10 +625,13 @@
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "data": {
-                      "$ref": "#/components/schemas/Build_V1"
+                    "content": {
+                      "$ref": "#/components/schemas/Tenant_Device_Model_PUT_Response_V1"
                     }
-                  }
+                  },
+                  "required": [
+                    "content"
+                  ]
                 }
               }
             }
@@ -624,29 +720,46 @@
                   "type": "object",
                   "properties": {
                     "content": {
+                      "type": "object",
                       "properties": {
                         "count": {
                           "type": "integer",
                           "description": "counter of number of events retrieved"
                         },
                         "next": {
-                          "type": "string",
+                          "type": [
+                            "string",
+                            "null"
+                          ],
                           "format": "url",
                           "description": "url of the next ten events"
                         },
-                        "previous": {
-                          "type": "string",
+                        "prev": {
+                          "type": [
+                            "string",
+                            "null"
+                          ],
                           "format": "url",
                           "description": "url of the previous ten events"
                         },
                         "results": {
+                          "type": "array",
                           "items": {
                             "$ref": "#/components/schemas/Foundry_Event_V1"
                           }
                         }
-                      }
+                      },
+                      "required": [
+                        "count",
+                        "next",
+                        "prev",
+                        "results"
+                      ]
                     }
-                  }
+                  },
+                  "required": [
+                    "content"
+                  ]
                 }
               }
             }
@@ -683,7 +796,7 @@
           }
         },
         "x-esper-destructive": false,
-        "x-esper-pagination": "limit-offset",
+        "x-esper-pagination": "apps-envelope",
         "x-esper-verb": "list",
         "x-esper-noun": "foundry-event"
       }
@@ -767,7 +880,8 @@
         },
         "required": [
           "code",
-          "message"
+          "message",
+          "content"
         ]
       },
       "Device_Model_PUT_Request_V1": {
@@ -783,36 +897,84 @@
           },
           "locked_build_id": {
             "type": "string",
+            "format": "uuid",
             "description": "Specifies the UUID of the build which needs to be locked for automatic updates."
           }
         }
+      },
+      "Tenant_Device_Model_PUT_Response_V1": {
+        "type": "object",
+        "properties": {
+          "auto_update": {
+            "type": "boolean"
+          },
+          "latest": {
+            "type": "boolean"
+          },
+          "locked_build_id": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uuid"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_by": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "locked_build_id"
+        ]
       },
       "Device_Model_V1": {
         "type": "object",
         "properties": {
           "model_display_name": {
-            "type": "string",
+            "type": [
+              "string",
+              "null"
+            ],
             "example": "Motorola Edge 20 - T2E20"
           },
           "manufacturer": {
-            "type": "string",
+            "type": [
+              "string",
+              "null"
+            ],
             "example": "Motorola"
           },
           "model": {
-            "type": "string",
+            "type": [
+              "string",
+              "null"
+            ],
             "example": "Edge 20"
           },
           "profile_name": {
-            "type": "string",
+            "type": [
+              "string",
+              "null"
+            ],
             "example": "Tacobell"
           },
           "profile_variant": {
-            "type": "string",
+            "type": [
+              "string",
+              "null"
+            ],
             "example": "T2E20"
           },
           "update_compatible_android_api_level_begin": {
             "type": "integer",
             "example": 11
+          },
+          "update_compatible_android_api_level_end": {
+            "type": "integer",
+            "example": 35
           },
           "device_model_id": {
             "type": "string",
@@ -831,7 +993,8 @@
             "type": [
               "string",
               "null"
-            ]
+            ],
+            "format": "uuid"
           },
           "created_at": {
             "type": "string",
@@ -851,7 +1014,20 @@
             "type": "string",
             "example": "FoundryAdmin"
           }
-        }
+        },
+        "required": [
+          "model_display_name",
+          "manufacturer",
+          "model",
+          "profile_name",
+          "profile_variant",
+          "update_compatible_android_api_level_begin",
+          "device_model_id",
+          "auto_update",
+          "latest",
+          "locked_build_id",
+          "created_at"
+        ]
       },
       "Error_400_Bad_Data": {
         "type": "object",
@@ -870,19 +1046,23 @@
         },
         "required": [
           "code",
-          "message"
+          "message",
+          "content"
         ]
       },
       "Foundry_Build_PUT_Request_V1": {
         "type": "object",
         "properties": {
-          "approve": {
+          "approved": {
             "type": "boolean"
           },
           "user_remarks": {
             "type": "string"
           }
-        }
+        },
+        "required": [
+          "approved"
+        ]
       },
       "Error_404_Not_Found": {
         "type": "object",
@@ -901,7 +1081,8 @@
         },
         "required": [
           "code",
-          "message"
+          "message",
+          "content"
         ]
       },
       "Error_500_Internal_Server_Error": {
@@ -921,7 +1102,8 @@
         },
         "required": [
           "code",
-          "message"
+          "message",
+          "content"
         ]
       },
       "Error_401_Unauthorized": {
@@ -941,14 +1123,16 @@
         },
         "required": [
           "code",
-          "message"
+          "message",
+          "content"
         ]
       },
       "Build_V1": {
         "type": "object",
         "properties": {
           "build_id": {
-            "type": "string"
+            "type": "string",
+            "format": "uuid"
           },
           "created_at": {
             "type": "string",
@@ -959,7 +1143,10 @@
             "format": "date-time"
           },
           "deprecated_on": {
-            "type": "string",
+            "type": [
+              "string",
+              "null"
+            ],
             "format": "date-time"
           },
           "created_by": {
@@ -986,6 +1173,9 @@
           "build_arch": {
             "type": "string"
           },
+          "build_details_id": {
+            "type": "integer"
+          },
           "build_flavor": {
             "type": "string"
           },
@@ -1011,9 +1201,9 @@
             "type": "string",
             "format": "url"
           },
-          "build_update_meta_data": {
-            "type": "string",
-            "format": "json"
+          "build_update_metadata": {
+            "type": "object",
+            "additionalProperties": true
           },
           "build_update_url": {
             "type": "string",
@@ -1034,42 +1224,80 @@
           "foundation_name": {
             "type": "string"
           },
-          "model_display_name": {
-            "type": "string"
-          },
           "build_job_params": {
-            "type": "string",
-            "format": "json"
+            "type": "object",
+            "additionalProperties": true
           },
           "prebuilt_app_info": {
-            "type": "string",
-            "format": "json"
+            "type": "object",
+            "additionalProperties": true
           },
           "release_notes": {
-            "type": "string",
-            "format": "json"
+            "type": "object",
+            "additionalProperties": true
           },
           "release_rating": {
             "type": "string"
           },
           "source_build_id": {
-            "type": "string"
+            "type": "string",
+            "format": "uuid"
           },
           "build_state": {
             "type": "string",
             "enum": [
               "released",
+              "unreleased",
               "to_be_deprecated",
               "unavailable"
             ]
           },
           "device_model_id": {
-            "type": "string"
+            "type": "string",
+            "format": "uuid"
           },
           "approved": {
             "type": "boolean"
           }
-        }
+        },
+        "required": [
+          "build_id",
+          "created_at",
+          "created_by",
+          "updated_at",
+          "updated_by",
+          "ab_update",
+          "android_major_version",
+          "android_minimum_sdk_level",
+          "android_minor_version",
+          "android_sdk_level",
+          "build_arch",
+          "build_details_id",
+          "build_fingerprint_hash",
+          "build_hash",
+          "build_ota_hash",
+          "build_update_metadata",
+          "build_update_url",
+          "build_url",
+          "deprecated_on",
+          "device_model_id",
+          "file_size_kb",
+          "build_flavor",
+          "foundation_build_number",
+          "foundation_major_number",
+          "foundation_minor_number",
+          "foundation_name",
+          "release_notes",
+          "release_rating",
+          "source_build_id",
+          "build_state",
+          "build_type",
+          "build_job_id",
+          "build_job_url",
+          "build_job_params",
+          "prebuilt_app_info",
+          "approved"
+        ]
       }
     },
     "securitySchemes": {

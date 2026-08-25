@@ -1,0 +1,13 @@
+{
+  "alert_channels": [],
+  "conditions": {
+    "value": 90
+  },
+  "devices": [],
+  "enterprise": "enterprise-1",
+  "groups": [],
+  "id": "alarm-1",
+  "metric": "cpu",
+  "name": "cpu-updated",
+  "realert_interval": 5
+}

@@ -1,0 +1,1 @@
+Re-record these synthesized fixtures with a non-production tenant before promoting them as captured API examples. Preserve response envelopes and pagination links, and remove tenant-specific identifiers and tokens.

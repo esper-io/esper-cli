@@ -48,6 +48,10 @@ func (client *HTTPClient) Do(ctx context.Context, method, requestPath string, qu
 }
 
 func (client *HTTPClient) DoWithContentType(ctx context.Context, method, requestPath string, query url.Values, body []byte, contentType string) ([]byte, error) {
+	return client.DoWithContentTypeAndHeaders(ctx, method, requestPath, query, nil, body, contentType, "application/json")
+}
+
+func (client *HTTPClient) DoWithContentTypeAndHeaders(ctx context.Context, method, requestPath string, query url.Values, headers http.Header, body []byte, contentType, accept string) ([]byte, error) {
 	base := strings.TrimRight(client.BaseURL, "/")
 	requestURL := base + "/" + strings.TrimLeft(requestPath, "/")
 	if len(query) > 0 {
@@ -63,8 +67,11 @@ func (client *HTTPClient) DoWithContentType(ctx context.Context, method, request
 		if err != nil {
 			return nil, NewError(CategoryUsage, fmt.Errorf("build request: %w", err))
 		}
+		for name, values := range headers {
+			request.Header[name] = append([]string(nil), values...)
+		}
 		Authorize(request, client.APIKey)
-		request.Header.Set("Accept", "application/json")
+		request.Header.Set("Accept", accept)
 		request.Header.Set("User-Agent", client.UserAgent)
 		if len(body) > 0 {
 			request.Header.Set("Content-Type", contentType)

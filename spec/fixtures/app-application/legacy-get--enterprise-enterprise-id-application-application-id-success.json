@@ -1,0 +1,28 @@
+{
+  "application_name": "fixture-legacy-get--enterprise-enterprise-id-application-application-id-success-application_name",
+  "category": "fixture-legacy-get--enterprise-enterprise-id-application-application-id-success-category",
+  "compatibility": "fixture-legacy-get--enterprise-enterprise-id-application-application-id-success-compatibility",
+  "content_rating": "fixture-legacy-get--enterprise-enterprise-id-application-application-id-success-content_rating",
+  "created_on": "2026-08-24T12:00:00Z",
+  "developer": "fixture-legacy-get--enterprise-enterprise-id-application-application-id-success-developer",
+  "enterprise": "https://fixture.example.test/packet-3",
+  "id": "00000000-0000-4000-8000-000000000001",
+  "is_active": true,
+  "is_hidden": true,
+  "package_name": "fixture-legacy-get--enterprise-enterprise-id-application-application-id-success-package_name",
+  "updated_on": "2026-08-24T12:00:00Z",
+  "versions": [
+    {
+      "build_number": "fixture-legacy-get--enterprise-enterprise-id-application-application-id-success-versions-build_number",
+      "download_url": "https://fixture.example.test/packet-3",
+      "hash_string": "fixture-legacy-get--enterprise-enterprise-id-application-application-id-success-versions-hash_string",
+      "icon_url": "https://fixture.example.test/packet-3",
+      "id": "00000000-0000-4000-8000-000000000001",
+      "min_sdk_version": "fixture-legacy-get--enterprise-enterprise-id-application-application-id-success-versions-min_sdk_version",
+      "release_comments": "fixture-legacy-get--enterprise-enterprise-id-application-application-id-success-versions-release_comments",
+      "release_name": "fixture-legacy-get--enterprise-enterprise-id-application-application-id-success-versions-release_name",
+      "target_sdk_version": "fixture-legacy-get--enterprise-enterprise-id-application-application-id-success-versions-target_sdk_version",
+      "version_code": "fixture-legacy-get--enterprise-enterprise-id-application-application-id-success-versions-version_code"
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "count": 1,
+  "next": "https://fixture.example.test/packet-3",
+  "previous": "https://fixture.example.test/packet-3",
+  "results": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "package_name": "fixture-v1-get--v1-enterprise-enterprise-id-applications-minimal-success-results-package_name"
+    }
+  ]
+}

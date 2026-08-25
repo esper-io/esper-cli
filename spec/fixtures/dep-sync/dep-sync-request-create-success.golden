@@ -1,0 +1,11 @@
+{
+  "code": 200,
+  "content": {
+    "created_at": "2026-08-24T00:00:00Z",
+    "created_by": "fixture-user",
+    "id": "dep-sync-1",
+    "status": "QUEUED",
+    "updated_at": "2026-08-24T00:00:00Z"
+  },
+  "message": "DEP sync request created"
+}

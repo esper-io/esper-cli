@@ -13,7 +13,7 @@ import (
 
 var methods = map[string]bool{"get": true, "post": true, "put": true, "patch": true, "delete": true}
 var coreGenerationRank = map[string]int{"legacy": 0, "v0": 1, "v1": 2, "v2": 3, "v3": 4}
-var pathResourceNames = map[string]string{"devicegroup": "device-group", "devicegroups": "device-group", "operationlists": "operation-list", "pipelines": "pipeline", "runs": "pipeline-run", "stageruns": "stage-run", "stages": "stage", "targetlists": "target-list", "targetruns": "target-run", "targets": "target"}
+var pathResourceNames = map[string]string{"alarmrules": "alarm-rule", "devicegroup": "device-group", "devicegroups": "device-group", "operationlists": "operation-list", "pipelines": "pipeline", "runs": "pipeline-run", "stageruns": "stage-run", "stages": "stage", "targetlists": "target-list", "targetruns": "target-run", "targets": "target"}
 var sideFamilyPrefixes = map[string]string{"authn2": "authn", "authz2": "authz", "foundry": "foundry", "geofence": "geofence", "pipelines-v0": "pipeline"}
 
 type document struct {
@@ -30,14 +30,22 @@ type document struct {
 type operation struct {
 	Parameters []parameter `json:"parameters"`
 	Body       struct {
-		Content map[string]requestMedia `json:"content"`
+		Required bool                    `json:"required"`
+		Content  map[string]requestMedia `json:"content"`
 	} `json:"requestBody"`
-	Noun        string `json:"x-esper-noun"`
-	Verb        string `json:"x-esper-verb"`
-	Pagination  string `json:"x-esper-pagination"`
-	Destructive bool   `json:"x-esper-destructive"`
-	ScopeParent string `json:"x-esper-scope-parent"`
-	Summary     string `json:"summary"`
+	Responses   map[string]response `json:"responses"`
+	OperationID string              `json:"operationId"`
+	AliasOf     string              `json:"x-esper-alias-of"`
+	Noun        string              `json:"x-esper-noun"`
+	Verb        string              `json:"x-esper-verb"`
+	Pagination  string              `json:"x-esper-pagination"`
+	Destructive bool                `json:"x-esper-destructive"`
+	ScopeParent string              `json:"x-esper-scope-parent"`
+	Summary     string              `json:"summary"`
+}
+
+type response struct {
+	Content map[string]json.RawMessage `json:"content"`
 }
 
 type parameter struct {
@@ -58,21 +66,25 @@ type schema struct {
 	Enum       []any             `json:"enum"`
 	Properties map[string]schema `json:"properties"`
 	Required   []string          `json:"required"`
+	AllOf      []schema          `json:"allOf"`
 }
 
 type generatedOperation struct {
-	Generation  string
-	Command     []string
-	Method      string
-	Path        string
-	Noun        string
-	Verb        string
-	Pagination  string
-	Destructive bool
-	ScopeParent string
-	Summary     string
-	Parameters  []generatedParameter
-	Body        *generatedBody
+	Generation   string
+	Command      []string
+	Method       string
+	Path         string
+	Noun         string
+	Verb         string
+	Pagination   string
+	Destructive  bool
+	ScopeParent  string
+	Summary      string
+	OperationID  string
+	AliasOf      string
+	SuccessMedia string
+	Parameters   []generatedParameter
+	Body         *generatedBody
 }
 type generatedParameter struct {
 	Name, In, Type  string
@@ -82,8 +94,13 @@ type generatedParameter struct {
 }
 type generatedBody struct {
 	MediaType  string
+	Required   bool
+	Empty      bool
+	BodyOnly   bool
 	Properties []generatedProperty
+	AutoFill   []generatedAutoFill
 }
+type generatedAutoFill struct{ Name, Parameter, Type, Format string }
 type generatedProperty struct {
 	Name, Type, Format string
 	Required, File     bool
@@ -152,15 +169,15 @@ func load(directory string) ([]generatedOperation, error) {
 				if !methods[method] {
 					continue
 				}
-				generated := generatedOperation{Generation: spec.Info.Generation, Method: strings.ToUpper(method), Path: apiPath, Noun: operation.Noun, Verb: operation.Verb, Pagination: operation.Pagination, Destructive: operation.Destructive, ScopeParent: operation.ScopeParent, Summary: operation.Summary}
+				generated := generatedOperation{Generation: spec.Info.Generation, Method: strings.ToUpper(method), Path: apiPath, Noun: operation.Noun, Verb: operation.Verb, Pagination: operation.Pagination, Destructive: operation.Destructive, ScopeParent: operation.ScopeParent, Summary: operation.Summary, OperationID: operation.OperationID, AliasOf: operation.AliasOf, SuccessMedia: successMedia(operation.Responses)}
 				for _, parameter := range operation.Parameters {
 					parameter = resolveParameter(parameter, spec.Components.Parameters)
 					resolved := resolve(parameter.Schema, spec.Components.Schemas)
-					scopeParameter := scopeParameterName(apiPath, operation.ScopeParent)
-					generated.Parameters = append(generated.Parameters, generatedParameter{Name: parameter.Name, In: parameter.In, Type: scalarType(resolved), Required: parameter.Required, Scope: parameter.In == "path" && parameter.Name == scopeParameter, ScopeName: operation.ScopeParent, Enum: stringEnum(resolved.Enum)})
+					scopeName := scopeParameterNames(apiPath, operation.ScopeParent)[parameter.Name]
+					generated.Parameters = append(generated.Parameters, generatedParameter{Name: parameter.Name, In: parameter.In, Type: scalarType(resolved), Required: parameter.Required, Scope: scopeName != "", ScopeName: scopeName, Enum: stringEnum(resolved.Enum)})
 				}
 				if len(operation.Body.Content) > 0 {
-					generated.Body = extractBody(operation.Body.Content, spec.Components.Schemas)
+					generated.Body = extractBody(operation.Body.Content, operation.Body.Required, generated.Parameters, spec.Components.Schemas)
 				}
 				result = append(result, generated)
 			}
@@ -169,30 +186,36 @@ func load(directory string) ([]generatedOperation, error) {
 	return result, nil
 }
 
-func scopeParameterName(apiPath, scopeParent string) string {
+func scopeParameterNames(apiPath, scopeParent string) map[string]string {
+	result := map[string]string{}
 	if scopeParent == "" {
-		return ""
+		return result
 	}
 	segments := strings.Split(strings.Trim(apiPath, "/"), "/")
+	lastIsItem := strings.HasPrefix(segments[len(segments)-1], "{")
 	for index := 0; index+1 < len(segments); index++ {
-		rawResource := strings.TrimSuffix(segments[index], "s")
-		resource := pathResourceNames[segments[index]]
-		if resource == "" {
-			resource = rawResource
-		}
-		if resource != scopeParent && rawResource != scopeParent {
+		parameter := segments[index+1]
+		if !strings.HasPrefix(parameter, "{") || !strings.HasSuffix(parameter, "}") || (lastIsItem && index+1 == len(segments)-1) {
 			continue
 		}
-		parameter := segments[index+1]
-		if strings.HasPrefix(parameter, "{") && strings.HasSuffix(parameter, "}") {
-			return strings.TrimSuffix(strings.TrimPrefix(parameter, "{"), "}")
+		resource := pathResourceNames[segments[index]]
+		if resource == "" {
+			resource = strings.TrimSuffix(segments[index], "s")
 		}
+		result[strings.TrimSuffix(strings.TrimPrefix(parameter, "{"), "}")] = resource
 	}
-	return ""
+	return result
 }
 
 func resolve(value schema, schemas map[string]schema) schema {
+	return resolveWithSeen(value, schemas, map[string]bool{})
+}
+
+func resolveWithSeen(value schema, schemas map[string]schema, resolving map[string]bool) schema {
 	if !strings.HasPrefix(value.Ref, "#/components/schemas/") {
+		return value
+	}
+	if resolving[value.Ref] {
 		return value
 	}
 	name := strings.TrimPrefix(value.Ref, "#/components/schemas/")
@@ -200,7 +223,9 @@ func resolve(value schema, schemas map[string]schema) schema {
 	if !ok {
 		return value
 	}
-	return resolve(resolved, schemas)
+	resolving[value.Ref] = true
+	defer delete(resolving, value.Ref)
+	return resolveWithSeen(resolved, schemas, resolving)
 }
 
 func resolveParameter(value parameter, parameters map[string]parameter) parameter {
@@ -215,7 +240,7 @@ func resolveParameter(value parameter, parameters map[string]parameter) paramete
 	return resolveParameter(resolved, parameters)
 }
 
-func extractBody(content map[string]requestMedia, schemas map[string]schema) *generatedBody {
+func extractBody(content map[string]requestMedia, required bool, parameters []generatedParameter, schemas map[string]schema) *generatedBody {
 	mediaType := ""
 	if _, ok := content["application/json"]; ok {
 		mediaType = "application/json"
@@ -225,28 +250,97 @@ func extractBody(content map[string]requestMedia, schemas map[string]schema) *ge
 		return nil
 	}
 	value := resolve(content[mediaType].Schema, schemas)
-	required := map[string]bool{}
+	requiredProperties := map[string]bool{}
 	for _, name := range value.Required {
-		required[name] = true
+		requiredProperties[name] = true
 	}
-	body := &generatedBody{MediaType: mediaType}
+	_, explicitlyObject := value.Type.(string)
+	body := &generatedBody{MediaType: mediaType, Required: required, Empty: explicitlyObject && scalarType(value) == "object" && len(value.Properties) == 0}
+	parameterByFlag := map[string]generatedParameter{}
+	for _, parameter := range parameters {
+		if parameter.In == "path" {
+			parameterByFlag[kebab(parameter.Name)] = parameter
+			parameterByFlag[kebab(parameter.ScopeName)] = parameter
+		}
+	}
+	body.BodyOnly = hasRequiredComplexProperty(value, schemas, map[string]bool{})
 	for _, name := range sortedKeys(value.Properties) {
 		property := resolve(value.Properties[name], schemas)
 		typeName := scalarType(property)
 		file := mediaType == "multipart/form-data" && typeName == "string" && property.Format == "binary"
+		if parameter, collision := parameterByFlag[kebab(name)]; collision {
+			if requiredProperties[name] {
+				body.AutoFill = append(body.AutoFill, generatedAutoFill{Name: name, Parameter: parameter.Name, Type: typeName, Format: property.Format})
+			}
+			continue
+		}
+		if body.BodyOnly {
+			continue
+		}
 		if !file && !isScalar(typeName) {
 			continue
 		}
-		body.Properties = append(body.Properties, generatedProperty{Name: name, Type: typeName, Format: property.Format, Required: required[name], File: file, Enum: stringEnum(property.Enum)})
+		body.Properties = append(body.Properties, generatedProperty{Name: name, Type: typeName, Format: property.Format, Required: requiredProperties[name], File: file, Enum: stringEnum(property.Enum)})
 	}
 	return body
 }
 
+// hasRequiredComplexProperty preserves composed request schemas while applying
+// the body-only rule to required complex properties from every allOf member.
+func hasRequiredComplexProperty(value schema, schemas map[string]schema, resolving map[string]bool) bool {
+	if strings.HasPrefix(value.Ref, "#/components/schemas/") {
+		if resolving[value.Ref] {
+			return false
+		}
+		resolved, ok := schemas[strings.TrimPrefix(value.Ref, "#/components/schemas/")]
+		if !ok {
+			return false
+		}
+		resolving[value.Ref] = true
+		defer delete(resolving, value.Ref)
+		return hasRequiredComplexProperty(resolved, schemas, resolving)
+	}
+	for _, name := range value.Required {
+		property, ok := value.Properties[name]
+		if ok && !isScalar(scalarType(resolve(property, schemas))) {
+			return true
+		}
+	}
+	for _, member := range value.AllOf {
+		if hasRequiredComplexProperty(member, schemas, resolving) {
+			return true
+		}
+	}
+	return false
+}
+
+func successMedia(responses map[string]response) string {
+	keys := sortedStringKeys(responses)
+	for _, status := range keys {
+		if !strings.HasPrefix(status, "2") {
+			continue
+		}
+		for _, mediaType := range sortedStringKeys(responses[status].Content) {
+			return mediaType
+		}
+	}
+	return "application/json"
+}
+
 func assignCommands(operations []generatedOperation) {
+	for index := range operations {
+		operation := &operations[index]
+		if operation.Generation == "pipelines-v0" && (operation.Noun == "command" || operation.Noun == "operation") {
+			operation.Noun = "pipeline-" + operation.Noun
+		}
+	}
 	type candidate struct{ index, rank int }
 	groups := map[string][]candidate{}
 	for index := range operations {
 		operation := &operations[index]
+		if operation.AliasOf != "" {
+			continue
+		}
 		rank, _ := coreGenerationRank[operation.Generation]
 		key := operation.Noun + "\x00" + operation.Verb
 		groups[key] = append(groups[key], candidate{index: index, rank: rank})
@@ -264,7 +358,7 @@ func assignCommands(operations []generatedOperation) {
 		}
 		for _, candidate := range candidates {
 			operation := &operations[candidate.index]
-			if prefix, side := sideFamilyPrefixes[operation.Generation]; side && operation.ScopeParent == "" {
+			if prefix, side := sideFamilyPrefixes[operation.Generation]; side && operation.Generation != "pipelines-v0" && operation.ScopeParent == "" {
 				operation.Noun = prefix + "-" + operation.Noun
 			}
 		}
@@ -272,6 +366,9 @@ func assignCommands(operations []generatedOperation) {
 	groups = map[string][]candidate{}
 	for index := range operations {
 		operation := &operations[index]
+		if operation.AliasOf != "" {
+			continue
+		}
 		rank, _ := coreGenerationRank[operation.Generation]
 		key := operation.Noun + "\x00" + operation.Verb
 		groups[key] = append(groups[key], candidate{index: index, rank: rank})
@@ -291,6 +388,25 @@ func assignCommands(operations []generatedOperation) {
 				operation.Command = []string{operation.Noun, operation.Verb}
 			}
 		}
+	}
+	byID := map[string]generatedOperation{}
+	for _, operation := range operations {
+		if operation.OperationID != "" && operation.AliasOf == "" {
+			byID[operation.OperationID] = operation
+		}
+	}
+	for index := range operations {
+		operation := &operations[index]
+		if operation.AliasOf == "" {
+			continue
+		}
+		canonical, ok := byID[operation.AliasOf]
+		if !ok {
+			continue
+		}
+		operation.Command = canonical.Command
+		operation.Noun = canonical.Noun
+		operation.Verb = canonical.Verb
 	}
 }
 
@@ -324,5 +440,27 @@ func sortedKeys(values map[string]schema) []string {
 	}
 	sort.Strings(keys)
 	return keys
+}
+func sortedStringKeys[T any](values map[string]T) []string {
+	keys := make([]string, 0, len(values))
+	for key := range values {
+		keys = append(keys, key)
+	}
+	sort.Strings(keys)
+	return keys
+}
+func kebab(value string) string {
+	var result []rune
+	for index, char := range value {
+		if char == '_' {
+			result = append(result, '-')
+			continue
+		}
+		if index > 0 && char >= 'A' && char <= 'Z' {
+			result = append(result, '-')
+		}
+		result = append(result, char)
+	}
+	return strings.ToLower(string(result))
 }
 func fatal(err error) { fmt.Fprintln(os.Stderr, "error:", err); os.Exit(1) }

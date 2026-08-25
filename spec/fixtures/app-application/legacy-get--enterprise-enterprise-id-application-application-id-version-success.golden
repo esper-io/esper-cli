@@ -1,0 +1,70 @@
+[
+  {
+    "app_file": "https://fixture.example.test/packet-3",
+    "app_icon": "https://fixture.example.test/packet-3",
+    "application": "https://fixture.example.test/packet-3",
+    "approval_status": "AVAILABLE",
+    "build_number": "fixture-legacy-get--enterprise-enterprise-id-application-application-id-version-one-results-build_number",
+    "created_on": "2026-08-24T12:00:00Z",
+    "enterprise": "https://fixture.example.test/packet-3",
+    "hash_string": "fixture-legacy-get--enterprise-enterprise-id-application-application-id-version-one-results-hash_string",
+    "id": "00000000-0000-4000-8000-000000000001",
+    "installed_count": 1,
+    "is_default": true,
+    "is_enabled": true,
+    "min_sdk_version": "fixture-legacy-get--enterprise-enterprise-id-application-application-id-version-one-results-min_sdk_version",
+    "permissions": [
+      {
+        "app_version": "https://fixture.example.test/packet-3",
+        "created_on": "2026-08-24T12:00:00Z",
+        "enterprise": "https://fixture.example.test/packet-3",
+        "grant_state": "Default",
+        "id": "00000000-0000-4000-8000-000000000001",
+        "is_active": true,
+        "permission": "fixture-legacy-get--enterprise-enterprise-id-application-application-id-version-one-results-permissions-permission",
+        "updated_on": "2026-08-24T12:00:00Z"
+      }
+    ],
+    "release_comments": "fixture-legacy-get--enterprise-enterprise-id-application-application-id-version-one-results-release_comments",
+    "release_name": "fixture-legacy-get--enterprise-enterprise-id-application-application-id-version-one-results-release_name",
+    "release_track": "Alpha",
+    "size_in_mb": 1,
+    "target_sdk_version": "fixture-legacy-get--enterprise-enterprise-id-application-application-id-version-one-results-target_sdk_version",
+    "updated_on": "2026-08-24T12:00:00Z",
+    "version_code": "fixture-legacy-get--enterprise-enterprise-id-application-application-id-version-one-results-version_code"
+  },
+  {
+    "app_file": "https://fixture.example.test/packet-3",
+    "app_icon": "https://fixture.example.test/packet-3",
+    "application": "https://fixture.example.test/packet-3",
+    "approval_status": "AVAILABLE",
+    "build_number": "fixture-legacy-get--enterprise-enterprise-id-application-application-id-version-two-results-build_number",
+    "created_on": "2026-08-24T12:00:00Z",
+    "enterprise": "https://fixture.example.test/packet-3",
+    "hash_string": "fixture-legacy-get--enterprise-enterprise-id-application-application-id-version-two-results-hash_string",
+    "id": "00000000-0000-4000-8000-000000000001",
+    "installed_count": 1,
+    "is_default": true,
+    "is_enabled": true,
+    "min_sdk_version": "fixture-legacy-get--enterprise-enterprise-id-application-application-id-version-two-results-min_sdk_version",
+    "permissions": [
+      {
+        "app_version": "https://fixture.example.test/packet-3",
+        "created_on": "2026-08-24T12:00:00Z",
+        "enterprise": "https://fixture.example.test/packet-3",
+        "grant_state": "Default",
+        "id": "00000000-0000-4000-8000-000000000001",
+        "is_active": true,
+        "permission": "fixture-legacy-get--enterprise-enterprise-id-application-application-id-version-two-results-permissions-permission",
+        "updated_on": "2026-08-24T12:00:00Z"
+      }
+    ],
+    "release_comments": "fixture-legacy-get--enterprise-enterprise-id-application-application-id-version-two-results-release_comments",
+    "release_name": "fixture-legacy-get--enterprise-enterprise-id-application-application-id-version-two-results-release_name",
+    "release_track": "Alpha",
+    "size_in_mb": 1,
+    "target_sdk_version": "fixture-legacy-get--enterprise-enterprise-id-application-application-id-version-two-results-target_sdk_version",
+    "updated_on": "2026-08-24T12:00:00Z",
+    "version_code": "fixture-legacy-get--enterprise-enterprise-id-application-application-id-version-two-results-version_code"
+  }
+]

@@ -1,0 +1,1 @@
+{"id":"connection-1","display_name":"Acme SSO","strategy":"oidc","config":{"issuer_url":"https://login.example.test","client_id":"client-1"}}

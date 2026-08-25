@@ -1,0 +1,35 @@
+{
+  "count": 1,
+  "next": "NEXT_PAGE",
+  "previous": "https://fixture.example.test/packet-3",
+  "results": [
+    {
+      "application_name": "fixture-legacy-get--enterprise-enterprise-id-application-one-results-application_name",
+      "category": "fixture-legacy-get--enterprise-enterprise-id-application-one-results-category",
+      "compatibility": "fixture-legacy-get--enterprise-enterprise-id-application-one-results-compatibility",
+      "content_rating": "fixture-legacy-get--enterprise-enterprise-id-application-one-results-content_rating",
+      "created_on": "2026-08-24T12:00:00Z",
+      "developer": "fixture-legacy-get--enterprise-enterprise-id-application-one-results-developer",
+      "enterprise": "https://fixture.example.test/packet-3",
+      "id": "00000000-0000-4000-8000-000000000001",
+      "is_active": true,
+      "is_hidden": true,
+      "package_name": "fixture-legacy-get--enterprise-enterprise-id-application-one-results-package_name",
+      "updated_on": "2026-08-24T12:00:00Z",
+      "versions": [
+        {
+          "build_number": "fixture-legacy-get--enterprise-enterprise-id-application-one-results-versions-build_number",
+          "download_url": "https://fixture.example.test/packet-3",
+          "hash_string": "fixture-legacy-get--enterprise-enterprise-id-application-one-results-versions-hash_string",
+          "icon_url": "https://fixture.example.test/packet-3",
+          "id": "00000000-0000-4000-8000-000000000001",
+          "min_sdk_version": "fixture-legacy-get--enterprise-enterprise-id-application-one-results-versions-min_sdk_version",
+          "release_comments": "fixture-legacy-get--enterprise-enterprise-id-application-one-results-versions-release_comments",
+          "release_name": "fixture-legacy-get--enterprise-enterprise-id-application-one-results-versions-release_name",
+          "target_sdk_version": "fixture-legacy-get--enterprise-enterprise-id-application-one-results-versions-target_sdk_version",
+          "version_code": "fixture-legacy-get--enterprise-enterprise-id-application-one-results-versions-version_code"
+        }
+      ]
+    }
+  ]
+}

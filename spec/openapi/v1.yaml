@@ -222,7 +222,8 @@
             "description": "A UUID string identifying this enterprise.",
             "required": true,
             "schema": {
-              "type": "string"
+              "type": "string",
+              "format": "uuid"
             }
           },
           {
@@ -231,7 +232,8 @@
             "description": "A UUID string identifying the device",
             "required": true,
             "schema": {
-              "type": "string"
+              "type": "string",
+              "format": "uuid"
             }
           },
           {
@@ -261,6 +263,8 @@
                 "schema": {
                   "required": [
                     "count",
+                    "next",
+                    "previous",
                     "results"
                   ],
                   "type": "object",
@@ -456,7 +460,7 @@
         "x-esper-destructive": false,
         "x-esper-pagination": "limit-offset",
         "x-esper-verb": "list",
-        "x-esper-noun": "alertchannel",
+        "x-esper-noun": "alert-channel",
         "x-esper-scope-parent": "enterprise"
       },
       "post": {
@@ -487,7 +491,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/UpdateAlertChannelsV1"
+                "$ref": "#/components/schemas/AlertChannelCreateReplaceV1"
               }
             }
           },
@@ -553,7 +557,7 @@
         "x-esper-destructive": false,
         "x-esper-pagination": "none",
         "x-esper-verb": "create",
-        "x-esper-noun": "alertchannel",
+        "x-esper-noun": "alert-channel",
         "x-esper-scope-parent": "enterprise"
       }
     },
@@ -641,7 +645,8 @@
         "x-esper-destructive": false,
         "x-esper-pagination": "none",
         "x-esper-verb": "get",
-        "x-esper-noun": "alert-channel"
+        "x-esper-noun": "alert-channel",
+        "x-esper-scope-parent": "enterprise"
       },
       "put": {
         "x-badges": [
@@ -681,7 +686,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/UpdateAlertChannelsV1"
+                "$ref": "#/components/schemas/AlertChannelCreateReplaceV1"
               }
             }
           },
@@ -747,7 +752,8 @@
         "x-esper-destructive": false,
         "x-esper-pagination": "none",
         "x-esper-verb": "update",
-        "x-esper-noun": "alert-channel"
+        "x-esper-noun": "alert-channel",
+        "x-esper-scope-parent": "enterprise"
       },
       "patch": {
         "x-badges": [
@@ -842,7 +848,8 @@
         "x-esper-destructive": false,
         "x-esper-pagination": "none",
         "x-esper-verb": "patch",
-        "x-esper-noun": "alert-channel"
+        "x-esper-noun": "alert-channel",
+        "x-esper-scope-parent": "enterprise"
       },
       "delete": {
         "x-badges": [
@@ -941,7 +948,8 @@
         "x-esper-destructive": true,
         "x-esper-pagination": "none",
         "x-esper-verb": "delete",
-        "x-esper-noun": "alert-channel"
+        "x-esper-noun": "alert-channel",
+        "x-esper-scope-parent": "enterprise"
       }
     },
     "/v1/enterprise/{enterprise_id}/alarmrules/": {
@@ -1106,7 +1114,7 @@
         "x-esper-destructive": false,
         "x-esper-pagination": "limit-offset",
         "x-esper-verb": "list",
-        "x-esper-noun": "alarmrule",
+        "x-esper-noun": "alarm-rule",
         "x-esper-scope-parent": "enterprise"
       },
       "post": {
@@ -1137,7 +1145,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/UpdateAlarmRule"
+                "$ref": "#/components/schemas/AlarmRuleCreateReplaceV1"
               }
             }
           },
@@ -1203,7 +1211,7 @@
         "x-esper-destructive": false,
         "x-esper-pagination": "none",
         "x-esper-verb": "add",
-        "x-esper-noun": "alarmrule",
+        "x-esper-noun": "alarm-rule",
         "x-esper-scope-parent": "enterprise"
       }
     },
@@ -1291,7 +1299,8 @@
         "x-esper-destructive": false,
         "x-esper-pagination": "none",
         "x-esper-verb": "get",
-        "x-esper-noun": "alarm-rule"
+        "x-esper-noun": "alarm-rule",
+        "x-esper-scope-parent": "enterprise"
       },
       "put": {
         "x-badges": [
@@ -1330,7 +1339,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/UpdateAlarmRule"
+                "$ref": "#/components/schemas/AlarmRuleCreateReplaceV1"
               }
             }
           },
@@ -1396,7 +1405,8 @@
         "x-esper-destructive": false,
         "x-esper-pagination": "none",
         "x-esper-verb": "update",
-        "x-esper-noun": "alarm-rule"
+        "x-esper-noun": "alarm-rule",
+        "x-esper-scope-parent": "enterprise"
       },
       "patch": {
         "x-badges": [
@@ -1500,7 +1510,8 @@
         "x-esper-destructive": false,
         "x-esper-pagination": "none",
         "x-esper-verb": "patch",
-        "x-esper-noun": "alarm-rule"
+        "x-esper-noun": "alarm-rule",
+        "x-esper-scope-parent": "enterprise"
       },
       "delete": {
         "x-badges": [
@@ -1598,7 +1609,8 @@
         "x-esper-destructive": true,
         "x-esper-pagination": "none",
         "x-esper-verb": "delete",
-        "x-esper-noun": "alarm-rule"
+        "x-esper-noun": "alarm-rule",
+        "x-esper-scope-parent": "enterprise"
       }
     },
     "/v1/enterprise/{enterprise_id}/alarmrules/{alarm_id}/alarmhistory/": {
@@ -1633,6 +1645,22 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 50
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 0
+            }
           }
         ],
         "responses": {
@@ -1641,7 +1669,20 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AlarmHistory"
+                  "required": [
+                    "total",
+                    "results"
+                  ],
+                  "type": "object",
+                  "properties": {
+                    "total": { "type": "integer" },
+                    "next": { "type": ["string", "null"], "format": "url" },
+                    "previous": { "type": ["string", "null"], "format": "url" },
+                    "results": {
+                      "type": "array",
+                      "items": { "$ref": "#/components/schemas/AlarmHistory" }
+                    }
+                  }
                 }
               }
             }
@@ -1683,9 +1724,10 @@
           }
         ],
         "x-esper-destructive": false,
-        "x-esper-pagination": "none",
+        "x-esper-pagination": "limit-offset",
         "x-esper-verb": "get",
-        "x-esper-noun": "alarmhistory"
+        "x-esper-noun": "alarm-history",
+        "x-esper-scope-parent": "enterprise"
       }
     },
     "/v1/enterprise/{enterprise_id}/wallpaper/": {
@@ -1753,8 +1795,7 @@
             "in": "query",
             "description": "Number of results to return per page.",
             "schema": {
-              "type": "integer",
-              "default": 20
+              "type": "integer"
             }
           },
           {
@@ -1762,8 +1803,7 @@
             "in": "query",
             "description": "Return results from this index.",
             "schema": {
-              "type": "integer",
-              "default": 0
+              "type": "integer"
             }
           }
         ],
@@ -1775,6 +1815,8 @@
                 "schema": {
                   "required": [
                     "count",
+                    "next",
+                    "previous",
                     "results"
                   ],
                   "type": "object",
@@ -1885,11 +1927,15 @@
                   "image_file": {
                     "type": "string",
                     "description": "Valid file to upload",
-                    "format": "path"
+                    "format": "binary"
                   },
                   "orientation": {
                     "type": "string",
-                    "description": "Orientation of image e.g. landscape"
+                    "description": "Orientation of image e.g. landscape",
+                    "enum": [
+                      "portrait",
+                      "landscape"
+                    ]
                   }
                 }
               }
@@ -2239,6 +2285,22 @@
             "schema": {
               "type": "boolean"
             }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Number of results to return per page.",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "description": "Return results from this index.",
+            "schema": {
+              "type": "integer"
+            }
           }
         ],
         "responses": {
@@ -2249,6 +2311,8 @@
                 "schema": {
                   "required": [
                     "count",
+                    "next",
+                    "previous",
                     "results"
                   ],
                   "type": "object",
@@ -2318,7 +2382,7 @@
           }
         ],
         "x-esper-destructive": false,
-        "x-esper-pagination": "none",
+        "x-esper-pagination": "limit-offset",
         "x-esper-verb": "list",
         "x-esper-noun": "tile-icon",
         "x-esper-scope-parent": "enterprise"
@@ -2360,11 +2424,25 @@
                   "icon_file": {
                     "type": "string",
                     "description": "Valid file to upload",
-                    "format": "path"
+                    "format": "binary"
                   },
                   "device_model": {
                     "type": "string",
                     "description": "Device model"
+                  },
+                  "category": {
+                    "type": "string",
+                    "enum": [
+                      "mobile",
+                      "tablet",
+                      "rugged",
+                      "pos",
+                      "digital_signage",
+                      "kiosk"
+                    ]
+                  },
+                  "custom": {
+                    "type": "boolean"
                   },
                   "enterprise": {
                     "type": "string",
@@ -2763,6 +2841,7 @@
           "content": {
             "application/json": {
               "schema": {
+                "type": "object",
                 "required": [
                   "model"
                 ],
@@ -2783,6 +2862,10 @@
             "content": {
               "application/json": {
                 "schema": {
+                  "type": "object",
+                  "required": [
+                    "model"
+                  ],
                   "properties": {
                     "model": {
                       "type": "string",
@@ -2839,7 +2922,7 @@
             "apiKey": []
           }
         ],
-        "x-esper-destructive": false,
+        "x-esper-destructive": true,
         "x-esper-pagination": "none",
         "x-esper-verb": "remove",
         "x-esper-noun": "tile-icon-unapply"
@@ -2866,7 +2949,8 @@
             "description": "A UUID string identifying this enterprise.",
             "required": true,
             "schema": {
-              "type": "string"
+              "type": "string",
+              "format": "uuid"
             }
           },
           {
@@ -2894,6 +2978,8 @@
                 "schema": {
                   "required": [
                     "count",
+                    "next",
+                    "previous",
                     "results"
                   ],
                   "type": "object",
@@ -2990,7 +3076,8 @@
             "description": "A UUID string identifying this enterprise.",
             "required": true,
             "schema": {
-              "type": "string"
+              "type": "string",
+              "format": "uuid"
             }
           },
           {
@@ -3077,7 +3164,8 @@
             "description": "A UUID string identifying this enterprise.",
             "required": true,
             "schema": {
-              "type": "string"
+              "type": "string",
+              "format": "uuid"
             }
           },
           {
@@ -3094,7 +3182,7 @@
             "description": "Filter device-tile reports created after a given timestamp.",
             "schema": {
               "type": "string",
-              "format": "datetime"
+              "format": "date-time"
             }
           },
           {
@@ -3103,7 +3191,7 @@
             "description": "Flter device-tile reports created before a given timestamp.",
             "schema": {
               "type": "string",
-              "format": "datetime"
+              "format": "date-time"
             }
           },
           {
@@ -3112,7 +3200,7 @@
             "description": "Filter device-tile reports provisioned after a given timestamp.",
             "schema": {
               "type": "string",
-              "format": "datetime"
+              "format": "date-time"
             }
           },
           {
@@ -3121,7 +3209,7 @@
             "description": "Filter device-tile reports provisioned before a given timestamp.",
             "schema": {
               "type": "string",
-              "format": "datetime"
+              "format": "date-time"
             }
           },
           {
@@ -3130,7 +3218,7 @@
             "description": "Filter device-tile reports updated after a given timestamp.",
             "schema": {
               "type": "string",
-              "format": "datetime"
+              "format": "date-time"
             }
           },
           {
@@ -3139,7 +3227,7 @@
             "description": "Filter device-tile reports updated before a given timestamp.",
             "schema": {
               "type": "string",
-              "format": "datetime"
+              "format": "date-time"
             }
           },
           {
@@ -3148,7 +3236,7 @@
             "description": "Filter device-tile reports last seen after a given timestamp.",
             "schema": {
               "type": "string",
-              "format": "datetime"
+              "format": "date-time"
             }
           },
           {
@@ -3157,7 +3245,7 @@
             "description": "Filter device-tile reports last seen before a given timestamp.",
             "schema": {
               "type": "string",
-              "format": "datetime"
+              "format": "date-time"
             }
           },
           {
@@ -3251,7 +3339,6 @@
             "description": "Filter device-tile reports by availability of group. True returns device-tiles with no group. False returns device-tiles with group.",
             "schema": {
               "type": "string",
-              "format": "boolean",
               "description": "Allowed values are True, False, true, false, 1, 0."
             }
           },
@@ -3300,7 +3387,7 @@
             "in": "query",
             "description": "Filter device-tile reports by geofence application.",
             "schema": {
-              "type": "boolean"
+              "type": "string"
             }
           },
           {
@@ -3316,7 +3403,7 @@
             "in": "query",
             "description": "Filter device-tile reports by android version.",
             "schema": {
-              "type": "integer"
+              "type": "string"
             }
           },
           {
@@ -3324,7 +3411,7 @@
             "in": "query",
             "description": "Filter device-tile reports by multiple android versions.",
             "schema": {
-              "type": "integer",
+              "type": "string",
               "description": "List of android versions- comma separated."
             }
           },
@@ -3412,20 +3499,11 @@
             }
           },
           {
-            "name": "location",
-            "in": "query",
-            "description": "Filter device-tile reports by location.",
-            "schema": {
-              "type": "string",
-              "description": "City or state can be used to filter location."
-            }
-          },
-          {
             "name": "active_connection",
             "in": "query",
             "description": "Filter device-tile reports by active connection status.",
             "schema": {
-              "type": "boolean"
+              "type": "string"
             }
           },
           {
@@ -3437,11 +3515,27 @@
             }
           },
           {
-            "name": "has_seamlessInfo",
+            "name": "seamless_info",
             "in": "query",
             "description": "Filter device-tile reports by seamless information.",
             "schema": {
-              "type": "boolean"
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Number of results to return per page.",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "description": "The initial index from which to return the results.",
+            "schema": {
+              "type": "integer"
             }
           }
         ],
@@ -3453,6 +3547,8 @@
                 "schema": {
                   "required": [
                     "count",
+                    "next",
+                    "previous",
                     "results"
                   ],
                   "type": "object",
@@ -3522,7 +3618,7 @@
           }
         ],
         "x-esper-destructive": false,
-        "x-esper-pagination": "none",
+        "x-esper-pagination": "limit-offset",
         "x-esper-verb": "list",
         "x-esper-noun": "device-tile-report",
         "x-esper-scope-parent": "enterprise"
@@ -3549,7 +3645,8 @@
             "description": "A UUID string identifying this enterprise.",
             "required": true,
             "schema": {
-              "type": "string"
+              "type": "string",
+              "format": "uuid"
             }
           },
           {
@@ -3636,7 +3733,8 @@
             "description": "A UUID string identifying this enterprise.",
             "required": true,
             "schema": {
-              "type": "string"
+              "type": "string",
+              "format": "uuid"
             }
           }
         ],
@@ -3799,7 +3897,7 @@
         ],
         "requestBody": {
           "content": {
-            "*/*": {
+            "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/EnterpriseUpdateV1"
               }
@@ -4757,7 +4855,7 @@
         ],
         "requestBody": {
           "content": {
-            "*/*": {
+            "application/json": {
               "schema": {
                 "type": "object",
                 "properties": {
@@ -5170,7 +5268,7 @@
           }
         },
         "x-esper-destructive": false,
-        "x-esper-pagination": "none",
+        "x-esper-pagination": "limit-offset",
         "x-esper-verb": "list",
         "x-esper-noun": "directory-record",
         "x-esper-scope-parent": "enterprise"
@@ -5426,6 +5524,9 @@
     "schemas": {
       "DirectoryRecordUpdate": {
         "title": "DirectoryRecordUpdate",
+        "required": [
+          "unique_identifiers"
+        ],
         "type": "object",
         "properties": {
           "unique_identifiers": {
@@ -5483,6 +5584,9 @@
       },
       "DirectoryRecordCreate": {
         "title": "DirectoryRecordCreate",
+        "required": [
+          "unique_identifiers"
+        ],
         "type": "object",
         "properties": {
           "unique_identifiers": {
@@ -6172,6 +6276,19 @@
       },
       "StatusMetrics": {
         "type": "object",
+        "required": [
+          "active",
+          "in_active",
+          "low_risk",
+          "high_risk",
+          "medium_risk",
+          "secure",
+          "low_battery",
+          "under_provisioning",
+          "recently_added",
+          "unspecified",
+          "total_devices_under_risk"
+        ],
         "properties": {
           "active": {
             "type": "integer"
@@ -6442,33 +6559,56 @@
       },
       "DeviceLocations": {
         "type": "object",
+        "required": [
+          "id",
+          "device",
+          "enterprise",
+          "latitude",
+          "longitude",
+          "altitude",
+          "city",
+          "state",
+          "country",
+          "zipcode",
+          "last_updated_on",
+          "status_id"
+        ],
         "properties": {
           "id": {
             "type": "integer"
           },
           "latitude": {
-            "type": "number",
-            "format": "double"
+            "type": "string"
           },
           "longitude": {
-            "type": "number",
-            "format": "double"
+            "type": "string"
           },
           "altitude": {
-            "type": "number",
-            "format": "double"
+            "type": "string"
           },
           "city": {
-            "type": "string"
+            "type": [
+              "string",
+              "null"
+            ]
           },
-          "status": {
-            "type": "string"
+          "state": {
+            "type": [
+              "string",
+              "null"
+            ]
           },
           "country": {
-            "type": "string"
+            "type": [
+              "string",
+              "null"
+            ]
           },
           "zipcode": {
-            "type": "integer"
+            "type": [
+              "string",
+              "null"
+            ]
           },
           "last_updated_on": {
             "type": "string",
@@ -6481,11 +6621,20 @@
           "enterprise": {
             "type": "string",
             "format": "url"
+          },
+          "status_id": {
+            "type": [
+              "integer",
+              "null"
+            ]
           }
         }
       },
       "ApplyTileIcon": {
         "type": "object",
+        "required": [
+          "icon"
+        ],
         "properties": {
           "icon": {
             "type": [
@@ -6511,13 +6660,21 @@
             ]
           },
           "devices": {
-            "type": "array",
+            "type": [
+              "array",
+              "null"
+            ],
+            "maxItems": 100,
             "items": {
-              "format": "string"
+              "type": "string"
             }
           },
           "groups": {
-            "type": "array",
+            "type": [
+              "array",
+              "null"
+            ],
+            "maxItems": 10,
             "items": {
               "type": "string"
             }
@@ -6562,19 +6719,25 @@
             "format": "uuid"
           },
           "enterprise": {
-            "type": "string",
-            "format": "uuid"
+            "type": "string"
           },
           "image_file": {
             "type": "string",
             "format": "url"
           },
           "thumbnail": {
-            "type": "string",
+            "type": [
+              "string",
+              "null"
+            ],
             "format": "url"
           },
           "orientation": {
-            "type": "string"
+            "type": "string",
+            "enum": [
+              "portrait",
+              "landscape"
+            ]
           },
           "is_active": {
             "type": "boolean"
@@ -6602,7 +6765,7 @@
           "group_id": {
             "type": "array",
             "items": {
-              "format": "string"
+              "type": "string"
             },
             "description": "lists group id's in uuid format"
           },
@@ -6621,13 +6784,6 @@
       },
       "UpdateAlarmRule": {
         "type": "object",
-        "required": [
-          "enterprise",
-          "name",
-          "metric",
-          "conditions",
-          "realert_interval"
-        ],
         "properties": {
           "id": {
             "type": "string",
@@ -6659,6 +6815,8 @@
             "type": "string"
           },
           "conditions": {
+            "type": "object",
+            "required": ["value", "unit", "comparator"],
             "properties": {
               "value": {
                 "type": "number",
@@ -6710,12 +6868,6 @@
           },
           "repeat_times": {
             "type": "integer"
-          },
-          "trigger_count": {
-            "type": "integer"
-          },
-          "daily_trigger_count": {
-            "type": "integer"
           }
         }
       },
@@ -6731,7 +6883,10 @@
             "format": "uuid"
           },
           "devices": {
-            "properties": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
               "id": {
                 "type": "string",
                 "format": "uuid"
@@ -6746,11 +6901,17 @@
                 ]
               }
             }
+            }
           },
           "groups": {
             "type": "array",
             "items": {
-              "type": "string"
+              "type": "object",
+              "properties": {
+                "id": { "type": "string" },
+                "name": { "type": "string" },
+                "path": { "type": ["string", "null"] }
+              }
             }
           },
           "name": {
@@ -6763,6 +6924,7 @@
             "type": "string"
           },
           "conditions": {
+            "type": "object",
             "properties": {
               "value": {
                 "type": "number",
@@ -6795,7 +6957,11 @@
           "alert_channels": {
             "type": "array",
             "items": {
-              "type": "string"
+              "type": "object",
+              "properties": {
+                "id": { "type": "string" },
+                "name": { "type": "string" }
+              }
             }
           },
           "created_on": {
@@ -6826,15 +6992,12 @@
       "UpdateAlertChannelsV1": {
         "type": "object",
         "properties": {
-          "id": {
-            "type": "integer"
-          },
           "properties": {
             "type": "object",
             "properties": {
               "to_address": {
-                "type": "string",
-                "format": "email"
+                "type": "array",
+                "items": { "type": "string", "format": "email" }
               }
             }
           },
@@ -6844,14 +7007,6 @@
           "type": {
             "type": "string",
             "description": "format of alert. e.g. email"
-          },
-          "created_on": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "updated_on": {
-            "type": "string",
-            "format": "date-time"
           },
           "enterprise": {
             "type": "string",
@@ -6869,8 +7024,8 @@
             "type": "object",
             "properties": {
               "to_address": {
-                "type": "string",
-                "format": "email"
+                "type": "array",
+                "items": { "type": "string", "format": "email" }
               }
             }
           },
@@ -6896,9 +7051,60 @@
           "linked_alerts": {
             "type": "array",
             "items": {
-              "type": "string"
+              "type": "object",
+              "properties": {
+                "id": { "type": "string" },
+                "alarm_name": { "type": "string" },
+                "type": { "type": "string" }
+              }
             }
           }
+        }
+      },
+      "AlertChannelCreateReplaceV1": {
+        "type": "object",
+        "required": ["enterprise", "name", "type", "properties"],
+        "properties": {
+          "enterprise": { "type": "string", "format": "uuid" },
+          "name": { "type": "string" },
+          "type": { "type": "string" },
+          "properties": {
+            "type": "object",
+            "properties": {
+              "to_address": { "type": "array", "items": { "type": "string", "format": "email" } }
+            }
+          }
+        }
+      },
+      "AlarmRuleCreateReplaceV1": {
+        "type": "object",
+        "required": ["enterprise", "name", "metric", "conditions", "realert_interval"],
+        "properties": {
+          "enterprise": { "type": "string", "format": "uuid" },
+          "devices": { "type": "array", "items": { "type": "string" } },
+          "groups": { "type": "array", "items": { "type": "string" } },
+          "name": { "type": "string" },
+          "description": { "type": "string" },
+          "metric": { "type": "string" },
+          "conditions": {
+            "type": "object",
+            "required": ["value", "unit", "comparator"],
+            "properties": {
+              "value": { "type": "number" },
+              "unit": { "type": "string", "enum": ["Percent", "Count"] },
+              "comparator": {
+                "type": "string",
+                "enum": ["GreaterThanThreshold", "GreaterThanOrEqualToThreshold", "LessThanThreshold", "LessThanOrEqualToThreshold", "Frequency"]
+              },
+              "toggle_state": { "type": "boolean" }
+            }
+          },
+          "action_emails": { "type": "array", "items": { "type": "string", "format": "email" } },
+          "actions": { "type": "array", "items": { "type": "string" } },
+          "alert_channels": { "type": "array", "items": { "type": "string" } },
+          "is_active": { "type": "boolean" },
+          "realert_interval": { "type": "integer" },
+          "repeat_times": { "type": "integer" }
         }
       },
       "EventFeed": {

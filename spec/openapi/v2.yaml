@@ -185,9 +185,7 @@
                   "type": "object",
                   "properties": {
                     "content": {
-                      "items": {
-                        "$ref": "#/components/schemas/DeviceSubGroup"
-                      }
+                      "$ref": "#/components/schemas/DeviceSubGroup"
                     }
                   }
                 }
@@ -225,6 +223,7 @@
             }
           }
         },
+        "x-esper-platform-source": "src/services/shoonyacloud/shoonyapoc/api/enterprise/views/device_group.py:346-381",
         "security": [
           {
             "apiKey": []
@@ -257,7 +256,8 @@
             "description": "A UUID string identifying this enterprise.",
             "required": true,
             "schema": {
-              "type": "string"
+              "type": "string",
+              "format": "uuid"
             }
           }
         ],
@@ -478,7 +478,7 @@
           }
         },
         "x-esper-destructive": false,
-        "x-esper-pagination": "none",
+        "x-esper-pagination": "apps-envelope",
         "x-esper-verb": "list",
         "x-esper-noun": "blueprint",
         "summary": "List blueprint"
@@ -688,7 +688,7 @@
                     "code": {
                       "type": "string",
                       "enum": [
-                        201
+                        "201"
                       ]
                     }
                   }
@@ -712,7 +712,7 @@
                     "code": {
                       "type": "string",
                       "enum": [
-                        3456
+                        "3456"
                       ]
                     }
                   }
@@ -736,7 +736,7 @@
                     "code": {
                       "type": "string",
                       "enum": [
-                        3456
+                        "3456"
                       ]
                     }
                   }
@@ -775,28 +775,7 @@
         ],
         "responses": {
           "204": {
-            "description": "Success",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "content": {
-                      "$ref": "#/components/schemas/BlueprintV2"
-                    },
-                    "message": {
-                      "type": "string"
-                    },
-                    "code": {
-                      "type": "string",
-                      "enum": [
-                        201
-                      ]
-                    }
-                  }
-                }
-              }
-            }
+            "description": "Success"
           },
           "404": {
             "description": "Resource not found",
@@ -814,7 +793,7 @@
                     "code": {
                       "type": "string",
                       "enum": [
-                        201
+                        "201"
                       ]
                     }
                   }
@@ -1014,7 +993,7 @@
                     "code": {
                       "type": "string",
                       "enum": [
-                        201
+                        "201"
                       ]
                     }
                   }
@@ -1038,7 +1017,7 @@
                     "code": {
                       "type": "string",
                       "enum": [
-                        201
+                        "201"
                       ]
                     }
                   }
@@ -1051,7 +1030,8 @@
         "x-esper-pagination": "none",
         "x-esper-verb": "get",
         "x-esper-noun": "blueprint-version",
-        "summary": "Get blueprint-version"
+        "summary": "Get blueprint-version",
+        "x-esper-scope-parent": "blueprint"
       }
     },
     "/v2/custom-actions/": {
@@ -1231,7 +1211,7 @@
           }
         },
         "x-esper-destructive": false,
-        "x-esper-pagination": "limit-offset",
+        "x-esper-pagination": "apps-envelope",
         "x-esper-verb": "list",
         "x-esper-noun": "custom-action",
         "summary": "List custom-action"
@@ -2463,7 +2443,7 @@
           }
         },
         "x-esper-destructive": false,
-        "x-esper-pagination": "limit-offset",
+        "x-esper-pagination": "apps-envelope",
         "x-esper-verb": "list",
         "x-esper-noun": "device-heartbeat-list"
       }
@@ -2491,7 +2471,7 @@
             }
           },
           {
-            "name": "app type",
+            "name": "app_type",
             "in": "query",
             "description": "App Type to filter list by, supports multiple values separated by comma",
             "schema": {
@@ -2529,10 +2509,24 @@
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "results": {
-                      "type": "array",
-                      "items": {
-                        "$ref": "#/components/schemas/DeviceAppsResponse"
+                    "content": {
+                      "type": "object",
+                      "properties": {
+                        "count": {
+                          "type": "integer"
+                        },
+                        "prev": {
+                          "type": "string"
+                        },
+                        "next": {
+                          "type": "string"
+                        },
+                        "results": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/DeviceAppsResponse"
+                          }
+                        }
                       }
                     }
                   }
@@ -2572,7 +2566,8 @@
           }
         },
         "x-esper-destructive": false,
-        "x-esper-pagination": "limit-offset",
+        "x-esper-pagination": "apps-envelope",
+        "x-esper-platform-source": "src/services/device-api/api/deviceapps/handler/read.go:15-124",
         "x-esper-verb": "list",
         "x-esper-noun": "device-app",
         "x-esper-scope-parent": "device"
@@ -2617,23 +2612,28 @@
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "count": {
-                      "type": "integer"
-                    },
-                    "prev": {
-                      "type": "string"
-                    },
-                    "next": {
-                      "type": "string"
-                    },
-                    "results": {
-                      "type": "array",
-                      "items": {
-                        "type": "object",
-                        "properties": {
-                          "device_id": {
-                            "type": "string",
-                            "format": "uuid"
+                    "content": {
+                      "type": "object",
+                      "properties": {
+                        "count": {
+                          "type": "integer"
+                        },
+                        "prev": {
+                          "type": "string"
+                        },
+                        "next": {
+                          "type": "string"
+                        },
+                        "results": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "device_id": {
+                                "type": "string",
+                                "format": "uuid"
+                              }
+                            }
                           }
                         }
                       }
@@ -2675,7 +2675,8 @@
           }
         },
         "x-esper-destructive": false,
-        "x-esper-pagination": "none",
+        "x-esper-pagination": "apps-envelope",
+        "x-esper-platform-source": "src/services/device-api/api/deviceapps/handler/read.go:74-124",
         "x-esper-verb": "list",
         "x-esper-noun": "device-app"
       }
@@ -3024,7 +3025,7 @@
           }
         },
         "x-esper-destructive": false,
-        "x-esper-pagination": "none",
+        "x-esper-pagination": "apps-envelope",
         "x-esper-verb": "list",
         "x-esper-noun": "google-account",
         "x-esper-scope-parent": "device"
@@ -3668,7 +3669,7 @@
           }
         },
         "x-esper-destructive": false,
-        "x-esper-pagination": "limit-offset",
+        "x-esper-pagination": "apps-envelope",
         "x-esper-verb": "list",
         "x-esper-noun": "rv-activity-feed"
       }
@@ -3792,7 +3793,8 @@
           }
         },
         "x-esper-destructive": false,
-        "x-esper-pagination": "none",
+        "x-esper-pagination": "apps-envelope",
+        "x-esper-platform-source": "src/services/apple-external-management-provider/api/itunesappinfo/handler/handler.go:65-75",
         "x-esper-verb": "list",
         "x-esper-noun": "itunesapp"
       }
@@ -5788,7 +5790,8 @@
         "x-esper-destructive": false,
         "x-esper-pagination": "none",
         "x-esper-verb": "get",
-        "x-esper-noun": "provisioning-profile-version"
+        "x-esper-noun": "provisioning-profile-version",
+        "x-esper-scope-parent": "provisioning-profile"
       },
       "delete": {
         "security": [
@@ -5883,7 +5886,8 @@
         "x-esper-destructive": true,
         "x-esper-pagination": "none",
         "x-esper-verb": "delete",
-        "x-esper-noun": "provisioning-profile-version"
+        "x-esper-noun": "provisioning-profile-version",
+        "x-esper-scope-parent": "provisioning-profile"
       }
     },
     "/v2/preferred-regions": {
@@ -6430,7 +6434,7 @@
           }
         },
         "x-esper-destructive": false,
-        "x-esper-pagination": "limit-offset",
+        "x-esper-pagination": "apps-envelope",
         "x-esper-verb": "list",
         "x-esper-noun": "converge"
       },
@@ -6689,7 +6693,7 @@
           }
         },
         "x-esper-destructive": false,
-        "x-esper-pagination": "limit-offset",
+        "x-esper-pagination": "apps-envelope",
         "x-esper-verb": "list",
         "x-esper-noun": "command",
         "x-esper-scope-parent": "converge"
@@ -6716,8 +6720,20 @@
                   "csv_file": {
                     "type": "string",
                     "format": "binary"
+                  },
+                  "platform": {
+                    "type": "string",
+                    "default": "APPLE",
+                    "enum": [
+                      "APPLE",
+                      "LINUX",
+                      "WINDOWS"
+                    ]
                   }
-                }
+                },
+                "required": [
+                  "csv_file"
+                ]
               }
             }
           }
@@ -6728,35 +6744,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "code": {
-                      "type": "integer"
-                    },
-                    "message": {
-                      "type": "string"
-                    },
-                    "content": {
-                      "type": "object",
-                      "properties": {
-                        "count": {
-                          "type": "integer"
-                        },
-                        "previous": {
-                          "type": "string"
-                        },
-                        "next": {
-                          "type": "string"
-                        },
-                        "results": {
-                          "type": "array",
-                          "items": {
-                            "$ref": "#/components/schemas/SeamlessRequest"
-                          }
-                        }
-                      }
-                    }
-                  }
+                  "$ref": "#/components/schemas/SeamlessSuccessResponse"
                 }
               }
             }
@@ -6766,7 +6754,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error_400_Bad_Data"
+                  "$ref": "#/components/schemas/SeamlessErrorResponse"
                 }
               }
             }
@@ -6776,7 +6764,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error_401_Unauthorized"
+                  "$ref": "#/components/schemas/SeamlessErrorResponse"
                 }
               }
             }
@@ -6786,7 +6774,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error_500_Internal_Server_Error"
+                  "$ref": "#/components/schemas/SeamlessErrorResponse"
                 }
               }
             }
@@ -6825,18 +6813,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "code": {
-                      "type": "integer"
-                    },
-                    "message": {
-                      "type": "string"
-                    },
-                    "content": {
-                      "$ref": "#/components/schemas/SeamlessRequest"
-                    }
-                  }
+                  "$ref": "#/components/schemas/SeamlessSuccessResponse"
                 }
               }
             }
@@ -6846,7 +6823,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error_400_Bad_Data"
+                  "$ref": "#/components/schemas/SeamlessErrorResponse"
                 }
               }
             }
@@ -6856,7 +6833,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error_401_Unauthorized"
+                  "$ref": "#/components/schemas/SeamlessErrorResponse"
                 }
               }
             }
@@ -6866,7 +6843,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error_500_Internal_Server_Error"
+                  "$ref": "#/components/schemas/SeamlessErrorResponse"
                 }
               }
             }
@@ -6894,24 +6871,21 @@
             }
           }
         },
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "description": "Bearer token for authorization",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
         "responses": {
           "201": {
             "description": "Successfully generated sign-up URL",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/BeginGoogleEMMEnrollmentResponse"
+                  "required": [
+                    "content"
+                  ],
+                  "type": "object",
+                  "properties": {
+                    "content": {
+                      "$ref": "#/components/schemas/BeginGoogleEMMEnrollmentResponse"
+                    }
+                  }
                 }
               }
             }
@@ -6969,17 +6943,6 @@
         "tags": [
           "8_Google Enterprise"
         ],
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "description": "Bearer token for authorization",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
         "responses": {
           "200": {
             "description": "Successfully retrieved enrollment status",
@@ -6994,7 +6957,7 @@
                         "count": {
                           "type": "integer"
                         },
-                        "previous": {
+                        "prev": {
                           "type": "string"
                         },
                         "next": {
@@ -7045,7 +7008,7 @@
           }
         },
         "x-esper-destructive": false,
-        "x-esper-pagination": "none",
+        "x-esper-pagination": "apps-envelope",
         "x-esper-verb": "list",
         "x-esper-noun": "emm-detail"
       },
@@ -7064,24 +7027,21 @@
             }
           }
         },
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "description": "Bearer token for authorization",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
         "responses": {
           "201": {
             "description": "Successful Response",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/GoogleEnterpriseDetails"
+                  "required": [
+                    "content"
+                  ],
+                  "type": "object",
+                  "properties": {
+                    "content": {
+                      "$ref": "#/components/schemas/GoogleEnterpriseDetails"
+                    }
+                  }
                 }
               }
             }
@@ -7149,24 +7109,21 @@
             }
           }
         },
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "description": "Bearer token for authorization",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
         "responses": {
           "200": {
             "description": "Successful Response",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/CreateWebTokenResponse"
+                  "required": [
+                    "content"
+                  ],
+                  "type": "object",
+                  "properties": {
+                    "content": {
+                      "$ref": "#/components/schemas/CreateWebTokenResponse"
+                    }
+                  }
                 }
               }
             }
@@ -7214,17 +7171,6 @@
         "tags": [
           "8_Google Enterprise"
         ],
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "description": "Bearer token for authorization",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -7248,12 +7194,20 @@
           }
         },
         "responses": {
-          "200": {
+          "201": {
             "description": "Successfully completed EMM enrollment",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/GoogleEnterpriseDetails"
+                  "required": [
+                    "content"
+                  ],
+                  "type": "object",
+                  "properties": {
+                    "content": {
+                      "$ref": "#/components/schemas/GoogleEnterpriseDetails"
+                    }
+                  }
                 }
               }
             }
@@ -7311,17 +7265,6 @@
         "tags": [
           "8_Google Enterprise"
         ],
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "description": "Bearer token for authorization",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
         "responses": {
           "200": {
             "description": "Successfully retrieved Google Service Account",
@@ -7336,7 +7279,7 @@
                         "count": {
                           "type": "integer"
                         },
-                        "previous": {
+                        "prev": {
                           "type": "string"
                         },
                         "next": {
@@ -7387,7 +7330,7 @@
           }
         },
         "x-esper-destructive": false,
-        "x-esper-pagination": "none",
+        "x-esper-pagination": "apps-envelope",
         "x-esper-verb": "list",
         "x-esper-noun": "emm-account"
       },
@@ -7406,24 +7349,21 @@
             }
           }
         },
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "description": "Bearer token for authorization",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
         "responses": {
           "201": {
             "description": "Successful Response",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/GoogleServiceAccountDetails"
+                  "required": [
+                    "content"
+                  ],
+                  "type": "object",
+                  "properties": {
+                    "content": {
+                      "$ref": "#/components/schemas/GoogleServiceAccountDetails"
+                    }
+                  }
                 }
               }
             }
@@ -7479,6 +7419,15 @@
   "components": {
     "schemas": {
       "GoogleServiceAccountDetails": {
+        "required": [
+          "google_enterprise_id",
+          "key_id",
+          "type",
+          "is_set",
+          "is_active",
+          "data",
+          "public_data"
+        ],
         "type": "object",
         "properties": {
           "tenant_id": {
@@ -7507,6 +7456,12 @@
           },
           "public_data": {
             "type": "string"
+          },
+          "is_synced_to_scapi": {
+            "type": [
+              "boolean",
+              "null"
+            ]
           },
           "created_at": {
             "type": "string",
@@ -7551,6 +7506,14 @@
         ]
       },
       "GoogleEnterpriseDetails": {
+        "required": [
+          "google_enterprise_id",
+          "state",
+          "callback_url",
+          "signup_url",
+          "completion_token",
+          "enterprise_token"
+        ],
         "type": "object",
         "properties": {
           "id": {
@@ -7577,6 +7540,12 @@
           "enterprise_token": {
             "type": "string"
           },
+          "is_synced_to_scapi": {
+            "type": [
+              "boolean",
+              "null"
+            ]
+          },
           "created_at": {
             "type": "string",
             "format": "date-time"
@@ -7593,6 +7562,12 @@
       "BeginGoogleEMMEnrollmentResponse": {
         "type": "object",
         "properties": {
+          "tenant_id": {
+            "type": "string"
+          },
+          "callback_url": {
+            "type": "string"
+          },
           "signup_url": {
             "type": "string"
           },
@@ -7612,6 +7587,71 @@
           "callback_url"
         ]
       },
+      "SeamlessErrorResponse": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer"
+          },
+          "message": {
+            "type": "string"
+          },
+          "content": {
+            "type": "object"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "content"
+        ]
+      },
+      "SeamlessSuccessResponse": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer"
+          },
+          "message": {
+            "type": "string"
+          },
+          "content": {
+            "type": "object",
+            "properties": {
+              "count": {
+                "type": "integer"
+              },
+              "prev": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "next": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "results": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/SeamlessRequest"
+                }
+              }
+            },
+            "required": [
+              "count",
+              "prev",
+              "next",
+              "results"
+            ]
+          }
+        },
+        "required": [
+          "content"
+        ]
+      },
       "SeamlessRequestBody": {
         "type": "object",
         "properties": {
@@ -7625,23 +7665,57 @@
             "format": "uuid",
             "example": "3e41fd18-d53d-4673-a10a-23089cbb6b73"
           },
+          "alias": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 5
+          },
           "seamless_info": {
             "$ref": "#/components/schemas/SeamlessInfo"
           }
-        }
+        },
+        "required": [
+          "assigned_blueprint_id",
+          "seamless_info"
+        ]
       },
       "SeamlessInfo": {
         "type": "object",
         "properties": {
           "unique_ids": {
             "type": "string",
-            "example": "3e41fd18-d53d-4673-a10a-23089cbb6b73,3e41fd18-d53d-4673-a10a-23089cbb6b73"
+            "example": "3e41fd18-d53d-4673-a10a-23089cbb6b73"
           },
           "unique_id_type": {
             "type": "integer",
+            "enum": [
+              2,
+              3
+            ],
             "example": 2
+          },
+          "platform": {
+            "type": "string",
+            "default": "APPLE",
+            "enum": [
+              "APPLE",
+              "LINUX",
+              "WINDOWS"
+            ]
           }
-        }
+        },
+        "required": [
+          "unique_ids",
+          "unique_id_type"
+        ]
       },
       "SeamlessRequest": {
         "type": "object",
@@ -7655,22 +7729,66 @@
             "format": "uuid"
           },
           "group_id": {
-            "type": [
-              "string",
-              "null"
-            ],
+            "type": "string",
             "format": "uuid"
+          },
+          "alias": {
+            "type": "string"
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
           },
           "unique_ids": {
             "type": "string"
           },
           "unique_id_type": {
-            "type": "integer"
+            "type": "string",
+            "enum": [
+              "SERIAL",
+              "UUID"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "FAILED",
+              "IN_PROGRESS",
+              "IN_QUEUE",
+              "SUCCESS"
+            ]
+          },
+          "meta": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "additionalProperties": true
           },
           "tenant_id": {
             "type": "string"
+          },
+          "platform": {
+            "type": "string",
+            "enum": [
+              "APPLE",
+              "LINUX",
+              "WINDOWS"
+            ]
           }
-        }
+        },
+        "required": [
+          "id",
+          "assigned_blueprint_id",
+          "unique_ids",
+          "unique_id_type",
+          "status",
+          "meta",
+          "tenant_id",
+          "platform"
+        ]
       },
       "ConvergeCommand": {
         "type": "object",
@@ -13885,17 +14003,35 @@
       },
       "StatusMetricsV2": {
         "type": "object",
+        "required": [
+          "last_seen",
+          "low_risk",
+          "high_risk",
+          "medium_risk",
+          "secure",
+          "low_battery",
+          "under_provisioning",
+          "unprovisioned_devices",
+          "recently_added",
+          "unspecified",
+          "total_devices_under_risk"
+        ],
         "properties": {
           "last_seen": {
             "type": "object",
+            "required": [
+              "first_period",
+              "second_period",
+              "third_period"
+            ],
             "properties": {
-              "less_than_30_minutes": {
+              "first_period": {
                 "type": "integer"
               },
-              "less_than_1_day": {
+              "second_period": {
                 "type": "integer"
               },
-              "greater_than_1_day": {
+              "third_period": {
                 "type": "integer"
               }
             }
@@ -13916,6 +14052,9 @@
             "type": "integer"
           },
           "under_provisioning": {
+            "type": "integer"
+          },
+          "unprovisioned_devices": {
             "type": "integer"
           },
           "recently_added": {

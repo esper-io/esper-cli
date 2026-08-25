@@ -1,0 +1,13 @@
+{
+  "connections": [
+    {
+      "connection": {
+        "is_default": true,
+        "name": "Acme SSO",
+        "strategy": "oidc"
+      },
+      "connection_id": "connection-1"
+    }
+  ],
+  "count": 1
+}

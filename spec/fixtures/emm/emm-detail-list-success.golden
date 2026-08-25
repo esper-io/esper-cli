@@ -1,0 +1,28 @@
+[
+  {
+    "callback_url": "https://example.test/callback",
+    "completion_token": "completion-1",
+    "created_at": "2026-08-24T10:00:00Z",
+    "enterprise_token": "enterprise-token-1",
+    "google_enterprise_id": "google-enterprise-1",
+    "is_synced_to_scapi": null,
+    "name": "Fixture Enterprise 1",
+    "signup_url": "https://example.test/signup",
+    "state": 1,
+    "tenant_id": "tenant-1",
+    "updated_at": "2026-08-24T11:00:00Z"
+  },
+  {
+    "callback_url": "https://example.test/callback-2",
+    "completion_token": "completion-2",
+    "created_at": "2026-08-24T12:00:00Z",
+    "enterprise_token": "enterprise-token-2",
+    "google_enterprise_id": "google-enterprise-2",
+    "is_synced_to_scapi": null,
+    "name": "Fixture Enterprise 2",
+    "signup_url": "https://example.test/signup-2",
+    "state": 2,
+    "tenant_id": "tenant-1",
+    "updated_at": "2026-08-24T13:00:00Z"
+  }
+]

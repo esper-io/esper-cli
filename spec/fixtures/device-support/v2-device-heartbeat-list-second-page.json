@@ -1,0 +1,1 @@
+{"code":200,"message":"ok","content":{"count":2,"prev":"https://example.invalid/v2/heartbeat/?offset=1","next":"","results":[{"device_id":"device-2","timestamp":"2026-08-24T01:00:00Z","status":0}]}}

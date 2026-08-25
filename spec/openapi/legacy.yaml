@@ -970,7 +970,7 @@
         ],
         "requestBody": {
           "content": {
-            "*/*": {
+            "application/json": {
               "schema": {
                 "type": "object",
                 "properties": {
@@ -2234,7 +2234,7 @@
           }
         ],
         "x-esper-destructive": false,
-        "x-esper-pagination": "none",
+        "x-esper-pagination": "limit-offset",
         "x-esper-verb": "get",
         "x-esper-noun": "status"
       }
@@ -2646,7 +2646,7 @@
         ],
         "requestBody": {
           "content": {
-            "*/*": {
+            "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/DeviceGroupUpdate"
               }
@@ -2712,6 +2712,11 @@
           }
         ],
         "x-codegen-request-body-name": "data",
+        "x-esper-platform-source": [
+          "src/services/shoonyacloud/shoonyapoc/api/enterprise/urls.py:250-252",
+          "src/services/shoonyacloud/shoonyapoc/api/enterprise/views/device_group.py:163-245",
+          "src/services/shoonyacloud/shoonyapoc/api/enterprise/serializers/device_group.py:61-243"
+        ],
         "x-esper-destructive": false,
         "x-esper-pagination": "none",
         "x-esper-verb": "create",
@@ -2850,7 +2855,7 @@
         ],
         "requestBody": {
           "content": {
-            "*/*": {
+            "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/DeviceGroupUpdate"
               }
@@ -2916,6 +2921,11 @@
           }
         ],
         "x-codegen-request-body-name": "data",
+        "x-esper-platform-source": [
+          "src/services/shoonyacloud/shoonyapoc/api/enterprise/urls.py:250-252",
+          "src/services/shoonyacloud/shoonyapoc/api/enterprise/views/device_group.py:163-262",
+          "src/services/shoonyacloud/shoonyapoc/api/enterprise/serializers/device_group.py:61-440"
+        ],
         "x-esper-destructive": false,
         "x-esper-pagination": "none",
         "x-esper-verb": "update",
@@ -3064,7 +3074,7 @@
         ],
         "requestBody": {
           "content": {
-            "*/*": {
+            "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/DeviceGroupPartialUpdate"
               }
@@ -3140,6 +3150,11 @@
           }
         ],
         "x-codegen-request-body-name": "data",
+        "x-esper-platform-source": [
+          "src/services/shoonyacloud/shoonyapoc/api/enterprise/urls.py:250-252",
+          "src/services/shoonyacloud/shoonyapoc/api/enterprise/views/device_group.py:163-262",
+          "src/services/shoonyacloud/shoonyapoc/api/enterprise/serializers/device_group.py:61-440"
+        ],
         "x-esper-destructive": false,
         "x-esper-pagination": "none",
         "x-esper-verb": "partial-update",
@@ -3396,6 +3411,24 @@
             }
           },
           {
+            "name": "created_on_gt",
+            "in": "query",
+            "description": "filter by policies created at or after this timestamp",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "created_on_lt",
+            "in": "query",
+            "description": "filter by policies created at or before this timestamp",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
             "name": "limit",
             "in": "query",
             "description": "Number of results to return per page.",
@@ -3422,6 +3455,8 @@
                 "schema": {
                   "required": [
                     "count",
+                    "next",
+                    "previous",
                     "results"
                   ],
                   "type": "object",
@@ -3524,9 +3559,9 @@
         "requestBody": {
           "description": "The request body to create an Enteprise Policy",
           "content": {
-            "*/*": {
+            "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/EnterprisePolicy"
+                "$ref": "#/components/schemas/EnterprisePolicyWrite"
               }
             }
           },
@@ -3627,7 +3662,8 @@
             "description": "A UUID string identifying enterprise.",
             "required": true,
             "schema": {
-              "type": "string"
+              "type": "string",
+              "format": "uuid"
             }
           }
         ],
@@ -3712,15 +3748,16 @@
             "description": "A UUID string identifying enterprise.",
             "required": true,
             "schema": {
-              "type": "string"
+              "type": "string",
+              "format": "uuid"
             }
           }
         ],
         "requestBody": {
           "content": {
-            "*/*": {
+            "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/EnterprisePolicy"
+                "$ref": "#/components/schemas/EnterprisePolicyWrite"
               }
             }
           },
@@ -3916,13 +3953,14 @@
             "description": "A UUID string identifying enterprise.",
             "required": true,
             "schema": {
-              "type": "string"
+              "type": "string",
+              "format": "uuid"
             }
           }
         ],
         "requestBody": {
           "content": {
-            "*/*": {
+            "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/EnterprisePolicyPartialUpdate"
               }
@@ -4025,9 +4063,16 @@
               "application/json": {
                 "schema": {
                   "type": "object",
+                  "required": [
+                    "reportAvailabilityFrom",
+                    "enableReportsWorkflow"
+                  ],
                   "properties": {
                     "reportAvailabilityFrom": {
-                      "type": "string",
+                      "type": [
+                        "string",
+                        "null"
+                      ],
                       "format": "date-time"
                     },
                     "enableReportsWorkflow": {
@@ -4122,7 +4167,7 @@
             "description": "Sync device status report to specified field",
             "schema": {
               "type": "boolean",
-              "default": true
+              "default": false
             }
           },
           {
@@ -4132,6 +4177,16 @@
             "description": "List of fields to add to device status report, comma separated",
             "schema": {
               "type": "string"
+            }
+          },
+          {
+            "name": "group_id",
+            "in": "query",
+            "required": false,
+            "description": "Filter the device status report by group.",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
             }
           }
         ],
@@ -4143,9 +4198,23 @@
                 "schema": {
                   "type": "array",
                   "items": {
+                    "required": [
+                      "group_id",
+                      "group_name",
+                      "group_path",
+                      "active_devices",
+                      "inactive_devices",
+                      "registered_devices",
+                      "new_devices",
+                      "disabled_devices",
+                      "device_status_reports"
+                    ],
                     "properties": {
                       "group_id": {
-                        "type": "string",
+                        "type": [
+                          "string",
+                          "null"
+                        ],
                         "format": "uuid"
                       },
                       "group_name": {
@@ -4177,6 +4246,16 @@
                       }
                     }
                   }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
                 }
               }
             }
@@ -4439,6 +4518,24 @@
         "summary": "Get list of subscription reports",
         "description": "Returns list of subscription reports",
         "operationId": "getSubscriptionReports",
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Number of results to return per page.",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "description": "The initial index from which to return the results.",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "successful operation",
@@ -4447,6 +4544,8 @@
                 "schema": {
                   "required": [
                     "count",
+                    "next",
+                    "previous",
                     "results"
                   ],
                   "type": "object",
@@ -4516,7 +4615,7 @@
           }
         ],
         "x-esper-destructive": false,
-        "x-esper-pagination": "none",
+        "x-esper-pagination": "limit-offset",
         "x-esper-verb": "list",
         "x-esper-noun": "subscription-report"
       },
@@ -4543,10 +4642,14 @@
                 "properties": {
                   "email_ids": {
                     "type": "array",
+                    "maxItems": 10,
                     "items": {
                       "type": "string",
                       "format": "email"
                     }
+                  },
+                  "is_subscribed": {
+                    "type": "boolean"
                   }
                 }
               }
@@ -4728,6 +4831,7 @@
                 "properties": {
                   "email_ids": {
                     "type": "array",
+                    "maxItems": 10,
                     "items": {
                       "type": "string",
                       "format": "email"
@@ -5126,7 +5230,7 @@
           }
         },
         "x-esper-destructive": false,
-        "x-esper-pagination": "none",
+        "x-esper-pagination": "limit-offset",
         "x-esper-verb": "list",
         "x-esper-noun": "user"
       },
@@ -5634,7 +5738,7 @@
           }
         },
         "x-esper-destructive": false,
-        "x-esper-pagination": "none",
+        "x-esper-pagination": "limit-offset",
         "x-esper-verb": "list",
         "x-esper-noun": "blueprint",
         "x-esper-scope-parent": "devicegroup"
@@ -5783,7 +5887,8 @@
         "x-esper-destructive": false,
         "x-esper-pagination": "none",
         "x-esper-verb": "get",
-        "x-esper-noun": "blueprint"
+        "x-esper-noun": "blueprint",
+        "x-esper-scope-parent": "devicegroup"
       },
       "patch": {
         "x-badges": [
@@ -5866,7 +5971,8 @@
         "x-esper-destructive": false,
         "x-esper-pagination": "none",
         "x-esper-verb": "partial-update",
-        "x-esper-noun": "blueprint"
+        "x-esper-noun": "blueprint",
+        "x-esper-scope-parent": "devicegroup"
       },
       "delete": {
         "x-badges": [
@@ -5922,7 +6028,8 @@
         "x-esper-destructive": true,
         "x-esper-pagination": "none",
         "x-esper-verb": "delete",
-        "x-esper-noun": "blueprint"
+        "x-esper-noun": "blueprint",
+        "x-esper-scope-parent": "devicegroup"
       }
     },
     "/enterprise/{enterprise_id}/devicegroup/{group_id}/blueprint/{blueprint_id}/revisions/": {
@@ -6002,7 +6109,7 @@
           }
         },
         "x-esper-destructive": false,
-        "x-esper-pagination": "none",
+        "x-esper-pagination": "limit-offset",
         "x-esper-verb": "list",
         "x-esper-noun": "revision",
         "x-esper-scope-parent": "blueprint"
@@ -6073,7 +6180,8 @@
         "x-esper-destructive": false,
         "x-esper-pagination": "none",
         "x-esper-verb": "get",
-        "x-esper-noun": "blueprint-revision"
+        "x-esper-noun": "blueprint-revision",
+        "x-esper-scope-parent": "blueprint"
       }
     },
     "/enterprise/{enterprise_id}/devicegroup/{group_id}/blueprint/restore/": {
@@ -6154,7 +6262,8 @@
         "x-esper-destructive": false,
         "x-esper-pagination": "none",
         "x-esper-verb": "restore",
-        "x-esper-noun": "blueprint-revision"
+        "x-esper-noun": "blueprint-revision",
+        "x-esper-scope-parent": "devicegroup"
       }
     },
     "/enterprise/{enterprise_id}/devicegroup/{group_id}/blueprint/upload/": {
@@ -6235,7 +6344,8 @@
         "x-esper-destructive": false,
         "x-esper-pagination": "none",
         "x-esper-verb": "upload",
-        "x-esper-noun": "blueprint"
+        "x-esper-noun": "blueprint",
+        "x-esper-scope-parent": "devicegroup"
       }
     },
     "/graph/{category}/{metric}/": {
@@ -6304,14 +6414,6 @@
               "type": "string",
               "format": "uuid"
             }
-          },
-          {
-            "name": "enterprise_id",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
           }
         ],
         "responses": {
@@ -6350,6 +6452,17 @@
           },
           "404": {
             "description": "Not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
             "content": {
               "application/json": {
                 "schema": {
@@ -8184,9 +8297,17 @@
       },
       "Subscription": {
         "type": "object",
+        "required": [
+          "id",
+          "email_ids",
+          "is_subscribed",
+          "created_on",
+          "updated_on"
+        ],
         "properties": {
           "id": {
-            "type": "integer"
+            "type": "integer",
+            "readOnly": true
           },
           "email_ids": {
             "type": "array",
@@ -8200,11 +8321,13 @@
           },
           "created_on": {
             "type": "string",
-            "format": "date-time"
+            "format": "date-time",
+            "readOnly": true
           },
           "updated_on": {
             "type": "string",
-            "format": "date-time"
+            "format": "date-time",
+            "readOnly": true
           }
         }
       },
@@ -8287,58 +8410,29 @@
       "EnterprisePolicyPartialUpdate": {
         "type": "object",
         "properties": {
-          "uuid": {
-            "title": "UUID",
-            "type": "string",
-            "description": "Unique Policy identifier",
-            "format": "uuid",
-            "readOnly": true
-          },
           "enterprise": {
             "title": "Enterprise url",
             "type": "string",
             "description": "Url of the enterprise resource",
             "format": "url"
           },
-          "url": {
-            "title": "Policy URL",
-            "type": "string",
-            "description": "URL link to policy",
-            "format": "url",
-            "readOnly": true
-          },
           "name": {
             "title": "Policy Name",
+            "maxLength": 255,
+            "minLength": 1,
             "type": "string",
             "description": "Name of the Policy"
           },
           "description": {
             "title": "Policy Description",
-            "type": "string",
+            "type": [
+              "string",
+              "null"
+            ],
             "description": "Details regarding the Policy"
-          },
-          "device_count": {
-            "title": "Number of Devices with this policy applied",
-            "type": "integer",
-            "description": "Count of Devices with this policy applied",
-            "readOnly": true
           },
           "policy": {
             "$ref": "#/components/schemas/EnterprisePolicyData"
-          },
-          "updated_on": {
-            "title": "Updated On",
-            "type": "string",
-            "description": "Last-Updated Timestamp of Policy",
-            "format": "date-time",
-            "readOnly": true
-          },
-          "created_on": {
-            "title": "Created on",
-            "type": "string",
-            "description": "Creation Timestamp of Policy",
-            "format": "date-time",
-            "readOnly": true
           },
           "is_active": {
             "title": "Policy Active status",
@@ -8347,9 +8441,72 @@
           },
           "google_policy_id": {
             "title": "Google policy id",
+            "maxLength": 255,
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Id of the Google policy"
+          },
+          "is_template": {
+            "title": "Template status",
+            "type": "boolean",
+            "default": false,
+            "writeOnly": true
+          }
+        }
+      },
+      "EnterprisePolicyWrite": {
+        "required": [
+          "enterprise",
+          "name",
+          "policy"
+        ],
+        "type": "object",
+        "properties": {
+          "enterprise": {
+            "title": "Enterprise url",
             "type": "string",
-            "description": "Id of the Google policy",
-            "readOnly": true
+            "description": "Url of the enterprise resource",
+            "format": "url"
+          },
+          "name": {
+            "title": "Policy Name",
+            "maxLength": 255,
+            "minLength": 1,
+            "type": "string",
+            "description": "Name of the Policy"
+          },
+          "description": {
+            "title": "Policy Description",
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Details regarding the Policy"
+          },
+          "google_policy_id": {
+            "title": "Google policy id",
+            "maxLength": 255,
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Id of the Google policy"
+          },
+          "policy": {
+            "$ref": "#/components/schemas/EnterprisePolicyData"
+          },
+          "is_template": {
+            "title": "Template status",
+            "type": "boolean",
+            "default": false,
+            "writeOnly": true
+          },
+          "is_active": {
+            "title": "Policy Active status",
+            "type": "boolean",
+            "description": "Is this policy currently active"
           }
         }
       },
@@ -8357,6 +8514,15 @@
         "title": "Policy Data",
         "type": "object",
         "properties": {
+          "applications": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
+          },
+          "kioskMode": {
+            "type": "boolean"
+          },
           "keyguardDisabled": {
             "type": "boolean",
             "description": "Should KeyGuard be disabled?"
@@ -8552,6 +8718,19 @@
           "deviceUpdatePolicy": {
             "type": "object",
             "properties": {
+              "passwordQuality": {
+                "type": "string",
+                "enum": [
+                  "PASSWORD_QUALITY_ALPHABETIC",
+                  "PASSWORD_QUALITY_ALPHANUMERIC",
+                  "PASSWORD_QUALITY_BIOMETRIC_WEAK",
+                  "PASSWORD_QUALITY_COMPLEX",
+                  "PASSWORD_QUALITY_NUMERIC",
+                  "PASSWORD_QUALITY_NUMERIC_COMPLEX",
+                  "PASSWORD_QUALITY_SOMETHING",
+                  "PASSWORD_QUALITY_UNSPECIFIED"
+                ]
+              },
               "type": {
                 "type": "string",
                 "description": "What type of installation is preferred?",
@@ -8591,12 +8770,26 @@
       },
       "EnterprisePolicy": {
         "required": [
+          "id",
+          "uuid",
           "enterprise",
+          "url",
           "name",
-          "policy"
+          "description",
+          "device_count",
+          "google_policy_id",
+          "policy",
+          "updated_on",
+          "created_on",
+          "is_active"
         ],
         "type": "object",
         "properties": {
+          "id": {
+            "title": "ID",
+            "type": "integer",
+            "readOnly": true
+          },
           "uuid": {
             "title": "UUID",
             "type": "string",
@@ -8624,7 +8817,10 @@
           },
           "description": {
             "title": "Policy Description",
-            "type": "string",
+            "type": [
+              "string",
+              "null"
+            ],
             "description": "Details regarding the Policy"
           },
           "device_count": {
@@ -8635,7 +8831,10 @@
           },
           "google_policy_id": {
             "title": "Google policy id",
-            "type": "string",
+            "type": [
+              "string",
+              "null"
+            ],
             "description": "Id of the Google policy",
             "readOnly": true
           },

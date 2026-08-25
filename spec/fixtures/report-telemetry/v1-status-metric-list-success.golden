@@ -1,0 +1,13 @@
+{
+  "active": 1,
+  "high_risk": 4,
+  "in_active": 2,
+  "low_battery": 7,
+  "low_risk": 3,
+  "medium_risk": 5,
+  "recently_added": 9,
+  "secure": 6,
+  "total_devices_under_risk": 11,
+  "under_provisioning": 8,
+  "unspecified": 10
+}

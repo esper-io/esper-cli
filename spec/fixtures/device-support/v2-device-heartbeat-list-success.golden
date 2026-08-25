@@ -1,0 +1,12 @@
+[
+  {
+    "device_id": "device-1",
+    "status": 1,
+    "timestamp": "2026-08-24T00:00:00Z"
+  },
+  {
+    "device_id": "device-2",
+    "status": 0,
+    "timestamp": "2026-08-24T01:00:00Z"
+  }
+]

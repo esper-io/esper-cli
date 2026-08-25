@@ -1,0 +1,11 @@
+{
+  "callback_url": "https://example.test/callback",
+  "completion_token": "completion-1",
+  "enterprise_token": "enterprise-token-1",
+  "google_enterprise_id": "google-enterprise-1",
+  "id": 17,
+  "is_active": true,
+  "name": "Fixture Google Enterprise",
+  "signup_url": "https://example.test/signup",
+  "state": 1
+}

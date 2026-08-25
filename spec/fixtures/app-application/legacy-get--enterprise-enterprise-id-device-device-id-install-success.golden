@@ -1,0 +1,44 @@
+[
+  {
+    "application": {
+      "application_name": "fixture-legacy-get--enterprise-enterprise-id-device-device-id-install-one-results-application-application_name",
+      "is_enabled": true,
+      "package_name": "fixture-legacy-get--enterprise-enterprise-id-device-device-id-install-one-results-application-package_name",
+      "version": {
+        "app_version_id": "00000000-0000-4000-8000-000000000001",
+        "build_number": "fixture-legacy-get--enterprise-enterprise-id-device-device-id-install-one-results-application-version-build_number",
+        "hash_string": "fixture-legacy-get--enterprise-enterprise-id-device-device-id-install-one-results-application-version-hash_string",
+        "version_code": "fixture-legacy-get--enterprise-enterprise-id-device-device-id-install-one-results-application-version-version_code"
+      }
+    },
+    "created_on": "2026-08-24T12:00:00Z",
+    "device": "https://fixture.example.test/packet-3",
+    "enterprise": "https://fixture.example.test/packet-3",
+    "id": "00000000-0000-4000-8000-000000000001",
+    "install_state": "NOT_INSTALLED",
+    "is_active": true,
+    "reason_details": "fixture-legacy-get--enterprise-enterprise-id-device-device-id-install-one-results-reason_details",
+    "updated_on": "2026-08-24T12:00:00Z"
+  },
+  {
+    "application": {
+      "application_name": "fixture-legacy-get--enterprise-enterprise-id-device-device-id-install-two-results-application-application_name",
+      "is_enabled": true,
+      "package_name": "fixture-legacy-get--enterprise-enterprise-id-device-device-id-install-two-results-application-package_name",
+      "version": {
+        "app_version_id": "00000000-0000-4000-8000-000000000001",
+        "build_number": "fixture-legacy-get--enterprise-enterprise-id-device-device-id-install-two-results-application-version-build_number",
+        "hash_string": "fixture-legacy-get--enterprise-enterprise-id-device-device-id-install-two-results-application-version-hash_string",
+        "version_code": "fixture-legacy-get--enterprise-enterprise-id-device-device-id-install-two-results-application-version-version_code"
+      }
+    },
+    "created_on": "2026-08-24T12:00:00Z",
+    "device": "https://fixture.example.test/packet-3",
+    "enterprise": "https://fixture.example.test/packet-3",
+    "id": "00000000-0000-4000-8000-000000000001",
+    "install_state": "NOT_INSTALLED",
+    "is_active": true,
+    "reason_details": "fixture-legacy-get--enterprise-enterprise-id-device-device-id-install-two-results-reason_details",
+    "updated_on": "2026-08-24T12:00:00Z"
+  }
+]

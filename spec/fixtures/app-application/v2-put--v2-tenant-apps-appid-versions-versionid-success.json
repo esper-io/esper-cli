@@ -1,0 +1,24 @@
+{
+  "content": {
+    "app_icon_url": "fixture-v2-put--v2-tenant-apps-appid-versions-versionid-success-content-app_icon_url",
+    "app_id": "fixture-v2-put--v2-tenant-apps-appid-versions-versionid-success-content-app_id",
+    "app_name": "fixture-v2-put--v2-tenant-apps-appid-versions-versionid-success-content-app_name",
+    "app_type": "TENANT_IOS",
+    "build_number": "fixture-v2-put--v2-tenant-apps-appid-versions-versionid-success-content-build_number",
+    "created_at": "2026-08-24T12:00:00Z",
+    "created_by": "fixture-v2-put--v2-tenant-apps-appid-versions-versionid-success-content-created_by",
+    "description": "fixture-v2-put--v2-tenant-apps-appid-versions-versionid-success-content-description",
+    "device_family": [
+      "fixture-v2-put--v2-tenant-apps-appid-versions-versionid-success-content-device_family"
+    ],
+    "file_size_in_kb": 1,
+    "id": "fixture-v2-put--v2-tenant-apps-appid-versions-versionid-success-content-id",
+    "min_sdk_version": "fixture-v2-put--v2-tenant-apps-appid-versions-versionid-success-content-min_sdk_version",
+    "release_notes": "fixture-v2-put--v2-tenant-apps-appid-versions-versionid-success-content-release_notes",
+    "tenant_id": "fixture-v2-put--v2-tenant-apps-appid-versions-versionid-success-content-tenant_id",
+    "updated_at": "2026-08-24T12:00:00Z",
+    "updated_by": "fixture-v2-put--v2-tenant-apps-appid-versions-versionid-success-content-updated_by",
+    "version_code": "fixture-v2-put--v2-tenant-apps-appid-versions-versionid-success-content-version_code",
+    "version_name": "fixture-v2-put--v2-tenant-apps-appid-versions-versionid-success-content-version_name"
+  }
+}

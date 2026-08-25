@@ -237,7 +237,8 @@
         "x-esper-destructive": true,
         "x-esper-pagination": "none",
         "x-esper-verb": "delete",
-        "x-esper-noun": "tenant-user-invite"
+        "x-esper-noun": "tenant-user-invite",
+        "x-esper-scope-parent": "tenant"
       }
     },
     "/authn2/v0/user/{user_id}": {
@@ -260,9 +261,6 @@
           }
         ],
         "parameters": [
-          {
-            "$ref": "#/components/parameters/EnterpriseID"
-          },
           {
             "$ref": "#/components/parameters/AuthNUserID"
           }
@@ -380,7 +378,8 @@
         "x-esper-destructive": true,
         "x-esper-pagination": "none",
         "x-esper-verb": "delete",
-        "x-esper-noun": "tenant-user"
+        "x-esper-noun": "tenant-user",
+        "x-esper-scope-parent": "tenant"
       }
     },
     "/authn2/v0/tenant/{enterprise_id}/connection": {
@@ -1159,6 +1158,11 @@
       "CustomConnectionRequest": {
         "title": "CustomConnectionRequest",
         "type": "object",
+        "required": [
+          "display_name",
+          "strategy",
+          "config"
+        ],
         "properties": {
           "display_name": {
             "title": "display name",

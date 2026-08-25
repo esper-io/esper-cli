@@ -1,0 +1,19 @@
+{
+  "app_name": "fixture-legacy-get--enterprise-enterprise-id-device-device-id-app-app-id-success-app_name",
+  "app_type": "fixture-legacy-get--enterprise-enterprise-id-device-device-id-app-app-id-success-app_type",
+  "created_on": "2026-08-24T12:00:00Z",
+  "device": "00000000-0000-4000-8000-000000000001",
+  "id": "00000000-0000-4000-8000-000000000001",
+  "is_active": true,
+  "is_data_clearable": true,
+  "is_esper_controlled": true,
+  "is_kiosk_app": true,
+  "is_uninstallable": true,
+  "package_name": "fixture-legacy-get--enterprise-enterprise-id-device-device-id-app-app-id-success-package_name",
+  "product_id": "fixture-legacy-get--enterprise-enterprise-id-device-device-id-app-app-id-success-product_id",
+  "state": "fixture-legacy-get--enterprise-enterprise-id-device-device-id-app-app-id-success-state",
+  "updated_on": "2026-08-24T12:00:00Z",
+  "version_code": "fixture-legacy-get--enterprise-enterprise-id-device-device-id-app-app-id-success-version_code",
+  "version_name": "fixture-legacy-get--enterprise-enterprise-id-device-device-id-app-app-id-success-version_name",
+  "whitelisted": true
+}

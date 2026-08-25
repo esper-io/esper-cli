@@ -1,0 +1,1 @@
+{"code":200,"message":"DEP sync request","content":{"id":"dep-sync-1","status":"FAILURE","failure_reason":"Device assignment failed","devices":{"failure":[{"serial":"SERIAL-001","reason":"Not assigned to this tenant"}]},"created_by":"fixture-user","created_at":"2026-08-24T00:00:00Z","updated_at":"2026-08-24T00:01:00Z"}}

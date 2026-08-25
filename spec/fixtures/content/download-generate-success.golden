@@ -1,0 +1,5 @@
+{
+  "download_url": "https://example.invalid/download/guide.pdf",
+  "expires_in": 600,
+  "file_key": "enterprise-1/files/guide.pdf"
+}

@@ -1,0 +1,9 @@
+{
+  "category": "kiosk",
+  "created_on": "2026-08-01T00:00:00Z",
+  "custom": true,
+  "device_model": "TC57",
+  "icon_file": "https://files.example/icon.png",
+  "id": "44444444-4444-4444-8444-444444444444",
+  "updated_on": "2026-08-01T00:00:00Z"
+}

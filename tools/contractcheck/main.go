@@ -35,6 +35,16 @@ type operation struct {
 	Noun        string      `json:"x-esper-noun"`
 	ScopeParent string      `json:"x-esper-scope-parent"`
 	Summary     string      `json:"summary"`
+	OperationID string      `json:"operationId"`
+	AliasOf     string      `json:"x-esper-alias-of"`
+	Body        struct {
+		Required bool `json:"required"`
+		Content  map[string]struct {
+			Schema struct {
+				Properties map[string]json.RawMessage `json:"properties"`
+			} `json:"schema"`
+		} `json:"content"`
+	} `json:"requestBody"`
 }
 type parameter struct {
 	Ref      string `json:"$ref"`
@@ -106,8 +116,13 @@ func check(specDir string) []string {
 				if prefix, side := sideFamilyPrefixes[document.Info.Generation]; side && generatedOperation.Noun == prefix+"-"+operation.Noun {
 					expectedNoun = generatedOperation.Noun
 				}
-				if generatedOperation.Noun != expectedNoun || generatedOperation.Verb != operation.Verb || generatedOperation.Destructive != *operation.Destructive || generatedOperation.Summary != operation.Summary {
+				if generatedOperation.Noun != expectedNoun || generatedOperation.Verb != operation.Verb || generatedOperation.Destructive != *operation.Destructive || generatedOperation.Summary != operation.Summary || generatedOperation.OperationID != operation.OperationID || generatedOperation.AliasOf != operation.AliasOf {
 					issues = append(issues, location+": generated metadata differs from overlay")
+				}
+				if operation.Body.Required && supportedBody(operation.Body.Content) && generatedOperation.Body == nil {
+					issues = append(issues, location+": required request body missing generated metadata")
+				} else if generatedOperation.Body != nil && generatedOperation.Body.Required != operation.Body.Required {
+					issues = append(issues, location+": generated request body requiredness differs from spec")
 				}
 				command, _, err := root.Find(generatedOperation.Command)
 				if err != nil || command == root {
@@ -124,6 +139,9 @@ func check(specDir string) []string {
 					if err != nil || group == root || group.Short != expectedSummary {
 						issues = append(issues, location+": generated group has no explicit description")
 					}
+				}
+				if operation.AliasOf != "" {
+					continue
 				}
 				for _, parameter := range operation.Parameters {
 					parameter = resolveParameter(parameter, document.Components.Parameters)
@@ -176,6 +194,9 @@ func checkCommandGrammar(root interface {
 	byNounVerb := map[string][]generated.Operation{}
 	byCommand := map[string][]generated.Operation{}
 	for _, operation := range operations {
+		if operation.AliasOf != "" {
+			continue
+		}
 		byNounVerb[operation.Noun+"\x00"+operation.Verb] = append(byNounVerb[operation.Noun+"\x00"+operation.Verb], operation)
 		byCommand[strings.Join(operation.Command, "\x00")] = append(byCommand[strings.Join(operation.Command, "\x00")], operation)
 	}
@@ -201,17 +222,23 @@ func checkCommandGrammar(root interface {
 	}
 	for commandPath, group := range byCommand {
 		scopes := map[string]bool{}
+		scopeNames := map[string]bool{}
 		unscoped := 0
 		for _, operation := range group {
-			if operation.ScopeParent == "" {
+			names := operationScopeNames(operation)
+			for _, name := range names {
+				scopeNames[name] = true
+			}
+			scope := strings.Join(names, "\x00")
+			if scope == "" {
 				unscoped++
 				continue
 			}
-			if scopes[operation.ScopeParent] {
-				issues = append(issues, commandPath+": duplicate scope --"+kebab(operation.ScopeParent))
+			if scopes[scope] {
+				issues = append(issues, commandPath+": duplicate scope combination "+formatScopeNames(operationScopeNames(operation)))
 				continue
 			}
-			scopes[operation.ScopeParent] = true
+			scopes[scope] = true
 		}
 		if unscoped > 1 {
 			issues = append(issues, commandPath+": multiple unscoped operations")
@@ -220,13 +247,19 @@ func checkCommandGrammar(root interface {
 		if err != nil || command == nil {
 			continue
 		}
-		for scope := range scopes {
+		for scope := range scopeNames {
 			if command.Flags().Lookup(kebab(scope)) == nil {
 				issues = append(issues, commandPath+": missing scope flag --"+kebab(scope))
 			}
 		}
 	}
 	for _, operation := range operations {
+		if operation.AliasOf != "" {
+			if operation.OperationID == "" {
+				issues = append(issues, operation.Method+" "+operation.Path+": alias lacks operation ID")
+			}
+			continue
+		}
 		if operation.Generation != "pipelines-v0" {
 			continue
 		}
@@ -235,6 +268,43 @@ func checkCommandGrammar(root interface {
 		}
 	}
 	return issues
+}
+
+func operationScopeNames(operation generated.Operation) []string {
+	var names []string
+	seen := map[string]bool{}
+	for _, parameter := range operation.Parameters {
+		if parameter.In == "path" && parameter.Scope {
+			name := parameter.ScopeName
+			if name == "" {
+				name = operation.ScopeParent
+			}
+			if name != "" && !seen[name] {
+				names = append(names, name)
+				seen[name] = true
+			}
+		}
+	}
+	sort.Strings(names)
+	return names
+}
+
+func formatScopeNames(names []string) string {
+	flags := make([]string, 0, len(names))
+	for _, name := range names {
+		flags = append(flags, "--"+kebab(name))
+	}
+	return strings.Join(flags, " + ")
+}
+
+func supportedBody(content map[string]struct {
+	Schema struct {
+		Properties map[string]json.RawMessage `json:"properties"`
+	} `json:"schema"`
+}) bool {
+	_, jsonBody := content["application/json"]
+	_, multipartBody := content["multipart/form-data"]
+	return jsonBody || multipartBody
 }
 
 func key(generation, method, apiPath string) string {
