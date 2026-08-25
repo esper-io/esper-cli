@@ -33,15 +33,17 @@ type operation struct {
 		Required bool                    `json:"required"`
 		Content  map[string]requestMedia `json:"content"`
 	} `json:"requestBody"`
-	Responses   map[string]response `json:"responses"`
-	OperationID string              `json:"operationId"`
-	AliasOf     string              `json:"x-esper-alias-of"`
-	Noun        string              `json:"x-esper-noun"`
-	Verb        string              `json:"x-esper-verb"`
-	Pagination  string              `json:"x-esper-pagination"`
-	Destructive bool                `json:"x-esper-destructive"`
-	ScopeParent string              `json:"x-esper-scope-parent"`
-	Summary     string              `json:"summary"`
+	Responses    map[string]response `json:"responses"`
+	OperationID  string              `json:"operationId"`
+	AliasOf      string              `json:"x-esper-alias-of"`
+	Noun         string              `json:"x-esper-noun"`
+	Verb         string              `json:"x-esper-verb"`
+	Pagination   string              `json:"x-esper-pagination"`
+	Envelope     string              `json:"x-esper-response-envelope"`
+	RequireOneOf []string            `json:"x-esper-require-one-of"`
+	Destructive  bool                `json:"x-esper-destructive"`
+	ScopeParent  string              `json:"x-esper-scope-parent"`
+	Summary      string              `json:"summary"`
 }
 
 type response struct {
@@ -70,21 +72,23 @@ type schema struct {
 }
 
 type generatedOperation struct {
-	Generation   string
-	Command      []string
-	Method       string
-	Path         string
-	Noun         string
-	Verb         string
-	Pagination   string
-	Destructive  bool
-	ScopeParent  string
-	Summary      string
-	OperationID  string
-	AliasOf      string
-	SuccessMedia string
-	Parameters   []generatedParameter
-	Body         *generatedBody
+	Generation       string
+	Command          []string
+	Method           string
+	Path             string
+	Noun             string
+	Verb             string
+	Pagination       string
+	ResponseEnvelope string
+	RequireOneOf     []string
+	Destructive      bool
+	ScopeParent      string
+	Summary          string
+	OperationID      string
+	AliasOf          string
+	SuccessMedia     string
+	Parameters       []generatedParameter
+	Body             *generatedBody
 }
 type generatedParameter struct {
 	Name, In, Type  string
@@ -169,7 +173,7 @@ func load(directory string) ([]generatedOperation, error) {
 				if !methods[method] {
 					continue
 				}
-				generated := generatedOperation{Generation: spec.Info.Generation, Method: strings.ToUpper(method), Path: apiPath, Noun: operation.Noun, Verb: operation.Verb, Pagination: operation.Pagination, Destructive: operation.Destructive, ScopeParent: operation.ScopeParent, Summary: operation.Summary, OperationID: operation.OperationID, AliasOf: operation.AliasOf, SuccessMedia: successMedia(operation.Responses)}
+				generated := generatedOperation{Generation: spec.Info.Generation, Method: strings.ToUpper(method), Path: apiPath, Noun: operation.Noun, Verb: operation.Verb, Pagination: operation.Pagination, ResponseEnvelope: operation.Envelope, RequireOneOf: operation.RequireOneOf, Destructive: operation.Destructive, ScopeParent: operation.ScopeParent, Summary: operation.Summary, OperationID: operation.OperationID, AliasOf: operation.AliasOf, SuccessMedia: successMedia(operation.Responses)}
 				for _, parameter := range operation.Parameters {
 					parameter = resolveParameter(parameter, spec.Components.Parameters)
 					resolved := resolve(parameter.Schema, spec.Components.Schemas)
@@ -183,7 +187,30 @@ func load(directory string) ([]generatedOperation, error) {
 			}
 		}
 	}
+	deriveResponseEnvelopes(result)
 	return result, nil
+}
+
+func deriveResponseEnvelopes(operations []generatedOperation) {
+	families := map[string]bool{}
+	for _, operation := range operations {
+		if operation.Pagination == "apps-envelope" {
+			families[serviceFamily(operation.Path)] = true
+		}
+	}
+	for index := range operations {
+		if operations[index].ResponseEnvelope == "" && families[serviceFamily(operations[index].Path)] {
+			operations[index].ResponseEnvelope = "apps-envelope"
+		}
+	}
+}
+
+func serviceFamily(apiPath string) string {
+	segments := strings.Split(strings.Trim(apiPath, "/"), "/")
+	if len(segments) < 2 {
+		return strings.Join(segments, "/")
+	}
+	return strings.Join(segments[:2], "/")
 }
 
 func scopeParameterNames(apiPath, scopeParent string) map[string]string {

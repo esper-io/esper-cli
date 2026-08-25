@@ -38,6 +38,8 @@ func TestRenderSkillIncludesGeneratedAndHandWrittenCommands(t *testing.T) {
 		{Command: []string{"old", "alias"}, AliasOf: "canonical"},
 	}))
 	for _, expected := range []string{
+		"`espercli configure",
+		"`espercli context set",
 		"`espercli secureadb connect --device <id>`",
 		"`espercli version`",
 		"`espercli device list` - List devices",

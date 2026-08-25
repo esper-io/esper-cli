@@ -140,7 +140,7 @@
     }
   ],
   "paths": {
-    "/api/v2/subgroups/": {
+    "/v2/subgroups": {
       "get": {
         "x-badges": [
           {
@@ -159,6 +159,7 @@
             "name": "parent_group_ids",
             "in": "query",
             "description": "Filter by parent group ids. This is a comma separated list of group ids.",
+            "required": true,
             "schema": {
               "type": "string"
             }
@@ -635,6 +636,7 @@
         },
         "x-esper-destructive": false,
         "x-esper-pagination": "none",
+        "x-esper-response-envelope": "apps-envelope",
         "x-esper-verb": "get",
         "x-esper-noun": "blueprint",
         "summary": "Get blueprint"
@@ -2161,7 +2163,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Device information for the Tenant.\nResponse format depends on pagination type used:\n- **Offset-based**: Returns `count`, `prev`, `next` (URLs), `results`\n- **Cursor-based**: Returns `results`, `next_cursor`, `prev_cursor`\n",
+            "description": "Device information for the Tenant.\nResponse format depends on pagination type used:\n- **Offset-based**: Returns `count`, `prev`, `next` (URLs), `results`\n- **Cursor-based**: Returns `results`, `next_cursor`, `prev_cursor`\n\nLive apps-envelope evidence: `.spec/cli-revamp/smoke-test.md`, Results 2026-08-25.\n",
             "content": {
               "application/json": {
                 "schema": {
@@ -2214,7 +2216,7 @@
           }
         },
         "x-esper-destructive": false,
-        "x-esper-pagination": "limit-offset",
+        "x-esper-pagination": "apps-envelope",
         "x-esper-verb": "list",
         "x-esper-noun": "device"
       }
@@ -2321,6 +2323,7 @@
         },
         "x-esper-destructive": false,
         "x-esper-pagination": "none",
+        "x-esper-response-envelope": "apps-envelope",
         "x-esper-verb": "get",
         "x-esper-noun": "device"
       }
@@ -3794,6 +3797,10 @@
         },
         "x-esper-destructive": false,
         "x-esper-pagination": "apps-envelope",
+        "x-esper-require-one-of": [
+          "app_id",
+          "apple_app_id"
+        ],
         "x-esper-platform-source": "src/services/apple-external-management-provider/api/itunesappinfo/handler/handler.go:65-75",
         "x-esper-verb": "list",
         "x-esper-noun": "itunesapp"
@@ -11119,7 +11126,7 @@
             "type": "integer",
             "description": "Total number of devices matching the query"
           },
-          "previous": {
+          "prev": {
             "type": [
               "string",
               "null"

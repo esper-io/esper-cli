@@ -45,9 +45,9 @@ func policyFixtures() []policyFixture {
 	return []policyFixture{
 		{"legacy GET /enterprise/{enterprise_id}/policy/", "legacy-policy-list", http.MethodGet, "/enterprise/" + policyEnterpriseID + "/policy/", "", []string{"policy", "list", "--enterprise", policyEnterpriseID, "--name", "Kiosk", "--is-active", "true", "--created-on-gt", "2026-08-01T00:00:00Z", "--created-on-lt", "2026-08-31T23:59:59Z", "--limit", "1", "--offset", "0", "--all", "--json"}, url.Values{"name": {"Kiosk"}, "is_active": {"true"}, "created_on_gt": {"2026-08-01T00:00:00Z"}, "created_on_lt": {"2026-08-31T23:59:59Z"}, "limit": {"1"}, "offset": {"0"}}, http.StatusOK, http.StatusUnauthorized, true},
 		{"legacy POST /enterprise/{enterprise_id}/policy/", "legacy-policy-create", http.MethodPost, "/enterprise/" + policyEnterpriseID + "/policy/", policyCreateBody, []string{"policy", "create", "--enterprise", policyEnterpriseID, "--body", policyCreateInput, "--json"}, nil, http.StatusCreated, http.StatusBadRequest, false},
-		{"legacy GET /enterprise/{enterprise_id}/policy/{policy_id}/", "legacy-policy-get", http.MethodGet, "/enterprise/" + policyEnterpriseID + "/policy/" + policyID + "/", "", []string{"policy", "get", policyID, policyEnterpriseID, "--json"}, nil, http.StatusOK, http.StatusNotFound, false},
-		{"legacy PUT /enterprise/{enterprise_id}/policy/{policy_id}/", "legacy-policy-update", http.MethodPut, "/enterprise/" + policyEnterpriseID + "/policy/" + policyID + "/", policyUpdateBody, []string{"policy", "update", policyID, policyEnterpriseID, "--body", policyUpdateBody, "--json"}, nil, http.StatusOK, http.StatusBadRequest, false},
-		{"legacy PATCH /enterprise/{enterprise_id}/policy/{policy_id}/", "legacy-policy-partial-update", http.MethodPatch, "/enterprise/" + policyEnterpriseID + "/policy/" + policyID + "/", policyPatchBody, []string{"policy", "partial-update", policyID, policyEnterpriseID, "--name", "Kiosk baseline updated", "--is-active", "false", "--json"}, nil, http.StatusOK, http.StatusBadRequest, false},
+		{"legacy GET /enterprise/{enterprise_id}/policy/{policy_id}/", "legacy-policy-get", http.MethodGet, "/enterprise/" + policyEnterpriseID + "/policy/" + policyID + "/", "", []string{"policy", "get", policyEnterpriseID, policyID, "--json"}, nil, http.StatusOK, http.StatusNotFound, false},
+		{"legacy PUT /enterprise/{enterprise_id}/policy/{policy_id}/", "legacy-policy-update", http.MethodPut, "/enterprise/" + policyEnterpriseID + "/policy/" + policyID + "/", policyUpdateBody, []string{"policy", "update", policyEnterpriseID, policyID, "--body", policyUpdateBody, "--json"}, nil, http.StatusOK, http.StatusBadRequest, false},
+		{"legacy PATCH /enterprise/{enterprise_id}/policy/{policy_id}/", "legacy-policy-partial-update", http.MethodPatch, "/enterprise/" + policyEnterpriseID + "/policy/" + policyID + "/", policyPatchBody, []string{"policy", "partial-update", policyEnterpriseID, policyID, "--name", "Kiosk baseline updated", "--is-active", "false", "--json"}, nil, http.StatusOK, http.StatusBadRequest, false},
 	}
 }
 
@@ -202,11 +202,11 @@ func TestPolicyInputRules(t *testing.T) {
 		{"policy", "list"},
 		{"policy", "create", "--enterprise", policyEnterpriseID},
 		{"policy", "create", "--enterprise", policyEnterpriseID, "--body", "{"},
-		{"policy", "update", policyID, policyEnterpriseID},
-		{"policy", "update", policyID, policyEnterpriseID, "--body", "{"},
-		{"policy", "partial-update", policyID, policyEnterpriseID},
-		{"policy", "partial-update", policyID, policyEnterpriseID, "--body", "{"},
-		{"policy", "partial-update", policyID, policyEnterpriseID, "--body", policyPatchBody, "--name", "conflict"},
+		{"policy", "update", policyEnterpriseID, policyID},
+		{"policy", "update", policyEnterpriseID, policyID, "--body", "{"},
+		{"policy", "partial-update", policyEnterpriseID, policyID},
+		{"policy", "partial-update", policyEnterpriseID, policyID, "--body", "{"},
+		{"policy", "partial-update", policyEnterpriseID, policyID, "--body", policyPatchBody, "--name", "conflict"},
 	} {
 		assertPolicyUsage(t, args)
 	}

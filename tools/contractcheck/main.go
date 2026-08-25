@@ -28,16 +28,17 @@ type spec struct {
 	} `json:"components"`
 }
 type operation struct {
-	Parameters  []parameter `json:"parameters"`
-	Destructive *bool       `json:"x-esper-destructive"`
-	Pagination  string      `json:"x-esper-pagination"`
-	Verb        string      `json:"x-esper-verb"`
-	Noun        string      `json:"x-esper-noun"`
-	ScopeParent string      `json:"x-esper-scope-parent"`
-	Summary     string      `json:"summary"`
-	OperationID string      `json:"operationId"`
-	AliasOf     string      `json:"x-esper-alias-of"`
-	Body        struct {
+	Parameters   []parameter `json:"parameters"`
+	Destructive  *bool       `json:"x-esper-destructive"`
+	Pagination   string      `json:"x-esper-pagination"`
+	Verb         string      `json:"x-esper-verb"`
+	Noun         string      `json:"x-esper-noun"`
+	ScopeParent  string      `json:"x-esper-scope-parent"`
+	Summary      string      `json:"summary"`
+	OperationID  string      `json:"operationId"`
+	AliasOf      string      `json:"x-esper-alias-of"`
+	RequireOneOf []string    `json:"x-esper-require-one-of"`
+	Body         struct {
 		Required bool `json:"required"`
 		Content  map[string]struct {
 			Schema struct {
@@ -116,7 +117,7 @@ func check(specDir string) []string {
 				if prefix, side := sideFamilyPrefixes[document.Info.Generation]; side && generatedOperation.Noun == prefix+"-"+operation.Noun {
 					expectedNoun = generatedOperation.Noun
 				}
-				if generatedOperation.Noun != expectedNoun || generatedOperation.Verb != operation.Verb || generatedOperation.Destructive != *operation.Destructive || generatedOperation.Summary != operation.Summary || generatedOperation.OperationID != operation.OperationID || generatedOperation.AliasOf != operation.AliasOf {
+				if generatedOperation.Noun != expectedNoun || generatedOperation.Verb != operation.Verb || generatedOperation.Destructive != *operation.Destructive || generatedOperation.Summary != operation.Summary || generatedOperation.OperationID != operation.OperationID || generatedOperation.AliasOf != operation.AliasOf || !sameStrings(generatedOperation.RequireOneOf, operation.RequireOneOf) {
 					issues = append(issues, location+": generated metadata differs from overlay")
 				}
 				if operation.Body.Required && supportedBody(operation.Body.Content) && generatedOperation.Body == nil {
@@ -166,6 +167,18 @@ func check(specDir string) []string {
 	issues = append(issues, checkCommandGrammar(root)...)
 	issues = append(issues, checkDescriptions(root)...)
 	return issues
+}
+
+func sameStrings(left, right []string) bool {
+	if len(left) != len(right) {
+		return false
+	}
+	for index := range left {
+		if left[index] != right[index] {
+			return false
+		}
+	}
+	return true
 }
 
 func checkDescriptions(root *cobra.Command) []string {

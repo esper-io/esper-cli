@@ -398,10 +398,20 @@ function verbFor(method, apiPath, operation, collectionPaths) {
 
 function paginationFor(apiPath, operation, verb) {
   if (verb !== "list" || !operationHasPagination(operation)) return "none";
-  if (/^\/(apps\/v0|v2\/(itunesapps|tenant-apps|appleappstore|apps|webclips|provisioning-profiles|preferred-regions|esper-apps|tenant-esper-apps))/.test(apiPath)) {
+  if (apiPath === "/v2/devices/" || /^\/(apps\/v0|v2\/(itunesapps|tenant-apps|appleappstore|apps|webclips|provisioning-profiles|preferred-regions|esper-apps|tenant-esper-apps))/.test(apiPath)) {
     return "apps-envelope";
   }
   return "limit-offset";
+}
+
+function serviceFamily(apiPath) {
+  return apiPath.split("/").filter(Boolean).slice(0, 2).join("/");
+}
+
+function requiredOneOfFor(apiPath) {
+  if (apiPath === "/commands/v0/status/") return ["request", "device"];
+  if (apiPath === "/v2/itunesapps") return ["app_id", "apple_app_id"];
+  return [];
 }
 
 function scopeParentFor(apiPath, verb, generation) {
@@ -449,6 +459,16 @@ function annotateOperations(spec, generation) {
   }
   let operationCount = 0;
   const commands = new Map();
+  const appsEnvelopeFamilies = new Set();
+  for (const [apiPath, pathItem] of Object.entries(spec.paths)) {
+    for (const [method, operation] of Object.entries(pathItem)) {
+      if (!methods.has(method)) continue;
+      const verb = verbFor(method, apiPath, operation, collectionPaths);
+      if (paginationFor(apiPath, operation, verb) === "apps-envelope") {
+        appsEnvelopeFamilies.add(serviceFamily(apiPath));
+      }
+    }
+  }
   for (const [apiPath, pathItem] of Object.entries(spec.paths)) {
     for (const [method, operation] of Object.entries(pathItem)) {
       if (!methods.has(method)) continue;
@@ -460,6 +480,15 @@ function annotateOperations(spec, generation) {
       operation["x-esper-destructive"] = method === "delete" ||
         /\b(delete|remove|wipe|factory|revoke|terminate|uninstall|unapply)\b/i.test(`${operation.operationId ?? ""} ${operation.summary ?? ""}`);
       operation["x-esper-pagination"] = paginationFor(apiPath, operation, verb);
+      const requiredOneOf = requiredOneOfFor(apiPath);
+      if (requiredOneOf.length > 0) operation["x-esper-require-one-of"] = requiredOneOf;
+      if (apiPath === "/v2/subgroups") {
+        const parentGroups = (operation.parameters ?? []).find((parameter) => parameter.name === "parent_group_ids");
+        if (parentGroups) parentGroups.required = true;
+      }
+      if (appsEnvelopeFamilies.has(serviceFamily(apiPath))) {
+        operation["x-esper-response-envelope"] = "apps-envelope";
+      }
       operation["x-esper-verb"] = verb;
       operation["x-esper-noun"] = noun;
       if (!operation.summary) operation.summary = `${verb.charAt(0).toUpperCase()}${verb.slice(1)} ${noun}`;
@@ -584,7 +613,8 @@ function convertSchemasTo31(value) {
 }
 
 const byGeneration = new Map();
-for (const [apiPath, pathItem] of Object.entries(source.paths)) {
+for (const [sourcePath, pathItem] of Object.entries(source.paths)) {
+  const apiPath = sourcePath === "/api/v2/subgroups/" ? "/v2/subgroups" : sourcePath;
   if (excludedPaths.has(apiPath)) continue;
   const generation = generationFor(apiPath);
   if (!byGeneration.has(generation)) byGeneration.set(generation, {});

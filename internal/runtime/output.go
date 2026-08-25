@@ -27,6 +27,21 @@ func WriteJSON(writer io.Writer, data []byte) error {
 	return nil
 }
 
+func UnwrapResponseEnvelope(data []byte, envelope string) ([]byte, error) {
+	if envelope != "apps-envelope" || len(bytes.TrimSpace(data)) == 0 {
+		return data, nil
+	}
+	var object map[string]json.RawMessage
+	if err := json.Unmarshal(data, &object); err != nil {
+		return nil, fmt.Errorf("decode %s response: %w", envelope, err)
+	}
+	content, ok := object["content"]
+	if !ok {
+		return data, nil
+	}
+	return content, nil
+}
+
 func WriteHuman(writer io.Writer, data []byte) error {
 	if len(bytes.TrimSpace(data)) == 0 {
 		return nil

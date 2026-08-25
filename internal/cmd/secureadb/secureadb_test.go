@@ -1,12 +1,16 @@
 package secureadb
 
 import (
+	"bytes"
 	"context"
+	"crypto"
 	cryptorand "crypto/rand"
 	"crypto/rsa"
+	"crypto/sha256"
 	"crypto/tls"
 	"crypto/x509"
 	"crypto/x509/pkix"
+	"encoding/asn1"
 	"encoding/json"
 	"encoding/pem"
 	"fmt"
@@ -16,6 +20,7 @@ import (
 	"net/http/httptest"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 	"time"
 
@@ -59,6 +64,19 @@ func TestGenerateClientCertificate(t *testing.T) {
 	}
 	if privateKey.N.Cmp(publicKey.N) != 0 {
 		t.Fatal("certificate and private key do not match")
+	}
+}
+
+func TestConnectHelpDocumentsADBHostAuthorization(t *testing.T) {
+	command := NewCommand(&esperruntime.GlobalOptions{})
+	connect, _, err := command.Find([]string{"connect"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, expected := range []string{"RSA host authorization", "Esper Foundation", "Allow USB debugging?", "disables debugging features"} {
+		if !strings.Contains(connect.Long, expected) {
+			t.Fatalf("connect help does not contain %q:\n%s", expected, connect.Long)
+		}
 	}
 }
 
@@ -207,7 +225,7 @@ func TestPinnedTLSConfig(t *testing.T) {
 	_, unrelatedCertificatePEM := newServerCertificate(t, "other.invalid")
 
 	t.Run("accepts pinned certificate without hostname verification", func(t *testing.T) {
-		config, err := pinnedTLSConfig(clientCertificate, serverCertificatePEM)
+		config, _, err := pinnedTLSConfig(clientCertificate, serverCertificatePEM)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -217,7 +235,7 @@ func TestPinnedTLSConfig(t *testing.T) {
 	})
 
 	t.Run("rejects certificate outside pin", func(t *testing.T) {
-		config, err := pinnedTLSConfig(clientCertificate, unrelatedCertificatePEM)
+		config, _, err := pinnedTLSConfig(clientCertificate, unrelatedCertificatePEM)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -225,6 +243,44 @@ func TestPinnedTLSConfig(t *testing.T) {
 			t.Fatal("TLS handshake unexpectedly trusted an unpinned certificate")
 		}
 	})
+}
+
+func TestPinnedTLSConfigAcceptsCapturedNegativeSerialPEMFormat(t *testing.T) {
+	t.Setenv("GODEBUG", "")
+	clientCertificatePEM, clientKeyPEM, err := generateClientCertificate(time.Now(), cryptorand.Reader)
+	if err != nil {
+		t.Fatal(err)
+	}
+	clientCertificate, err := tls.X509KeyPair(clientCertificatePEM, clientKeyPEM)
+	if err != nil {
+		t.Fatal(err)
+	}
+	serverCertificate, serverCertificatePEM := newNegativeSerialServerCertificate(t)
+	if !bytes.HasPrefix(serverCertificatePEM, []byte("-----BEGIN CERTIFICATE-----\n")) || bytes.Contains(serverCertificatePEM, []byte(`\n`)) {
+		t.Fatal("synthetic certificate does not match captured PEM structure")
+	}
+	if _, err := x509.ParseCertificate(serverCertificate.Certificate[0]); err == nil || !strings.Contains(err.Error(), "negative serial number") {
+		t.Fatalf("default parser error = %v, want negative serial rejection", err)
+	}
+	config, negativeSerial, err := pinnedTLSConfig(clientCertificate, serverCertificatePEM)
+	if err != nil {
+		t.Fatalf("pinnedTLSConfig() error = %v", err)
+	}
+	if !negativeSerial {
+		t.Fatal("negative serial compatibility was not detected")
+	}
+	if err := withNegativeSerialCompatibility(func() error { return localTLSHandshake(config, serverCertificate) }); err != nil {
+		t.Fatalf("TLS handshake error = %v", err)
+	}
+	if os.Getenv("GODEBUG") != "" {
+		t.Fatalf("GODEBUG was not restored: %q", os.Getenv("GODEBUG"))
+	}
+
+	untrustedCertificate, _ := newNegativeSerialServerCertificate(t)
+	err = withNegativeSerialCompatibility(func() error { return localTLSHandshake(config, untrustedCertificate) })
+	if err == nil {
+		t.Fatal("TLS handshake unexpectedly trusted an unpinned negative-serial certificate")
+	}
 }
 
 func TestBridgeStopsOnContextCancellation(t *testing.T) {
@@ -290,6 +346,78 @@ func newServerCertificate(t *testing.T, commonName string) (tls.Certificate, []b
 		t.Fatal(err)
 	}
 	return certificate, certificatePEM
+}
+
+func newNegativeSerialServerCertificate(t *testing.T) (tls.Certificate, []byte) {
+	t.Helper()
+	privateKey, err := rsa.GenerateKey(cryptorand.Reader, 2048)
+	if err != nil {
+		t.Fatal(err)
+	}
+	template := &x509.Certificate{
+		SerialNumber:          big.NewInt(128),
+		Subject:               pkix.Name{CommonName: "captured-device.invalid"},
+		DNSNames:              []string{"captured-device.invalid"},
+		NotBefore:             time.Now().Add(-time.Minute),
+		NotAfter:              time.Now().Add(time.Hour),
+		KeyUsage:              x509.KeyUsageDigitalSignature | x509.KeyUsageKeyEncipherment | x509.KeyUsageCertSign,
+		ExtKeyUsage:           []x509.ExtKeyUsage{x509.ExtKeyUsageServerAuth},
+		IsCA:                  true,
+		BasicConstraintsValid: true,
+	}
+	der, err := x509.CreateCertificate(cryptorand.Reader, template, template, &privateKey.PublicKey, privateKey)
+	if err != nil {
+		t.Fatal(err)
+	}
+	der = rewriteCertificateSerial(t, der, privateKey, big.NewInt(-1))
+	certificatePEM := pem.EncodeToMemory(&pem.Block{Type: "CERTIFICATE", Bytes: der})
+	return tls.Certificate{Certificate: [][]byte{der}, PrivateKey: privateKey}, certificatePEM
+}
+
+func rewriteCertificateSerial(t *testing.T, der []byte, privateKey *rsa.PrivateKey, serial *big.Int) []byte {
+	t.Helper()
+	type certificate struct {
+		TBSCertificate     asn1.RawValue
+		SignatureAlgorithm pkix.AlgorithmIdentifier
+		SignatureValue     asn1.BitString
+	}
+	type tbsCertificate struct {
+		Raw                asn1.RawContent
+		Version            int `asn1:"optional,explicit,default:0,tag:0"`
+		SerialNumber       *big.Int
+		SignatureAlgorithm pkix.AlgorithmIdentifier
+		Issuer             asn1.RawValue
+		Validity           asn1.RawValue
+		Subject            asn1.RawValue
+		PublicKey          asn1.RawValue
+		Extensions         []pkix.Extension `asn1:"omitempty,optional,explicit,tag:3"`
+	}
+	var outer certificate
+	if _, err := asn1.Unmarshal(der, &outer); err != nil {
+		t.Fatal(err)
+	}
+	var tbs tbsCertificate
+	if _, err := asn1.Unmarshal(outer.TBSCertificate.FullBytes, &tbs); err != nil {
+		t.Fatal(err)
+	}
+	tbs.Raw = nil
+	tbs.SerialNumber = serial
+	tbsDER, err := asn1.Marshal(tbs)
+	if err != nil {
+		t.Fatal(err)
+	}
+	digest := sha256.Sum256(tbsDER)
+	signature, err := rsa.SignPKCS1v15(cryptorand.Reader, privateKey, crypto.SHA256, digest[:])
+	if err != nil {
+		t.Fatal(err)
+	}
+	outer.TBSCertificate = asn1.RawValue{FullBytes: tbsDER}
+	outer.SignatureValue = asn1.BitString{Bytes: signature, BitLength: len(signature) * 8}
+	result, err := asn1.Marshal(outer)
+	if err != nil {
+		t.Fatal(err)
+	}
+	return result
 }
 
 func localTLSHandshake(clientConfig *tls.Config, serverCertificate tls.Certificate) error {

@@ -26,6 +26,18 @@ func TestWriteHumanTable(t *testing.T) {
 	}
 }
 
+func TestUnwrapResponseEnvelope(t *testing.T) {
+	input := []byte(`{"code":200,"message":"ok","content":{"id":"device-1"}}`)
+	got, err := UnwrapResponseEnvelope(input, "apps-envelope")
+	if err != nil || string(got) != `{"id":"device-1"}` {
+		t.Fatalf("UnwrapResponseEnvelope() = %s, %v", got, err)
+	}
+	raw, err := UnwrapResponseEnvelope(input, "")
+	if err != nil || !bytes.Equal(raw, input) {
+		t.Fatalf("raw response = %s, %v", raw, err)
+	}
+}
+
 func TestConfirm(t *testing.T) {
 	tests := []struct {
 		name   string

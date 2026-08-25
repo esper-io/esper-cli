@@ -46,7 +46,7 @@ func commandOperationFixtures() []commandOperationFixture {
 		{"v0 POST /commands/v0/commands/", "command-request-create", "POST", "/commands/v0/commands/", `{"command":"REBOOT"}`, []string{"command-request", "create", "--command", "REBOOT", "--json"}, nil, 201, 400, "", false},
 		{"v0 GET /commands/v0/commands/{id}/", "command-request-get", "GET", "/commands/v0/commands/request-1/", "", []string{"command-request", "get", "request-1", "--json"}, nil, 200, 400, "", false},
 		{"v0 GET /commands/v0/commands/{id}/stats/", "stat-list", "GET", "/commands/v0/commands/request-1/stats/", "", []string{"stat", "list", "--command", "request-1", "--json"}, nil, 200, 400, "", false},
-		{"v0 GET /commands/v0/status/", "command-request-status-list", "GET", "/commands/v0/status/", "", []string{"command-request-status", "list", "--limit", "1", "--offset", "0", "--all", "--json"}, url.Values{"limit": {"1"}, "offset": {"0"}}, 200, 400, "apps-envelope", false},
+		{"v0 GET /commands/v0/status/", "command-request-status-list", "GET", "/commands/v0/status/", "", []string{"command-request-status", "list", "--device", "device-1", "--limit", "1", "--offset", "0", "--all", "--json"}, url.Values{"device": {"device-1"}, "limit": {"1"}, "offset": {"0"}}, 200, 400, "apps-envelope", false},
 		{"v0 GET /commands/v0/status/{id}/", "command-status-get", "GET", "/commands/v0/status/status-1/", "", []string{"command-status", "get", "status-1", "--json"}, nil, 200, 400, "", false},
 		{"v0 PUT /commands/v0/status/{id}/", "command-status-update", "PUT", "/commands/v0/status/status-1/", `{"state":"Command Cancelled"}`, []string{"command-status", "update", "status-1", "--state", "Command Cancelled", "--yes", "--json"}, nil, 200, 400, "", true},
 		{"v2 GET /v2/command-inbox/", "command-inbox-get", "GET", "/v2/command-inbox/", "", []string{"command-inbox", "get", "--device-id", "device-1", "--json"}, url.Values{"device_id": {"device-1"}}, 200, 400, "", false},
@@ -209,6 +209,7 @@ func TestCommandOperationInputValidation(t *testing.T) {
 		{"pipeline-operation", "update", "operation-1", "--operation-list", "list-1"}, {"operation-list", "update", "list-1", "--stage", "stage-1"},
 		{"command", "create", "--enterprise", "tenant-1", "--body", `{"command":"REBOOT"}`, "--command", "REBOOT"},
 		{"operation", "create", "--body", "{"},
+		{"command-request-status", "list"},
 	} {
 		assertCommandOperationUsage(t, args)
 	}

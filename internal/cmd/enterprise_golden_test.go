@@ -66,7 +66,7 @@ func TestEnterpriseCommandsGoldenFixtures(t *testing.T) {
 		},
 		{
 			name:      "enterprise policy delete success with yes",
-			arguments: []string{"enterprise-policy", "delete", "42", "enterprise-1", "--yes", "--json"},
+			arguments: []string{"enterprise-policy", "delete", "enterprise-1", "42", "--yes", "--json"},
 			method:    http.MethodDelete,
 			path:      "/enterprise/enterprise-1/policy/42/",
 			fixture:   "enterprise-policy-delete-success.body",
@@ -75,7 +75,7 @@ func TestEnterpriseCommandsGoldenFixtures(t *testing.T) {
 		},
 		{
 			name:      "enterprise policy delete API error after confirmation",
-			arguments: []string{"enterprise-policy", "delete", "42", "enterprise-1", "--json"},
+			arguments: []string{"enterprise-policy", "delete", "enterprise-1", "42", "--json"},
 			input:     "yes\n",
 			method:    http.MethodDelete,
 			path:      "/enterprise/enterprise-1/policy/42/",

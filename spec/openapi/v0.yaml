@@ -5954,6 +5954,10 @@
         },
         "x-esper-destructive": false,
         "x-esper-pagination": "apps-envelope",
+        "x-esper-require-one-of": [
+          "request",
+          "device"
+        ],
         "x-esper-verb": "list",
         "x-esper-noun": "command-request-status"
       }

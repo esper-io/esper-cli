@@ -106,6 +106,39 @@ func TestRequiredParametersAreConditionalOnSelectedRoute(t *testing.T) {
 	}
 }
 
+func TestRequireOneOfParameters(t *testing.T) {
+	operation := Operation{
+		RequireOneOf: []string{"request", "device"},
+		Parameters: []Parameter{
+			{Name: "request", In: "query"},
+			{Name: "device", In: "query"},
+		},
+	}
+	command := &cobra.Command{Use: "list"}
+	addFlags(command, []Operation{operation})
+	if err := validateRequiredParameters(command, operation); err == nil || esperruntime.ExitCode(err) != 2 || !strings.Contains(err.Error(), "--request, --device") {
+		t.Fatalf("missing one-of error = %v", err)
+	}
+	if usage := command.Flags().Lookup("request").Usage; !strings.Contains(usage, "at least one required") {
+		t.Fatalf("--request usage = %q", usage)
+	}
+	if err := command.Flags().Set("device", "device-1"); err != nil {
+		t.Fatal(err)
+	}
+	if err := validateRequiredParameters(command, operation); err != nil {
+		t.Fatalf("one-of validation = %v", err)
+	}
+}
+
+func TestRequiredParameterHelp(t *testing.T) {
+	operation := Operation{Parameters: []Parameter{{Name: "parent_group_ids", In: "query", Required: true}}}
+	command := &cobra.Command{Use: "list"}
+	addFlags(command, []Operation{operation})
+	if usage := command.Flags().Lookup("parent-group-ids").Usage; usage != "parent-group-ids (required)" {
+		t.Fatalf("required flag usage = %q", usage)
+	}
+}
+
 func TestRequiredBodyPropertiesAreConditionalOnBodyInput(t *testing.T) {
 	tests := []struct {
 		name      string
@@ -344,5 +377,137 @@ func TestMultiParentScopesRequireExactlyOneWithoutGlobalRoute(t *testing.T) {
 	_, err = selectOperation(command, operations)
 	if err == nil || esperruntime.ExitCode(err) != 2 {
 		t.Fatalf("selectOperation() error = %v", err)
+	}
+}
+
+func TestPathContextFallback(t *testing.T) {
+	operation := Operation{Path: "/devices/{device_id}", Parameters: []Parameter{{Name: "device_id", In: "path", Required: true}}}
+	command := &cobra.Command{Use: "get"}
+	var stderr bytes.Buffer
+	command.SetErr(&stderr)
+	active := esperruntime.ActiveContext{Device: &esperruntime.ActiveResource{ID: "device-1"}}
+	values, err := resolvedPathValuesWithContext(command, operation, nil, active, true)
+	if err != nil || values["device_id"] != "device-1" {
+		t.Fatalf("resolvedPathValuesWithContext() = %#v, %v", values, err)
+	}
+	if stderr.String() != "context: using active device device-1 for device_id\n" {
+		t.Fatalf("verbose output = %q", stderr.String())
+	}
+
+	values, err = resolvedPathValuesWithContext(command, operation, []string{"explicit-device"}, active, true)
+	if err != nil || values["device_id"] != "explicit-device" {
+		t.Fatalf("explicit path value = %#v, %v", values, err)
+	}
+}
+
+func TestScopeContextFallback(t *testing.T) {
+	operations := []Operation{{Path: "/enterprise/{enterprise_id}/apps", Parameters: []Parameter{{Name: "enterprise_id", In: "path", Required: true, Scope: true, ScopeName: "enterprise"}}}}
+	command := &cobra.Command{Use: "list"}
+	addFlags(command, operations)
+	var stderr bytes.Buffer
+	command.SetErr(&stderr)
+	active := esperruntime.ActiveContext{Enterprise: &esperruntime.ActiveResource{ID: "enterprise-1"}}
+	if err := applyScopeContextFallbacks(command, operations, active, true); err != nil {
+		t.Fatal(err)
+	}
+	selected, err := selectOperation(command, operations)
+	if err != nil || selected.Path != operations[0].Path {
+		t.Fatalf("selectOperation() = %#v, %v", selected, err)
+	}
+	if value, _ := command.Flags().GetString("enterprise"); value != "enterprise-1" {
+		t.Fatalf("--enterprise = %q", value)
+	}
+	if stderr.String() != "context: using active enterprise enterprise-1 for enterprise_id\n" {
+		t.Fatalf("verbose output = %q", stderr.String())
+	}
+}
+
+func TestContextFallbackDoesNotOverrideGlobalOrExplicitScope(t *testing.T) {
+	operations := []Operation{
+		{Path: "/apps"},
+		{Path: "/enterprise/{enterprise_id}/apps", Parameters: []Parameter{{Name: "enterprise_id", In: "path", Required: true, Scope: true, ScopeName: "enterprise"}}},
+	}
+	command := &cobra.Command{Use: "list"}
+	addFlags(command, operations)
+	active := esperruntime.ActiveContext{Enterprise: &esperruntime.ActiveResource{ID: "active-enterprise"}}
+	if err := applyScopeContextFallbacks(command, operations, active, false); err != nil {
+		t.Fatal(err)
+	}
+	selected, err := selectOperation(command, operations)
+	if err != nil || selected.Path != "/apps" {
+		t.Fatalf("global route = %#v, %v", selected, err)
+	}
+
+	if err := command.Flags().Set("enterprise", "explicit-enterprise"); err != nil {
+		t.Fatal(err)
+	}
+	if err := applyScopeContextFallbacks(command, operations, active, false); err != nil {
+		t.Fatal(err)
+	}
+	value, _ := command.Flags().GetString("enterprise")
+	if value != "explicit-enterprise" {
+		t.Fatalf("explicit scope was replaced with %q", value)
+	}
+}
+
+func TestMissingContextErrorsIncludeSetHint(t *testing.T) {
+	operation := Operation{Path: "/devices/{device_id}", Parameters: []Parameter{{Name: "device_id", In: "path", Required: true}}}
+	command := &cobra.Command{Use: "get"}
+	_, err := resolvedPathValuesWithContext(command, operation, nil, esperruntime.ActiveContext{}, false)
+	if err == nil || !strings.Contains(err.Error(), "espercli context set device <id>") {
+		t.Fatalf("missing path error = %v", err)
+	}
+
+	scoped := []Operation{{Path: "/enterprise/{enterprise_id}/apps", Parameters: []Parameter{{Name: "enterprise_id", In: "path", Required: true, Scope: true, ScopeName: "enterprise"}}}}
+	addFlags(command, scoped)
+	_, selectionErr := selectOperation(command, scoped)
+	err = addScopeContextHint(command, scoped, esperruntime.ActiveContext{}, selectionErr)
+	if err == nil || !strings.Contains(err.Error(), "espercli context set enterprise <id>") {
+		t.Fatalf("missing scope error = %v", err)
+	}
+}
+
+func TestCommandUseIncludesPositionalPathParameters(t *testing.T) {
+	operations := []Operation{{Path: "/enterprise/{enterprise_id}/devices/{deviceId}/events/{event_id}", Parameters: []Parameter{
+		{Name: "event_id", In: "path", Required: true},
+		{Name: "deviceId", In: "path", Required: true},
+		{Name: "enterprise_id", In: "path", Scope: true, ScopeName: "enterprise"},
+		{Name: "limit", In: "query"},
+	}}}
+	if got, want := commandUse("get", operations), "get <device-id> <event-id>"; got != want {
+		t.Fatalf("commandUse() = %q, want %q", got, want)
+	}
+}
+
+func TestResolvedPathValuesFollowPathOrder(t *testing.T) {
+	operation := Operation{Path: "/devices/{device_id}/events/{event_id}", Parameters: []Parameter{
+		{Name: "event_id", In: "path", Required: true},
+		{Name: "device_id", In: "path", Required: true},
+	}}
+	command := &cobra.Command{Use: "get"}
+	values, err := resolvedPathValues(command, operation, []string{"device-1", "event-1"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if values["device_id"] != "device-1" || values["event_id"] != "event-1" {
+		t.Fatalf("resolved values = %#v", values)
+	}
+}
+
+func TestMergedCommandUseFollowsPrimaryRoute(t *testing.T) {
+	operations := []Operation{
+		{Verb: "get", Parameters: []Parameter{{Name: "operation_id", In: "path"}}},
+		{Verb: "get", Parameters: []Parameter{{Name: "stage_run_operation_id", In: "path"}}},
+	}
+	if got, want := commandUse("get", operations), "get <operation-id>"; got != want {
+		t.Fatalf("commandUse() = %q, want %q", got, want)
+	}
+}
+
+func TestCommandLongHelpListsOlderAPIGenerations(t *testing.T) {
+	operations := []Operation{{Command: []string{"application", "list"}, Noun: "application", Verb: "list"}}
+	help := commandLongHelp("List applications", operations)
+	if !strings.Contains(help, "Other API generations:") || !strings.Contains(help, "espercli api legacy application list") {
+		t.Fatalf("commandLongHelp() = %q", help)
 	}
 }

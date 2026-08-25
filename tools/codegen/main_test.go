@@ -99,3 +99,32 @@ func TestPipelineCommandAndOperationAlwaysUseSideFamilyPrefix(t *testing.T) {
 		t.Fatalf("pipeline nouns = %#v", operations)
 	}
 }
+
+func TestDeriveResponseEnvelopesByServiceFamily(t *testing.T) {
+	operations := []generatedOperation{
+		{Path: "/v2/devices/", Pagination: "apps-envelope"},
+		{Path: "/v2/devices/{id}"},
+		{Path: "/v2/scripts/{id}"},
+		{Path: "/unwrapped/{id}", ResponseEnvelope: "explicit"},
+	}
+	deriveResponseEnvelopes(operations)
+	if operations[0].ResponseEnvelope != "apps-envelope" || operations[1].ResponseEnvelope != "apps-envelope" {
+		t.Fatalf("device envelopes = %#v", operations[:2])
+	}
+	if operations[2].ResponseEnvelope != "" || operations[3].ResponseEnvelope != "explicit" {
+		t.Fatalf("unrelated envelopes = %#v", operations[2:])
+	}
+}
+
+func TestServiceFamily(t *testing.T) {
+	tests := map[string]string{
+		"/v2/devices/{id}":         "v2/devices",
+		"/v1/foundry/builds/{id}/": "v1/foundry",
+		"/pipelines/v0/runs/":      "pipelines/v0",
+	}
+	for path, want := range tests {
+		if got := serviceFamily(path); got != want {
+			t.Fatalf("serviceFamily(%q) = %q, want %q", path, got, want)
+		}
+	}
+}

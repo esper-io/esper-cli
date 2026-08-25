@@ -1,6 +1,7 @@
 package secureadb
 
 import (
+	"bytes"
 	"context"
 	cryptorand "crypto/rand"
 	"crypto/rsa"
@@ -21,11 +22,14 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	esperruntime "github.com/esper-io/esper-cli/internal/runtime"
 	"github.com/spf13/cobra"
 )
+
+var negativeSerialCompatibilityMutex sync.Mutex
 
 const (
 	CertificatesDirectoryEnvironment = "ESPER_CERTS_DIR"
@@ -83,7 +87,15 @@ func NewCommand(options *esperruntime.GlobalOptions) *cobra.Command {
 	connect := &cobra.Command{
 		Use:   "connect",
 		Short: "Open a pinned mutual-TLS ADB relay for a device",
-		Args:  cobra.NoArgs,
+		Long: `Open a pinned mutual-TLS ADB relay for a device.
+
+The relay forwards raw ADB protocol bytes; the local adb client still performs
+normal RSA host authorization with the device. Esper Foundation devices
+auto-authorize the session key. On non-EEA or stock Android devices, unlock the
+device and accept the one-time "Allow USB debugging?" RSA fingerprint prompt,
+then run the printed adb connect command again while this relay remains open.
+Remote ADB cannot start when device policy disables debugging features.`,
+		Args: cobra.NoArgs,
 		RunE: func(command *cobra.Command, _ []string) error {
 			deviceID, _ := command.Flags().GetString("device")
 			return runConnect(command, options, deviceID)
@@ -105,16 +117,26 @@ func runConnect(command *cobra.Command, options *esperruntime.GlobalOptions, dev
 	}
 	if deviceID == "" && state.Active.Device != nil {
 		deviceID = state.Active.Device.ID
+		if options.Verbose {
+			_, _ = fmt.Fprintf(command.ErrOrStderr(), "context: using active device %s for device_id\n", deviceID)
+		}
 	}
 	if deviceID == "" {
-		return esperruntime.NewError(esperruntime.CategoryUsage, fmt.Errorf("--device is required when no active device is set"))
+		return esperruntime.NewError(esperruntime.CategoryUsage, fmt.Errorf("--device is required (or run espercli context set device <id>)"))
 	}
 	credentials, err := esperruntime.ResolveCredentials(state.Config, options.Environment, options.APIKey)
 	if err != nil {
 		return err
 	}
-	if credentials.EnterpriseID == "" {
-		return esperruntime.NewError(esperruntime.CategoryAuth, fmt.Errorf("enterprise ID is not configured"))
+	enterpriseID := credentials.EnterpriseID
+	if state.Active.Enterprise != nil && state.Active.Enterprise.ID != "" {
+		enterpriseID = state.Active.Enterprise.ID
+		if options.Verbose {
+			_, _ = fmt.Fprintf(command.ErrOrStderr(), "context: using active enterprise %s for enterprise_id\n", enterpriseID)
+		}
+	}
+	if enterpriseID == "" {
+		return esperruntime.NewError(esperruntime.CategoryAuth, fmt.Errorf("enterprise ID is not configured (run espercli context set enterprise <id>)"))
 	}
 
 	certificatesDirectory, err := defaultCertificatesDirectory()
@@ -127,7 +149,7 @@ func runConnect(command *cobra.Command, options *esperruntime.GlobalOptions, dev
 	}
 
 	client := esperruntime.NewHTTPClient(credentials)
-	requestPath := remoteADBCollectionPath(credentials.EnterpriseID, deviceID)
+	requestPath := remoteADBCollectionPath(enterpriseID, deviceID)
 	session, err := createRemoteADBSession(command.Context(), client, requestPath, clientCertificatePEM)
 	if err != nil {
 		return err
@@ -164,14 +186,14 @@ func runConnect(command *cobra.Command, options *esperruntime.GlobalOptions, dev
 	if err := os.WriteFile(deviceCertificatePath, deviceCertificatePEM, 0o600); err != nil {
 		return fmt.Errorf("write device certificate: %w", err)
 	}
-	tlsConfig, err := pinnedTLSConfig(clientCertificate, deviceCertificatePEM)
+	tlsConfig, negativeSerial, err := pinnedTLSConfig(clientCertificate, deviceCertificatePEM)
 	if err != nil {
 		return esperruntime.NewError(esperruntime.CategoryAPI, err)
 	}
 
 	signalContext, stopSignals := signal.NotifyContext(command.Context(), os.Interrupt)
 	defer stopSignals()
-	relayConnection, err := dialTLS(signalContext, net.JoinHostPort(relayHost, strconv.Itoa(relayPort)), tlsConfig)
+	relayConnection, err := dialTLS(signalContext, net.JoinHostPort(relayHost, strconv.Itoa(relayPort)), tlsConfig, negativeSerial)
 	if err != nil {
 		return esperruntime.NewError(esperruntime.CategoryNetwork, err)
 	}
@@ -374,10 +396,10 @@ func resolveRelayHost(ctx context.Context, session remoteADBSession) (string, er
 	return addresses[0], nil
 }
 
-func pinnedTLSConfig(clientCertificate tls.Certificate, deviceCertificatePEM []byte) (*tls.Config, error) {
-	roots := x509.NewCertPool()
-	if !roots.AppendCertsFromPEM(deviceCertificatePEM) {
-		return nil, fmt.Errorf("device certificate is not valid PEM")
+func pinnedTLSConfig(clientCertificate tls.Certificate, deviceCertificatePEM []byte) (*tls.Config, bool, error) {
+	roots, negativeSerial, err := deviceCertificatePool(deviceCertificatePEM)
+	if err != nil {
+		return nil, false, err
 	}
 	return &tls.Config{
 		MinVersion:         tls.VersionTLS12,
@@ -408,17 +430,91 @@ func pinnedTLSConfig(clientCertificate tls.Certificate, deviceCertificatePEM []b
 			}
 			return nil
 		},
-	}, nil
+	}, negativeSerial, nil
 }
 
-func dialTLS(ctx context.Context, address string, config *tls.Config) (*tls.Conn, error) {
+func deviceCertificatePool(data []byte) (*x509.CertPool, bool, error) {
+	roots := x509.NewCertPool()
+	rest := bytes.TrimSpace(data)
+	count := 0
+	negativeSerial := false
+	for len(rest) > 0 {
+		block, remaining := pem.Decode(rest)
+		if block == nil || block.Type != "CERTIFICATE" {
+			return nil, false, fmt.Errorf("device certificate is not valid PEM")
+		}
+		certificate, negative, err := parseDeviceCertificate(block.Bytes)
+		if err != nil {
+			return nil, false, fmt.Errorf("parse device certificate: %w", err)
+		}
+		negativeSerial = negativeSerial || negative
+		roots.AddCert(certificate)
+		count++
+		rest = bytes.TrimSpace(remaining)
+	}
+	if count == 0 {
+		return nil, false, fmt.Errorf("device certificate is not valid PEM")
+	}
+	return roots, negativeSerial, nil
+}
+
+func parseDeviceCertificate(raw []byte) (*x509.Certificate, bool, error) {
+	certificate, err := x509.ParseCertificate(raw)
+	if err == nil || !strings.Contains(err.Error(), "negative serial number") {
+		return certificate, false, err
+	}
+	// Device certificates generated by the legacy relay can have negative serials.
+	// Go 1.23 offers this compatibility switch without changing chain verification.
+	var parsed *x509.Certificate
+	if err := withNegativeSerialCompatibility(func() error {
+		var parseErr error
+		parsed, parseErr = x509.ParseCertificate(raw)
+		return parseErr
+	}); err != nil {
+		return nil, false, err
+	}
+	return parsed, true, nil
+}
+
+func withNegativeSerialCompatibility(run func() error) error {
+	negativeSerialCompatibilityMutex.Lock()
+	defer negativeSerialCompatibilityMutex.Unlock()
+	original, hadOriginal := os.LookupEnv("GODEBUG")
+	settings := strings.Split(os.Getenv("GODEBUG"), ",")
+	filtered := make([]string, 0, len(settings)+1)
+	for _, setting := range settings {
+		if setting != "" && !strings.HasPrefix(setting, "x509negativeserial=") {
+			filtered = append(filtered, setting)
+		}
+	}
+	filtered = append(filtered, "x509negativeserial=1")
+	if err := os.Setenv("GODEBUG", strings.Join(filtered, ",")); err != nil {
+		return fmt.Errorf("enable negative X.509 serial compatibility: %w", err)
+	}
+	defer func() {
+		if hadOriginal {
+			_ = os.Setenv("GODEBUG", original)
+		} else {
+			_ = os.Unsetenv("GODEBUG")
+		}
+	}()
+	return run()
+}
+
+func dialTLS(ctx context.Context, address string, config *tls.Config, negativeSerial bool) (*tls.Conn, error) {
 	dialer := &net.Dialer{Timeout: 30 * time.Second}
 	connection, err := dialer.DialContext(ctx, "tcp", address)
 	if err != nil {
 		return nil, fmt.Errorf("connect to secure ADB relay: %w", err)
 	}
 	secureConnection := tls.Client(connection, config)
-	if err := secureConnection.HandshakeContext(ctx); err != nil {
+	handshake := func() error { return secureConnection.HandshakeContext(ctx) }
+	if negativeSerial {
+		err = withNegativeSerialCompatibility(handshake)
+	} else {
+		err = handshake()
+	}
+	if err != nil {
 		connection.Close()
 		return nil, fmt.Errorf("perform secure ADB TLS handshake: %w", err)
 	}

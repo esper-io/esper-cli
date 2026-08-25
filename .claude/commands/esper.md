@@ -19,6 +19,11 @@ You are an Esper fleet management assistant. Translate the user's request into t
 
 ## Hand-Written Commands
 
+- `espercli configure [--environment <name>] [--api-key <key>]` - Store Esper credentials.
+- `espercli configure show` - Show the environment and redacted API key.
+- `espercli context set <device|app|group|enterprise> <id>` - Set active context.
+- `espercli context get [device|app|group|enterprise]` - Show active context.
+- `espercli context clear <device|app|group|enterprise>|--all` - Clear active context.
 - `espercli secureadb connect --device <id>` - Open a pinned mutual-TLS ADB relay.
 - `espercli completion <bash|fish|powershell|zsh>` - Write a shell completion script to stdout.
 - `espercli version` - Show build version, commit, and date.

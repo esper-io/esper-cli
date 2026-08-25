@@ -70,7 +70,7 @@ func appApplicationFixtureTests() []appApplicationFixtureTest {
 		{"v2 GET /v2/device-apps", "device-app list", []string{"device-app", "list", "--app-id", "fixture-value", "--app-version-id", "fixture-value", "--limit", "1", "--offset", "0", "--all", "--json"}, "GET", "/v2/device-apps", url.Values{"app_id": {"fixture-value"}, "app_version_id": {"fixture-value"}, "limit": {"1"}, "offset": {"0"}}, "", "v2-get--v2-device-apps", 200, 400, true, false, nil},
 		{"v2 GET /v2/devices/{deviceId}/device-apps/", "device-app list", []string{"device-app", "list", "--device", "fixture-id", "--limit", "1", "--offset", "0", "--all", "--json"}, "GET", "/v2/devices/fixture-id/device-apps/", url.Values{"limit": {"1"}, "offset": {"0"}}, "", "v2-get--v2-devices-deviceid-device-apps", 200, 400, true, false, nil},
 		{"v2 GET /v2/esper-apps/{appId}/versions/{versionId}", "esper-app-version get", []string{"esper-app-version", "get", "fixture-id", "fixture-id", "--json"}, "GET", "/v2/esper-apps/fixture-id/versions/fixture-id", nil, "", "v2-get--v2-esper-apps-appid-versions-versionid", 200, 400, false, false, nil},
-		{"v2 GET /v2/itunesapps", "itunesapp list", []string{"itunesapp", "list", "--limit", "1", "--offset", "0", "--all", "--json"}, "GET", "/v2/itunesapps", url.Values{"limit": {"1"}, "offset": {"0"}}, "", "v2-get--v2-itunesapps", 200, 400, true, false, nil},
+		{"v2 GET /v2/itunesapps", "itunesapp list", []string{"itunesapp", "list", "--app-id", "fixture-id", "--limit", "1", "--offset", "0", "--all", "--json"}, "GET", "/v2/itunesapps", url.Values{"app_id": {"fixture-id"}, "limit": {"1"}, "offset": {"0"}}, "", "v2-get--v2-itunesapps", 200, 400, true, false, nil},
 		{"v2 GET /v2/preferred-regions", "preferred-region list", []string{"preferred-region", "list", "--json"}, "GET", "/v2/preferred-regions", nil, "", "v2-get--v2-preferred-regions", 200, 401, false, false, nil},
 		{"v2 GET /v2/provisioning-profiles/{id}/versions", "version list", []string{"version", "list", "--provisioning-profile", "fixture-id", "--limit", "1", "--offset", "0", "--all", "--json"}, "GET", "/v2/provisioning-profiles/fixture-id/versions", url.Values{"limit": {"1"}, "offset": {"0"}}, "", "v2-get--v2-provisioning-profiles-id-versions", 200, 400, true, false, nil},
 		{"v2 GET /v2/tenant-apps", "tenant-app list", []string{"tenant-app", "list", "--limit", "1", "--offset", "0", "--all", "--json"}, "GET", "/v2/tenant-apps", url.Values{"limit": {"1"}, "offset": {"0"}}, "", "v2-get--v2-tenant-apps", 200, 400, true, false, nil},
@@ -123,7 +123,7 @@ func TestAppApplicationCommandsAPIErrors(t *testing.T) {
 }
 
 func TestAppApplicationInputValidation(t *testing.T) {
-	for _, arguments := range [][]string{{"preferred-region", "create"}, {"app-info", "patch", "fixture-id", "fixture-id", "fixture-id", "--body", "{}", "--icon-url", "https://example.test/icon.png"}, {"device-app", "list"}} {
+	for _, arguments := range [][]string{{"preferred-region", "create"}, {"app-info", "patch", "fixture-id", "fixture-id", "fixture-id", "--body", "{}", "--icon-url", "https://example.test/icon.png"}, {"device-app", "list"}, {"itunesapp", "list"}} {
 		command := NewRootCommand()
 		command.SetArgs(arguments)
 		if err := command.Execute(); err == nil || esperruntime.ExitCode(err) != 2 {

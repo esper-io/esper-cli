@@ -10,6 +10,15 @@ import (
 
 const CredentialsFileEnvironment = "ESPER_CREDS_FILE"
 
+const (
+	ContextDevice     = "device"
+	ContextApp        = "app"
+	ContextGroup      = "group"
+	ContextEnterprise = "enterprise"
+)
+
+var ContextResources = []string{ContextDevice, ContextApp, ContextGroup, ContextEnterprise}
+
 type Config struct {
 	Environment  string `json:"environment"`
 	APIKey       string `json:"api_key"`
@@ -25,6 +34,53 @@ type ActiveContext struct {
 	Device      *ActiveResource `json:"device,omitempty"`
 	Application *ActiveResource `json:"application,omitempty"`
 	Group       *ActiveResource `json:"group,omitempty"`
+	Enterprise  *ActiveResource `json:"enterprise,omitempty"`
+}
+
+func ContextResourceForParameter(name string) (string, bool) {
+	switch name {
+	case "enterprise_id":
+		return ContextEnterprise, true
+	case "device_id", "deviceId":
+		return ContextDevice, true
+	case "group_id", "devicegroup_id":
+		return ContextGroup, true
+	case "application_id", "app_id", "appId":
+		return ContextApp, true
+	default:
+		return "", false
+	}
+}
+
+func (active ActiveContext) Resource(resource string) *ActiveResource {
+	switch resource {
+	case ContextDevice:
+		return active.Device
+	case ContextApp:
+		return active.Application
+	case ContextGroup:
+		return active.Group
+	case ContextEnterprise:
+		return active.Enterprise
+	default:
+		return nil
+	}
+}
+
+func (active *ActiveContext) SetResource(resource string, value *ActiveResource) error {
+	switch resource {
+	case ContextDevice:
+		active.Device = value
+	case ContextApp:
+		active.Application = value
+	case ContextGroup:
+		active.Group = value
+	case ContextEnterprise:
+		active.Enterprise = value
+	default:
+		return fmt.Errorf("unknown context resource %q", resource)
+	}
+	return nil
 }
 
 type State struct {
