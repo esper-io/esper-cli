@@ -32,7 +32,7 @@ func deviceSupportFixtures() []deviceSupportFixture {
 	return []deviceSupportFixture{
 		{"legacy GET /enterprise/{enterprise_id}/device/{device_id}/download/eventfeed/", "legacy-device-eventfeed-list", http.MethodGet, "/enterprise/tenant-1/device/device-1/download/eventfeed/", "", []string{"device-eventfeed", "list", "--enterprise", "tenant-1", "--device", "device-1", "--limit", "1", "--offset", "0", "--all", "--json"}, url.Values{"limit": {"1"}, "offset": {"0"}}, 200, 401, "limit-offset", false},
 		{"v0 GET /device/v0/devices/{id}/", "v0-device-request-get", http.MethodGet, "/device/v0/devices/device-1/", "", []string{"device-request", "get", "device-1", "--json"}, nil, 200, 404, "", false},
-		{"v0 DELETE /device/v0/devices/{id}/", "v0-device-request-delete", http.MethodDelete, "/device/v0/devices/device-1/", "", []string{"device-request", "delete", "device-1", "--yes", "--json"}, nil, 200, 404, "", true},
+		{"v0 DELETE /device/v0/devices/{id}/", "v0-device-delete-non-android-device", http.MethodDelete, "/device/v0/devices/device-1/", "", []string{"device", "delete-non-android-device", "device-1", "--yes", "--json"}, nil, 200, 404, "", true},
 		{"v0 GET /device/v0/devices/{id}/devicestate", "v0-devicestate-get", http.MethodGet, "/device/v0/devices/device-1/devicestate", "", []string{"devicestate", "get", "device-1", "--json"}, nil, 200, 404, "", false},
 		{"v0 GET /device/v0/heartbeat/{id}/", "v0-device-heartbeat-get", http.MethodGet, "/device/v0/heartbeat/device-1/", "", []string{"device-heartbeat", "get", "device-1", "--json"}, nil, 200, 404, "", false},
 		{"v2 GET /v2/heartbeat/", "v2-device-heartbeat-list", http.MethodGet, "/v2/heartbeat/", "", []string{"device-heartbeat-list", "list", "--last-seen-gt", "2026-08-24T00:00:00Z", "--last-seen-lt", "2026-08-25T00:00:00Z", "--limit", "1", "--offset", "0", "--all", "--json"}, url.Values{"last_seen_gt": {"2026-08-24T00:00:00Z"}, "last_seen_lt": {"2026-08-25T00:00:00Z"}, "limit": {"1"}, "offset": {"0"}}, 200, 400, "apps-envelope", false},
@@ -62,7 +62,7 @@ func TestDeviceSupportOperationCoverage(t *testing.T) {
 	nouns := map[string]bool{"device-eventfeed": true, "device-google-account-emm-managed": true, "device-google-account-policy": true, "device-heartbeat": true, "device-heartbeat-list": true, "device-request": true, "devicestate": true, "foundation-version-list": true, "google-account": true, "rv-activity-feed": true}
 	got := map[string]bool{}
 	for _, operation := range generated.Operations() {
-		if nouns[operation.Noun] {
+		if nouns[operation.Noun] || operation.OperationID == "deleteDeviceRequest" {
 			got[operation.Generation+" "+operation.Method+" "+operation.Path] = true
 		}
 	}

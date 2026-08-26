@@ -155,6 +155,20 @@ specification. Tests use committed HTTP fixtures and must not require live
 credentials. CI also checks deterministic code generation and the generated
 `/esper` skill.
 
+The repeatable command harness is documented in
+[`docs/command-harness.md`](docs/command-harness.md):
+
+```bash
+./scripts/test-commands.sh offline
+./scripts/test-commands.sh live-readonly
+./scripts/test-commands.sh live-mutations
+```
+
+Offline mode checks every generated command and hand-written command through
+`--help`. Live read-only mode runs bounded GET operations. Mutation mode requires
+an explicit disposable-enterprise confirmation and a scenario cleanup section.
+All modes write machine-readable reports under `dist/`.
+
 The previous Python CLI is preserved on the `python-legacy` branch. New Go CLI
 work belongs on `go-rewrite` until that branch becomes the default.
 

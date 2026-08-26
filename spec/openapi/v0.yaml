@@ -4334,7 +4334,7 @@
         "x-esper-noun": "device-request"
       },
       "delete": {
-        "summary": "Delete a device. Currently supported by iOS, Linux and Windows devices.",
+        "summary": "Delete a non-Android device. Supported by iOS, Linux, and Windows devices only.",
         "operationId": "deleteDeviceRequest",
         "tags": [
           "3_Device"
@@ -4430,8 +4430,8 @@
         },
         "x-esper-destructive": true,
         "x-esper-pagination": "none",
-        "x-esper-verb": "delete",
-        "x-esper-noun": "device-request"
+        "x-esper-verb": "delete-non-android-device",
+        "x-esper-noun": "device"
       }
     },
     "/device/v0/devices/{id}/devicestate": {

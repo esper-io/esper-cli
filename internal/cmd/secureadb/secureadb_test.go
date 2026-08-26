@@ -80,6 +80,36 @@ func TestConnectHelpDocumentsADBHostAuthorization(t *testing.T) {
 	}
 }
 
+func TestSendEnableADBCommand(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
+		if request.Method != http.MethodPost || request.URL.Path != "/v0/enterprise/enterprise-1/command/" {
+			t.Errorf("request = %s %s", request.Method, request.URL.Path)
+		}
+		if request.Header.Get("Authorization") != "Bearer fixture-key" {
+			t.Errorf("authorization = %q", request.Header.Get("Authorization"))
+		}
+		var body map[string]any
+		if err := json.NewDecoder(request.Body).Decode(&body); err != nil {
+			t.Fatal(err)
+		}
+		if body["command"] != "SET_ADB_STATE" || body["command_type"] != "DEVICE" {
+			t.Fatalf("body = %#v", body)
+		}
+		arguments := body["command_args"].(map[string]any)
+		if arguments["adb_state"] != "ENABLED" || arguments["remoteadb_ip"] != "127.0.0.1" || arguments["remoteadb_device_port"] != "5555" {
+			t.Fatalf("command args = %#v", arguments)
+		}
+		writer.WriteHeader(http.StatusCreated)
+		_, _ = writer.Write([]byte(`{}`))
+	}))
+	defer server.Close()
+	client := &esperruntime.HTTPClient{BaseURL: server.URL, APIKey: "fixture-key", Client: server.Client(), Retry: esperruntime.RetryPolicy{MaxAttempts: 1}}
+	err := sendEnableADBCommand(context.Background(), client, esperruntime.Credentials{Environment: server.URL, APIKey: "fixture-key"}, "enterprise-1", "device-1", remoteADBSession{IP: "127.0.0.1", DevicePort: "5555", ClientPort: "4444"}, "/v0/enterprise/enterprise-1/device/device-1/remoteadb/session-1/")
+	if err != nil {
+		t.Fatal(err)
+	}
+}
+
 func TestPrepareCertificatesReplacesFilesWithPrivatePermissions(t *testing.T) {
 	directory := filepath.Join(t.TempDir(), "certs")
 	if err := os.MkdirAll(directory, 0o755); err != nil {

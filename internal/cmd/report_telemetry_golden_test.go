@@ -55,7 +55,6 @@ func reportTelemetryFixtures() []reportTelemetryFixture {
 		{"getStatusMetrics", "v1", "v1-status-metric-list", http.MethodGet, "/v1/enterprise/" + reportEnterpriseID + "/report/status-metrics/", "", []string{"api", "v1", "status-metric", "list", "--enterprise", reportEnterpriseID, "--json"}, nil, 200, 401, false, false},
 		{"getStatusMetricsV2", "v2", "status-metric-list", http.MethodGet, "/v2/enterprise/" + reportEnterpriseID + "/report/status-metrics", "", []string{"status-metric", "list", "--enterprise", reportEnterpriseID, "--json"}, nil, 200, 401, false, false},
 		{"getReportInfo", "legacy", "report-info-get", http.MethodGet, "/enterprise/report/info/", "", []string{"report-info", "get", "--json"}, nil, 200, 401, false, false},
-		{"getDeviceReport", "legacy", "device-report-get", http.MethodGet, "/enterprise/report/device-report/", "", []string{"device-report", "get", "--start-date", "2026-08-01T00:00:00Z", "--end-date", "2026-08-02T00:00:00Z", "--sync", "false", "--group-id", reportID, "--json"}, url.Values{"start_date": {"2026-08-01T00:00:00Z"}, "end_date": {"2026-08-02T00:00:00Z"}, "sync": {"false"}, "group_id": {reportID}}, 200, 400, false, false},
 		{"getSubscriptionReports", "legacy", "subscription-report-list", http.MethodGet, "/enterprise/report/subscription/", "", []string{"subscription-report", "list", "--limit", "1", "--offset", "0", "--all", "--json"}, url.Values{"limit": {"1"}, "offset": {"0"}}, 200, 401, true, false},
 		{"addSubscription", "legacy", "subscription-add", http.MethodPost, "/enterprise/report/subscription/", reportBody, []string{"subscription", "add", "--body", reportBody, "--json"}, nil, 201, 400, false, false},
 		{"getSubscriptionReport", "legacy", "subscription-report-get", http.MethodGet, "/enterprise/report/subscription/" + reportSubscription + "/", "", []string{"subscription-report", "get", reportSubscription, "--json"}, nil, 200, 404, false, false},
@@ -79,7 +78,6 @@ func TestReportTelemetryOperationCoverage(t *testing.T) {
 		"getStatusMetrics":         {"v1", "GET", "/v1/enterprise/{enterprise_id}/report/status-metrics/", "status-metric", "list", "none", "enterprise", "application/json", []string{"api", "v1", "status-metric", "list"}, false},
 		"getStatusMetricsV2":       {"v2", "GET", "/v2/enterprise/{enterprise_id}/report/status-metrics", "status-metric", "list", "none", "enterprise", "application/json", []string{"status-metric", "list"}, false},
 		"getReportInfo":            {"legacy", "GET", "/enterprise/report/info/", "report-info", "get", "none", "", "application/json", []string{"report-info", "get"}, false},
-		"getDeviceReport":          {"legacy", "GET", "/enterprise/report/device-report/", "device-report", "get", "none", "", "application/json", []string{"device-report", "get"}, false},
 		"getSubscriptionReports":   {"legacy", "GET", "/enterprise/report/subscription/", "subscription-report", "list", "limit-offset", "", "application/json", []string{"subscription-report", "list"}, false},
 		"addSubscription":          {"legacy", "POST", "/enterprise/report/subscription/", "subscription", "add", "none", "", "application/json", []string{"subscription", "add"}, false},
 		"getSubscriptionReport":    {"legacy", "GET", "/enterprise/report/subscription/{subscription_id}/", "subscription-report", "get", "none", "", "application/json", []string{"subscription-report", "get"}, false},
@@ -97,7 +95,7 @@ func TestReportTelemetryOperationCoverage(t *testing.T) {
 			got[operation.OperationID] = reportTelemetryMetadata{operation.Generation, operation.Method, operation.Path, operation.Noun, operation.Verb, operation.Pagination, operation.ScopeParent, operation.SuccessMedia, operation.Command, operation.Destructive}
 		}
 	}
-	if len(want) != 19 || !reflect.DeepEqual(want, got) {
+	if len(want) != 18 || !reflect.DeepEqual(want, got) {
 		t.Fatalf("report telemetry inventory = %#v, want %#v", got, want)
 	}
 }
@@ -120,8 +118,8 @@ func TestReportTelemetryFixtureInventory(t *testing.T) {
 	for _, entry := range entries {
 		got[entry.Name()] = true
 	}
-	if len(want) != 62 || !reflect.DeepEqual(want, got) {
-		t.Fatalf("fixture inventory = %#v, want 62 exact files", got)
+	if len(want) != 59 || !reflect.DeepEqual(want, got) {
+		t.Fatalf("fixture inventory = %#v, want 59 exact files", got)
 	}
 }
 
@@ -248,11 +246,10 @@ func TestReportTelemetryInputRules(t *testing.T) {
 	for _, args := range [][]string{{"event-feed", "list", "--enterprise", reportEnterpriseID}, {"subscription", "add"}, {"subscription-report", "update", reportSubscription}, {"report-status", "create"}, {"report-status", "create", "--body", "{"}, {"report-status", "create", "--body", reportCreateBody, "--report-type", "device"}} {
 		assertReportTelemetryUsage(t, args)
 	}
-	assertReportTelemetryUsage(t, []string{"device-report", "get", "--start-date", "2026-08-01T00:00:00Z"})
-	assertReportTelemetryRequest(t, []string{"subscription-report", "patch", reportSubscription}, "", reportTelemetryFixtures()[13])
+	assertReportTelemetryRequest(t, []string{"subscription-report", "patch", reportSubscription}, "", reportTelemetryFixtures()[12])
 	assertReportTelemetryRequest(t, []string{"subscription-report", "patch", reportSubscription, "--is-subscribed", "false"}, `{"is_subscribed":false}`, reportTelemetryFixture{method: http.MethodPatch, path: "/enterprise/report/subscription/" + reportSubscription + "/", status: 200})
 	assertReportTelemetryRequest(t, []string{"subscription-report", "patch", reportSubscription, "--body", reportPatchBody}, reportPatchBody, reportTelemetryFixture{method: http.MethodPatch, path: "/enterprise/report/subscription/" + reportSubscription + "/", status: 200})
-	for _, row := range []reportTelemetryFixture{reportTelemetryFixtures()[10], reportTelemetryFixtures()[12]} {
+	for _, row := range []reportTelemetryFixture{reportTelemetryFixtures()[9], reportTelemetryFixtures()[11]} {
 		assertReportTelemetryBodyModes(t, row)
 	}
 	assertReportTelemetryBodyModes(t, reportTelemetryFixture{args: []string{"report-status", "create"}, method: http.MethodPost, path: "/report/v0/reports", body: reportCreateBody, status: 200})

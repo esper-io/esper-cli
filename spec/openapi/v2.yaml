@@ -499,7 +499,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/BlueprintV2"
+                "$ref": "#/components/schemas/BlueprintCreate"
               }
             }
           }
@@ -11560,6 +11560,26 @@
             "type": "string",
             "format": "date-time",
             "readOnly": true
+          }
+        }
+      },
+      "BlueprintCreate": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Name of the blueprint"
+          },
+          "description": {
+            "type": "string",
+            "description": "Description of the blueprint"
+          },
+          "comments": {
+            "type": "string",
+            "description": "Comments on the blueprint"
+          },
+          "settings": {
+            "$ref": "#/components/schemas/settingsV2"
           }
         }
       },

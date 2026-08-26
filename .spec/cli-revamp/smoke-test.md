@@ -173,7 +173,7 @@ Answer `n`; this must stop before an API request is sent.
 
 ```bash
 set +e
-printf 'n\n' | espercli device-request delete "$SMOKE_DEVICE"
+printf 'n\n' | espercli device delete-non-android-device "$SMOKE_DEVICE"
 ESPER_SMOKE_CANCEL_EXIT="$?"
 set -e
 printf 'exit=%s\n' "$ESPER_SMOKE_CANCEL_EXIT"
@@ -263,7 +263,7 @@ Python installation and fails during import. No API key is included below.
 | 5. Pagination `--all` | `espercli device list --limit 2 --all` | One merged table; exit 0 | Not run. Step 3a reported 142,632 devices; this command would require approximately 71,316 live requests | SKIPPED |
 | 6. JSON through `jq` | `espercli device list --limit 2 --all --json \| jq ...` | `true`; exit 0 | Not run for the same request-volume reason as step 5 | SKIPPED |
 | 7. Ping | `espercli command create --body '<redacted device request>' --json \| jq ...` | JSON object; exit 0 | Not run because no device was selected | SKIPPED |
-| 8. Destructive prompt | `printf 'n\n' \| espercli device-request delete "$ESPER_SMOKE_DEVICE_ID"` | Exact target/count prompt, decline, exit 2, no API call | Not run because no exact device target was selected | SKIPPED |
+| 8. Destructive prompt | `printf 'n\n' \| espercli device delete-non-android-device "$ESPER_SMOKE_DEVICE_ID"` | Exact target/count prompt, decline, exit 2, no API call. Non-Android devices only. | Not run because no exact device target was selected | SKIPPED |
 | 9. Secure ADB | `espercli --verbose secureadb connect` | Loopback ADB endpoint, successful bridge, metrics, exit 0 | Not run because no selected device could be checked for Remote ADB eligibility | SKIPPED |
 | 10. Cleanup | `unset ESPER_SMOKE_API_KEY ESPER_SMOKE_PING_BODY` | No output; exit 0 | No output; exit 0 | PASS |
 
@@ -333,7 +333,7 @@ device: `be51677d-d0f4-4a08-a06d-cea69429b5a8`. Enterprise:
 | 5. Group pagination | `device-group list --limit 100 --all` | One merged group table; exit 0 | One-row merged `All devices` group table; exit 0 | PASS |
 | 6. Group JSON pagination | `device-group list --limit 100 --all --json \| jq ...` | `true`; exit 0 | `true`; exit 0 | PASS |
 | 7. Ping | `command create` with `UPDATE_HEARTBEAT` targeting only `SMOKE_DEVICE` | JSON object; exit 0 | `true`; exit 0 | PASS |
-| 8. Destructive prompt | `device-request delete "$SMOKE_DEVICE"` without `--yes`, answer `n` | Exact target and count, cancellation, exit 2, no API request | Prompt named `/device/v0/devices/be51677d-d0f4-4a08-a06d-cea69429b5a8/` and `1 target(s)`; declined; exit 2 | PASS |
+| 8. Destructive prompt | `device delete-non-android-device "$SMOKE_DEVICE"` without `--yes`, answer `n` | Exact target and count, cancellation, exit 2, no API request. Non-Android devices only. | Prompt named `/device/v0/devices/be51677d-d0f4-4a08-a06d-cea69429b5a8/` and `1 target(s)`; declined; exit 2 | PASS |
 | 9. Secure ADB | `secureadb connect --device "$SMOKE_DEVICE"` | Loopback endpoint, ADB bridge, metrics; exit 0 | Active enterprise applied, then `device certificate is not valid PEM`; exit 1; no local endpoint | FAIL |
 | 10. Cleanup | `unset ESPER_SMOKE_API_KEY ESPER_SMOKE_PING_BODY ESPER_SMOKE_DEVICE_JSON` | No output; exit 0 | No output; exit 0 | PASS |
 

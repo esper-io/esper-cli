@@ -70,6 +70,7 @@ type remoteADBSession struct {
 	ID                string     `json:"id"`
 	IP                string     `json:"ip"`
 	ClientPort        remotePort `json:"client_port"`
+	DevicePort        remotePort `json:"device_port"`
 	RemoteADBHost     string     `json:"remoteadb_host"`
 	DeviceCertificate string     `json:"device_certificate"`
 }
@@ -98,15 +99,20 @@ Remote ADB cannot start when device policy disables debugging features.`,
 		Args: cobra.NoArgs,
 		RunE: func(command *cobra.Command, _ []string) error {
 			deviceID, _ := command.Flags().GetString("device")
-			return runConnect(command, options, deviceID)
+			forceEnable, _ := command.Flags().GetBool("force-enable")
+			if forceEnable && !command.Flags().Changed("device") {
+				return esperruntime.NewError(esperruntime.CategoryUsage, fmt.Errorf("--force-enable requires an explicit --device"))
+			}
+			return runConnect(command, options, deviceID, forceEnable)
 		},
 	}
 	connect.Flags().String("device", "", "device ID (defaults to the active device)")
+	connect.Flags().Bool("force-enable", false, "send SET_ADB_STATE to enable Remote ADB using this session (requires explicit --device)")
 	command.AddCommand(connect)
 	return command
 }
 
-func runConnect(command *cobra.Command, options *esperruntime.GlobalOptions, deviceID string) error {
+func runConnect(command *cobra.Command, options *esperruntime.GlobalOptions, deviceID string, forceEnable bool) error {
 	store, err := esperruntime.NewStateStore()
 	if err != nil {
 		return esperruntime.NewError(esperruntime.CategoryAuth, err)
@@ -186,6 +192,14 @@ func runConnect(command *cobra.Command, options *esperruntime.GlobalOptions, dev
 	if err := os.WriteFile(deviceCertificatePath, deviceCertificatePEM, 0o600); err != nil {
 		return fmt.Errorf("write device certificate: %w", err)
 	}
+	if forceEnable {
+		if err := sendEnableADBCommand(command.Context(), client, credentials, enterpriseID, deviceID, session, detailPath); err != nil {
+			return err
+		}
+		if _, err := fmt.Fprintln(command.OutOrStdout(), "Remote ADB enable command sent to device."); err != nil {
+			return err
+		}
+	}
 	tlsConfig, negativeSerial, err := pinnedTLSConfig(clientCertificate, deviceCertificatePEM)
 	if err != nil {
 		return esperruntime.NewError(esperruntime.CategoryAPI, err)
@@ -223,6 +237,45 @@ func runConnect(command *cobra.Command, options *esperruntime.GlobalOptions, dev
 	}
 	if bridgeErr != nil && !errors.Is(bridgeErr, context.Canceled) && !errors.Is(bridgeErr, context.DeadlineExceeded) {
 		return esperruntime.NewError(esperruntime.CategoryNetwork, bridgeErr)
+	}
+	return nil
+}
+
+func sendEnableADBCommand(ctx context.Context, client *esperruntime.HTTPClient, credentials esperruntime.Credentials, enterpriseID, deviceID string, session remoteADBSession, detailPath string) error {
+	devicePort := session.DevicePort
+	if devicePort == "" {
+		devicePort = session.ClientPort
+	}
+	port, err := devicePort.number()
+	if err != nil {
+		return esperruntime.NewError(esperruntime.CategoryAPI, fmt.Errorf("Remote ADB device port is unavailable: %w", err))
+	}
+	if session.IP == "" {
+		return esperruntime.NewError(esperruntime.CategoryAPI, fmt.Errorf("Remote ADB relay IP is unavailable"))
+	}
+	commandArgs := map[string]any{
+		"adb_state":             "ENABLED",
+		"adb_timeout":           3600000,
+		"remoteadb_ip":          session.IP,
+		"remoteadb_device_port": strconv.Itoa(port),
+		"remoteadb_url":         strings.TrimRight(credentials.BaseURL(), "/") + detailPath,
+	}
+	if session.RemoteADBHost != "" {
+		commandArgs["remoteadb_host"] = session.RemoteADBHost
+	}
+	body, err := esperruntime.EncodeBody(map[string]any{
+		"command_type": "DEVICE",
+		"devices":      []string{deviceID},
+		"command":      "SET_ADB_STATE",
+		"command_args": commandArgs,
+		"schedule":     "IMMEDIATE",
+	})
+	if err != nil {
+		return err
+	}
+	path := fmt.Sprintf("/v0/enterprise/%s/command/", url.PathEscape(enterpriseID))
+	if _, err := client.Do(ctx, http.MethodPost, path, nil, body); err != nil {
+		return fmt.Errorf("send Remote ADB enable command: %w", err)
 	}
 	return nil
 }

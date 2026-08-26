@@ -33,6 +33,8 @@ jobs:
         run: go test ./...
       - name: Check spec-to-command contract
         run: go run ./tools/contractcheck
+      - name: Check command harness
+        run: go run ./tools/command-harness --mode offline --report dist/command-harness-offline.json
 
   snapshot:
     needs: verify

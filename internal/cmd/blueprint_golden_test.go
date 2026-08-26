@@ -84,6 +84,11 @@ func TestBlueprintCommandsAPIErrors(t *testing.T) {
 }
 
 func TestBlueprintInputValidation(t *testing.T) {
+	root := NewRootCommand()
+	create, _, err := root.Find([]string{"blueprint", "create"})
+	if err != nil || create.Flags().Lookup("publish") != nil {
+		t.Fatal("blueprint create exposes read-only --publish")
+	}
 	for _, arguments := range [][]string{
 		{"blueprint-revision", "restore", "--enterprise", "enterprise-1", "--device-group", "group-1"},
 		{"blueprint", "upload", "--enterprise", "enterprise-1", "--device-group", "group-1"},
