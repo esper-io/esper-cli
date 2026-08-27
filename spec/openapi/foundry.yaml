@@ -880,27 +880,8 @@
         },
         "required": [
           "code",
-          "message",
-          "content"
+          "message"
         ]
-      },
-      "Device_Model_PUT_Request_V1": {
-        "type": "object",
-        "properties": {
-          "auto_update": {
-            "type": "boolean",
-            "description": "Enables/disables automatic updates for the device model. The other properties (latest and locked_build_id) are processed only if autoupdate is set to true."
-          },
-          "latest": {
-            "type": "boolean",
-            "description": "Configures Foundry service to automatically lock to the latest approved build (whenever available) if set to true."
-          },
-          "locked_build_id": {
-            "type": "string",
-            "format": "uuid",
-            "description": "Specifies the UUID of the build which needs to be locked for automatic updates."
-          }
-        }
       },
       "Tenant_Device_Model_PUT_Response_V1": {
         "type": "object",
@@ -929,6 +910,24 @@
         "required": [
           "locked_build_id"
         ]
+      },
+      "Device_Model_PUT_Request_V1": {
+        "type": "object",
+        "properties": {
+          "auto_update": {
+            "type": "boolean",
+            "description": "Enables/disables automatic updates for the device model. The other properties (latest and locked_build_id) are processed only if autoupdate is set to true."
+          },
+          "latest": {
+            "type": "boolean",
+            "description": "Configures Foundry service to automatically lock to the latest approved build (whenever available) if set to true."
+          },
+          "locked_build_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Specifies the UUID of the build which needs to be locked for automatic updates."
+          }
+        }
       },
       "Device_Model_V1": {
         "type": "object",
@@ -1029,27 +1028,6 @@
           "created_at"
         ]
       },
-      "Error_400_Bad_Data": {
-        "type": "object",
-        "properties": {
-          "code": {
-            "type": "integer",
-            "format": "int32",
-            "default": 400
-          },
-          "message": {
-            "type": "string"
-          },
-          "content": {
-            "type": "object"
-          }
-        },
-        "required": [
-          "code",
-          "message",
-          "content"
-        ]
-      },
       "Foundry_Build_PUT_Request_V1": {
         "type": "object",
         "properties": {
@@ -1081,8 +1059,7 @@
         },
         "required": [
           "code",
-          "message",
-          "content"
+          "message"
         ]
       },
       "Error_500_Internal_Server_Error": {
@@ -1102,8 +1079,7 @@
         },
         "required": [
           "code",
-          "message",
-          "content"
+          "message"
         ]
       },
       "Error_401_Unauthorized": {
@@ -1123,8 +1099,27 @@
         },
         "required": [
           "code",
-          "message",
-          "content"
+          "message"
+        ]
+      },
+      "Error_400_Bad_Data": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer",
+            "format": "int32",
+            "default": 400
+          },
+          "message": {
+            "type": "string"
+          },
+          "content": {
+            "type": "object"
+          }
+        },
+        "required": [
+          "code",
+          "message"
         ]
       },
       "Build_V1": {

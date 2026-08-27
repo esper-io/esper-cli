@@ -182,7 +182,7 @@ func runOffline() []result {
 		}
 		results = append(results, item)
 	}
-	for _, commandPath := range [][]string{{"configure"}, {"configure", "show"}, {"context", "set"}, {"context", "get"}, {"context", "clear"}, {"secureadb", "connect"}, {"completion", "bash"}, {"completion", "zsh"}, {"completion", "fish"}, {"completion", "powershell"}, {"version"}} {
+	for _, commandPath := range [][]string{{"configure"}, {"configure", "show"}, {"context", "set"}, {"context", "get"}, {"context", "clear"}, {"discover"}, {"secureadb", "connect"}, {"completion", "bash"}, {"completion", "zsh"}, {"completion", "fish"}, {"completion", "powershell"}, {"version"}} {
 		root := cmd.NewRootCommand()
 		item := result{Name: "handwritten", Command: strings.Join(commandPath, " ")}
 		if commandPath[0] != "completion" {

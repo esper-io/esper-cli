@@ -81,11 +81,12 @@ func renderSkill(operations []generated.Operation) []byte {
 	output.WriteString("- `espercli context set <device|app|group|enterprise> <id>` - Set active context.\n")
 	output.WriteString("- `espercli context get [device|app|group|enterprise]` - Show active context.\n")
 	output.WriteString("- `espercli context clear <device|app|group|enterprise>|--all` - Clear active context.\n")
+	output.WriteString("- `espercli discover <query-or-docs-url>` - Find commands by name, request fields, OpenAPI metadata, or an api.esper.io documentation URL.\n")
 	output.WriteString("- `espercli secureadb connect --device <id>` - Open a pinned mutual-TLS ADB relay.\n")
 	output.WriteString("- `espercli completion <bash|fish|powershell|zsh>` - Write a shell completion script to stdout.\n")
 	output.WriteString("- `espercli version` - Show build version, commit, and date.\n\n")
-	output.WriteString("## Spec-Generated Command Tree\n\n")
-	output.WriteString("Commands marked **destructive** require confirmation or `--yes`. Use each command's `--help` for positional arguments, request-body flags, scope flags, and pagination options.\n")
+	output.WriteString("## Spec-Generated Operations\n\n")
+	output.WriteString("Commands marked **destructive** require confirmation or `--yes`. Use each command's `--help` for positional arguments, request-body flags, nested body fields, scope flags, and pagination options. `espercli api <generation> ...` accesses older colliding API generations; it is not a general API escape hatch.\n")
 
 	currentGroup := ""
 	for _, path := range paths {

@@ -947,6 +947,17 @@
           "organization_type"
         ]
       },
+      "UpdateRole": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          }
+        }
+      },
       "CreateRole": {
         "type": "object",
         "properties": {
@@ -961,17 +972,6 @@
           "name",
           "description"
         ]
-      },
-      "UpdateRole": {
-        "type": "object",
-        "properties": {
-          "name": {
-            "type": "string"
-          },
-          "description": {
-            "type": "string"
-          }
-        }
       },
       "RoleResponse": {
         "type": "object",

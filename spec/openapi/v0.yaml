@@ -122,6 +122,11 @@
       "name": "10_Reports API",
       "description": "APIs for managing reports.<br /> Currently supports [App Reports](https://help.esper.io/hc/en-us/articles/27379366650257-App-Reports).",
       "x-displayName": "Reports API"
+    },
+    {
+      "name": "tenant_DEP Profile",
+      "description": "APIs to create and manage DEP profiles. Learn more about [DEP profiles](https://help.esper.io/hc/en-us/articles/20361103311761-Setting-Up-Apple-MDM-Management)",
+      "x-displayName": "DEP Profile"
     }
   ],
   "paths": {
@@ -6470,22 +6475,22 @@
               }
             }
           },
-          "401": {
-            "description": "Authorization information is missing or invalid.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error_401_Unauthorized"
-                }
-              }
-            }
-          },
           "400": {
             "description": "Bad request",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Error_400_Bad_Data"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authorization information is missing or invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_401_Unauthorized"
                 }
               }
             }
@@ -6621,22 +6626,22 @@
               }
             }
           },
-          "401": {
-            "description": "Authorization information is missing or invalid.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error_401_Unauthorized"
-                }
-              }
-            }
-          },
           "400": {
             "description": "Bad request",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Error_400_Bad_Data"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authorization information is missing or invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_401_Unauthorized"
                 }
               }
             }
@@ -6812,22 +6817,22 @@
               }
             }
           },
-          "401": {
-            "description": "APNs certificate delete error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error_401_Unauthorized"
-                }
-              }
-            }
-          },
           "400": {
             "description": "Bad request",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Error_400_Bad_Data"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "APNs certificate delete error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_401_Unauthorized"
                 }
               }
             }
@@ -7700,138 +7705,55 @@
         "x-esper-noun": "report-status"
       }
     },
-    "/v0/enterprise/{enterprise_id}/device/{device_id}/remoteadb/": {
+    "/tenant/v0/depprofiles/": {
       "get": {
-        "operationId": "listRemoteADBConnections",
-        "summary": "List remote ADB connections for a device",
-        "tags": [
-          "Remote ADB"
+        "x-badges": [
+          {
+            "name": "Stable",
+            "color": "green"
+          }
         ],
-        "parameters": [
+        "summary": "Get all DEP profiles for the tenant",
+        "description": "Returns all the DEP profile for the tenant",
+        "operationId": "getDEPProfileList",
+        "tags": [
+          "tenant_DEP Profile"
+        ],
+        "security": [
           {
-            "name": "enterprise_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "device_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "limit",
-            "in": "query",
-            "schema": {
-              "type": "integer",
-              "minimum": 1
-            }
-          },
-          {
-            "name": "offset",
-            "in": "query",
-            "schema": {
-              "type": "integer",
-              "minimum": 0
-            }
+            "tenant_apiKey": []
           }
         ],
         "responses": {
           "200": {
-            "description": "Remote ADB connections",
+            "description": "DEP profile information for the Tenant",
             "content": {
               "application/json": {
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "count": {
+                    "code": {
                       "type": "integer"
                     },
-                    "next": {
-                      "type": [
-                        "string",
-                        "null"
-                      ],
-                      "format": "uri"
+                    "message": {
+                      "type": "string"
                     },
-                    "previous": {
-                      "type": [
-                        "string",
-                        "null"
-                      ],
-                      "format": "uri"
-                    },
-                    "results": {
-                      "type": "array",
-                      "items": {
-                        "type": "object",
-                        "properties": {
-                          "id": {
-                            "type": "string",
-                            "format": "uuid"
-                          },
-                          "enterprise": {
-                            "type": "string",
-                            "format": "uuid"
-                          },
-                          "device": {
-                            "type": "string",
-                            "format": "uuid"
-                          },
-                          "device_name": {
-                            "type": "string"
-                          },
-                          "ip": {
-                            "type": [
-                              "string",
-                              "null"
-                            ]
-                          },
-                          "client_port": {
-                            "type": [
-                              "string",
-                              "null"
-                            ]
-                          },
-                          "device_port": {
-                            "type": [
-                              "string",
-                              "null"
-                            ]
-                          },
-                          "remoteadb_host": {
-                            "type": [
-                              "string",
-                              "null"
-                            ]
-                          },
-                          "client_certificate": {
-                            "type": [
-                              "string",
-                              "null"
-                            ]
-                          },
-                          "device_certificate": {
-                            "type": [
-                              "string",
-                              "null"
-                            ]
-                          },
-                          "state": {
-                            "type": "string"
-                          },
-                          "errors": {
-                            "type": [
-                              "string",
-                              "null"
-                            ]
+                    "content": {
+                      "type": "object",
+                      "properties": {
+                        "count": {
+                          "type": "integer"
+                        },
+                        "previous": {
+                          "type": "string"
+                        },
+                        "next": {
+                          "type": "string"
+                        },
+                        "results": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/tenant_DEPProfile"
                           }
                         }
                       }
@@ -7841,161 +7763,76 @@
               }
             }
           },
-          "400": {
-            "description": "Bad request",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "additionalProperties": true
-                }
-              }
-            }
-          },
           "401": {
-            "description": "Unauthorized",
+            "description": "Authorization information is missing or invalid.",
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": true
+                  "$ref": "#/components/schemas/tenant_Error_401_Unauthorized"
                 }
               }
             }
           },
-          "404": {
-            "description": "Not found",
+          "500": {
+            "description": "Internal server error",
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": true
+                  "$ref": "#/components/schemas/tenant_Error_500_Internal_Server_Error"
                 }
               }
             }
           }
         },
-        "x-esper-platform-source": [
-          "src/services/shoonyacloud/shoonyapoc/api/remoteadb/urls.py:13-22",
-          "src/services/shoonyacloud/shoonyapoc/api/remoteadb/views/remoteadb_connection.py:9-20"
-        ],
         "x-esper-destructive": false,
-        "x-esper-pagination": "limit-offset",
+        "x-esper-pagination": "none",
         "x-esper-verb": "list",
-        "x-esper-noun": "remoteadb",
-        "x-esper-scope-parent": "device"
+        "x-esper-noun": "dep-profile-list"
       },
       "post": {
-        "operationId": "createRemoteADBConnection",
-        "summary": "Start a remote ADB connection",
-        "tags": [
-          "Remote ADB"
+        "x-badges": [
+          {
+            "name": "Stable",
+            "color": "green"
+          }
         ],
-        "parameters": [
+        "summary": "Create a DEP profile",
+        "description": "Creates a DEP profile",
+        "operationId": "createDEPProfile",
+        "tags": [
+          "tenant_DEP Profile"
+        ],
+        "security": [
           {
-            "name": "enterprise_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "device_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
+            "tenant_apiKey": []
           }
         ],
         "requestBody": {
-          "required": true,
+          "required": false,
           "content": {
             "application/json": {
               "schema": {
-                "type": "object",
-                "required": [
-                  "client_certificate"
-                ],
-                "properties": {
-                  "client_certificate": {
-                    "type": "string"
-                  }
-                }
+                "$ref": "#/components/schemas/tenant_DEPProfileCreateRequest"
               }
             }
           }
         },
         "responses": {
-          "201": {
-            "description": "Remote ADB connection created",
+          "200": {
+            "description": "Updated the DEP profile for the tenant",
             "content": {
               "application/json": {
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "id": {
-                      "type": "string",
-                      "format": "uuid"
+                    "code": {
+                      "type": "integer"
                     },
-                    "enterprise": {
-                      "type": "string",
-                      "format": "uuid"
-                    },
-                    "device": {
-                      "type": "string",
-                      "format": "uuid"
-                    },
-                    "device_name": {
+                    "message": {
                       "type": "string"
                     },
-                    "ip": {
-                      "type": [
-                        "string",
-                        "null"
-                      ]
-                    },
-                    "client_port": {
-                      "type": [
-                        "string",
-                        "null"
-                      ]
-                    },
-                    "device_port": {
-                      "type": [
-                        "string",
-                        "null"
-                      ]
-                    },
-                    "remoteadb_host": {
-                      "type": [
-                        "string",
-                        "null"
-                      ]
-                    },
-                    "client_certificate": {
-                      "type": [
-                        "string",
-                        "null"
-                      ]
-                    },
-                    "device_certificate": {
-                      "type": [
-                        "string",
-                        "null"
-                      ]
-                    },
-                    "state": {
-                      "type": "string"
-                    },
-                    "errors": {
-                      "type": [
-                        "string",
-                        "null"
-                      ]
+                    "content": {
+                      "$ref": "#/components/schemas/tenant_DEPProfile"
                     }
                   }
                 }
@@ -8007,284 +7844,204 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": true
+                  "$ref": "#/components/schemas/tenant_Error_400_Bad_Data"
                 }
               }
             }
           },
           "401": {
-            "description": "Unauthorized",
+            "description": "Authorization information is missing or invalid.",
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": true
+                  "$ref": "#/components/schemas/tenant_Error_401_Unauthorized"
                 }
               }
             }
           },
-          "404": {
-            "description": "Not found",
+          "500": {
+            "description": "Internal server error",
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": true
+                  "$ref": "#/components/schemas/tenant_Error_500_Internal_Server_Error"
                 }
               }
             }
           }
         },
-        "x-esper-platform-source": [
-          "src/services/shoonyacloud/shoonyapoc/api/remoteadb/urls.py:13-22",
-          "src/services/shoonyacloud/shoonyapoc/api/remoteadb/views/remoteadb_connection.py:9-20"
-        ],
         "x-esper-destructive": false,
         "x-esper-pagination": "none",
         "x-esper-verb": "create",
-        "x-esper-noun": "remoteadb",
-        "x-esper-scope-parent": "device"
-      }
-    },
-    "/v0/enterprise/{enterprise_id}/device/{device_id}/remoteadb/{remoteadb_id}/": {
-      "get": {
-        "operationId": "getRemoteADBConnection",
-        "summary": "Get remote ADB connection status",
-        "tags": [
-          "Remote ADB"
-        ],
-        "parameters": [
-          {
-            "name": "enterprise_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "device_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "remoteadb_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Remote ADB connection",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "id": {
-                      "type": "string",
-                      "format": "uuid"
-                    },
-                    "enterprise": {
-                      "type": "string",
-                      "format": "uuid"
-                    },
-                    "device": {
-                      "type": "string",
-                      "format": "uuid"
-                    },
-                    "device_name": {
-                      "type": "string"
-                    },
-                    "ip": {
-                      "type": [
-                        "string",
-                        "null"
-                      ]
-                    },
-                    "client_port": {
-                      "type": [
-                        "string",
-                        "null"
-                      ]
-                    },
-                    "device_port": {
-                      "type": [
-                        "string",
-                        "null"
-                      ]
-                    },
-                    "remoteadb_host": {
-                      "type": [
-                        "string",
-                        "null"
-                      ]
-                    },
-                    "client_certificate": {
-                      "type": [
-                        "string",
-                        "null"
-                      ]
-                    },
-                    "device_certificate": {
-                      "type": [
-                        "string",
-                        "null"
-                      ]
-                    },
-                    "state": {
-                      "type": "string"
-                    },
-                    "errors": {
-                      "type": [
-                        "string",
-                        "null"
-                      ]
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad request",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "additionalProperties": true
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Unauthorized",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "additionalProperties": true
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Not found",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "additionalProperties": true
-                }
-              }
-            }
-          }
-        },
-        "x-esper-platform-source": [
-          "src/services/shoonyacloud/shoonyapoc/api/remoteadb/urls.py:13-22",
-          "src/services/shoonyacloud/shoonyapoc/api/remoteadb/views/remoteadb_connection.py:9-20"
-        ],
-        "x-esper-destructive": false,
-        "x-esper-pagination": "none",
-        "x-esper-verb": "get",
-        "x-esper-noun": "remote-adb-connection"
-      },
-      "delete": {
-        "operationId": "deleteRemoteADBConnection",
-        "summary": "Delete a remote ADB connection",
-        "tags": [
-          "Remote ADB"
-        ],
-        "parameters": [
-          {
-            "name": "enterprise_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "device_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "remoteadb_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "responses": {
-          "204": {
-            "description": "Remote ADB connection deleted"
-          },
-          "400": {
-            "description": "Bad request",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "additionalProperties": true
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Unauthorized",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "additionalProperties": true
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Not found",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "additionalProperties": true
-                }
-              }
-            }
-          }
-        },
-        "x-esper-platform-source": [
-          "src/services/shoonyacloud/shoonyapoc/api/remoteadb/urls.py:13-22",
-          "src/services/shoonyacloud/shoonyapoc/api/remoteadb/views/remoteadb_connection.py:9-20"
-        ],
-        "x-esper-destructive": true,
-        "x-esper-pagination": "none",
-        "x-esper-verb": "delete",
-        "x-esper-noun": "remote-adb-connection"
+        "x-esper-noun": "dep-profile"
       }
     }
   },
   "components": {
     "schemas": {
+      "tenant_Error_400_Bad_Data": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer",
+            "format": "int32",
+            "default": 400
+          },
+          "message": {
+            "type": "string"
+          },
+          "content": {
+            "type": "object"
+          }
+        },
+        "required": [
+          "code",
+          "message"
+        ]
+      },
+      "tenant_DEPProfileCreateRequest": {
+        "type": "object",
+        "properties": {
+          "show_setup_items": {
+            "type": "array",
+            "uniqueItems": true,
+            "items": {
+              "type": "string",
+              "enum": [
+                "AccessibilityAppearance",
+                "ActionButton",
+                "Android",
+                "Appearance",
+                "AppleID",
+                "AppStore",
+                "Biometric",
+                "CameraButton",
+                "DeviceToDeviceMigration",
+                "Diagnostics",
+                "DisplayTone",
+                "EnableLockdownMode",
+                "HomeButtonSensitivity",
+                "iMessageAndFaceTime",
+                "Intelligence",
+                "Keyboard",
+                "LiquidGlass",
+                "Location",
+                "MessagingActivationUsingPhoneNumber",
+                "Multitasking",
+                "OnBoarding",
+                "OSShowcase",
+                "Passcode",
+                "Payment",
+                "Privacy",
+                "Restore",
+                "RestoreCompleted",
+                "Safety",
+                "SafetyAndHandling",
+                "ScreenTime",
+                "ScreenSaver",
+                "SIMSetup",
+                "Siri",
+                "SoftwareUpdate",
+                "SpokenLanguage",
+                "TapToSetup",
+                "TermsOfAddress",
+                "TOS",
+                "TVHomeScreenSync",
+                "TVProviderSignIn",
+                "TVRoom",
+                "UpdateCompleted",
+                "WatchMigration",
+                "Welcome",
+                "Zoom"
+              ]
+            },
+            "description": "List of setup items to show during device enrollment. If not provided or empty, all items will be skipped (default behavior)."
+          },
+          "auto_advance_setup": {
+            "type": "boolean",
+            "default": true,
+            "description": "Whether to automatically advance through setup screens. Defaults to true if not specified. Only applicable to TvOS devices."
+          }
+        }
+      },
+      "tenant_Error_500_Internal_Server_Error": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer",
+            "format": "int32",
+            "default": 500
+          },
+          "message": {
+            "type": "string"
+          },
+          "content": {
+            "type": "object"
+          }
+        },
+        "required": [
+          "code",
+          "message"
+        ]
+      },
+      "tenant_Error_401_Unauthorized": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer",
+            "format": "int32",
+            "default": 401
+          },
+          "message": {
+            "type": "string"
+          },
+          "content": {
+            "type": "object"
+          }
+        },
+        "required": [
+          "code",
+          "message"
+        ]
+      },
+      "tenant_DEPProfile": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "readOnly": true
+          },
+          "profile_uuid": {
+            "type": "string"
+          },
+          "show_setup_items": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "List of setup items to show during device enrollment"
+          },
+          "auto_advance_setup": {
+            "type": "boolean",
+            "description": "Whether to automatically advance through setup screens, only applicable to TvOS devices"
+          },
+          "created_by": {
+            "type": "string"
+          },
+          "updated_by": {
+            "type": "string"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
       "GetReportResponseDownload": {
         "type": "object",
         "required": [
@@ -11165,6 +10922,31 @@
           }
         }
       },
+      "GeofenceErrorResponse": {
+        "required": [
+          "errors",
+          "message",
+          "status"
+        ],
+        "type": "object",
+        "properties": {
+          "errors": {
+            "title": "Messages describing the error",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "message": {
+            "title": "Message describing the error",
+            "type": "string"
+          },
+          "status": {
+            "title": "alias name",
+            "type": "integer"
+          }
+        }
+      },
       "Geofence": {
         "required": [
           "id",
@@ -12251,31 +12033,6 @@
           }
         }
       },
-      "GeofenceErrorResponse": {
-        "required": [
-          "errors",
-          "message",
-          "status"
-        ],
-        "type": "object",
-        "properties": {
-          "errors": {
-            "title": "Messages describing the error",
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "message": {
-            "title": "Message describing the error",
-            "type": "string"
-          },
-          "status": {
-            "title": "alias name",
-            "type": "integer"
-          }
-        }
-      },
       "GoogleEnterprise": {
         "type": "object",
         "required": [
@@ -12406,6 +12163,11 @@
       "bearerAuth": {
         "type": "http",
         "scheme": "bearer"
+      },
+      "tenant_apiKey": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "#### API KEY - Access Token\nAccess token for API is passed as authorization header in calls. You need to generate this from your Esper Console at `<domain>-api.esper.cloud` where foo is the sub-domain name you gave for your Esper Dev environment when you signed up for your Esper account. Please follow the instructions [in this Help article](https://help.esper.io/hc/en-us/articles/12656959508497) to generate an access token.\nOnce you have the access token, you need to send an authorization header as below\n\n```bash\n\n    curl -X GET \\\n      https://<domain>-api.esper.cloud/api/enterprise/<enterprise_id>/device/ \\\n      -H 'Authorization: Bearer <ACCESS_TOKEN>' \\\n      -H 'Content-Type: application/json' \\\n```\n\n> Please note the use of keyword **Bearer** before the token value.\n\n\nYou can read more about api key authentication [here](https://help.esper.io/hc/en-us/articles/12656959508497).\n"
       }
     }
   }

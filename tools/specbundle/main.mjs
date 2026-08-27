@@ -1,20 +1,175 @@
 #!/usr/bin/env node
 
-import { mkdir, readFile, writeFile } from "node:fs/promises";
+import { mkdir, readdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 
-const [input, outputDir] = process.argv.slice(2);
-if (!input || !outputDir) {
-  console.error("usage: main.mjs <bundled-openapi.json> <output-directory>");
-  process.exit(2);
+const [input, outputDir, publicInput, overlayDir] = process.argv.slice(2);
+if (!input || !outputDir || !publicInput) {
+	console.error("usage: main.mjs <bundled-openapi.json> <output-directory> <public-oas.json> [overlay-spec-dir]");
+	process.exit(2);
 }
 
-const source = JSON.parse(await readFile(input, "utf8"));
-const sourcePathCount = Object.keys(source.paths).length;
-const excludedPaths = new Set([
-  "/sys/health",
-  "/device/v0/devices/",
+const bundledSource = JSON.parse(await readFile(input, "utf8"));
+const envelope = JSON.parse(await readFile(publicInput, "utf8"));
+const publicSource = envelope.definition ?? envelope;
+if (!publicSource.paths || !publicSource.components) {
+	throw new Error("public OAS does not contain paths and components");
+}
+stripRedoclyArtifacts(publicSource);
+const publicMetadata = {
+	fsPath: envelope.fsPath ?? null,
+	hash: envelope.hash ?? null,
+	pathCount: Object.keys(publicSource.paths).length,
+};
+const overlaySource = overlayDir ? await readOverlaySource(overlayDir) : undefined;
+let source = mergeSources(mergeSources(bundledSource, overlaySource), publicSource, true);
+const bundledSourcePathCount = Object.keys(bundledSource.paths).length;
+const overlayPathCount = Object.keys(overlaySource?.paths ?? {}).length;
+const methods = new Set(["get", "post", "put", "patch", "delete"]);
+const excludedPathReasons = new Map([
+  ["/sys/health", "operational health endpoint, not a customer API"],
+  ["/device/v0/devices", "deprecated device API path"],
+  ["/enterprise/report/device-report", "returned 404 during direct supported-environment verification"],
+  ["/enterprise/report/group-report", "returned 404 during direct supported-environment verification"],
 ]);
+const documentedSlugsByPath = new Map([
+  ["/geofence/v1/geofences", ["geofence_geofences"]],
+]);
+
+function normalizePath(apiPath) {
+  const withoutAPIPrefix = apiPath.replace(/^\/api(?=\/)/, "");
+  return withoutAPIPrefix === "/v2/subgroups/" ? "/v2/subgroups" : withoutAPIPrefix;
+}
+
+function pathKey(apiPath) {
+  const normalized = normalizePath(apiPath);
+  return normalized.length > 1 ? normalized.replace(/\/$/, "") : normalized;
+}
+
+function mergeSources(base, publicDocument, preserveBaseAnnotations = false) {
+  if (!publicDocument) return base;
+  const tags = new Map();
+  for (const tag of [...(base.tags ?? []), ...(publicDocument.tags ?? [])]) tags.set(tag.name, tag);
+  const components = { ...base.components, ...publicDocument.components };
+  for (const type of new Set([...Object.keys(base.components ?? {}), ...Object.keys(publicDocument.components ?? {})])) {
+    if (base.components?.[type] && publicDocument.components?.[type] && typeof base.components[type] === "object" && typeof publicDocument.components[type] === "object") {
+      components[type] = { ...base.components[type], ...publicDocument.components[type] };
+    }
+  }
+  const paths = {};
+  const pathsByKey = new Map();
+  for (const [apiPath, pathItem] of Object.entries(base.paths ?? {})) {
+    const outputPath = normalizePath(apiPath);
+    pathsByKey.set(pathKey(apiPath), { outputPath, pathItem });
+  }
+  for (const [apiPath, pathItem] of Object.entries(publicDocument.paths ?? {})) {
+    const key = pathKey(apiPath);
+    const existing = pathsByKey.get(key);
+    if (existing) {
+      existing.pathItem = mergePathItems(existing.pathItem, pathItem, preserveBaseAnnotations);
+      continue;
+    }
+    pathsByKey.set(key, { outputPath: normalizePath(apiPath), pathItem });
+  }
+  for (const { outputPath, pathItem } of pathsByKey.values()) paths[outputPath] = pathItem;
+  return {
+    ...base,
+    ...publicDocument,
+    paths,
+    components,
+    tags: [...tags.values()],
+    security: publicDocument.security ?? base.security,
+  };
+}
+
+async function readOverlaySource(directory) {
+  const source = { paths: {}, components: {}, tags: [] };
+  for (const entry of await readdir(directory)) {
+    if (!entry.endsWith(".yaml")) continue;
+    const document = JSON.parse(await readFile(path.join(directory, entry), "utf8"));
+    source.paths = { ...source.paths, ...document.paths };
+    source.tags.push(...(document.tags ?? []));
+    source.components = mergeComponents(source.components, document.components ?? {});
+  }
+  return source;
+}
+
+function mergeComponents(base, current) {
+  const result = { ...base, ...current };
+  for (const type of new Set([...Object.keys(base), ...Object.keys(current)])) {
+    if (base[type] && current[type] && typeof base[type] === "object" && typeof current[type] === "object") {
+      result[type] = { ...base[type], ...current[type] };
+    }
+  }
+  return result;
+}
+
+function mergePathItems(base, current, preserveBaseAnnotations) {
+  if (preserveBaseAnnotations) {
+    const result = { ...current, ...base };
+    for (const [method, operation] of Object.entries(current)) {
+      if (!base[method]) result[method] = operation;
+    }
+    return result;
+  }
+  const result = { ...base, ...current };
+  for (const [method, operation] of Object.entries(current)) {
+    const previous = base[method];
+    if (!previous || !operation || typeof operation !== "object") continue;
+    const annotations = Object.fromEntries([...Object.entries(previous), ...Object.entries(operation)].filter(([key]) => key.startsWith("x-esper-")));
+    result[method] = { ...operation, ...annotations };
+  }
+  return result;
+}
+
+function stripRedoclyArtifacts(value) {
+  if (Array.isArray(value)) {
+    for (const item of value) stripRedoclyArtifacts(item);
+    return;
+  }
+  if (!value || typeof value !== "object") return;
+  delete value["x-parsed-md-description"];
+  for (const child of Object.values(value)) stripRedoclyArtifacts(child);
+}
+
+function excludedReason(apiPath) {
+  return excludedPathReasons.get(apiPath.replace(/\/$/, ""));
+}
+
+function operationKey(method, apiPath) {
+  return `${method.toUpperCase()} ${pathKey(apiPath)}`;
+}
+
+function publicOperationKeys(document) {
+  const result = new Set();
+  for (const [apiPath, pathItem] of Object.entries(document.paths)) {
+    for (const method of Object.keys(pathItem)) {
+      if (methods.has(method)) result.add(operationKey(method, apiPath));
+    }
+  }
+  return result;
+}
+
+function filterToPublicOperations(document, publicOperations) {
+  const paths = {};
+  const removed = [];
+  for (const [apiPath, pathItem] of Object.entries(document.paths)) {
+    const filtered = {};
+    for (const [method, value] of Object.entries(pathItem)) {
+      if (!methods.has(method)) {
+        filtered[method] = value;
+        continue;
+      }
+      if (publicOperations.has(operationKey(method, apiPath))) {
+        filtered[method] = value;
+      } else {
+        removed.push(operationKey(method, apiPath));
+      }
+    }
+    if (Object.keys(filtered).some((method) => methods.has(method))) paths[apiPath] = filtered;
+  }
+  return { document: { ...document, paths }, removed };
+}
 
 const uuidParameter = (name) => ({
   name,
@@ -56,7 +211,7 @@ const remoteADBSource = [
 ];
 
 // Platform source: api/remoteadb/urls.py:13-22 registers a ModelViewSet below enterprise/device.
-source.paths["/v0/enterprise/{enterprise_id}/device/{device_id}/remoteadb/"] = {
+source.paths["/v0/enterprise/{enterprise_id}/device/{device_id}/remoteadb/"] ??= {
   get: {
     operationId: "listRemoteADBConnections",
     summary: "List remote ADB connections for a device",
@@ -102,7 +257,7 @@ source.paths["/v0/enterprise/{enterprise_id}/device/{device_id}/remoteadb/"] = {
   },
 };
 
-source.paths["/v0/enterprise/{enterprise_id}/device/{device_id}/remoteadb/{remoteadb_id}/"] = {
+source.paths["/v0/enterprise/{enterprise_id}/device/{device_id}/remoteadb/{remoteadb_id}/"] ??= {
   get: {
     operationId: "getRemoteADBConnection",
     summary: "Get remote ADB connection status",
@@ -122,7 +277,7 @@ source.paths["/v0/enterprise/{enterprise_id}/device/{device_id}/remoteadb/{remot
 };
 
 // Platform source: shoonyapoc/urls.py:158-160 and telemetry_graph.py:44-74.
-source.paths["/graph/{category}/{metric}/"] = {
+source.paths["/graph/{category}/{metric}/"] ??= {
   get: {
     operationId: "getTelemetryGraphData",
     summary: "Get telemetry graph data",
@@ -162,7 +317,7 @@ const groupCommandResponse = {
 };
 
 // Platform source: api/enterprise/urls.py:250-256 nests GroupCommandViewSet under devicegroup.
-source.paths["/enterprise/{enterprise_id}/devicegroup/{group_id}/command/"] = {
+source.paths["/enterprise/{enterprise_id}/devicegroup/{group_id}/command/"] ??= {
   get: {
     operationId: "listLegacyDeviceGroupCommands",
     summary: "List commands for a device group",
@@ -212,7 +367,7 @@ source.paths["/enterprise/{enterprise_id}/devicegroup/{group_id}/command/"] = {
   },
 };
 
-source.paths["/enterprise/{enterprise_id}/devicegroup/{group_id}/command/{command_id}/"] = {
+source.paths["/enterprise/{enterprise_id}/devicegroup/{group_id}/command/{command_id}/"] ??= {
   get: {
     operationId: "getLegacyDeviceGroupCommand",
     summary: "Get a device group command",
@@ -223,11 +378,17 @@ source.paths["/enterprise/{enterprise_id}/devicegroup/{group_id}/command/{comman
   },
 };
 
+const publicOperations = publicOperationKeys(publicSource);
+const publicOnly = filterToPublicOperations(source, publicOperations);
+source = publicOnly.document;
+const sourcePathCount = Object.keys(source.paths).length;
+
 function generationFor(apiPath) {
   if (apiPath.startsWith("/authn2/")) return "authn2";
   if (apiPath.startsWith("/authz2/")) return "authz2";
   if (apiPath.startsWith("/pipelines/v0/")) return "pipelines-v0";
   if (apiPath.startsWith("/v1/foundry/")) return "foundry";
+  if (apiPath.startsWith("/geofence/v1/")) return "v1";
   if (/^\/(apps|commands|device|onboarding|report|tenant)\/v0\//.test(apiPath)) return "v0";
   if (apiPath.startsWith("/v1/")) return "v1";
   if (apiPath.startsWith("/v2/") || apiPath.startsWith("/api/v2/")) return "v2";
@@ -237,7 +398,6 @@ function generationFor(apiPath) {
   throw new Error(`no generation mapping for ${apiPath}`);
 }
 
-const methods = new Set(["get", "post", "put", "patch", "delete"]);
 const resourceNames = new Map([
   ["devicegroup", "device-group"],
   ["devicegroups", "device-group"],
@@ -335,10 +495,12 @@ function relationshipCollectionNoun(apiPath, generation) {
 }
 
 function nounFor(apiPath, operation, generation) {
+  const geofenceNoun = geofenceResourceNoun(apiPath);
+  if (geofenceNoun) return geofenceNoun;
   const relationshipNoun = relationshipCollectionNoun(apiPath, generation);
   if (relationshipNoun) return relationshipNoun;
   if (!operation.operationId) return nounFromPath(apiPath, operation);
-  let parts = words(operation.operationId);
+  let parts = operationIDWords(apiPath, operation);
   if (parts[0] === "partial" && parts[1] === "update") parts = parts.slice(2);
   else if (parts[0] === "bulk" && ["add", "create", "update", "delete"].includes(parts[1])) parts = parts.slice(2);
   else if (actionPrefixes.includes(parts[0])) parts = parts.slice(1);
@@ -350,6 +512,24 @@ function nounFor(apiPath, operation, generation) {
   if (parts.length === 0) return nounFromTag(operation);
   for (let index = 0; index < parts.length; index++) parts[index] = singular(parts[index]);
   return parts.join("-");
+}
+
+function geofenceResourceNoun(apiPath) {
+  const prefix = "/geofence/v1/geofences/{geofence_id}/";
+  if (!apiPath.startsWith(prefix)) return "";
+  const resource = apiPath.slice(prefix.length).replace(/\/$/, "");
+  return {
+    blueprints: "geofence-blueprint",
+    devices: "geofence-device",
+    "device-summary": "geofence-device-summary",
+  }[resource] ?? "";
+}
+
+function operationIDWords(apiPath, operation) {
+  const parts = words(operation.operationId ?? "");
+  const service = words(apiPath.split("/").filter(Boolean)[0] ?? "")[0];
+  if (service && parts.length > 1 && parts[0] === service) return parts.slice(1);
+  return parts;
 }
 
 function operationHasPagination(operation) {
@@ -365,7 +545,7 @@ function isCollectionPath(apiPath) {
 
 function verbFor(method, apiPath, operation, collectionPaths) {
   const id = operation.operationId ?? "";
-  const parts = words(id);
+  const parts = operationIDWords(apiPath, operation);
   const first = parts[0] ?? "";
   if (first === "list" || (first === "get" && parts[1] === "all")) return "list";
   if (first === "get") return operationHasPagination(operation) || isCollectionPath(apiPath) ||
@@ -412,6 +592,25 @@ function requiredOneOfFor(apiPath) {
   if (apiPath === "/commands/v0/status/") return ["request", "device"];
   if (apiPath === "/v2/itunesapps") return ["app_id", "apple_app_id"];
   return [];
+}
+
+const internalHeaderNames = new Set([
+  "x-esper-tenant-id",
+  "x-esper-user-id",
+  "x-caller-id",
+]);
+
+function parameterName(parameter) {
+  if (parameter.$ref?.startsWith("#/components/parameters/")) {
+    const name = parameter.$ref.slice("#/components/parameters/".length);
+    return source.components?.parameters?.[name]?.name ?? "";
+  }
+  return parameter.name ?? "";
+}
+
+function removeInternalHeaders(operation) {
+  if (!operation.parameters) return;
+  operation.parameters = operation.parameters.filter((parameter) => !internalHeaderNames.has(parameterName(parameter).toLowerCase()));
 }
 
 function scopeParentFor(apiPath, verb, generation) {
@@ -472,27 +671,30 @@ function annotateOperations(spec, generation) {
   for (const [apiPath, pathItem] of Object.entries(spec.paths)) {
     for (const [method, operation] of Object.entries(pathItem)) {
       if (!methods.has(method)) continue;
+      removeInternalHeaders(operation);
       operationCount++;
 	   const noun = nounFor(apiPath, operation, generation);
       const verb = verbFor(method, apiPath, operation, collectionPaths);
       const identity = `${noun} ${verb}`;
 	   const scopeParent = scopeParentFor(apiPath, verb, generation);
-      operation["x-esper-destructive"] = method === "delete" ||
+      operation["x-esper-destructive"] ??= method === "delete" ||
         /\b(delete|remove|wipe|factory|revoke|terminate|uninstall|unapply)\b/i.test(`${operation.operationId ?? ""} ${operation.summary ?? ""}`);
-      operation["x-esper-pagination"] = paginationFor(apiPath, operation, verb);
+      operation["x-esper-pagination"] ??= paginationFor(apiPath, operation, verb);
+      const documentedSlugs = documentedSlugsByPath.get(apiPath);
+      if (documentedSlugs) operation["x-esper-docs-slugs"] ??= documentedSlugs;
       const requiredOneOf = requiredOneOfFor(apiPath);
-      if (requiredOneOf.length > 0) operation["x-esper-require-one-of"] = requiredOneOf;
+      if (requiredOneOf.length > 0) operation["x-esper-require-one-of"] ??= requiredOneOf;
       if (apiPath === "/v2/subgroups") {
         const parentGroups = (operation.parameters ?? []).find((parameter) => parameter.name === "parent_group_ids");
         if (parentGroups) parentGroups.required = true;
       }
       if (appsEnvelopeFamilies.has(serviceFamily(apiPath))) {
-        operation["x-esper-response-envelope"] = "apps-envelope";
+        operation["x-esper-response-envelope"] ??= "apps-envelope";
       }
-      operation["x-esper-verb"] = verb;
-      operation["x-esper-noun"] = noun;
+      operation["x-esper-verb"] ??= verb;
+      operation["x-esper-noun"] ??= noun;
       if (!operation.summary) operation.summary = `${verb.charAt(0).toUpperCase()}${verb.slice(1)} ${noun}`;
-      if (scopeParent) operation["x-esper-scope-parent"] = scopeParent;
+      if (scopeParent) operation["x-esper-scope-parent"] ??= scopeParent;
       if (!commands.has(identity)) commands.set(identity, []);
       commands.get(identity).push({ apiPath, method, scopeParent });
     }
@@ -613,19 +815,35 @@ function convertSchemasTo31(value) {
 }
 
 const byGeneration = new Map();
+const emittedNonPublicOperations = [];
 for (const [sourcePath, pathItem] of Object.entries(source.paths)) {
-  const apiPath = sourcePath === "/api/v2/subgroups/" ? "/v2/subgroups" : sourcePath;
-  if (excludedPaths.has(apiPath)) continue;
+  const apiPath = normalizePath(sourcePath);
+  if (excludedReason(apiPath)) continue;
+	for (const method of Object.keys(pathItem)) {
+		if (methods.has(method) && !publicOperations.has(operationKey(method, apiPath))) {
+			emittedNonPublicOperations.push(operationKey(method, apiPath));
+		}
+	}
   const generation = generationFor(apiPath);
   if (!byGeneration.has(generation)) byGeneration.set(generation, {});
   byGeneration.get(generation)[apiPath] = pathItem;
 }
 
+if (emittedNonPublicOperations.length > 0) {
+	throw new Error(`non-public operations would be emitted:\n${emittedNonPublicOperations.sort().join("\n")}`);
+}
+
 await mkdir(outputDir, { recursive: true });
 const manifest = {
   sourcePathCount,
-  addedPathCount: Object.keys(source.paths).length - sourcePathCount,
-  excludedPaths: [...excludedPaths].sort(),
+  bundledSourcePathCount,
+  overlayPathCount,
+  publicSource: publicMetadata,
+	publicOperationCount: publicOperations.size,
+	nonPublicOperationsRemoved: publicOnly.removed.sort(),
+	publicOperationKeys: [...publicOperations].sort(),
+  excludedPaths: [...excludedPathReasons.keys()].sort(),
+  excludedPathReasons: Object.fromEntries(excludedPathReasons),
   emittedPathCount: 0,
   operationCount: 0,
   generations: {},

@@ -61,7 +61,6 @@ func reportTelemetryFixtures() []reportTelemetryFixture {
 		{"updateSubscriptionReport", "legacy", "subscription-report-update", http.MethodPut, "/enterprise/report/subscription/" + reportSubscription + "/", reportBody, []string{"subscription-report", "update", reportSubscription, "--body", reportBody, "--json"}, nil, 200, 400, false, false},
 		{"patchSubscriptionReport", "legacy", "subscription-report-patch", http.MethodPatch, "/enterprise/report/subscription/" + reportSubscription + "/", "", []string{"subscription-report", "patch", reportSubscription, "--json"}, nil, 200, 400, false, false},
 		{"deleteSubscriptionReport", "legacy", "subscription-report-delete", http.MethodDelete, "/enterprise/report/subscription/" + reportSubscription + "/", "", []string{"subscription-report", "delete", reportSubscription, "--yes"}, nil, 204, 404, false, true},
-		{"getTelemetryGraphData", "legacy", "telemetry-graph-data-get", http.MethodGet, "/graph/device/battery/", "", []string{"telemetry-graph-data", "get", "device", "battery", "--from-time", "2026-08-01T00:00:00Z", "--to-time", "2026-08-02T00:00:00Z", "--period", "day", "--statistic", "avg", "--device-id", reportDeviceID, "--json"}, url.Values{"from_time": {"2026-08-01T00:00:00Z"}, "to_time": {"2026-08-02T00:00:00Z"}, "period": {"day"}, "statistic": {"avg"}, "device_id": {reportDeviceID}}, 200, 500, false, false},
 		{"getReportTypes", "v0", "report-type-list", http.MethodGet, "/report/v0/report-types", "", []string{"report-type", "list", "--json"}, nil, 200, 500, false, false},
 		{"createReportStatus", "v0", "report-status-create", http.MethodPost, "/report/v0/reports", `{"end_time":"2026-08-02T00:00:00Z","is_download":true,"report_type":"device","start_time":"2026-08-01T00:00:00Z"}`, []string{"report-status", "create", "--report-type", "device", "--start-time", "2026-08-01T00:00:00Z", "--end-time", "2026-08-02T00:00:00Z", "--is-download", "true", "--json"}, nil, 200, 400, false, false},
 		{"getReportStatus", "v0", "report-status-get", http.MethodGet, "/report/v0/reports/" + reportID, "", []string{"report-status", "get", reportID, "--json"}, nil, 200, 404, false, false},
@@ -84,7 +83,6 @@ func TestReportTelemetryOperationCoverage(t *testing.T) {
 		"updateSubscriptionReport": {"legacy", "PUT", "/enterprise/report/subscription/{subscription_id}/", "subscription-report", "update", "none", "", "application/json", []string{"subscription-report", "update"}, false},
 		"patchSubscriptionReport":  {"legacy", "PATCH", "/enterprise/report/subscription/{subscription_id}/", "subscription-report", "patch", "none", "", "application/json", []string{"subscription-report", "patch"}, false},
 		"deleteSubscriptionReport": {"legacy", "DELETE", "/enterprise/report/subscription/{subscription_id}/", "subscription-report", "delete", "none", "", "application/json", []string{"subscription-report", "delete"}, true},
-		"getTelemetryGraphData":    {"legacy", "GET", "/graph/{category}/{metric}/", "telemetry-graph-data", "get", "none", "", "application/json", []string{"telemetry-graph-data", "get"}, false},
 		"getReportTypes":           {"v0", "GET", "/report/v0/report-types", "report-type", "list", "none", "", "application/json", []string{"report-type", "list"}, false},
 		"createReportStatus":       {"v0", "POST", "/report/v0/reports", "report-status", "create", "none", "", "application/json", []string{"report-status", "create"}, false},
 		"getReportStatus":          {"v0", "GET", "/report/v0/reports/{report_id}", "report-status", "get", "none", "", "application/json", []string{"report-status", "get"}, false},
@@ -95,7 +93,7 @@ func TestReportTelemetryOperationCoverage(t *testing.T) {
 			got[operation.OperationID] = reportTelemetryMetadata{operation.Generation, operation.Method, operation.Path, operation.Noun, operation.Verb, operation.Pagination, operation.ScopeParent, operation.SuccessMedia, operation.Command, operation.Destructive}
 		}
 	}
-	if len(want) != 18 || !reflect.DeepEqual(want, got) {
+	if len(want) != 17 || !reflect.DeepEqual(want, got) {
 		t.Fatalf("report telemetry inventory = %#v, want %#v", got, want)
 	}
 }
@@ -118,8 +116,8 @@ func TestReportTelemetryFixtureInventory(t *testing.T) {
 	for _, entry := range entries {
 		got[entry.Name()] = true
 	}
-	if len(want) != 59 || !reflect.DeepEqual(want, got) {
-		t.Fatalf("fixture inventory = %#v, want 59 exact files", got)
+	if len(want) != 56 || !reflect.DeepEqual(want, got) {
+		t.Fatalf("fixture inventory = %#v, want 56 exact files", got)
 	}
 }
 
@@ -224,15 +222,6 @@ func TestReportTelemetryInputRules(t *testing.T) {
 	for _, name := range []string{"body", "is-subscribed"} {
 		if patch.Flags().Lookup(name) == nil {
 			t.Fatalf("patch missing --%s", name)
-		}
-	}
-	graph, _, _ := root.Find([]string{"telemetry-graph-data", "get"})
-	if graph.Flags().Lookup("enterprise-id") != nil {
-		t.Fatal("graph exposes ignored --enterprise-id")
-	}
-	for _, name := range []string{"from-time", "to-time", "period", "statistic", "device-id"} {
-		if graph.Flags().Lookup(name) == nil {
-			t.Fatalf("graph missing --%s", name)
 		}
 	}
 	for _, path := range [][]string{{"report-type", "list"}, {"report-status", "create"}, {"report-status", "get"}} {

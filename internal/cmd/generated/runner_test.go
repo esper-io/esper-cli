@@ -511,3 +511,15 @@ func TestCommandLongHelpListsOlderAPIGenerations(t *testing.T) {
 		t.Fatalf("commandLongHelp() = %q", help)
 	}
 }
+
+func TestCommandLongHelpDocumentsNestedBodyFields(t *testing.T) {
+	help := commandLongHelp("Create report", []Operation{{Body: &Body{Fields: []BodyField{
+		{Path: "filters.platform", Type: "array", Enum: []string{"Android", "Apple"}},
+		{Path: "report_type", Type: "string", Required: true, Enum: []string{"device"}},
+	}}}})
+	for _, expected := range []string{"Request body fields", "filters.platform", "Apple", "report_type (string, required)"} {
+		if !strings.Contains(help, expected) {
+			t.Fatalf("help does not contain %q:\n%s", expected, help)
+		}
+	}
+}

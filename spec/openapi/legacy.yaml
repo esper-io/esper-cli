@@ -6068,523 +6068,6 @@
         "x-esper-noun": "blueprint",
         "x-esper-scope-parent": "devicegroup"
       }
-    },
-    "/graph/{category}/{metric}/": {
-      "get": {
-        "operationId": "getTelemetryGraphData",
-        "summary": "Get telemetry graph data",
-        "tags": [
-          "Device Telemetry"
-        ],
-        "parameters": [
-          {
-            "name": "category",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "metric",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "from_time",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "date-time"
-            }
-          },
-          {
-            "name": "to_time",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "date-time"
-            }
-          },
-          {
-            "name": "period",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "statistic",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "device_id",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Telemetry data",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "additionalProperties": true
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad request",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "additionalProperties": true
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Unauthorized",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "additionalProperties": true
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Not found",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "additionalProperties": true
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "Internal server error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "additionalProperties": true
-                }
-              }
-            }
-          }
-        },
-        "x-esper-platform-source": [
-          "src/services/shoonyacloud/shoonyapoc/shoonyapoc/urls.py:158-160",
-          "src/services/shoonyacloud/shoonyapoc/api/device/views/telemetry_graph.py:44-74"
-        ],
-        "x-esper-destructive": false,
-        "x-esper-pagination": "none",
-        "x-esper-verb": "get",
-        "x-esper-noun": "telemetry-graph-data"
-      }
-    },
-    "/enterprise/{enterprise_id}/devicegroup/{group_id}/command/": {
-      "get": {
-        "operationId": "listLegacyDeviceGroupCommands",
-        "summary": "List commands for a device group",
-        "tags": [
-          "Device Group Command"
-        ],
-        "parameters": [
-          {
-            "name": "enterprise_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "group_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "limit",
-            "in": "query",
-            "schema": {
-              "type": "integer",
-              "minimum": 1
-            }
-          },
-          {
-            "name": "offset",
-            "in": "query",
-            "schema": {
-              "type": "integer",
-              "minimum": 0
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Device group commands",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "count": {
-                      "type": "integer"
-                    },
-                    "next": {
-                      "type": [
-                        "string",
-                        "null"
-                      ],
-                      "format": "uri"
-                    },
-                    "previous": {
-                      "type": [
-                        "string",
-                        "null"
-                      ],
-                      "format": "uri"
-                    },
-                    "results": {
-                      "type": "array",
-                      "items": {
-                        "type": "object",
-                        "properties": {
-                          "id": {
-                            "type": "string",
-                            "format": "uuid"
-                          },
-                          "command": {
-                            "type": "string"
-                          },
-                          "command_args": {
-                            "type": "object",
-                            "additionalProperties": true
-                          },
-                          "state": {
-                            "type": "string"
-                          },
-                          "details": {
-                            "type": "object",
-                            "additionalProperties": true
-                          }
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad request",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "additionalProperties": true
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Unauthorized",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "additionalProperties": true
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Not found",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "additionalProperties": true
-                }
-              }
-            }
-          }
-        },
-        "x-esper-platform-source": [
-          "src/services/shoonyacloud/shoonyapoc/api/enterprise/urls.py:250-256",
-          "src/services/shoonyacloud/shoonyapoc/api/device/views/group_command.py:43-93"
-        ],
-        "x-esper-destructive": false,
-        "x-esper-pagination": "limit-offset",
-        "x-esper-verb": "list",
-        "x-esper-noun": "command",
-        "x-esper-scope-parent": "devicegroup"
-      },
-      "post": {
-        "operationId": "createLegacyDeviceGroupCommand",
-        "summary": "Send a command to a device group",
-        "tags": [
-          "Device Group Command"
-        ],
-        "parameters": [
-          {
-            "name": "enterprise_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "group_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "required": [
-                  "command"
-                ],
-                "properties": {
-                  "command": {
-                    "type": "string"
-                  },
-                  "command_args": {
-                    "type": "object",
-                    "additionalProperties": true
-                  },
-                  "schedule": {
-                    "type": "object",
-                    "additionalProperties": true
-                  }
-                }
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": "Device group command created",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "id": {
-                      "type": "string",
-                      "format": "uuid"
-                    },
-                    "command": {
-                      "type": "string"
-                    },
-                    "command_args": {
-                      "type": "object",
-                      "additionalProperties": true
-                    },
-                    "state": {
-                      "type": "string"
-                    },
-                    "details": {
-                      "type": "object",
-                      "additionalProperties": true
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad request",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "additionalProperties": true
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Unauthorized",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "additionalProperties": true
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Not found",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "additionalProperties": true
-                }
-              }
-            }
-          }
-        },
-        "x-esper-platform-source": [
-          "src/services/shoonyacloud/shoonyapoc/api/enterprise/urls.py:250-256",
-          "src/services/shoonyacloud/shoonyapoc/api/device/views/group_command.py:43-93"
-        ],
-        "x-esper-destructive": false,
-        "x-esper-pagination": "none",
-        "x-esper-verb": "create",
-        "x-esper-noun": "command",
-        "x-esper-scope-parent": "devicegroup"
-      }
-    },
-    "/enterprise/{enterprise_id}/devicegroup/{group_id}/command/{command_id}/": {
-      "get": {
-        "operationId": "getLegacyDeviceGroupCommand",
-        "summary": "Get a device group command",
-        "tags": [
-          "Device Group Command"
-        ],
-        "parameters": [
-          {
-            "name": "enterprise_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "group_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "command_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Device group command",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "id": {
-                      "type": "string",
-                      "format": "uuid"
-                    },
-                    "command": {
-                      "type": "string"
-                    },
-                    "command_args": {
-                      "type": "object",
-                      "additionalProperties": true
-                    },
-                    "state": {
-                      "type": "string"
-                    },
-                    "details": {
-                      "type": "object",
-                      "additionalProperties": true
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad request",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "additionalProperties": true
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Unauthorized",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "additionalProperties": true
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Not found",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "additionalProperties": true
-                }
-              }
-            }
-          }
-        },
-        "x-esper-platform-source": [
-          "src/services/shoonyacloud/shoonyapoc/api/enterprise/urls.py:250-256",
-          "src/services/shoonyacloud/shoonyapoc/api/device/views/group_command.py:43-93"
-        ],
-        "x-esper-destructive": false,
-        "x-esper-pagination": "none",
-        "x-esper-verb": "get",
-        "x-esper-noun": "legacy-device-group-command"
-      }
     }
   },
   "components": {
@@ -8052,82 +7535,6 @@
           }
         }
       },
-      "GroupReport": {
-        "type": "object",
-        "properties": {
-          "group_id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "group_name": {
-            "type": "string"
-          },
-          "group_path": {
-            "type": "string"
-          },
-          "active_devices": {
-            "type": "integer"
-          },
-          "inactive_devices": {
-            "type": "integer"
-          },
-          "registered_devices": {
-            "type": "integer"
-          },
-          "new_devices": {
-            "type": "integer"
-          },
-          "disabled_devices": {
-            "type": "integer"
-          }
-        }
-      },
-      "DeviceStatusReport": {
-        "type": "object",
-        "properties": {
-          "device_id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "device_name": {
-            "type": "string"
-          },
-          "alias_name": {
-            "type": [
-              "string",
-              "null"
-            ]
-          },
-          "device_model": {
-            "type": "string"
-          },
-          "device_brand": {
-            "type": "string"
-          },
-          "android_version": {
-            "type": "string"
-          },
-          "serial_number": {
-            "type": "string"
-          },
-          "is_new": {
-            "type": "boolean"
-          },
-          "last_known_location": {
-            "type": "string"
-          },
-          "days_active": {
-            "type": "integer"
-          },
-          "status": {
-            "type": "string",
-            "description": "choices- ACTIVE / INACTIVE / DISABLED"
-          },
-          "inactive_since_three_days": {
-            "type": "boolean"
-          }
-        }
-      },
       "EnterprisePolicyPartialUpdate": {
         "type": "object",
         "properties": {
@@ -8174,60 +7581,6 @@
             "type": "boolean",
             "default": false,
             "writeOnly": true
-          }
-        }
-      },
-      "EnterprisePolicyWrite": {
-        "required": [
-          "enterprise",
-          "name",
-          "policy"
-        ],
-        "type": "object",
-        "properties": {
-          "enterprise": {
-            "title": "Enterprise url",
-            "type": "string",
-            "description": "Url of the enterprise resource",
-            "format": "url"
-          },
-          "name": {
-            "title": "Policy Name",
-            "maxLength": 255,
-            "minLength": 1,
-            "type": "string",
-            "description": "Name of the Policy"
-          },
-          "description": {
-            "title": "Policy Description",
-            "type": [
-              "string",
-              "null"
-            ],
-            "description": "Details regarding the Policy"
-          },
-          "google_policy_id": {
-            "title": "Google policy id",
-            "maxLength": 255,
-            "type": [
-              "string",
-              "null"
-            ],
-            "description": "Id of the Google policy"
-          },
-          "policy": {
-            "$ref": "#/components/schemas/EnterprisePolicyData"
-          },
-          "is_template": {
-            "title": "Template status",
-            "type": "boolean",
-            "default": false,
-            "writeOnly": true
-          },
-          "is_active": {
-            "title": "Policy Active status",
-            "type": "boolean",
-            "description": "Is this policy currently active"
           }
         }
       },
@@ -8486,6 +7839,60 @@
             "type": "string",
             "description": "Lock Password (optional) for the ESPER Settings app",
             "format": "password"
+          }
+        }
+      },
+      "EnterprisePolicyWrite": {
+        "required": [
+          "enterprise",
+          "name",
+          "policy"
+        ],
+        "type": "object",
+        "properties": {
+          "enterprise": {
+            "title": "Enterprise url",
+            "type": "string",
+            "description": "Url of the enterprise resource",
+            "format": "url"
+          },
+          "name": {
+            "title": "Policy Name",
+            "maxLength": 255,
+            "minLength": 1,
+            "type": "string",
+            "description": "Name of the Policy"
+          },
+          "description": {
+            "title": "Policy Description",
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Details regarding the Policy"
+          },
+          "google_policy_id": {
+            "title": "Google policy id",
+            "maxLength": 255,
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Id of the Google policy"
+          },
+          "policy": {
+            "$ref": "#/components/schemas/EnterprisePolicyData"
+          },
+          "is_template": {
+            "title": "Template status",
+            "type": "boolean",
+            "default": false,
+            "writeOnly": true
+          },
+          "is_active": {
+            "title": "Policy Active status",
+            "type": "boolean",
+            "description": "Is this policy currently active"
           }
         }
       },

@@ -54,6 +54,10 @@ type parameter struct {
 	Required bool   `json:"required"`
 }
 
+type publicManifest struct {
+	PublicOperationKeys []string `json:"publicOperationKeys"`
+}
+
 func main() {
 	specDir := flag.String("spec-dir", "spec/openapi", "directory containing canonical OpenAPI files")
 	flag.Parse()
@@ -74,12 +78,12 @@ func check(specDir string) []string {
 	for _, operation := range generated.Operations() {
 		byOperation[key(operation.Generation, operation.Method, operation.Path)] = operation
 	}
+	issues := checkPublicOperationParity(specDir, generated.Operations())
 	entries, err := os.ReadDir(specDir)
 	if err != nil {
 		return []string{fmt.Sprintf("read spec directory: %v", err)}
 	}
 	root := cmd.NewRootCommand()
-	issues := []string{}
 	for _, entry := range entries {
 		if entry.IsDir() || !strings.HasSuffix(entry.Name(), ".yaml") {
 			continue
@@ -136,7 +140,7 @@ func check(specDir string) []string {
 				for index := 1; index < len(generatedOperation.Command)-1; index++ {
 					groupPath := generatedOperation.Command[:index]
 					group, _, err := root.Find(groupPath)
-					expectedSummary := "Commands in the " + generatedOperation.Command[index-1] + " group"
+					expectedSummary := generated.GroupSummary(generatedOperation.Command[index-1])
 					if err != nil || group == root || group.Short != expectedSummary {
 						issues = append(issues, location+": generated group has no explicit description")
 					}
@@ -167,6 +171,37 @@ func check(specDir string) []string {
 	issues = append(issues, checkCommandGrammar(root)...)
 	issues = append(issues, checkDescriptions(root)...)
 	return issues
+}
+
+func checkPublicOperationParity(specDir string, operations []generated.Operation) []string {
+	data, err := os.ReadFile(filepath.Join(specDir, "manifest.json"))
+	if err != nil {
+		return []string{fmt.Sprintf("read public operation manifest: %v", err)}
+	}
+	var manifest publicManifest
+	if err := json.Unmarshal(data, &manifest); err != nil {
+		return []string{fmt.Sprintf("decode public operation manifest: %v", err)}
+	}
+	if len(manifest.PublicOperationKeys) == 0 {
+		return []string{"public operation manifest has no operation keys"}
+	}
+	public := map[string]bool{}
+	for _, operation := range manifest.PublicOperationKeys {
+		public[operation] = true
+	}
+	issues := []string{}
+	for _, operation := range operations {
+		if !public[publicOperationKey(operation.Method, operation.Path)] {
+			issues = append(issues, "generated operation is not publicly documented: "+operation.Method+" "+operation.Path)
+		}
+	}
+	return issues
+}
+
+func publicOperationKey(method, apiPath string) string {
+	apiPath = strings.TrimPrefix(apiPath, "/api")
+	apiPath = strings.TrimSuffix(apiPath, "/")
+	return strings.ToUpper(method) + " " + apiPath
 }
 
 func sameStrings(left, right []string) bool {

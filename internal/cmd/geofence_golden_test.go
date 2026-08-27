@@ -43,30 +43,35 @@ type geofenceOperationMetadata struct {
 
 func geofenceFixtures() []geofenceFixture {
 	return []geofenceFixture{
-		{"v0 GET /v0/enterprise/{enterprise_id}/geofence/", "v0-geofence-list", http.MethodGet, "/v0/enterprise/" + geofenceEnterpriseID + "/geofence/", "", []string{"geofence", "list", "--enterprise", geofenceEnterpriseID, "--search", "warehouse", "--limit", "1", "--offset", "0", "--all", "--json"}, url.Values{"search": {"warehouse"}, "limit": {"1"}, "offset": {"0"}}, http.StatusOK, http.StatusUnauthorized, true, false},
+		{"v0 GET /v0/enterprise/{enterprise_id}/geofence/", "v0-geofence-list", http.MethodGet, "/v0/enterprise/" + geofenceEnterpriseID + "/geofence/", "", []string{"api", "v0", "geofence", "list", "--enterprise", geofenceEnterpriseID, "--search", "warehouse", "--limit", "1", "--offset", "0", "--all", "--json"}, url.Values{"search": {"warehouse"}, "limit": {"1"}, "offset": {"0"}}, http.StatusOK, http.StatusUnauthorized, true, false},
 		{"v0 GET /v0/enterprise/{enterprise_id}/geofence/{geofence_id}/", "v0-geofence-get", http.MethodGet, "/v0/enterprise/" + geofenceEnterpriseID + "/geofence/" + geofenceID + "/", "", []string{"geofence", "get", geofenceEnterpriseID, geofenceID, "--json"}, nil, http.StatusOK, http.StatusNotFound, false, false},
 		{"v0 PUT /v0/enterprise/{enterprise_id}/geofence/{geofence_id}/", "v0-geofence-update", http.MethodPut, "/v0/enterprise/" + geofenceEnterpriseID + "/geofence/" + geofenceID + "/", geofenceUpdateBody, []string{"geofence", "update", geofenceEnterpriseID, geofenceID, "--name", "Warehouse perimeter", "--latitude", "37.7749", "--longitude", "-122.4194", "--radius", "0.25", "--radius-unit", "KILOMETERS", "--json"}, nil, http.StatusOK, http.StatusBadRequest, false, false},
 		{"v0 PATCH /v0/enterprise/{enterprise_id}/geofence/{geofence_id}/", "v0-geofence-partial-update", http.MethodPatch, "/v0/enterprise/" + geofenceEnterpriseID + "/geofence/" + geofenceID + "/", geofencePatchBody, []string{"geofence", "partial-update", geofenceEnterpriseID, geofenceID, "--radius", "0.5", "--radius-unit", "KILOMETERS", "--json"}, nil, http.StatusOK, http.StatusBadRequest, false, false},
 		{"v0 DELETE /v0/enterprise/{enterprise_id}/geofence/{geofence_id}/", "v0-geofence-delete", http.MethodDelete, "/v0/enterprise/" + geofenceEnterpriseID + "/geofence/" + geofenceID + "/", "", []string{"geofence", "delete", geofenceEnterpriseID, geofenceID, "--yes"}, nil, http.StatusNoContent, http.StatusNotFound, false, true},
-		{"v0 POST /v0/enterprise/{enterprise_id}/create-apply-geo-fence/", "v0-geofence-create", http.MethodPost, "/v0/enterprise/" + geofenceEnterpriseID + "/create-apply-geo-fence/", geofenceCreateBody, []string{"geofence", "create", "--enterprise", geofenceEnterpriseID, "--body", geofenceCreateBody, "--json"}, nil, http.StatusCreated, http.StatusBadRequest, false, false},
+		{"v0 POST /v0/enterprise/{enterprise_id}/create-apply-geo-fence/", "v0-geofence-create", http.MethodPost, "/v0/enterprise/" + geofenceEnterpriseID + "/create-apply-geo-fence/", geofenceCreateBody, []string{"api", "v0", "geofence", "create", "--enterprise", geofenceEnterpriseID, "--body", geofenceCreateBody, "--json"}, nil, http.StatusCreated, http.StatusBadRequest, false, false},
 	}
 }
 
 func TestGeofenceOperationCoverage(t *testing.T) {
 	want := map[string]geofenceOperationMetadata{
-		"getAllGeofences":       {"v0", http.MethodGet, "/v0/enterprise/{enterprise_id}/geofence/", "geofence", "list", "limit-offset", "enterprise", "List Geofences in Enterprise", "", "application/json", []string{"geofence", "list"}, false},
-		"getGeofence":           {"v0", http.MethodGet, "/v0/enterprise/{enterprise_id}/geofence/{geofence_id}/", "geofence", "get", "none", "", "Get geofence information", "", "application/json", []string{"geofence", "get"}, false},
-		"updateGeofence":        {"v0", http.MethodPut, "/v0/enterprise/{enterprise_id}/geofence/{geofence_id}/", "geofence", "update", "none", "", "Update geofence information", "", "application/json", []string{"geofence", "update"}, false},
-		"partialUpdateGeofence": {"v0", http.MethodPatch, "/v0/enterprise/{enterprise_id}/geofence/{geofence_id}/", "geofence", "partial-update", "none", "", "Partially updates geofence information", "", "application/json", []string{"geofence", "partial-update"}, false},
-		"deleteGeofence":        {"v0", http.MethodDelete, "/v0/enterprise/{enterprise_id}/geofence/{geofence_id}/", "geofence", "delete", "none", "", "Delete a geofence", "", "application/json", []string{"geofence", "delete"}, true},
-		"createGeofence":        {"v0", http.MethodPost, "/v0/enterprise/{enterprise_id}/create-apply-geo-fence/", "geofence", "create", "none", "enterprise", "Create a geofence", "", "application/json", []string{"geofence", "create"}, false},
-		"getGeofenceList":       {"v0", http.MethodGet, "/v0/enterprise/{enterprise_id}/create-apply-geo-fence/", "geofence", "list", "limit-offset", "enterprise", "List Geofences in Enterprise", "getAllGeofences", "application/json", []string{"geofence", "list"}, false},
-		"getTheGeofence":        {"v0", http.MethodGet, "/v0/enterprise/{enterprise_id}/create-apply-geofence/{geofence_id}/", "geofence", "get", "none", "", "Get geofence information", "getGeofence", "application/json", []string{"geofence", "get"}, false},
-		"deleteTheGeofence":     {"v0", http.MethodDelete, "/v0/enterprise/{enterprise_id}/create-apply-geofence/{geofence_id}/", "geofence", "delete", "none", "", "Delete a geofence", "deleteGeofence", "application/json", []string{"geofence", "delete"}, true},
+		"getAllGeofences":            {"v0", http.MethodGet, "/v0/enterprise/{enterprise_id}/geofence/", "geofence", "list", "limit-offset", "enterprise", "List Geofences in Enterprise", "", "application/json", []string{"api", "v0", "geofence", "list"}, false},
+		"getGeofence":                {"v0", http.MethodGet, "/v0/enterprise/{enterprise_id}/geofence/{geofence_id}/", "geofence", "get", "none", "", "Get geofence information", "", "application/json", []string{"geofence", "get"}, false},
+		"updateGeofence":             {"v0", http.MethodPut, "/v0/enterprise/{enterprise_id}/geofence/{geofence_id}/", "geofence", "update", "none", "", "Update geofence information", "", "application/json", []string{"geofence", "update"}, false},
+		"partialUpdateGeofence":      {"v0", http.MethodPatch, "/v0/enterprise/{enterprise_id}/geofence/{geofence_id}/", "geofence", "partial-update", "none", "", "Partially updates geofence information", "", "application/json", []string{"geofence", "partial-update"}, false},
+		"deleteGeofence":             {"v0", http.MethodDelete, "/v0/enterprise/{enterprise_id}/geofence/{geofence_id}/", "geofence", "delete", "none", "", "Delete a geofence", "", "application/json", []string{"geofence", "delete"}, true},
+		"createGeofence":             {"v0", http.MethodPost, "/v0/enterprise/{enterprise_id}/create-apply-geo-fence/", "geofence", "create", "none", "enterprise", "Create a geofence", "", "application/json", []string{"api", "v0", "geofence", "create"}, false},
+		"getGeofenceList":            {"v0", http.MethodGet, "/v0/enterprise/{enterprise_id}/create-apply-geo-fence/", "geofence", "list", "limit-offset", "enterprise", "List Geofences in Enterprise", "getAllGeofences", "application/json", []string{"api", "v0", "geofence", "list"}, false},
+		"getTheGeofence":             {"v0", http.MethodGet, "/v0/enterprise/{enterprise_id}/create-apply-geofence/{geofence_id}/", "geofence", "get", "none", "", "Get geofence information", "getGeofence", "application/json", []string{"geofence", "get"}, false},
+		"deleteTheGeofence":          {"v0", http.MethodDelete, "/v0/enterprise/{enterprise_id}/create-apply-geofence/{geofence_id}/", "geofence", "delete", "none", "", "Delete a geofence", "deleteGeofence", "application/json", []string{"geofence", "delete"}, true},
+		"geofence_createGeofence":    {"v1", http.MethodPost, "/geofence/v1/geofences", "geofence", "create", "none", "", "Create a new geofence", "", "application/json", []string{"geofence", "create"}, false},
+		"geofence_listGeofences":     {"v1", http.MethodGet, "/geofence/v1/geofences", "geofence", "list", "none", "", "List all geofences", "", "application/json", []string{"geofence", "list"}, false},
+		"geofence_getDeviceSummary":  {"v1", http.MethodGet, "/geofence/v1/geofences/{geofence_id}/device-summary", "geofence-device-summary", "get", "none", "", "Get device summary for a geofence", "", "application/json", []string{"geofence-device-summary", "get"}, false},
+		"geofence_getBlueprintUsage": {"v1", http.MethodGet, "/geofence/v1/geofences/{geofence_id}/blueprints", "geofence-blueprint", "list", "none", "geofence", "Get blueprint usage statistics for a geofence", "", "application/json", []string{"geofence-blueprint", "list"}, false},
+		"geofence_getDevices":        {"v1", http.MethodGet, "/geofence/v1/geofences/{geofence_id}/devices", "geofence-device", "list", "none", "geofence", "Get devices for a geofence", "", "application/json", []string{"geofence-device", "list"}, false},
 	}
 	got := map[string]geofenceOperationMetadata{}
 	for _, operation := range generated.Operations() {
-		if operation.Noun == "geofence" {
+		if operation.Noun == "geofence" || strings.HasPrefix(operation.Noun, "geofence-") {
 			got[operation.OperationID] = geofenceOperationMetadata{operation.Generation, operation.Method, operation.Path, operation.Noun, operation.Verb, operation.Pagination, operation.ScopeParent, operation.Summary, operation.AliasOf, operation.SuccessMedia, operation.Command, operation.Destructive}
 		}
 	}
@@ -164,7 +169,7 @@ func TestGeofencePaginationMerges(t *testing.T) {
 
 func TestGeofenceInputRules(t *testing.T) {
 	root := NewRootCommand()
-	for _, path := range [][]string{{"geofence", "list"}, {"geofence", "create"}} {
+	for _, path := range [][]string{{"api", "v0", "geofence", "list"}, {"api", "v0", "geofence", "create"}} {
 		command, _, err := root.Find(path)
 		if err != nil || command.Flags().Lookup("enterprise") == nil {
 			t.Fatalf("%s enterprise scope flag = %v, error = %v", strings.Join(path, " "), command.Flags().Lookup("enterprise"), err)
@@ -176,22 +181,22 @@ func TestGeofenceInputRules(t *testing.T) {
 			t.Fatalf("%s item path flags = enterprise:%v geofence-id:%v error:%v", strings.Join(path, " "), command.Flags().Lookup("enterprise"), command.Flags().Lookup("geofence-id"), err)
 		}
 	}
-	for _, path := range [][]string{{"geofence", "create"}, {"geofence", "update"}, {"geofence", "partial-update"}} {
+	for _, path := range [][]string{{"api", "v0", "geofence", "create"}, {"geofence", "update"}, {"geofence", "partial-update"}} {
 		command, _, err := root.Find(path)
 		if err != nil || command.Flags().Lookup("body") == nil || command.Flags().Lookup("authorization") != nil || command.Flags().Lookup("output") != nil {
 			t.Fatalf("%s flags do not expose the expected JSON input surface", strings.Join(path, " "))
 		}
 	}
-	create, _, _ := root.Find([]string{"geofence", "create"})
+	create, _, _ := root.Find([]string{"api", "v0", "geofence", "create"})
 	for _, name := range []string{"name", "latitude", "longitude", "devices", "radius", "radius-unit", "device-actions"} {
 		if create.Flags().Lookup(name) != nil {
 			t.Fatalf("geofence create unexpectedly exposes --%s", name)
 		}
 	}
 	for _, args := range [][]string{
-		{"geofence", "list"},
-		{"geofence", "create", "--enterprise", geofenceEnterpriseID},
-		{"geofence", "create", "--enterprise", geofenceEnterpriseID, "--body", "{"},
+		{"api", "v0", "geofence", "list"},
+		{"api", "v0", "geofence", "create", "--enterprise", geofenceEnterpriseID},
+		{"api", "v0", "geofence", "create", "--enterprise", geofenceEnterpriseID, "--body", "{"},
 		{"geofence", "update", geofenceEnterpriseID, geofenceID},
 		{"geofence", "update", geofenceEnterpriseID, geofenceID, "--name", "Warehouse perimeter", "--latitude", "37.7749"},
 		{"geofence", "update", geofenceEnterpriseID, geofenceID, "--name", "Warehouse perimeter", "--longitude", "-122.4194"},
@@ -227,7 +232,7 @@ func TestGeofenceInputRules(t *testing.T) {
 		if body == "-" {
 			input = strings.NewReader(geofenceCreateBody)
 		}
-		assertGeofenceRequest(t, []string{"geofence", "create", "--enterprise", geofenceEnterpriseID, "--body", body}, input, geofenceFixtures()[5])
+		assertGeofenceRequest(t, []string{"api", "v0", "geofence", "create", "--enterprise", geofenceEnterpriseID, "--body", body}, input, geofenceFixtures()[5])
 	}
 }
 

@@ -22,10 +22,54 @@ func TestSecureADBCommandRegistered(t *testing.T) {
 }
 
 func TestStateCommandsRegistered(t *testing.T) {
-	for _, path := range [][]string{{"configure"}, {"configure", "show"}, {"context", "set"}, {"context", "get"}, {"context", "clear"}} {
+	for _, path := range [][]string{{"configure"}, {"configure", "show"}, {"context", "set"}, {"context", "get"}, {"context", "clear"}, {"discover"}} {
 		command, _, err := NewRootCommand().Find(path)
 		if err != nil || command.CommandPath() != "espercli "+strings.Join(path, " ") {
 			t.Fatalf("find %v = %q, %v", path, command.CommandPath(), err)
+		}
+	}
+}
+
+func TestGeneratedDiscoveryAndHelpContext(t *testing.T) {
+	command := NewRootCommand()
+	var output bytes.Buffer
+	command.SetOut(&output)
+	command.SetErr(&output)
+	command.SetArgs([]string{"discover", "https://api.esper.io/openapi/geofence_geofences"})
+	if err := command.Execute(); err != nil {
+		t.Fatal(err)
+	}
+	for _, expected := range []string{"espercli geofence create", "espercli geofence list", "Docs: https://api.esper.io/openapi/geofence_geofences"} {
+		if !strings.Contains(output.String(), expected) {
+			t.Fatalf("discover output does not contain %q:\n%s", expected, output.String())
+		}
+	}
+
+	for _, test := range []struct {
+		args    []string
+		heading string
+	}{
+		{[]string{"--help"}, "Command groups:"},
+		{[]string{"api", "--help"}, "API generations:"},
+		{[]string{"geofence", "--help"}, "Operations:"},
+		{[]string{"report-status", "create", "--help"}, "filters.platform (array) [values: Android, Apple, Linux, Windows]"},
+	} {
+		command = NewRootCommand()
+		output.Reset()
+		command.SetOut(&output)
+		command.SetErr(&output)
+		command.SetArgs(test.args)
+		if err := command.Execute(); err != nil {
+			t.Fatal(err)
+		}
+		if !strings.Contains(output.String(), test.heading) {
+			t.Fatalf("help %v does not contain %q:\n%s", test.args, test.heading, output.String())
+		}
+	}
+
+	for _, path := range [][]string{{"geofence", "list"}, {"api", "v0", "geofence", "list"}} {
+		if command, _, err := NewRootCommand().Find(path); err != nil || command.CommandPath() != "espercli "+strings.Join(path, " ") {
+			t.Fatalf("find %v = %v, %v", path, command, err)
 		}
 	}
 }

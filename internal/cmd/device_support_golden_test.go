@@ -34,6 +34,7 @@ func deviceSupportFixtures() []deviceSupportFixture {
 		{"v0 GET /device/v0/devices/{id}/", "v0-device-request-get", http.MethodGet, "/device/v0/devices/device-1/", "", []string{"device-request", "get", "device-1", "--json"}, nil, 200, 404, "", false},
 		{"v0 DELETE /device/v0/devices/{id}/", "v0-device-delete-non-android-device", http.MethodDelete, "/device/v0/devices/device-1/", "", []string{"device", "delete-non-android-device", "device-1", "--yes", "--json"}, nil, 200, 404, "", true},
 		{"v0 GET /device/v0/devices/{id}/devicestate", "v0-devicestate-get", http.MethodGet, "/device/v0/devices/device-1/devicestate", "", []string{"devicestate", "get", "device-1", "--json"}, nil, 200, 404, "", false},
+		{"v2 PUT /v2/devices/{id}/devicestate", "v2-devicestate-update", http.MethodPut, "/v2/devices/device-1/devicestate", `{"device_settings":{"wifi":true}}`, []string{"devicestate", "update", "device-1", "--body", `{"device_settings":{"wifi":true}}`, "--json"}, nil, 201, 400, "", false},
 		{"v0 GET /device/v0/heartbeat/{id}/", "v0-device-heartbeat-get", http.MethodGet, "/device/v0/heartbeat/device-1/", "", []string{"device-heartbeat", "get", "device-1", "--json"}, nil, 200, 404, "", false},
 		{"v2 GET /v2/heartbeat/", "v2-device-heartbeat-list", http.MethodGet, "/v2/heartbeat/", "", []string{"device-heartbeat-list", "list", "--last-seen-gt", "2026-08-24T00:00:00Z", "--last-seen-lt", "2026-08-25T00:00:00Z", "--limit", "1", "--offset", "0", "--all", "--json"}, url.Values{"last_seen_gt": {"2026-08-24T00:00:00Z"}, "last_seen_lt": {"2026-08-25T00:00:00Z"}, "limit": {"1"}, "offset": {"0"}}, 200, 400, "apps-envelope", false},
 		{"v2 GET /v2/devices/{deviceId}/google-accounts/policy/", "v2-device-google-account-policy-get", http.MethodGet, "/v2/devices/device-1/google-accounts/policy/", "", []string{"device-google-account-policy", "get", "device-1", "--json"}, nil, 200, 404, "", false},
@@ -56,8 +57,8 @@ func TestDeviceSupportOperationCoverage(t *testing.T) {
 		}
 		want[row.key] = true
 	}
-	if len(want) != 15 {
-		t.Fatalf("fixture rows = %d, want 15", len(want))
+	if len(want) != 16 {
+		t.Fatalf("fixture rows = %d, want 16", len(want))
 	}
 	nouns := map[string]bool{"device-eventfeed": true, "device-google-account-emm-managed": true, "device-google-account-policy": true, "device-heartbeat": true, "device-heartbeat-list": true, "device-request": true, "devicestate": true, "foundation-version-list": true, "google-account": true, "rv-activity-feed": true}
 	got := map[string]bool{}
@@ -66,7 +67,7 @@ func TestDeviceSupportOperationCoverage(t *testing.T) {
 			got[operation.Generation+" "+operation.Method+" "+operation.Path] = true
 		}
 	}
-	if len(got) != 15 || !reflect.DeepEqual(want, got) {
+	if len(got) != 16 || !reflect.DeepEqual(want, got) {
 		t.Fatalf("packet operation keys mismatch: rows=%d generated=%d", len(want), len(got))
 	}
 }

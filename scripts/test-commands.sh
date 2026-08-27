@@ -18,9 +18,9 @@ offline)
 live-readonly)
   : "${HARNESS_ENTERPRISE:?set HARNESS_ENTERPRISE to the current dev enterprise ID}"
   : "${HARNESS_DEVICE:?set HARNESS_DEVICE to an owned dev device ID}"
-  default_page_list_flag=()
+  default_page_list_flag=""
   if [[ "${HARNESS_ALLOW_DEFAULT_PAGE_LISTS:-}" == "1" ]]; then
-    default_page_list_flag=(--allow-default-page-lists)
+    default_page_list_flag="--allow-default-page-lists"
   fi
   go run ./tools/command-harness \
     --mode live-readonly \
@@ -29,7 +29,7 @@ live-readonly)
     --device "$HARNESS_DEVICE" \
     --group "${HARNESS_GROUP:-}" \
     --app "${HARNESS_APP:-}" \
-    "${default_page_list_flag[@]}" \
+    ${default_page_list_flag:+"$default_page_list_flag"} \
     --report "$ROOT/dist/command-harness-live-readonly.json"
   ;;
 live-mutations)

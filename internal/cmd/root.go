@@ -6,6 +6,7 @@ import (
 
 	"github.com/esper-io/esper-cli/internal/cmd/configure"
 	contextcmd "github.com/esper-io/esper-cli/internal/cmd/context"
+	"github.com/esper-io/esper-cli/internal/cmd/discover"
 	"github.com/esper-io/esper-cli/internal/cmd/generated"
 	"github.com/esper-io/esper-cli/internal/cmd/secureadb"
 	esperruntime "github.com/esper-io/esper-cli/internal/runtime"
@@ -23,6 +24,7 @@ func NewRootCommand() *cobra.Command {
 		SilenceErrors: true,
 		SilenceUsage:  true,
 	}
+	command.SetUsageTemplate(generated.UsageTemplate("Command groups"))
 	flags := command.PersistentFlags()
 	flags.BoolVarP(&options.JSON, "json", "j", false, "write raw API JSON")
 	flags.BoolVarP(&options.Yes, "yes", "y", false, "skip destructive-operation confirmation")
@@ -33,8 +35,14 @@ func NewRootCommand() *cobra.Command {
 	generated.AddCommands(command, options)
 	command.AddCommand(configure.NewCommand(options))
 	command.AddCommand(contextcmd.NewCommand(options))
+	command.AddCommand(discover.NewCommand(options))
 	command.AddCommand(secureadb.NewCommand(options))
 	addVersionCommand(command, options)
+	for _, child := range command.Commands() {
+		if child.Name() != "api" {
+			child.SetUsageTemplate(generated.UsageTemplate("Operations"))
+		}
+	}
 	return command
 }
 

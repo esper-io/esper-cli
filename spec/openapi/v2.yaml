@@ -137,6 +137,36 @@
       "name": "8_Google Enterprise",
       "description": "APIs to enroll the enterprise in Google EMM.",
       "x-displayName": "Google Enterprise"
+    },
+    {
+      "name": "blueprints_Background Scripts API",
+      "description": "APIs to manage background scripts. Background scripts are scripts that can be configured to run continuously or at specified intervals on devices.",
+      "x-displayName": "Background Scripts API"
+    },
+    {
+      "name": "device_Device",
+      "description": "APIs to retrieve information about the device or delete the device.",
+      "x-displayName": "Device"
+    },
+    {
+      "name": "apps_management_VPP App Management",
+      "description": "APIs for getting information about VPP apps. Learn more about [VPP apps](https://help.esper.io/hc/en-us/articles/20518326865681-Managing-iOS-Applications).",
+      "x-displayName": "VPP App Management"
+    },
+    {
+      "name": "apps_management_Tenant Apps",
+      "description": "API to manage Enterprise iOS apps for a tenant.",
+      "x-displayName": "Tenant Apps"
+    },
+    {
+      "name": "apps_management_OEM Config Schema",
+      "description": "APIs for retrieving OEM config schemas parsed from OEM APKs",
+      "x-displayName": "OEM Config Schema"
+    },
+    {
+      "name": "tenant_MDM Service Config",
+      "description": "Unauthenticated discovery endpoint for Apple's MDMServiceConfig spec.",
+      "x-displayName": "MDM Service Config"
     }
   ],
   "paths": {
@@ -2218,7 +2248,8 @@
         "x-esper-destructive": false,
         "x-esper-pagination": "apps-envelope",
         "x-esper-verb": "list",
-        "x-esper-noun": "device"
+        "x-esper-noun": "device",
+        "x-esper-response-envelope": "apps-envelope"
       }
     },
     "/v2/devices/{id}": {
@@ -2573,7 +2604,8 @@
         "x-esper-platform-source": "src/services/device-api/api/deviceapps/handler/read.go:15-124",
         "x-esper-verb": "list",
         "x-esper-noun": "device-app",
-        "x-esper-scope-parent": "device"
+        "x-esper-scope-parent": "device",
+        "x-esper-response-envelope": "apps-envelope"
       }
     },
     "/v2/device-apps": {
@@ -2757,7 +2789,8 @@
         "x-esper-destructive": false,
         "x-esper-pagination": "none",
         "x-esper-verb": "get",
-        "x-esper-noun": "device-google-account-policy"
+        "x-esper-noun": "device-google-account-policy",
+        "x-esper-response-envelope": "apps-envelope"
       },
       "put": {
         "summary": "Update the Google EMM Policy details for a specific device.",
@@ -2866,7 +2899,8 @@
         "x-esper-destructive": false,
         "x-esper-pagination": "none",
         "x-esper-verb": "update",
-        "x-esper-noun": "device-google-account-policy"
+        "x-esper-noun": "device-google-account-policy",
+        "x-esper-response-envelope": "apps-envelope"
       }
     },
     "/v2/devices/{deviceId}/google-accounts/emm-managed/": {
@@ -2942,7 +2976,8 @@
         "x-esper-destructive": false,
         "x-esper-pagination": "none",
         "x-esper-verb": "get",
-        "x-esper-noun": "device-google-account-emm-managed"
+        "x-esper-noun": "device-google-account-emm-managed",
+        "x-esper-response-envelope": "apps-envelope"
       }
     },
     "/v2/devices/{deviceId}/google-accounts/": {
@@ -3031,7 +3066,8 @@
         "x-esper-pagination": "apps-envelope",
         "x-esper-verb": "list",
         "x-esper-noun": "google-account",
-        "x-esper-scope-parent": "device"
+        "x-esper-scope-parent": "device",
+        "x-esper-response-envelope": "apps-envelope"
       },
       "put": {
         "summary": "Update the Google account details of the EMM enrollment stored in the database for a specific device.",
@@ -3120,7 +3156,8 @@
         "x-esper-destructive": false,
         "x-esper-pagination": "none",
         "x-esper-verb": "update",
-        "x-esper-noun": "google-account"
+        "x-esper-noun": "google-account",
+        "x-esper-response-envelope": "apps-envelope"
       },
       "post": {
         "summary": "Create a Google user and, if request body is not provided, generate a Google auth token for a specific device on the Google EMM side.",
@@ -3210,7 +3247,8 @@
         "x-esper-pagination": "none",
         "x-esper-verb": "create",
         "x-esper-noun": "google-account",
-        "x-esper-scope-parent": "device"
+        "x-esper-scope-parent": "device",
+        "x-esper-response-envelope": "apps-envelope"
       },
       "delete": {
         "summary": "Unenrolls device from Google EMM and deletes the Google account details.",
@@ -3279,7 +3317,8 @@
         "x-esper-destructive": true,
         "x-esper-pagination": "none",
         "x-esper-verb": "delete",
-        "x-esper-noun": "google-account"
+        "x-esper-noun": "google-account",
+        "x-esper-response-envelope": "apps-envelope"
       }
     },
     "/v2/foundationversions": {
@@ -3989,7 +4028,8 @@
         "x-esper-destructive": false,
         "x-esper-pagination": "none",
         "x-esper-verb": "create",
-        "x-esper-noun": "tenant-app"
+        "x-esper-noun": "tenant-app",
+        "x-esper-response-envelope": "apps-envelope"
       },
       "get": {
         "security": [
@@ -4116,7 +4156,8 @@
         "x-esper-destructive": false,
         "x-esper-pagination": "apps-envelope",
         "x-esper-verb": "list",
-        "x-esper-noun": "tenant-app"
+        "x-esper-noun": "tenant-app",
+        "x-esper-response-envelope": "apps-envelope"
       }
     },
     "/v2/tenant-apps/{appId}": {
@@ -4201,7 +4242,8 @@
         "x-esper-destructive": false,
         "x-esper-pagination": "none",
         "x-esper-verb": "get",
-        "x-esper-noun": "tenant-app"
+        "x-esper-noun": "tenant-app",
+        "x-esper-response-envelope": "apps-envelope"
       }
     },
     "/v2/tenant-apps/{appId}/versions": {
@@ -4331,7 +4373,8 @@
         "x-esper-pagination": "apps-envelope",
         "x-esper-verb": "list",
         "x-esper-noun": "version",
-        "x-esper-scope-parent": "tenant-app"
+        "x-esper-scope-parent": "tenant-app",
+        "x-esper-response-envelope": "apps-envelope"
       }
     },
     "/v2/tenant-apps/{appId}/versions/{versionId}": {
@@ -4434,7 +4477,8 @@
         "x-esper-destructive": false,
         "x-esper-pagination": "none",
         "x-esper-verb": "get",
-        "x-esper-noun": "tenant-app-version"
+        "x-esper-noun": "tenant-app-version",
+        "x-esper-response-envelope": "apps-envelope"
       },
       "put": {
         "security": [
@@ -4550,7 +4594,8 @@
         "x-esper-destructive": false,
         "x-esper-pagination": "none",
         "x-esper-verb": "update",
-        "x-esper-noun": "tenant-app-version"
+        "x-esper-noun": "tenant-app-version",
+        "x-esper-response-envelope": "apps-envelope"
       },
       "delete": {
         "security": [
@@ -4652,7 +4697,8 @@
         "x-esper-destructive": true,
         "x-esper-pagination": "none",
         "x-esper-verb": "delete",
-        "x-esper-noun": "tenant-app-version"
+        "x-esper-noun": "tenant-app-version",
+        "x-esper-response-envelope": "apps-envelope"
       }
     },
     "/v2/appleappstore/": {
@@ -4885,7 +4931,8 @@
         "x-esper-destructive": false,
         "x-esper-pagination": "apps-envelope",
         "x-esper-verb": "list",
-        "x-esper-noun": "app"
+        "x-esper-noun": "app",
+        "x-esper-response-envelope": "apps-envelope"
       }
     },
     "/v2/webclips": {
@@ -4969,7 +5016,8 @@
         "x-esper-destructive": false,
         "x-esper-pagination": "none",
         "x-esper-verb": "create",
-        "x-esper-noun": "webclip"
+        "x-esper-noun": "webclip",
+        "x-esper-response-envelope": "apps-envelope"
       },
       "get": {
         "security": [
@@ -5085,7 +5133,8 @@
         "x-esper-destructive": false,
         "x-esper-pagination": "apps-envelope",
         "x-esper-verb": "list",
-        "x-esper-noun": "webclip"
+        "x-esper-noun": "webclip",
+        "x-esper-response-envelope": "apps-envelope"
       }
     },
     "/v2/webclips/{webclipId}": {
@@ -5170,7 +5219,8 @@
         "x-esper-destructive": false,
         "x-esper-pagination": "none",
         "x-esper-verb": "get",
-        "x-esper-noun": "webclip"
+        "x-esper-noun": "webclip",
+        "x-esper-response-envelope": "apps-envelope"
       },
       "delete": {
         "security": [
@@ -5263,7 +5313,8 @@
         "x-esper-destructive": true,
         "x-esper-pagination": "none",
         "x-esper-verb": "delete",
-        "x-esper-noun": "webclip"
+        "x-esper-noun": "webclip",
+        "x-esper-response-envelope": "apps-envelope"
       }
     },
     "/v2/provisioning-profiles": {
@@ -5338,7 +5389,8 @@
         "x-esper-destructive": false,
         "x-esper-pagination": "none",
         "x-esper-verb": "create",
-        "x-esper-noun": "provisioning-profile"
+        "x-esper-noun": "provisioning-profile",
+        "x-esper-response-envelope": "apps-envelope"
       },
       "get": {
         "security": [
@@ -5479,7 +5531,8 @@
         "x-esper-destructive": false,
         "x-esper-pagination": "apps-envelope",
         "x-esper-verb": "list",
-        "x-esper-noun": "provisioning-profile"
+        "x-esper-noun": "provisioning-profile",
+        "x-esper-response-envelope": "apps-envelope"
       }
     },
     "/v2/provisioning-profiles/{id}": {
@@ -5566,7 +5619,8 @@
         "x-esper-destructive": false,
         "x-esper-pagination": "none",
         "x-esper-verb": "get",
-        "x-esper-noun": "provisioning-profile"
+        "x-esper-noun": "provisioning-profile",
+        "x-esper-response-envelope": "apps-envelope"
       }
     },
     "/v2/provisioning-profiles/{id}/versions": {
@@ -5700,7 +5754,8 @@
         "x-esper-pagination": "apps-envelope",
         "x-esper-verb": "list",
         "x-esper-noun": "version",
-        "x-esper-scope-parent": "provisioning-profile"
+        "x-esper-scope-parent": "provisioning-profile",
+        "x-esper-response-envelope": "apps-envelope"
       }
     },
     "/v2/provisioning-profiles/{id}/versions/{versionId}": {
@@ -5798,7 +5853,8 @@
         "x-esper-pagination": "none",
         "x-esper-verb": "get",
         "x-esper-noun": "provisioning-profile-version",
-        "x-esper-scope-parent": "provisioning-profile"
+        "x-esper-scope-parent": "provisioning-profile",
+        "x-esper-response-envelope": "apps-envelope"
       },
       "delete": {
         "security": [
@@ -5894,7 +5950,8 @@
         "x-esper-pagination": "none",
         "x-esper-verb": "delete",
         "x-esper-noun": "provisioning-profile-version",
-        "x-esper-scope-parent": "provisioning-profile"
+        "x-esper-scope-parent": "provisioning-profile",
+        "x-esper-response-envelope": "apps-envelope"
       }
     },
     "/v2/preferred-regions": {
@@ -6263,7 +6320,8 @@
         "x-esper-destructive": false,
         "x-esper-pagination": "apps-envelope",
         "x-esper-verb": "list",
-        "x-esper-noun": "tenant-esper-app"
+        "x-esper-noun": "tenant-esper-app",
+        "x-esper-response-envelope": "apps-envelope"
       }
     },
     "/v2/command-inbox/": {
@@ -7421,10 +7479,1529 @@
         "x-esper-verb": "create",
         "x-esper-noun": "emm-account"
       }
+    },
+    "/v2/background-scripts/": {
+      "post": {
+        "x-badges": [
+          {
+            "name": "Stable",
+            "color": "green"
+          }
+        ],
+        "tags": [
+          "blueprints_Background Scripts API"
+        ],
+        "description": "Create a new background script",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/blueprints_BackgroundScriptCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "content": {
+                      "$ref": "#/components/schemas/blueprints_BackgroundScriptRead"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "code": {
+                      "type": "integer",
+                      "enum": [
+                        201
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "errors": {
+                      "type": "array",
+                      "items": {
+                        "type": "object"
+                      }
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "code": {
+                      "type": "integer",
+                      "enum": [
+                        400
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict - Background Script name already exists",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    },
+                    "code": {
+                      "type": "integer",
+                      "enum": [
+                        409
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "x-esper-destructive": false,
+        "x-esper-pagination": "none",
+        "x-esper-verb": "create",
+        "x-esper-noun": "background-script",
+        "summary": "Create background-script"
+      },
+      "get": {
+        "x-badges": [
+          {
+            "name": "Stable",
+            "color": "green"
+          }
+        ],
+        "tags": [
+          "blueprints_Background Scripts API"
+        ],
+        "description": "Retrieve all background scripts for the tenant",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "ordering",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Order the results by a specific field (-field for descending order). Valid fields are 'name', 'created_at', 'updated_at', 'created_by', 'updated_by'.\n"
+          },
+          {
+            "in": "query",
+            "name": "name",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Filter the results by name (partial match, case insensitive).\n"
+          },
+          {
+            "in": "query",
+            "name": "always_run",
+            "schema": {
+              "type": "boolean"
+            },
+            "description": "Filter the results by always_run flag.\n"
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 10
+            },
+            "description": "Number of results to return per page.\n"
+          },
+          {
+            "in": "query",
+            "name": "offset",
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "default": 0
+            },
+            "description": "The initial index from which to return the results.\n"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "content": {
+                      "type": "object",
+                      "properties": {
+                        "count": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "The total number of background scripts"
+                        },
+                        "next": {
+                          "type": [
+                            "string",
+                            "null"
+                          ],
+                          "description": "The link to retrieve the next set of objects in the result set"
+                        },
+                        "previous": {
+                          "type": [
+                            "string",
+                            "null"
+                          ],
+                          "description": "The link to retrieve the previous set of objects in the result set"
+                        },
+                        "results": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/blueprints_BackgroundScriptRead"
+                          }
+                        }
+                      }
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "code": {
+                      "type": "integer"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "x-esper-destructive": false,
+        "x-esper-pagination": "limit-offset",
+        "x-esper-verb": "list",
+        "x-esper-noun": "background-script",
+        "summary": "List background-script"
+      }
+    },
+    "/v2/background-scripts/{background_script_id}/": {
+      "get": {
+        "x-badges": [
+          {
+            "name": "Stable",
+            "color": "green"
+          }
+        ],
+        "tags": [
+          "blueprints_Background Scripts API"
+        ],
+        "description": "Retrieve a background script by ID. Includes the script content fetched from S3.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "background_script_id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "content": {
+                      "$ref": "#/components/schemas/blueprints_BackgroundScriptDetailRead"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "code": {
+                      "type": "integer",
+                      "enum": [
+                        200
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Background Script not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    },
+                    "code": {
+                      "type": "integer",
+                      "enum": [
+                        404
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "x-esper-destructive": false,
+        "x-esper-pagination": "none",
+        "x-esper-verb": "get",
+        "x-esper-noun": "background-script",
+        "summary": "Get background-script"
+      }
+    },
+    "/v2/devices/{id}/devicestate": {
+      "put": {
+        "x-badges": [
+          {
+            "name": "Stable",
+            "color": "green"
+          }
+        ],
+        "summary": "Receive device state report and publish to Kafka for drift detection",
+        "description": "Accepts a device state report and forwards it (as-is) to Kafka topic `esper.device.device.state` after enriching with `tenant_id` and `device_id`.",
+        "operationId": "updateDeviceState",
+        "tags": [
+          "device_Device"
+        ],
+        "security": [
+          {
+            "device_apiKey": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID of the device",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "device_settings"
+                ],
+                "properties": {
+                  "event_ts": {
+                    "type": "number",
+                    "description": "Event timestamp in milliseconds since epoch"
+                  },
+                  "device_settings": {
+                    "type": "object",
+                    "description": "Partial settings payload containing only changed keys (sparse object)",
+                    "additionalProperties": true
+                  }
+                },
+                "additionalProperties": true
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "content": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/device_Error_400_Bad_Data"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authorization information is missing or invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/device_Error_401_Unauthorized"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/device_Error_500_Internal_Server_Error"
+                }
+              }
+            }
+          }
+        },
+        "x-esper-destructive": false,
+        "x-esper-pagination": "none",
+        "x-esper-response-envelope": "apps-envelope",
+        "x-esper-verb": "update",
+        "x-esper-noun": "devicestate"
+      }
+    },
+    "/v2/itunesapps/{appId}/refresh-version": {
+      "post": {
+        "x-badges": [
+          {
+            "name": "Stable",
+            "color": "green"
+          }
+        ],
+        "security": [
+          {
+            "apps_management_apiKey": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "required": true,
+            "name": "appId",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "description": "The internal Esper app id (UUID) of the VPP app"
+          }
+        ],
+        "summary": "Force refresh of VPP app version metadata",
+        "description": "Synchronously re-fetches the latest iTunes metadata for a single VPP\napp under the caller's tenant and persists it. Same write path as the\ndaily VPP version cron, scoped to one (tenant, app_id). Returns\nthe refreshed app details so the UI can render without a follow-up GET.\n",
+        "tags": [
+          "apps_management_VPP App Management"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "content": {
+                      "$ref": "#/components/schemas/apps_management_ItunesAppInfoV2"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request (invalid app_id or missing headers)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apps_management_Error_400_Bad_Data"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apps_management_Error_401_Unauthorized"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found (no vpp_app_ids row for the tenant + app_id, or app not found in iTunes)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apps_management_Error_404_Not_Found"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apps_management_Error_500_Internal_Server_Error"
+                }
+              }
+            }
+          }
+        },
+        "x-esper-destructive": false,
+        "x-esper-pagination": "none",
+        "x-esper-verb": "create",
+        "x-esper-noun": "refresh-version",
+        "x-esper-scope-parent": "itunesapp"
+      }
+    },
+    "/v2/tenant-apps/{appId}/versions/{versionId}/artifacts": {
+      "post": {
+        "x-badges": [
+          {
+            "name": "Stable",
+            "color": "green"
+          }
+        ],
+        "security": [
+          {
+            "apps_management_apiKey": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "required": true,
+            "name": "appId",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "in": "path",
+            "required": true,
+            "name": "versionId",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "summary": "Add an artifact to a UWP app version",
+        "description": "Uploads a per-version artifact (a UWP framework dependency or signing\ncertificate) for a TENANT_WINDOWS_UWP app version.\n",
+        "tags": [
+          "apps_management_Tenant Apps"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "artifact_type",
+                  "file"
+                ],
+                "properties": {
+                  "artifact_type": {
+                    "type": "string",
+                    "enum": [
+                      "UWP_DEPENDENCY",
+                      "UWP_CERTIFICATE"
+                    ],
+                    "description": "The kind of artifact being uploaded."
+                  },
+                  "file": {
+                    "type": "string",
+                    "format": "binary",
+                    "description": "The artifact file. For UWP_DEPENDENCY a .msix/.appx package;\nfor UWP_CERTIFICATE a .cer signing certificate.\n"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "content": {
+                      "$ref": "#/components/schemas/apps_management_ArtifactMutationResponse"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apps_management_Error_400_Bad_Data"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apps_management_Error_401_Unauthorized"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found (the app version does not exist)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apps_management_Error_404_Not_Found"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apps_management_Error_500_Internal_Server_Error"
+                }
+              }
+            }
+          }
+        },
+        "x-esper-destructive": false,
+        "x-esper-pagination": "none",
+        "x-esper-response-envelope": "apps-envelope",
+        "x-esper-verb": "create",
+        "x-esper-noun": "artifact",
+        "x-esper-scope-parent": "version"
+      }
+    },
+    "/v2/tenant-apps/{appId}/versions/{versionId}/artifacts/{artifactId}": {
+      "delete": {
+        "x-badges": [
+          {
+            "name": "Stable",
+            "color": "green"
+          }
+        ],
+        "security": [
+          {
+            "apps_management_apiKey": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "required": true,
+            "name": "appId",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "in": "path",
+            "required": true,
+            "name": "versionId",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "in": "path",
+            "required": true,
+            "name": "artifactId",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "description": "The id of the artifact to delete."
+          }
+        ],
+        "summary": "Delete an artifact from a UWP app version",
+        "description": "Deletes a per-version artifact (dependency or certificate) by its id,\nremoving both its stored file and its record.\n",
+        "tags": [
+          "apps_management_Tenant Apps"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "content": {
+                      "$ref": "#/components/schemas/apps_management_ArtifactMutationResponse"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apps_management_Error_400_Bad_Data"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apps_management_Error_401_Unauthorized"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apps_management_Error_404_Not_Found"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apps_management_Error_500_Internal_Server_Error"
+                }
+              }
+            }
+          }
+        },
+        "x-esper-destructive": true,
+        "x-esper-pagination": "none",
+        "x-esper-response-envelope": "apps-envelope",
+        "x-esper-verb": "delete",
+        "x-esper-noun": "tenant-app-version-artifact"
+      }
+    },
+    "/v2/oem-config-schema": {
+      "get": {
+        "x-badges": [
+          {
+            "name": "Beta",
+            "color": "yellow"
+          }
+        ],
+        "security": [
+          {
+            "apps_management_apiKey": []
+          }
+        ],
+        "summary": "Get OEM Config Schema",
+        "description": "Retrieve the OEM config schema for a given OEM type and package name.\nReturns the latest active schema by default. Specify `version_code` to retrieve a specific version.\nSet `include_schema=false` to receive metadata only (avoids the large `schema_json` payload).\n",
+        "operationId": "getOEMConfigSchema",
+        "tags": [
+          "apps_management_OEM Config Schema"
+        ],
+        "parameters": [
+          {
+            "in": "header",
+            "required": true,
+            "name": "Authorization",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Bearer token for authentication"
+          },
+          {
+            "in": "query",
+            "required": true,
+            "name": "oem_type",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "ZEBRA",
+                "HONEYWELL",
+                "DATALOGIC",
+                "SAMSUNG",
+                "SUNMI"
+              ]
+            },
+            "description": "OEM manufacturer type",
+            "example": "ZEBRA"
+          },
+          {
+            "in": "query",
+            "required": true,
+            "name": "package_name",
+            "schema": {
+              "type": "string"
+            },
+            "description": "OEM config package name (e.g. com.zebra.oemconfig.common)",
+            "example": "com.zebra.oemconfig.common"
+          },
+          {
+            "in": "query",
+            "required": false,
+            "name": "version_code",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Specific version code to retrieve. When omitted, returns the latest active schema.",
+            "example": "10"
+          },
+          {
+            "in": "query",
+            "required": false,
+            "name": "include_schema",
+            "schema": {
+              "type": "boolean",
+              "default": true
+            },
+            "description": "Set to false to return metadata only, omitting the schema_json field (avoids large payload)"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "When version_code is specified: public, max-age=3600 (response is immutable for that version). When version_code is omitted (latest lookup): not immutable — a newer upload can change the result; do not apply long-lived public caching."
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "integer",
+                      "default": 200
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "content": {
+                      "$ref": "#/components/schemas/apps_management_OEMConfigSchema"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request — missing or invalid query parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apps_management_Error_400_Bad_Data"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apps_management_Error_401_Unauthorized"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found — no schema found for the given oem_type, package_name, and version_code",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apps_management_Error_404_Not_Found"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apps_management_Error_500_Internal_Server_Error"
+                }
+              }
+            }
+          }
+        },
+        "x-esper-destructive": false,
+        "x-esper-pagination": "none",
+        "x-esper-verb": "get",
+        "x-esper-noun": "oem-config-schema"
+      }
+    },
+    "/v2/mdmserviceconfig": {
+      "get": {
+        "x-badges": [
+          {
+            "name": "Stable",
+            "color": "green"
+          }
+        ],
+        "summary": "Get MDM service configuration",
+        "description": "Unauthenticated discovery endpoint per Apple's [MDMServiceConfig](https://developer.apple.com/documentation/devicemanagement/providing-information-about-your-device-management-service) spec.\nReturns the URL a device uses to begin Automated Device Enrollment.\n",
+        "operationId": "getMDMServiceConfig",
+        "tags": [
+          "tenant_MDM Service Config"
+        ],
+        "responses": {
+          "200": {
+            "description": "MDM service configuration",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "dep_enrollment_url": {
+                      "type": "string"
+                    },
+                    "dep_anchor_certs_url": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/tenant_Error_400_Bad_Data"
+                }
+              }
+            }
+          }
+        },
+        "x-esper-destructive": false,
+        "x-esper-pagination": "none",
+        "x-esper-verb": "get",
+        "x-esper-noun": "mdm-service-config"
+      }
+    },
+    "/v2/mdmserviceconfig/anchor-certs": {
+      "get": {
+        "x-badges": [
+          {
+            "name": "Stable",
+            "color": "green"
+          }
+        ],
+        "summary": "Get DEP anchor certificates",
+        "description": "Unauthenticated endpoint referenced by dep_anchor_certs_url. We use a\ntrusted SSL certificate and don't support custom anchor certs yet, so\nthis always returns an empty body.\n",
+        "operationId": "getDepAnchorCerts",
+        "tags": [
+          "tenant_MDM Service Config"
+        ],
+        "responses": {
+          "200": {
+            "description": "Empty body (no custom anchor certificates configured)"
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/tenant_Error_400_Bad_Data"
+                }
+              }
+            }
+          }
+        },
+        "x-esper-destructive": false,
+        "x-esper-pagination": "none",
+        "x-esper-verb": "list",
+        "x-esper-noun": "dep-anchor-cert"
+      }
     }
   },
   "components": {
     "schemas": {
+      "tenant_Error_400_Bad_Data": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer",
+            "format": "int32",
+            "default": 400
+          },
+          "message": {
+            "type": "string"
+          },
+          "content": {
+            "type": "object"
+          }
+        },
+        "required": [
+          "code",
+          "message"
+        ]
+      },
+      "apps_management_OEMConfigSchema": {
+        "type": "object",
+        "description": "OEM config schema metadata and optional JSON schema content parsed from an OEM APK",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Unique identifier for this schema record"
+          },
+          "oem_type": {
+            "type": "string",
+            "enum": [
+              "ZEBRA",
+              "HONEYWELL",
+              "DATALOGIC",
+              "SAMSUNG",
+              "SUNMI"
+            ],
+            "description": "OEM manufacturer type"
+          },
+          "package_name": {
+            "type": "string",
+            "description": "OEM config package name",
+            "example": "com.zebra.oemconfig.common"
+          },
+          "version_name": {
+            "type": "string",
+            "description": "Human-readable version string from the APK manifest",
+            "example": "11.3.3.00"
+          },
+          "version_code": {
+            "type": "string",
+            "description": "Integer version code from the APK manifest",
+            "example": "10"
+          },
+          "schema_format": {
+            "type": "string",
+            "description": "Format of the parsed schema (e.g. MANAGED_CONFIGURATIONS)"
+          },
+          "parser_version": {
+            "type": "string",
+            "description": "Version of the internal parser that produced this schema"
+          },
+          "is_latest": {
+            "type": "boolean",
+            "description": "Whether this is the latest active schema for this oem_type + package_name"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "ACTIVE",
+              "INACTIVE"
+            ],
+            "description": "Status of this schema record"
+          },
+          "schema_metadata": {
+            "type": "object",
+            "description": "Additional metadata produced by the parser (parser-specific)"
+          },
+          "schema_json": {
+            "type": "object",
+            "description": "Full parsed schema JSON. Omitted when include_schema=false."
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Timestamp when this schema was first persisted"
+          }
+        }
+      },
+      "apps_management_ArtifactMutationResponse": {
+        "type": "object",
+        "description": "Identifies the artifact affected by an add/delete (identity-style, like\nthe app upload response) so the caller can refresh its view without a\nfull re-fetch.\n",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "The affected artifact's id."
+          },
+          "version_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "The app version the artifact belongs to."
+          },
+          "tenant_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "artifact_type": {
+            "type": "string",
+            "enum": [
+              "UWP_DEPENDENCY",
+              "UWP_CERTIFICATE"
+            ],
+            "description": "The artifact discriminator."
+          },
+          "file_name": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "The artifact's original filename."
+          },
+          "metadata": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/apps_management_AppVersionArtifactMetadata"
+              }
+            ]
+          }
+        }
+      },
+      "apps_management_AppVersionArtifactMetadata": {
+        "type": "object",
+        "description": "Type-specific attributes of an artifact. All fields are optional; only\nthose relevant to the artifact's type are populated.\n",
+        "properties": {
+          "package_family_name": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "The dependency package's own package family name (UWP_DEPENDENCY)."
+          },
+          "package_dependency_name": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "The <PackageDependency Name> declared by the main package manifest (UWP_DEPENDENCY)."
+          },
+          "min_version": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "The minimum required version declared by the main package manifest (UWP_DEPENDENCY)."
+          },
+          "version_name": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "The actual version of the uploaded dependency package (UWP_DEPENDENCY)."
+          },
+          "architecture": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "The dependency package architecture, e.g. x64, x86, arm64 (UWP_DEPENDENCY)."
+          },
+          "cert_thumbprint": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "SHA1 thumbprint of the signing certificate (UWP_CERTIFICATE)."
+          }
+        }
+      },
+      "apps_management_Error_500_Internal_Server_Error": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer",
+            "format": "int32",
+            "default": 500
+          },
+          "message": {
+            "type": "string"
+          },
+          "content": {
+            "type": "object"
+          }
+        },
+        "required": [
+          "code",
+          "message"
+        ]
+      },
+      "apps_management_Error_404_Not_Found": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer",
+            "format": "int32",
+            "default": 404
+          },
+          "message": {
+            "type": "string"
+          },
+          "content": {
+            "type": "object"
+          }
+        },
+        "required": [
+          "code",
+          "message"
+        ]
+      },
+      "apps_management_Error_401_Unauthorized": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer",
+            "format": "int32",
+            "default": 401
+          },
+          "message": {
+            "type": "string"
+          },
+          "content": {
+            "type": "object"
+          }
+        },
+        "required": [
+          "code",
+          "message"
+        ]
+      },
+      "apps_management_Error_400_Bad_Data": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer",
+            "format": "int32",
+            "default": 400
+          },
+          "message": {
+            "type": "string"
+          },
+          "content": {
+            "type": "object"
+          }
+        },
+        "required": [
+          "code",
+          "message"
+        ]
+      },
+      "apps_management_ItunesAppInfoV2": {
+        "type": "object",
+        "properties": {
+          "app_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "App ID in UUID format"
+          },
+          "apple_app_id": {
+            "type": "string",
+            "description": "App ID from Apple"
+          },
+          "app_version_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "current version of the app in UUID format"
+          },
+          "apple_app_version": {
+            "type": "string",
+            "description": "current version of the app"
+          },
+          "app_name": {
+            "type": "string",
+            "description": "name of the app"
+          },
+          "icon_url": {
+            "type": "string",
+            "description": "url of the app's icon"
+          },
+          "developer": {
+            "type": "string",
+            "description": "developer of the app"
+          },
+          "itunes_url": {
+            "type": "string",
+            "description": "URL for the app on the iTunes store"
+          },
+          "genres": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "genre of the app"
+            }
+          },
+          "device_families": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "devices the app is compatible with"
+            }
+          },
+          "bundle_id": {
+            "type": "string",
+            "description": "bundle ID of the app"
+          },
+          "price": {
+            "type": "number",
+            "description": "price of the app"
+          },
+          "app_size": {
+            "type": "integer",
+            "description": "size of the app"
+          },
+          "minimum_os_version": {
+            "type": "string",
+            "description": "minimum OS version required for the app"
+          },
+          "description": {
+            "type": "string",
+            "description": "description of the app"
+          },
+          "last_updated_date": {
+            "type": "string",
+            "description": "date the app was last updated"
+          },
+          "pricing_param": {
+            "type": "string",
+            "description": "pricing parameter"
+          }
+        }
+      },
+      "device_Error_500_Internal_Server_Error": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer",
+            "format": "int32",
+            "default": 500
+          },
+          "message": {
+            "type": "string"
+          },
+          "content": {
+            "type": "object"
+          }
+        },
+        "required": [
+          "code",
+          "message"
+        ]
+      },
+      "device_Error_401_Unauthorized": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer",
+            "format": "int32",
+            "default": 401
+          },
+          "message": {
+            "type": "string"
+          },
+          "content": {
+            "type": "object"
+          }
+        },
+        "required": [
+          "code",
+          "message"
+        ]
+      },
+      "device_Error_400_Bad_Data": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer",
+            "format": "int32",
+            "default": 400
+          },
+          "message": {
+            "type": "string"
+          },
+          "content": {
+            "type": "object"
+          }
+        },
+        "required": [
+          "code",
+          "message"
+        ]
+      },
+      "blueprints_BackgroundScriptDetailRead": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/blueprints_BackgroundScriptRead"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "script": {
+                "type": "string",
+                "description": "The script content fetched from S3"
+              }
+            },
+            "required": [
+              "script"
+            ]
+          }
+        ]
+      },
+      "blueprints_BackgroundScriptRead": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Unique identifier for the background script"
+          },
+          "name": {
+            "type": "string",
+            "description": "Name of the background script"
+          },
+          "interpreter": {
+            "type": "string",
+            "description": "Interpreter used to run the script"
+          },
+          "always_run": {
+            "type": "boolean",
+            "description": "Whether the script runs continuously"
+          },
+          "frequency_in_mins": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "description": "Interval in minutes between script executions"
+          },
+          "timeout_in_mins": {
+            "type": "integer",
+            "description": "Maximum runtime in minutes before the script is terminated."
+          },
+          "description": {
+            "type": "string",
+            "description": "Description of the background script. Empty string if not set."
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When the background script was created"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When the background script was last updated"
+          },
+          "created_by": {
+            "type": "integer",
+            "description": "User ID who created the background script"
+          },
+          "updated_by": {
+            "type": "integer",
+            "description": "User ID who last updated the background script"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "interpreter",
+          "always_run",
+          "timeout_in_mins",
+          "created_at",
+          "updated_at",
+          "created_by",
+          "updated_by"
+        ]
+      },
+      "blueprints_BackgroundScriptCreate": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 50,
+            "description": "Name of the background script"
+          },
+          "script": {
+            "type": "string",
+            "description": "The script content to be executed on devices"
+          },
+          "interpreter": {
+            "type": "string",
+            "maxLength": 50,
+            "default": "powershell",
+            "description": "Interpreter used to run the script. Currently only 'powershell' is supported."
+          },
+          "always_run": {
+            "type": "boolean",
+            "description": "Whether the script runs continuously. When true, frequency_in_mins must be null."
+          },
+          "frequency_in_mins": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "description": "Interval in minutes between script executions. Required when always_run is false, must be null when always_run is true."
+          },
+          "timeout_in_mins": {
+            "type": "integer",
+            "minimum": 1,
+            "default": 60,
+            "description": "Maximum runtime in minutes before the script is terminated. Must be > 0. Defaults to 60 if omitted."
+          },
+          "description": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 300,
+            "description": "Optional description for the background script. Max 300 characters."
+          }
+        },
+        "required": [
+          "name",
+          "script",
+          "always_run"
+        ]
+      },
       "GoogleServiceAccountDetails": {
         "required": [
           "google_enterprise_id",
@@ -7594,71 +9171,6 @@
           "callback_url"
         ]
       },
-      "SeamlessErrorResponse": {
-        "type": "object",
-        "properties": {
-          "code": {
-            "type": "integer"
-          },
-          "message": {
-            "type": "string"
-          },
-          "content": {
-            "type": "object"
-          }
-        },
-        "required": [
-          "code",
-          "message",
-          "content"
-        ]
-      },
-      "SeamlessSuccessResponse": {
-        "type": "object",
-        "properties": {
-          "code": {
-            "type": "integer"
-          },
-          "message": {
-            "type": "string"
-          },
-          "content": {
-            "type": "object",
-            "properties": {
-              "count": {
-                "type": "integer"
-              },
-              "prev": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
-              "next": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
-              "results": {
-                "type": "array",
-                "items": {
-                  "$ref": "#/components/schemas/SeamlessRequest"
-                }
-              }
-            },
-            "required": [
-              "count",
-              "prev",
-              "next",
-              "results"
-            ]
-          }
-        },
-        "required": [
-          "content"
-        ]
-      },
       "SeamlessRequestBody": {
         "type": "object",
         "properties": {
@@ -7722,6 +9234,71 @@
         "required": [
           "unique_ids",
           "unique_id_type"
+        ]
+      },
+      "SeamlessErrorResponse": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer"
+          },
+          "message": {
+            "type": "string"
+          },
+          "content": {
+            "type": "object"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "content"
+        ]
+      },
+      "SeamlessSuccessResponse": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer"
+          },
+          "message": {
+            "type": "string"
+          },
+          "content": {
+            "type": "object",
+            "properties": {
+              "count": {
+                "type": "integer"
+              },
+              "prev": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "next": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "results": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/SeamlessRequest"
+                }
+              }
+            },
+            "required": [
+              "count",
+              "prev",
+              "next",
+              "results"
+            ]
+          }
+        },
+        "required": [
+          "content"
         ]
       },
       "SeamlessRequest": {
@@ -11563,26 +13140,6 @@
           }
         }
       },
-      "BlueprintCreate": {
-        "type": "object",
-        "properties": {
-          "name": {
-            "type": "string",
-            "description": "Name of the blueprint"
-          },
-          "description": {
-            "type": "string",
-            "description": "Description of the blueprint"
-          },
-          "comments": {
-            "type": "string",
-            "description": "Comments on the blueprint"
-          },
-          "settings": {
-            "$ref": "#/components/schemas/settingsV2"
-          }
-        }
-      },
       "settingsV2": {
         "type": "object",
         "properties": {
@@ -14028,6 +15585,26 @@
           "launcher"
         ]
       },
+      "BlueprintCreate": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Name of the blueprint"
+          },
+          "description": {
+            "type": "string",
+            "description": "Description of the blueprint"
+          },
+          "comments": {
+            "type": "string",
+            "description": "Comments on the blueprint"
+          },
+          "settings": {
+            "$ref": "#/components/schemas/settingsV2"
+          }
+        }
+      },
       "StatusMetricsV2": {
         "type": "object",
         "required": [
@@ -14130,6 +15707,16 @@
     },
     "securitySchemes": {
       "apiKey": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "#### API KEY - Access Token\nAccess token for API is passed as authorization header in calls. You need to generate this from your Esper Console at `<domain>-api.esper.cloud` where foo is the sub-domain name you gave for your Esper Dev environment when you signed up for your Esper account. Please follow the instructions [in this Help article](https://help.esper.io/hc/en-us/articles/12656959508497) to generate an access token.\nOnce you have the access token, you need to send an authorization header as below\n\n```bash\n\n    curl -X GET \\\n      https://<domain>-api.esper.cloud/api/enterprise/<enterprise_id>/device/ \\\n      -H 'Authorization: Bearer <ACCESS_TOKEN>' \\\n      -H 'Content-Type: application/json' \\\n```\n\n> Please note the use of keyword **Bearer** before the token value.\n\n\nYou can read more about api key authentication [here](https://help.esper.io/hc/en-us/articles/12656959508497).\n"
+      },
+      "device_apiKey": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "#### API KEY - Access Token\nAccess token for API is passed as authorization header in calls. You need to generate this from your Esper Console at `<domain>-api.esper.cloud` where foo is the sub-domain name you gave for your Esper Dev environment when you signed up for your Esper account. Please follow the instructions [in this Help article](https://help.esper.io/hc/en-us/articles/12656959508497) to generate an access token.\nOnce you have the access token, you need to send an authorization header as below\n\n```bash\n\n    curl -X GET \\\n      https://<domain>-api.esper.cloud/api/enterprise/<enterprise_id>/device/ \\\n      -H 'Authorization: Bearer <ACCESS_TOKEN>' \\\n      -H 'Content-Type: application/json' \\\n```\n\n> Please note the use of keyword **Bearer** before the token value.\n\n\nYou can read more about api key authentication [here](https://help.esper.io/hc/en-us/articles/12656959508497).\n"
+      },
+      "apps_management_apiKey": {
         "type": "http",
         "scheme": "bearer",
         "description": "#### API KEY - Access Token\nAccess token for API is passed as authorization header in calls. You need to generate this from your Esper Console at `<domain>-api.esper.cloud` where foo is the sub-domain name you gave for your Esper Dev environment when you signed up for your Esper account. Please follow the instructions [in this Help article](https://help.esper.io/hc/en-us/articles/12656959508497) to generate an access token.\nOnce you have the access token, you need to send an authorization header as below\n\n```bash\n\n    curl -X GET \\\n      https://<domain>-api.esper.cloud/api/enterprise/<enterprise_id>/device/ \\\n      -H 'Authorization: Bearer <ACCESS_TOKEN>' \\\n      -H 'Content-Type: application/json' \\\n```\n\n> Please note the use of keyword **Bearer** before the token value.\n\n\nYou can read more about api key authentication [here](https://help.esper.io/hc/en-us/articles/12656959508497).\n"

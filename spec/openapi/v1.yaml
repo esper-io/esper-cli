@@ -84,6 +84,14 @@
     {
       "name": "0_Device Telemetry",
       "x-displayName": "Device Telemetry"
+    },
+    {
+      "name": "geofence_Geofences",
+      "x-displayName": "Geofences"
+    },
+    {
+      "name": "geofence_Device State",
+      "x-displayName": "Device State"
     }
   ],
   "paths": {
@@ -1675,12 +1683,28 @@
                   ],
                   "type": "object",
                   "properties": {
-                    "total": { "type": "integer" },
-                    "next": { "type": ["string", "null"], "format": "url" },
-                    "previous": { "type": ["string", "null"], "format": "url" },
+                    "total": {
+                      "type": "integer"
+                    },
+                    "next": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "format": "url"
+                    },
+                    "previous": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "format": "url"
+                    },
                     "results": {
                       "type": "array",
-                      "items": { "$ref": "#/components/schemas/AlarmHistory" }
+                      "items": {
+                        "$ref": "#/components/schemas/AlarmHistory"
+                      }
                     }
                   }
                 }
@@ -5518,10 +5542,1164 @@
         "x-esper-verb": "delete",
         "x-esper-noun": "directory-record"
       }
+    },
+    "/geofence/v1/geofences": {
+      "post": {
+        "summary": "Create a new geofence",
+        "description": "Creates a new geofence with the specified geometry and actions",
+        "operationId": "geofence_createGeofence",
+        "tags": [
+          "geofence_Geofences"
+        ],
+        "parameters": [],
+        "security": [
+          {
+            "geofence_bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/geofence_GeofenceRequest"
+              },
+              "examples": {
+                "polygonExample": {
+                  "summary": "Polygon Geofence",
+                  "value": {
+                    "name": "Warehouse Perimeter",
+                    "description": "A polygon-shaped geofence",
+                    "actions": [
+                      "lockdown"
+                    ],
+                    "geometry": {
+                      "type": "polygon",
+                      "coordinates": [
+                        {
+                          "latitude": 41.8902,
+                          "longitude": 12.4924
+                        },
+                        {
+                          "latitude": 41.8903,
+                          "longitude": 12.4925
+                        },
+                        {
+                          "latitude": 41.8904,
+                          "longitude": 12.4926
+                        }
+                      ]
+                    }
+                  }
+                },
+                "circleExample": {
+                  "summary": "Circular Geofence",
+                  "value": {
+                    "name": "Restricted Area",
+                    "description": "A circle-shaped geofence",
+                    "actions": [
+                      "beep",
+                      "lockdown"
+                    ],
+                    "geometry": {
+                      "type": "circle",
+                      "coordinates": [
+                        {
+                          "latitude": 41.8902,
+                          "longitude": 12.4924
+                        }
+                      ],
+                      "radius": 100
+                    }
+                  }
+                },
+                "noActionsExample": {
+                  "summary": "Geofence with No Actions",
+                  "value": {
+                    "name": "Monitoring Zone",
+                    "description": "A geofence for monitoring only",
+                    "actions": [],
+                    "geometry": {
+                      "type": "circle",
+                      "coordinates": [
+                        {
+                          "latitude": 41.8902,
+                          "longitude": 12.4924
+                        }
+                      ],
+                      "radius": 50
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Geofence created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "content": {
+                      "$ref": "#/components/schemas/geofence_GeofenceResponse"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid input",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/geofence_ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/geofence_ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/geofence_ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "x-esper-destructive": false,
+        "x-esper-pagination": "none",
+        "x-esper-docs-slugs": [
+          "geofence_geofences"
+        ],
+        "x-esper-verb": "create",
+        "x-esper-noun": "geofence"
+      },
+      "get": {
+        "summary": "List all geofences",
+        "description": "Retrieves a paginated list of geofences for the tenant. Supports filtering by geofence IDs, exact name match, or searching by name. Optionally include device summary statistics and/or total count.",
+        "operationId": "geofence_listGeofences",
+        "tags": [
+          "geofence_Geofences"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/geofence_OffsetParam"
+          },
+          {
+            "$ref": "#/components/parameters/geofence_LimitParam"
+          },
+          {
+            "$ref": "#/components/parameters/geofence_IdsParam"
+          },
+          {
+            "$ref": "#/components/parameters/geofence_IncludeSummaryParam"
+          },
+          {
+            "$ref": "#/components/parameters/geofence_IncludeCountParam"
+          },
+          {
+            "$ref": "#/components/parameters/geofence_SearchParam"
+          },
+          {
+            "$ref": "#/components/parameters/geofence_NameParam"
+          }
+        ],
+        "security": [
+          {
+            "geofence_bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A list of geofences",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "content": {
+                      "type": "object",
+                      "properties": {
+                        "next": {
+                          "type": [
+                            "string",
+                            "null"
+                          ],
+                          "example": "/v1/geofences?offset=10&limit=10"
+                        },
+                        "previous": {
+                          "type": [
+                            "string",
+                            "null"
+                          ],
+                          "example": null
+                        },
+                        "count": {
+                          "type": [
+                            "integer",
+                            "null"
+                          ],
+                          "description": "Total count of geofences matching the filters. Only included when include_count=true.",
+                          "example": 42
+                        },
+                        "results": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/geofence_GeofenceListResponse"
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "examples": {
+                  "example": {
+                    "value": {
+                      "content": {
+                        "next": "/v1/geofences?offset=10&limit=10",
+                        "previous": null,
+                        "results": [
+                          {
+                            "id": "11111111-1111-1111-1111-111111111111",
+                            "name": "Sample Polygon Geofence",
+                            "description": "A polygon shaped zone",
+                            "actions": [
+                              "lockdown"
+                            ],
+                            "geometry": {
+                              "type": "polygon",
+                              "coordinates": [
+                                {
+                                  "latitude": 41.8902,
+                                  "longitude": 12.4924
+                                },
+                                {
+                                  "latitude": 41.8903,
+                                  "longitude": 12.4925
+                                },
+                                {
+                                  "latitude": 41.8904,
+                                  "longitude": 12.4926
+                                }
+                              ]
+                            },
+                            "created_at": "2024-06-24T14:00:00Z",
+                            "updated_at": "2024-06-24T15:00:00Z"
+                          },
+                          {
+                            "id": "22222222-2222-2222-2222-222222222222",
+                            "name": "Sample Circular Geofence",
+                            "description": "A circle shaped zone",
+                            "actions": [
+                              "beep"
+                            ],
+                            "geometry": {
+                              "type": "circle",
+                              "coordinates": [
+                                {
+                                  "latitude": 41.8902,
+                                  "longitude": 12.4924
+                                }
+                              ],
+                              "radius": 100
+                            },
+                            "created_at": "2024-06-25T10:00:00Z",
+                            "updated_at": "2024-06-25T11:00:00Z"
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  "withSummary": {
+                    "summary": "With device summary",
+                    "value": {
+                      "content": {
+                        "next": null,
+                        "previous": null,
+                        "count": 1,
+                        "results": [
+                          {
+                            "id": "11111111-1111-1111-1111-111111111111",
+                            "name": "Sample Geofence",
+                            "description": "A geofence with device tracking",
+                            "actions": [
+                              "lockdown"
+                            ],
+                            "geometry": {
+                              "type": "polygon",
+                              "coordinates": [
+                                {
+                                  "latitude": 41.8902,
+                                  "longitude": 12.4924
+                                },
+                                {
+                                  "latitude": 41.8903,
+                                  "longitude": 12.4925
+                                },
+                                {
+                                  "latitude": 41.8904,
+                                  "longitude": 12.4926
+                                }
+                              ]
+                            },
+                            "created_at": "2024-06-24T14:00:00Z",
+                            "updated_at": "2024-06-24T15:00:00Z",
+                            "device_summary": {
+                              "total_devices": 50,
+                              "inside_count": 30,
+                              "outside_count": 18,
+                              "unknown_count": 2
+                            },
+                            "blueprints": [
+                              {
+                                "blueprint_id": "550e8400-e29b-41d4-a716-446655440000",
+                                "blueprint_version_number": 1,
+                                "device_count": 25
+                              },
+                              {
+                                "blueprint_id": "550e8400-e29b-41d4-a716-446655440001",
+                                "blueprint_version_number": 2,
+                                "device_count": 15
+                              },
+                              {
+                                "blueprint_id": "550e8400-e29b-41d4-a716-446655440002",
+                                "blueprint_version_number": 1,
+                                "device_count": 10
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid input",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/geofence_ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/geofence_ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/geofence_ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "x-esper-destructive": false,
+        "x-esper-pagination": "none",
+        "x-esper-docs-slugs": [
+          "geofence_geofences"
+        ],
+        "x-esper-verb": "list",
+        "x-esper-noun": "geofence"
+      }
+    },
+    "/geofence/v1/geofences/{geofence_id}/device-summary": {
+      "get": {
+        "summary": "Get device summary for a geofence",
+        "description": "Returns aggregate statistics about devices in relation to a specific geofence (total devices, inside count, outside count)",
+        "operationId": "geofence_getDeviceSummary",
+        "tags": [
+          "geofence_Device State"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/geofence_GeofenceIdParam"
+          }
+        ],
+        "security": [
+          {
+            "geofence_bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Device summary retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "content": {
+                      "$ref": "#/components/schemas/geofence_DeviceSummaryResponse"
+                    }
+                  }
+                },
+                "examples": {
+                  "example": {
+                    "value": {
+                      "content": {
+                        "total_devices": 100,
+                        "inside_count": 60,
+                        "outside_count": 35,
+                        "unknown_count": 5
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid geofence ID or missing tenant ID",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/geofence_ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/geofence_ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/geofence_ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "x-esper-destructive": false,
+        "x-esper-pagination": "none",
+        "x-esper-verb": "get",
+        "x-esper-noun": "geofence-device-summary"
+      }
+    },
+    "/geofence/v1/geofences/{geofence_id}/blueprints": {
+      "get": {
+        "summary": "Get blueprint usage statistics for a geofence",
+        "description": "Returns paginated statistics about blueprint usage within a specific geofence (which blueprints are used and device counts)",
+        "operationId": "geofence_getBlueprintUsage",
+        "tags": [
+          "geofence_Device State"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/geofence_GeofenceIdParam"
+          },
+          {
+            "$ref": "#/components/parameters/geofence_OffsetParam"
+          },
+          {
+            "$ref": "#/components/parameters/geofence_LimitParam"
+          }
+        ],
+        "security": [
+          {
+            "geofence_bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Blueprint usage statistics retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "content": {
+                      "type": "object",
+                      "properties": {
+                        "next": {
+                          "type": [
+                            "string",
+                            "null"
+                          ],
+                          "example": "/v1/geofences/f5316a75-f186-4769-970e-28d6a1a0e110/blueprints?offset=10&limit=10"
+                        },
+                        "previous": {
+                          "type": [
+                            "string",
+                            "null"
+                          ],
+                          "example": null
+                        },
+                        "results": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/geofence_BlueprintUsageItem"
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "examples": {
+                  "example": {
+                    "value": {
+                      "content": {
+                        "next": "/v1/geofences/f5316a75-f186-4769-970e-28d6a1a0e110/blueprints?offset=10&limit=10",
+                        "previous": null,
+                        "results": [
+                          {
+                            "blueprint_id": "550e8400-e29b-41d4-a716-446655440000",
+                            "blueprint_version_number": 1,
+                            "device_count": 25
+                          },
+                          {
+                            "blueprint_id": "550e8400-e29b-41d4-a716-446655440002",
+                            "blueprint_version_number": 2,
+                            "device_count": 15
+                          }
+                        ]
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid geofence ID, missing tenant ID, or missing pagination parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/geofence_ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/geofence_ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/geofence_ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "x-esper-destructive": false,
+        "x-esper-pagination": "none",
+        "x-esper-verb": "list",
+        "x-esper-noun": "geofence-blueprint",
+        "x-esper-scope-parent": "geofence"
+      }
+    },
+    "/geofence/v1/geofences/{geofence_id}/devices": {
+      "get": {
+        "summary": "Get devices for a geofence",
+        "description": "Returns a paginated list of devices and their states within a specific geofence. Supports filtering by inside/outside status and blueprint version ID.",
+        "operationId": "geofence_getDevices",
+        "tags": [
+          "geofence_Device State"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/geofence_GeofenceIdParam"
+          },
+          {
+            "$ref": "#/components/parameters/geofence_OffsetParam"
+          },
+          {
+            "$ref": "#/components/parameters/geofence_LimitParam"
+          },
+          {
+            "$ref": "#/components/parameters/geofence_InsideParam"
+          },
+          {
+            "$ref": "#/components/parameters/geofence_BlueprintIdParam"
+          },
+          {
+            "$ref": "#/components/parameters/geofence_BlueprintVersionNumberParam"
+          }
+        ],
+        "security": [
+          {
+            "geofence_bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Device list retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "content": {
+                      "type": "object",
+                      "properties": {
+                        "next": {
+                          "type": [
+                            "string",
+                            "null"
+                          ],
+                          "example": "/v1/geofences/f5316a75-f186-4769-970e-28d6a1a0e110/devices?offset=10&limit=10"
+                        },
+                        "previous": {
+                          "type": [
+                            "string",
+                            "null"
+                          ],
+                          "example": null
+                        },
+                        "results": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/geofence_DeviceListingItem"
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "examples": {
+                  "example": {
+                    "value": {
+                      "content": {
+                        "next": "/v1/geofences/f5316a75-f186-4769-970e-28d6a1a0e110/devices?offset=10&limit=10",
+                        "previous": null,
+                        "results": [
+                          {
+                            "device_id": "660e8400-e29b-41d4-a716-446655440000",
+                            "blueprint_id": "550e8400-e29b-41d4-a716-446655440000",
+                            "blueprint_version_number": 1,
+                            "inside": true,
+                            "state_changed_at": "2025-07-24T09:00:00Z"
+                          },
+                          {
+                            "device_id": "660e8400-e29b-41d4-a716-446655440001",
+                            "blueprint_id": "550e8400-e29b-41d4-a716-446655440002",
+                            "blueprint_version_number": 2,
+                            "inside": false,
+                            "state_changed_at": "2025-07-24T08:30:00Z"
+                          }
+                        ]
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid geofence ID, missing tenant ID, invalid query parameters, or missing pagination parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/geofence_ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/geofence_ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/geofence_ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "x-esper-destructive": false,
+        "x-esper-pagination": "none",
+        "x-esper-verb": "list",
+        "x-esper-noun": "geofence-device",
+        "x-esper-scope-parent": "geofence"
+      }
     }
   },
   "components": {
     "schemas": {
+      "geofence_DeviceListingItem": {
+        "type": "object",
+        "description": "Information about a device and its state within a geofence",
+        "properties": {
+          "device_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "UUID of the device",
+            "example": "660e8400-e29b-41d4-a716-446655440000"
+          },
+          "blueprint_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "UUID of the blueprint used by this device",
+            "example": "550e8400-e29b-41d4-a716-446655440000"
+          },
+          "blueprint_version_number": {
+            "type": "integer",
+            "description": "Blueprint version number used by this device",
+            "example": 1
+          },
+          "inside": {
+            "type": [
+              "boolean",
+              "null"
+            ],
+            "description": "Whether the device is currently inside the geofence. Null means unknown state.",
+            "example": true
+          },
+          "state_changed_at": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time",
+            "description": "When the device's geofence state was last changed. Null means unknown time.",
+            "example": "2025-07-24T09:00:00Z"
+          },
+          "latitude": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "format": "double",
+            "description": "Last known latitude for the device, rounded to 4 decimal places.",
+            "example": 37.7749
+          },
+          "longitude": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "format": "double",
+            "description": "Last known longitude for the device, rounded to 4 decimal places.",
+            "example": -122.4194
+          },
+          "location_updated_at": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time",
+            "description": "Timestamp when the device location was last updated.",
+            "example": "2025-07-24T09:05:00Z"
+          }
+        },
+        "required": [
+          "device_id",
+          "blueprint_id",
+          "blueprint_version_number"
+        ]
+      },
+      "geofence_BlueprintUsageItem": {
+        "type": "object",
+        "description": "Statistics about blueprint usage within a geofence",
+        "properties": {
+          "blueprint_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "UUID of the blueprint",
+            "example": "550e8400-e29b-41d4-a716-446655440000"
+          },
+          "blueprint_version_number": {
+            "type": "integer",
+            "description": "Blueprint version number",
+            "example": 1
+          },
+          "device_count": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Number of devices using this blueprint revision",
+            "example": 25
+          }
+        },
+        "required": [
+          "blueprint_id",
+          "blueprint_version_number",
+          "device_count"
+        ]
+      },
+      "geofence_DeviceSummaryResponse": {
+        "type": "object",
+        "description": "Summary statistics of devices in relation to a geofence",
+        "properties": {
+          "total_devices": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Total number of devices associated with the geofence",
+            "example": 100
+          },
+          "inside_count": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Number of devices currently inside the geofence",
+            "example": 60
+          },
+          "outside_count": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Number of devices currently outside the geofence",
+            "example": 35
+          },
+          "unknown_count": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Number of devices with unknown state (neither inside nor outside)",
+            "example": 5
+          }
+        },
+        "required": [
+          "total_devices",
+          "inside_count",
+          "outside_count",
+          "unknown_count"
+        ]
+      },
+      "geofence_GeofenceListResponse": {
+        "type": "object",
+        "description": "Geofence response for list operations. Extends GeofenceResponse with optional summary fields when includeSummary=true.",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/geofence_GeofenceResponse"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "device_summary": {
+                "$ref": "#/components/schemas/geofence_DeviceSummaryResponse",
+                "description": "Device statistics for this geofence. Only included when include_summary=true."
+              },
+              "blueprints": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/geofence_BlueprintUsageItem"
+                },
+                "description": "Blueprint usage statistics for this geofence (top 5). Only included when include_summary=true."
+              }
+            }
+          }
+        ]
+      },
+      "geofence_GeofenceResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "example": "11111111-1111-1111-1111-111111111111",
+            "description": "Unique identifier for the geofence"
+          },
+          "name": {
+            "type": "string",
+            "example": "Warehouse Perimeter",
+            "description": "Name of the geofence"
+          },
+          "description": {
+            "type": "string",
+            "example": "A polygon-shaped geofence",
+            "description": "Description of the geofence"
+          },
+          "actions": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "lockdown",
+                "beep"
+              ]
+            },
+            "minItems": 0,
+            "maxItems": 2,
+            "example": [
+              "lockdown",
+              "beep"
+            ],
+            "description": "Actions configured for this geofence. Empty array means no actions."
+          },
+          "geometry": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/geofence_PolygonGeometry"
+              },
+              {
+                "$ref": "#/components/schemas/geofence_CircleGeometry"
+              }
+            ],
+            "discriminator": {
+              "propertyName": "type"
+            }
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2024-06-24T14:00:00Z",
+            "description": "When the geofence was created"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2024-06-24T15:00:00Z",
+            "description": "When the geofence was last updated"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "actions",
+          "geometry",
+          "created_at",
+          "updated_at"
+        ]
+      },
+      "geofence_CircleGeometry": {
+        "type": "object",
+        "description": "Circle geometry with center coordinates and radius",
+        "required": [
+          "type",
+          "coordinates",
+          "radius"
+        ],
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "circle"
+            ],
+            "example": "circle"
+          },
+          "coordinates": {
+            "type": "array",
+            "description": "Array with single coordinate object containing latitude and longitude",
+            "minItems": 1,
+            "maxItems": 1,
+            "items": {
+              "type": "object",
+              "description": "Coordinate object with latitude and longitude",
+              "required": [
+                "latitude",
+                "longitude"
+              ],
+              "properties": {
+                "latitude": {
+                  "type": "number",
+                  "minimum": -90,
+                  "maximum": 90,
+                  "description": "Latitude coordinate",
+                  "example": 41.8902
+                },
+                "longitude": {
+                  "type": "number",
+                  "minimum": -180,
+                  "maximum": 180,
+                  "description": "Longitude coordinate",
+                  "example": 12.4924
+                }
+              }
+            },
+            "example": [
+              {
+                "latitude": 41.8902,
+                "longitude": 12.4924
+              }
+            ]
+          },
+          "radius": {
+            "type": "number",
+            "minimum": 0.1,
+            "description": "Radius in meters",
+            "example": 100
+          }
+        }
+      },
+      "geofence_PolygonGeometry": {
+        "type": "object",
+        "description": "Polygon geometry with coordinates as array of coordinate objects",
+        "required": [
+          "type",
+          "coordinates"
+        ],
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "polygon"
+            ],
+            "example": "polygon"
+          },
+          "coordinates": {
+            "type": "array",
+            "description": "Array of coordinate objects, each containing latitude and longitude",
+            "items": {
+              "type": "object",
+              "description": "Coordinate object with latitude and longitude",
+              "required": [
+                "latitude",
+                "longitude"
+              ],
+              "properties": {
+                "latitude": {
+                  "type": "number",
+                  "minimum": -90,
+                  "maximum": 90,
+                  "description": "Latitude coordinate",
+                  "example": 41.8902
+                },
+                "longitude": {
+                  "type": "number",
+                  "minimum": -180,
+                  "maximum": 180,
+                  "description": "Longitude coordinate",
+                  "example": 12.4924
+                }
+              }
+            },
+            "minItems": 3,
+            "maxItems": 100,
+            "example": [
+              {
+                "latitude": 41.8902,
+                "longitude": 12.4924
+              },
+              {
+                "latitude": 41.8903,
+                "longitude": 12.4925
+              },
+              {
+                "latitude": 41.8904,
+                "longitude": 12.4926
+              }
+            ]
+          }
+        }
+      },
+      "geofence_ErrorResponse": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string",
+            "description": "Error message",
+            "example": "Invalid input"
+          },
+          "content": {
+            "type": "object",
+            "description": "Additional error details",
+            "example": {}
+          }
+        },
+        "required": [
+          "message",
+          "content"
+        ]
+      },
+      "geofence_GeofenceRequest": {
+        "type": "object",
+        "description": "Request payload for creating a geofence. Specify either a Polygon or Circular geofence.",
+        "required": [
+          "name",
+          "geometry"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 255,
+            "example": "Geofence 1",
+            "description": "Name of the geofence"
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 1000,
+            "example": "A geofence that is either polygonal or circular.",
+            "description": "Optional description of the geofence"
+          },
+          "actions": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "lockdown",
+                "beep"
+              ]
+            },
+            "minItems": 0,
+            "maxItems": 2,
+            "example": [
+              "lockdown",
+              "beep"
+            ],
+            "description": "Actions to trigger when geofence conditions are met. Empty array means no actions."
+          },
+          "geometry": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/geofence_PolygonGeometry"
+              },
+              {
+                "$ref": "#/components/schemas/geofence_CircleGeometry"
+              }
+            ],
+            "discriminator": {
+              "propertyName": "type"
+            }
+          }
+        }
+      },
       "DirectoryRecordUpdate": {
         "title": "DirectoryRecordUpdate",
         "required": [
@@ -6816,7 +7994,11 @@
           },
           "conditions": {
             "type": "object",
-            "required": ["value", "unit", "comparator"],
+            "required": [
+              "value",
+              "unit",
+              "comparator"
+            ],
             "properties": {
               "value": {
                 "type": "number",
@@ -6871,6 +8053,104 @@
           }
         }
       },
+      "AlarmRuleCreateReplaceV1": {
+        "type": "object",
+        "required": [
+          "enterprise",
+          "name",
+          "metric",
+          "conditions",
+          "realert_interval"
+        ],
+        "properties": {
+          "enterprise": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "devices": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "groups": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "metric": {
+            "type": "string"
+          },
+          "conditions": {
+            "type": "object",
+            "required": [
+              "value",
+              "unit",
+              "comparator"
+            ],
+            "properties": {
+              "value": {
+                "type": "number"
+              },
+              "unit": {
+                "type": "string",
+                "enum": [
+                  "Percent",
+                  "Count"
+                ]
+              },
+              "comparator": {
+                "type": "string",
+                "enum": [
+                  "GreaterThanThreshold",
+                  "GreaterThanOrEqualToThreshold",
+                  "LessThanThreshold",
+                  "LessThanOrEqualToThreshold",
+                  "Frequency"
+                ]
+              },
+              "toggle_state": {
+                "type": "boolean"
+              }
+            }
+          },
+          "action_emails": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "email"
+            }
+          },
+          "actions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "alert_channels": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "is_active": {
+            "type": "boolean"
+          },
+          "realert_interval": {
+            "type": "integer"
+          },
+          "repeat_times": {
+            "type": "integer"
+          }
+        }
+      },
       "AlarmRule": {
         "type": "object",
         "properties": {
@@ -6887,20 +8167,20 @@
             "items": {
               "type": "object",
               "properties": {
-              "id": {
-                "type": "string",
-                "format": "uuid"
-              },
-              "device_name": {
-                "type": "string"
-              },
-              "alias_name": {
-                "type": [
-                  "string",
-                  "null"
-                ]
+                "id": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "device_name": {
+                  "type": "string"
+                },
+                "alias_name": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                }
               }
-            }
             }
           },
           "groups": {
@@ -6908,9 +8188,18 @@
             "items": {
               "type": "object",
               "properties": {
-                "id": { "type": "string" },
-                "name": { "type": "string" },
-                "path": { "type": ["string", "null"] }
+                "id": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "path": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                }
               }
             }
           },
@@ -6959,8 +8248,12 @@
             "items": {
               "type": "object",
               "properties": {
-                "id": { "type": "string" },
-                "name": { "type": "string" }
+                "id": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                }
               }
             }
           },
@@ -6997,7 +8290,10 @@
             "properties": {
               "to_address": {
                 "type": "array",
-                "items": { "type": "string", "format": "email" }
+                "items": {
+                  "type": "string",
+                  "format": "email"
+                }
               }
             }
           },
@@ -7014,6 +8310,39 @@
           }
         }
       },
+      "AlertChannelCreateReplaceV1": {
+        "type": "object",
+        "required": [
+          "enterprise",
+          "name",
+          "type",
+          "properties"
+        ],
+        "properties": {
+          "enterprise": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          },
+          "properties": {
+            "type": "object",
+            "properties": {
+              "to_address": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "format": "email"
+                }
+              }
+            }
+          }
+        }
+      },
       "AlertChannelsV1": {
         "type": "object",
         "properties": {
@@ -7025,7 +8354,10 @@
             "properties": {
               "to_address": {
                 "type": "array",
-                "items": { "type": "string", "format": "email" }
+                "items": {
+                  "type": "string",
+                  "format": "email"
+                }
               }
             }
           },
@@ -7053,58 +8385,18 @@
             "items": {
               "type": "object",
               "properties": {
-                "id": { "type": "string" },
-                "alarm_name": { "type": "string" },
-                "type": { "type": "string" }
+                "id": {
+                  "type": "string"
+                },
+                "alarm_name": {
+                  "type": "string"
+                },
+                "type": {
+                  "type": "string"
+                }
               }
             }
           }
-        }
-      },
-      "AlertChannelCreateReplaceV1": {
-        "type": "object",
-        "required": ["enterprise", "name", "type", "properties"],
-        "properties": {
-          "enterprise": { "type": "string", "format": "uuid" },
-          "name": { "type": "string" },
-          "type": { "type": "string" },
-          "properties": {
-            "type": "object",
-            "properties": {
-              "to_address": { "type": "array", "items": { "type": "string", "format": "email" } }
-            }
-          }
-        }
-      },
-      "AlarmRuleCreateReplaceV1": {
-        "type": "object",
-        "required": ["enterprise", "name", "metric", "conditions", "realert_interval"],
-        "properties": {
-          "enterprise": { "type": "string", "format": "uuid" },
-          "devices": { "type": "array", "items": { "type": "string" } },
-          "groups": { "type": "array", "items": { "type": "string" } },
-          "name": { "type": "string" },
-          "description": { "type": "string" },
-          "metric": { "type": "string" },
-          "conditions": {
-            "type": "object",
-            "required": ["value", "unit", "comparator"],
-            "properties": {
-              "value": { "type": "number" },
-              "unit": { "type": "string", "enum": ["Percent", "Count"] },
-              "comparator": {
-                "type": "string",
-                "enum": ["GreaterThanThreshold", "GreaterThanOrEqualToThreshold", "LessThanThreshold", "LessThanOrEqualToThreshold", "Frequency"]
-              },
-              "toggle_state": { "type": "boolean" }
-            }
-          },
-          "action_emails": { "type": "array", "items": { "type": "string", "format": "email" } },
-          "actions": { "type": "array", "items": { "type": "string" } },
-          "alert_channels": { "type": "array", "items": { "type": "string" } },
-          "is_active": { "type": "boolean" },
-          "realert_interval": { "type": "integer" },
-          "repeat_times": { "type": "integer" }
         }
       },
       "EventFeed": {
@@ -7168,6 +8460,124 @@
       }
     },
     "parameters": {
+      "geofence_BlueprintVersionNumberParam": {
+        "name": "blueprint_version_number",
+        "in": "query",
+        "required": false,
+        "schema": {
+          "type": "integer"
+        },
+        "description": "Filter devices by blueprint version number",
+        "example": 1
+      },
+      "geofence_BlueprintIdParam": {
+        "name": "blueprint_id",
+        "in": "query",
+        "required": false,
+        "schema": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "description": "Filter devices by blueprint ID",
+        "example": "550e8400-e29b-41d4-a716-446655440000"
+      },
+      "geofence_InsideParam": {
+        "name": "inside",
+        "in": "query",
+        "required": false,
+        "schema": {
+          "type": "boolean"
+        },
+        "description": "Filter devices by whether they are inside (true) or outside (false) the geofence",
+        "example": true
+      },
+      "geofence_GeofenceIdParam": {
+        "name": "geofence_id",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "description": "UUID of the geofence",
+        "example": "f5316a75-f186-4769-970e-28d6a1a0e110"
+      },
+      "geofence_NameParam": {
+        "name": "name",
+        "in": "query",
+        "required": false,
+        "schema": {
+          "type": "string"
+        },
+        "description": "Exact geofence name to filter by (case-sensitive exact match).",
+        "example": "Test Geofence 1"
+      },
+      "geofence_SearchParam": {
+        "name": "search",
+        "in": "query",
+        "required": false,
+        "schema": {
+          "type": "string"
+        },
+        "description": "Search string to filter geofences by name (case-insensitive partial match).",
+        "example": "warehouse"
+      },
+      "geofence_IncludeCountParam": {
+        "name": "include_count",
+        "in": "query",
+        "required": false,
+        "schema": {
+          "type": "boolean",
+          "default": false
+        },
+        "description": "Whether to include the total count of geofences in the response. When true, adds a count field to the response.",
+        "example": true
+      },
+      "geofence_IncludeSummaryParam": {
+        "name": "include_summary",
+        "in": "query",
+        "required": false,
+        "schema": {
+          "type": "boolean",
+          "default": false
+        },
+        "description": "Whether to include device summary and blueprint usage statistics with each geofence. When true, adds device_summary and blueprints fields to each result.",
+        "example": true
+      },
+      "geofence_IdsParam": {
+        "name": "ids",
+        "in": "query",
+        "required": false,
+        "schema": {
+          "type": "string",
+          "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}(,[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})*$"
+        },
+        "description": "Comma-separated list of geofence UUIDs to filter by. When provided, only geofences with matching IDs will be returned.",
+        "example": "11111111-1111-1111-1111-111111111111,22222222-2222-2222-2222-222222222222"
+      },
+      "geofence_LimitParam": {
+        "name": "limit",
+        "in": "query",
+        "required": false,
+        "schema": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100,
+          "default": 10
+        },
+        "description": "Maximum number of items to return"
+      },
+      "geofence_OffsetParam": {
+        "name": "offset",
+        "in": "query",
+        "required": false,
+        "schema": {
+          "type": "integer",
+          "minimum": 0,
+          "default": 0
+        },
+        "description": "Number of items to skip before starting to collect the result set"
+      },
       "DirectoryRecordID": {
         "name": "directory_record_id",
         "description": "Directory record ID",
@@ -7194,6 +8604,11 @@
         "type": "http",
         "scheme": "bearer",
         "description": "#### API KEY - Access Token\nAccess token for API is passed as authorization header in calls. You need to generate this from your Esper Console at `<domain>-api.esper.cloud` where foo is the sub-domain name you gave for your Esper Dev environment when you signed up for your Esper account. Please follow the instructions [in this Help article](https://help.esper.io/hc/en-us/articles/12656959508497) to generate an access token.\nOnce you have the access token, you need to send an authorization header as below\n\n```bash\n\n    curl -X GET \\\n      https://<domain>-api.esper.cloud/api/enterprise/<enterprise_id>/device/ \\\n      -H 'Authorization: Bearer <ACCESS_TOKEN>' \\\n      -H 'Content-Type: application/json' \\\n```\n\n> Please note the use of keyword **Bearer** before the token value.\n\n\nYou can read more about api key authentication [here](https://help.esper.io/hc/en-us/articles/12656959508497).\n"
+      },
+      "geofence_bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
       }
     }
   }

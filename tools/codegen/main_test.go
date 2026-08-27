@@ -128,3 +128,30 @@ func TestServiceFamily(t *testing.T) {
 		}
 	}
 }
+
+func TestExtractBodyIncludesNestedFieldsAndItemEnums(t *testing.T) {
+	schemas := map[string]schema{
+		"Filter": {Type: "object", Properties: map[string]schema{
+			"platform": {Type: "array", Items: &schema{Type: "string", Enum: []any{"Android", "Apple"}}},
+		}},
+	}
+	content := map[string]requestMedia{
+		"application/json": {
+			Schema: schema{
+				Type: "object",
+				Properties: map[string]schema{
+					"report_type": {Type: "string", Enum: []any{"device"}},
+					"filters":     {Ref: "#/components/schemas/Filter"},
+				},
+				Required: []string{"report_type"},
+			},
+		},
+	}
+	body := extractBody(content, true, nil, schemas)
+	if len(body.Fields) != 2 {
+		t.Fatalf("body fields = %#v", body.Fields)
+	}
+	if body.Fields[0].Path != "filters.platform" || len(body.Fields[0].Enum) != 2 || body.Fields[1].Path != "report_type" || !body.Fields[1].Required {
+		t.Fatalf("body fields = %#v", body.Fields)
+	}
+}

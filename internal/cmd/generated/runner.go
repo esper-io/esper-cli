@@ -28,6 +28,9 @@ type Operation struct {
 	Destructive      bool
 	ScopeParent      string
 	Summary          string
+	Description      string
+	Tags             []string
+	DocsSlugs        []string
 	OperationID      string
 	AliasOf          string
 	SuccessMedia     string
@@ -35,10 +38,10 @@ type Operation struct {
 	Body             *Body
 }
 type Parameter struct {
-	Name, In, Type  string
-	ScopeName       string
-	Required, Scope bool
-	Enum            []string
+	Name, In, Type, Description string
+	ScopeName                   string
+	Required, Scope             bool
+	Enum                        []string
 }
 type Body struct {
 	MediaType  string
@@ -46,16 +49,66 @@ type Body struct {
 	Empty      bool
 	BodyOnly   bool
 	Properties []Property
+	Fields     []BodyField
 	AutoFill   []AutoFill
 }
 type AutoFill struct{ Name, Parameter, Type, Format string }
 type Property struct {
-	Name, Type, Format string
-	Required, File     bool
-	Enum               []string
+	Name, Type, Format, Description string
+	Example                         any
+	Required, File                  bool
+	Enum                            []string
+}
+type BodyField struct {
+	Path, Type, Format, Description string
+	Example                         any
+	Required                        bool
+	Enum                            []string
 }
 
 var generatedOperations []Operation
+
+const usageTemplate = `Usage:{{if .Runnable}}
+  {{.UseLine}}{{end}}{{if .HasAvailableSubCommands}}
+  {{.CommandPath}} [command]{{end}}{{if gt (len .Aliases) 0}}
+
+Aliases:
+  {{.NameAndAliases}}{{end}}{{if .HasExample}}
+
+Examples:
+{{.Example}}{{end}}{{if .HasAvailableSubCommands}}{{$cmds := .Commands}}{{if eq (len .Groups) 0}}
+
+Available Commands:{{range $cmds}}{{if (or .IsAvailableCommand (eq .Name "help"))}}
+  {{rpad .Name .NamePadding }} {{.Short}}{{end}}{{end}}{{else}}{{range $group := .Groups}}
+
+{{.Title}}{{range $cmds}}{{if (and (eq .GroupID $group.ID) (or .IsAvailableCommand (eq .Name "help")))}}
+  {{rpad .Name .NamePadding }} {{.Short}}{{end}}{{end}}{{end}}{{if not .AllChildCommandsHaveGroup}}
+
+Additional Commands:{{range $cmds}}{{if (and (eq .GroupID "") (or .IsAvailableCommand (eq .Name "help")))}}
+  {{rpad .Name .NamePadding }} {{.Short}}{{end}}{{end}}{{end}}{{end}}{{end}}{{if .HasAvailableLocalFlags}}
+
+Flags:
+{{.LocalFlags.FlagUsages | trimTrailingWhitespaces}}{{end}}{{if .HasAvailableInheritedFlags}}
+
+Global Flags:
+{{.InheritedFlags.FlagUsages | trimTrailingWhitespaces}}{{end}}{{if .HasHelpSubCommands}}
+
+Additional help topics:{{range .Commands}}{{if .IsAdditionalHelpTopicCommand}}
+  {{rpad .CommandPath .CommandPathPadding}} {{.Short}}{{end}}{{end}}{{end}}{{if .HasAvailableSubCommands}}
+
+Use "{{.CommandPath}} [command] --help" for more information about a command.{{end}}
+`
+
+func UsageTemplate(heading string) string {
+	return strings.Replace(usageTemplate, "Available Commands:", heading+":", 1)
+}
+
+func GroupSummary(segment string) string {
+	if segment == "api" {
+		return "Access older API generations"
+	}
+	return "Manage " + strings.ReplaceAll(segment, "-", " ") + " resources"
+}
 
 func init() {
 	if err := json.Unmarshal(generatedOperationsJSON, &generatedOperations); err != nil {
@@ -95,7 +148,12 @@ func addCommand(root *cobra.Command, commandPath []string, operations []Operatio
 	for _, segment := range commandPath[:len(commandPath)-1] {
 		child, _, err := parent.Find([]string{segment})
 		if err != nil || child == parent {
-			child = &cobra.Command{Use: segment, Short: commandGroupSummary(segment)}
+			child = &cobra.Command{Use: segment, Short: GroupSummary(segment)}
+			if segment == "api" {
+				child.SetUsageTemplate(UsageTemplate("API generations"))
+			} else {
+				child.SetUsageTemplate(UsageTemplate("Operations"))
+			}
 			parent.AddCommand(child)
 		}
 		parent = child
@@ -110,30 +168,89 @@ func addCommand(root *cobra.Command, commandPath []string, operations []Operatio
 }
 
 func commandLongHelp(summary string, operations []Operation) string {
-	if len(operations) == 0 || strings.HasPrefix(strings.Join(operations[0].Command, " "), "api ") {
-		return summary
+	sections := []string{summary}
+	if bodyHelp := bodySchemaHelp(operations); bodyHelp != "" {
+		sections = append(sections, bodyHelp)
 	}
-	paths := map[string]bool{}
-	for _, candidate := range generatedOperations {
-		if candidate.AliasOf != "" || candidate.Noun != operations[0].Noun || candidate.Verb != operations[0].Verb {
+	if len(operations) > 0 && !strings.HasPrefix(strings.Join(operations[0].Command, " "), "api ") {
+		paths := map[string]bool{}
+		for _, candidate := range generatedOperations {
+			if candidate.AliasOf != "" || candidate.Noun != operations[0].Noun || candidate.Verb != operations[0].Verb {
+				continue
+			}
+			path := strings.Join(candidate.Command, " ")
+			if strings.HasPrefix(path, "api ") {
+				paths[path] = true
+			}
+		}
+		if len(paths) > 0 {
+			older := mapKeys(paths)
+			sort.Strings(older)
+			var output strings.Builder
+			output.WriteString("Other API generations:\n")
+			for _, path := range older {
+				output.WriteString("  espercli ")
+				output.WriteString(path)
+				output.WriteByte('\n')
+			}
+			sections = append(sections, strings.TrimSuffix(output.String(), "\n"))
+		}
+	}
+	return strings.Join(sections, "\n\n")
+}
+
+func bodySchemaHelp(operations []Operation) string {
+	fields := map[string]BodyField{}
+	for _, operation := range operations {
+		if operation.Body == nil {
 			continue
 		}
-		path := strings.Join(candidate.Command, " ")
-		if strings.HasPrefix(path, "api ") {
-			paths[path] = true
+		for _, field := range operation.Body.Fields {
+			if _, exists := fields[field.Path]; !exists {
+				fields[field.Path] = field
+			}
 		}
 	}
-	if len(paths) == 0 {
-		return summary
+	if len(fields) == 0 {
+		return ""
 	}
-	older := mapKeys(paths)
-	sort.Strings(older)
+	paths := make([]string, 0, len(fields))
+	for path := range fields {
+		paths = append(paths, path)
+	}
+	sort.Strings(paths)
 	var output strings.Builder
-	output.WriteString(summary)
-	output.WriteString("\n\nOther API generations:\n")
-	for _, path := range older {
-		output.WriteString("  espercli ")
+	output.WriteString("Request body fields (nested values require --body):\n")
+	for _, path := range paths {
+		field := fields[path]
+		output.WriteString("  ")
 		output.WriteString(path)
+		output.WriteString(" (")
+		output.WriteString(field.Type)
+		if field.Format != "" {
+			output.WriteString(", ")
+			output.WriteString(field.Format)
+		}
+		if field.Required {
+			output.WriteString(", required")
+		}
+		output.WriteString(")")
+		if field.Description != "" {
+			output.WriteString(": ")
+			output.WriteString(field.Description)
+		}
+		if len(field.Enum) > 0 {
+			output.WriteString(" [values: ")
+			output.WriteString(strings.Join(field.Enum, ", "))
+			output.WriteString("]")
+		}
+		if field.Example != nil {
+			if example, err := json.Marshal(field.Example); err == nil {
+				output.WriteString(" [example: ")
+				output.Write(example)
+				output.WriteByte(']')
+			}
+		}
 		output.WriteByte('\n')
 	}
 	return strings.TrimSuffix(output.String(), "\n")
@@ -153,10 +270,6 @@ func commandUse(verb string, operations []Operation) string {
 		return verb
 	}
 	return verb + " " + strings.Join(parameters, " ")
-}
-
-func commandGroupSummary(segment string) string {
-	return fmt.Sprintf("Commands in the %s group", segment)
 }
 
 func addFlags(command *cobra.Command, operations []Operation) {
@@ -225,6 +338,9 @@ func addStringFlag(command *cobra.Command, name string, required bool, values []
 	name = kebab(name)
 	if seen[name] {
 		return
+	}
+	if len(values) > 0 {
+		description += " (values: " + strings.Join(values, ", ") + ")"
 	}
 	command.Flags().String(name, "", description)
 	seen[name] = true

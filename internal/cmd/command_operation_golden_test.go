@@ -52,8 +52,6 @@ func commandOperationFixtures() []commandOperationFixture {
 		{"v2 GET /v2/command-inbox/", "command-inbox-get", "GET", "/v2/command-inbox/", "", []string{"command-inbox", "get", "--device-id", "device-1", "--json"}, url.Values{"device_id": {"device-1"}}, 200, 400, "", false},
 		{"v2 GET /v2/converge/{id}/commands", "converge-command-list", "GET", "/v2/converge/converge-1/commands", "", []string{"command", "list", "--converge", "converge-1", "--limit", "1", "--offset", "0", "--all", "--json"}, url.Values{"limit": {"1"}, "offset": {"0"}}, 200, 400, "apps-envelope", false},
 		{"legacy GET /enterprise/{enterprise_id}/device/{device_id}/status/", "legacy-status-get", "GET", "/enterprise/tenant-1/device/device-1/status/", "", []string{"api", "legacy", "status", "get", "tenant-1", "device-1", "--latest-event", "true", "--all", "--json"}, url.Values{"latest_event": {"true"}}, 200, 400, "limit-offset", false},
-		{"legacy GET /enterprise/{enterprise_id}/devicegroup/{group_id}/command/", "legacy-command-list", "GET", "/enterprise/tenant-1/devicegroup/group-1/command/", "", []string{"api", "legacy", "command", "list", "--enterprise", "tenant-1", "--device-group", "group-1", "--all", "--json"}, nil, 200, 400, "limit-offset", false},
-		{"legacy POST /enterprise/{enterprise_id}/devicegroup/{group_id}/command/", "legacy-command-create", "POST", "/enterprise/tenant-1/devicegroup/group-1/command/", `{"command":"REBOOT"}`, []string{"api", "legacy", "command", "create", "--enterprise", "tenant-1", "--device-group", "group-1", "--command", "REBOOT", "--json"}, nil, 201, 400, "", false},
 		{"pipelines-v0 GET /pipelines/v0/stages/{stage_id}/operationlists/", "pipeline-operation-list-list", "GET", "/pipelines/v0/stages/stage-1/operationlists/", "", []string{"operation-list", "list", "--stage", "stage-1", "--all", "--json"}, nil, 200, 400, "apps-envelope", false},
 		{"pipelines-v0 POST /pipelines/v0/stages/{stage_id}/operationlists/", "pipeline-operation-list-add", "POST", "/pipelines/v0/stages/stage-1/operationlists/", `{"name":"fixture"}`, []string{"operation-list", "add", "--stage", "stage-1", "--name", "fixture", "--json"}, nil, 200, 400, "", false},
 		{"pipelines-v0 PUT /pipelines/v0/stages/{stage_id}/operationlists/{operationlist_id}/", "pipeline-operation-list-update", "PUT", "/pipelines/v0/stages/stage-1/operationlists/list-1/", `{"name":"fixture"}`, []string{"operation-list", "update", "list-1", "--stage", "stage-1", "--name", "fixture", "--json"}, nil, 200, 400, "", false},
@@ -79,8 +77,8 @@ func TestCommandOperationCoverage(t *testing.T) {
 		}
 		want[row.key] = true
 	}
-	if len(want) != 37 {
-		t.Fatalf("fixture rows = %d, want 37", len(want))
+	if len(want) != 35 {
+		t.Fatalf("fixture rows = %d, want 35", len(want))
 	}
 	nouns := map[string]bool{
 		"command": true, "command-history": true, "command-inbox": true,
@@ -94,7 +92,7 @@ func TestCommandOperationCoverage(t *testing.T) {
 			got[operation.Generation+" "+operation.Method+" "+operation.Path] = true
 		}
 	}
-	if len(got) != 37 || !reflect.DeepEqual(want, got) {
+	if len(got) != 35 || !reflect.DeepEqual(want, got) {
 		t.Fatalf("packet operation keys mismatch: rows=%d generated=%d", len(want), len(got))
 	}
 }
@@ -158,11 +156,11 @@ func TestCommandOperationPaginationFixtures(t *testing.T) {
 		{"command-list", "limit-offset"}, {"status-get", "limit-offset"}, {"command-history-get", "limit-offset"},
 		{"operation-list-list", "apps-envelope"}, {"operation-list-device", "limit-offset"}, {"command-request-list", "apps-envelope"},
 		{"command-request-status-list", "apps-envelope"}, {"converge-command-list", "apps-envelope"}, {"legacy-status-get", "limit-offset"},
-		{"legacy-command-list", "limit-offset"}, {"pipeline-operation-list-list", "apps-envelope"},
+		{"pipeline-operation-list-list", "apps-envelope"},
 		{"pipeline-operation-list-scope", "apps-envelope"}, {"pipeline-operation-stage-run-list", "apps-envelope"},
 	}
-	if len(flows) != 13 {
-		t.Fatalf("pagination flows = %d, want 13", len(flows))
+	if len(flows) != 12 {
+		t.Fatalf("pagination flows = %d, want 12", len(flows))
 	}
 	for _, flow := range flows {
 		t.Run(flow.name, func(t *testing.T) {
