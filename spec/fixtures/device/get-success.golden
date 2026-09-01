@@ -1,0 +1,9 @@
+{
+  "code": 200,
+  "content": {
+    "id": "device-1",
+    "name": "Kiosk One",
+    "state": "ONLINE"
+  },
+  "message": "Device retrieved"
+}

@@ -1,0 +1,1 @@
+{"count":2,"next":null,"previous":"https://example.test/page?offset=0","results":[{"id":2,"enterprise":"enterprise-1","name":"backup","type":"email","properties":{"to_address":["backup@example.test"]},"linked_alerts":[]}]}

@@ -1,0 +1,17 @@
+{
+  "application_name": "fixture-v1-get--v1-enterprise-enterprise-id-application-application-id-success-application_name",
+  "enterprise": "https://fixture.example.test/packet-3",
+  "id": "00000000-0000-4000-8000-000000000001",
+  "is_hidden": true,
+  "latest_version": {
+    "build_number": "fixture-v1-get--v1-enterprise-enterprise-id-application-application-id-success-latest_version-build_number",
+    "hash_string": "fixture-v1-get--v1-enterprise-enterprise-id-application-application-id-success-latest_version-hash_string",
+    "icon_url": "https://fixture.example.test/packet-3",
+    "id": "00000000-0000-4000-8000-000000000001",
+    "min_sdk_version": "fixture-v1-get--v1-enterprise-enterprise-id-application-application-id-success-latest_version-min_sdk_version",
+    "release_name": "fixture-v1-get--v1-enterprise-enterprise-id-application-application-id-success-latest_version-release_name",
+    "target_sdk_version": "fixture-v1-get--v1-enterprise-enterprise-id-application-application-id-success-latest_version-target_sdk_version",
+    "version_code": "fixture-v1-get--v1-enterprise-enterprise-id-application-application-id-success-latest_version-version_code"
+  },
+  "package_name": "fixture-v1-get--v1-enterprise-enterprise-id-application-application-id-success-package_name"
+}

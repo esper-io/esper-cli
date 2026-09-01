@@ -1,0 +1,20 @@
+[
+  {
+    "alert_time": "2026-01-01T00:00:00Z",
+    "device_id": "device-1",
+    "device_name": "device",
+    "group_id": [
+      "group-1"
+    ],
+    "group_name": "group",
+    "latest_seen": "2026-01-01T00:01:00Z"
+  },
+  {
+    "alert_time": "2026-01-02T00:00:00Z",
+    "device_id": "device-2",
+    "device_name": "device-2",
+    "group_id": [],
+    "group_name": "group",
+    "latest_seen": "2026-01-02T00:01:00Z"
+  }
+]

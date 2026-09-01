@@ -1,0 +1,13 @@
+{
+  "count": 1,
+  "next": "",
+  "previous": "https://fixture.example.test/packet-3",
+  "results": [
+    {
+      "alias_name": "fixture-v1-get--v1-enterprise-enterprise-id-application-application-id-version-version-id-installdevices-two-results-alias_name",
+      "device_name": "fixture-v1-get--v1-enterprise-enterprise-id-application-application-id-version-version-id-installdevices-two-results-device_name",
+      "group_name": "fixture-v1-get--v1-enterprise-enterprise-id-application-application-id-version-version-id-installdevices-two-results-group_name",
+      "id": "00000000-0000-4000-8000-000000000001"
+    }
+  ]
+}

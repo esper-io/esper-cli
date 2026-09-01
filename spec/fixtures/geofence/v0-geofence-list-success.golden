@@ -1,0 +1,37 @@
+[
+  {
+    "created_by": "Operator User",
+    "created_on": "2026-08-24T00:00:00Z",
+    "description": "Main distribution center",
+    "device_actions": [
+      "LOCK_DOWN",
+      "BEEP"
+    ],
+    "device_count": 12,
+    "enterprise": "11111111-1111-4111-8111-111111111111",
+    "id": "22222222-2222-4222-8222-222222222222",
+    "latitude": "37.7749",
+    "longitude": "-122.4194",
+    "name": "Warehouse perimeter",
+    "radius": 0.25,
+    "radius_unit": "KILOMETERS",
+    "updated_on": "2026-08-24T01:00:00Z"
+  },
+  {
+    "created_by": "Operator User",
+    "created_on": "2026-08-23T00:00:00Z",
+    "description": null,
+    "device_actions": [
+      "BEEP"
+    ],
+    "device_count": 3,
+    "enterprise": "11111111-1111-4111-8111-111111111111",
+    "id": "33333333-3333-4333-8333-333333333333",
+    "latitude": "37.7755",
+    "longitude": "-122.4180",
+    "name": "Loading dock",
+    "radius": 0.5,
+    "radius_unit": "KILOMETERS",
+    "updated_on": "2026-08-23T01:00:00Z"
+  }
+]

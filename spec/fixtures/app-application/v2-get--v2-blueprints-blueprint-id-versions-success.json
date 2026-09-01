@@ -1,0 +1,593 @@
+{
+  "content": {
+    "code": 1,
+    "count": 1,
+    "message": "fixture-v2-get--v2-blueprints-blueprint-id-versions-success-content-message",
+    "next": "fixture-v2-get--v2-blueprints-blueprint-id-versions-success-content-next",
+    "previous": "fixture-v2-get--v2-blueprints-blueprint-id-versions-success-content-previous",
+    "results": [
+      {
+        "comments": "fixture-v2-get--v2-blueprints-blueprint-id-versions-success-content-results-comments",
+        "created_at": "2026-08-24T12:00:00Z",
+        "created_by": "fixture-v2-get--v2-blueprints-blueprint-id-versions-success-content-results-created_by",
+        "description": "fixture-v2-get--v2-blueprints-blueprint-id-versions-success-content-results-description",
+        "id": "00000000-0000-4000-8000-000000000001",
+        "minor_version_number": 1,
+        "name": "fixture-v2-get--v2-blueprints-blueprint-id-versions-success-content-results-name",
+        "publish": true,
+        "settings": {
+          "android": {
+            "adb_settings": {
+              "allow_adb": true,
+              "apply_policy": "ALWAYS APPLY"
+            },
+            "android_settings_app_settings": {
+              "allow_android_settings_app": true,
+              "apply_policy": "ALWAYS APPLY"
+            },
+            "app_layout_setting": {
+              "app_icon_size": "SMALL_ICON",
+              "app_name_size": "SMALL_TEXT",
+              "apply_policy": "ALWAYS APPLY",
+              "brand_logo_position": "BOTTOM_LEFT",
+              "custom_app_icon_size": 1,
+              "custom_app_name_size": 1,
+              "custom_device_alias_size": 1,
+              "custom_device_name_size": 1,
+              "device_alias_size": "SMALL_TEXT",
+              "device_name_and_id_display_policy": "NONE",
+              "device_name_position": "BOTTOM_LEFT",
+              "device_name_size": "SMALL_TEXT"
+            },
+            "app_order_setting": {
+              "app_order_list": [
+                {
+                  "name": "fixture-v2-get--v2-blueprints-blueprint-id-versions-success-content-results-settings-android-app_order_setting-app_order_list-name",
+                  "type": "SINGLE_APP"
+                }
+              ],
+              "apply_policy": "ALWAYS APPLY"
+            },
+            "app_permission_policy_settings": {
+              "apply_policy": "ALWAYS APPLY",
+              "permission_policy": "ALLOW AUTOMATICALLY"
+            },
+            "app_uninstall_settings": {
+              "allow_app_uninstallation": true,
+              "apply_policy": "ALWAYS APPLY"
+            },
+            "apps": [
+              {
+                "app_id": "fixture-v2-get--v2-blueprints-blueprint-id-versions-success-content-results-settings-android-apps-app_id",
+                "app_version_id": "fixture-v2-get--v2-blueprints-blueprint-id-versions-success-content-results-settings-android-apps-app_version_id",
+                "auto_update_mode": "autoUpdateDefault",
+                "installation_rule": "POST PROVISIONING",
+                "managed_config": {},
+                "package_name": "fixture-v2-get--v2-blueprints-blueprint-id-versions-success-content-results-settings-android-apps-package_name",
+                "state": "SHOW",
+                "type": "PRELOADED"
+              }
+            ],
+            "bluetooth_settings": {
+              "allow_bluetooth": true,
+              "apply_policy": "ALWAYS APPLY",
+              "bluetooth_state": "ENABLE",
+              "drift_policy": "IGNORE"
+            },
+            "brightness_settings": {
+              "apply_policy": "ALWAYS APPLY",
+              "brightness_value": "fixture-v2-get--v2-blueprints-blueprint-id-versions-success-content-results-settings-android-brightness_settings-brightness_value"
+            },
+            "camera_settings": {
+              "allow_camera_access": true,
+              "apply_policy": "ALWAYS APPLY"
+            },
+            "customized_device_level_json_settings": {
+              "apply_policy": "ALWAYS APPLY",
+              "customized_json": {}
+            },
+            "device_mode_settings": {
+              "apply_policy": "ALWAYS APPLY",
+              "device_mode": "KIOSK"
+            },
+            "esper_edgebox_settings": {
+              "allow_esper_edgebox": true,
+              "apply_policy": "ALWAYS APPLY"
+            },
+            "esper_settings_apps_settings": {
+              "admin_mode_password": "fixture-v2-get--v2-blueprints-blueprint-id-versions-success-content-results-settings-android-esper_settings_apps_settings-admin_mode_password",
+              "admin_mode_password_settings": {},
+              "allow_dock": true,
+              "allow_esper_settings_app": true,
+              "apply_policy": "ALWAYS APPLY",
+              "dock_accessibitly_settings": {},
+              "settings": {
+                "about": "NONE",
+                "accessibility": "NONE",
+                "accessibility_cc_deuteranomaly": "NONE",
+                "accessibility_cc_protanomaly": "NONE",
+                "accessibility_cc_tritanomaly": "NONE",
+                "accessibility_display_size": "NONE",
+                "accessibility_font_scale": "NONE",
+                "accessibility_high_contrast_text": "NONE",
+                "accessibility_mono_audio": "NONE",
+                "accessibility_reset_to_default": "NONE",
+                "accessibility_talkback": "NONE",
+                "accessibility_text_to_speech": "NONE",
+                "airplane_mode": "NONE",
+                "auto_rotation": "NONE",
+                "bluetooth": "NONE",
+                "clear_app_data": "NONE",
+                "data_roaming": "NONE",
+                "display": "NONE",
+                "esper_branding": "NONE",
+                "factory_reset": "NONE",
+                "flashlight": "NONE",
+                "input_selection": "NONE",
+                "keyboard": "NONE",
+                "kiosk_app_selection": "NONE",
+                "language": "NONE",
+                "mobile_data": "NONE",
+                "reboot": "NONE",
+                "sound": "NONE",
+                "storage": "NONE",
+                "time_and_date": "NONE",
+                "wifi": "NONE",
+                "wifi_tethering": "NONE"
+              }
+            },
+            "ethernet_settings": {
+              "apply_policy": "ALWAYS APPLY",
+              "auth_mode": "NONE",
+              "ca_cert_alias": "fixture-v2-get--v2-blueprints-blueprint-id-versions-success-content-results-settings-android-ethernet_settings-ca_cert_alias",
+              "client_cert_alias": "fixture-v2-get--v2-blueprints-blueprint-id-versions-success-content-results-settings-android-ethernet_settings-client_cert_alias",
+              "eap_identity": "fixture-v2-get--v2-blueprints-blueprint-id-versions-success-content-results-settings-android-ethernet_settings-eap_identity"
+            },
+            "external_device_settings": {
+              "allow_external_device_mount": true,
+              "apply_policy": "ALWAYS APPLY"
+            },
+            "factory_reset_settings": {
+              "allow_factory_reset": true,
+              "apply_policy": "ALWAYS APPLY"
+            },
+            "file_transfer_settings": {
+              "allow_file_transfer": true,
+              "apply_policy": "ALWAYS APPLY"
+            },
+            "files": [
+              {
+                "destination_path": "fixture-v2-get--v2-blueprints-blueprint-id-versions-success-content-results-settings-android-files-destination_path",
+                "file_id": "fixture-v2-get--v2-blueprints-blueprint-id-versions-success-content-results-settings-android-files-file_id",
+                "tags": {}
+              }
+            ],
+            "google_services_settings": {
+              "afw_account_settings": {
+                "allow_afw_account_addition": true,
+                "apply_policy": "ALWAYS APPLY"
+              },
+              "factory_reset_protection_settings": {
+                "apply_policy": "ALWAYS APPLY",
+                "email": "fixture-v2-get--v2-blueprints-blueprint-id-versions-success-content-results-settings-android-google_services_settings-factory_reset_protection_settings-email",
+                "google_id": "fixture-v2-get--v2-blueprints-blueprint-id-versions-success-content-results-settings-android-google_services_settings-factory_reset_protection_settings-google_id"
+              },
+              "google_assitant_settings": {
+                "allow_google_assistant": true,
+                "apply_policy": "ALWAYS APPLY"
+              },
+              "personal_accounts_settings": {
+                "apply_policy": "ALWAYS APPLY",
+                "personal_accounts_limit_value": 1
+              },
+              "play_store_settings": {
+                "allow_playstore": true,
+                "apply_policy": "ALWAYS APPLY"
+              }
+            },
+            "incoming_numbers_settings": {
+              "allow_all_numbers": true,
+              "allowed_numbers": [
+                "fixture-v2-get--v2-blueprints-blueprint-id-versions-success-content-results-settings-android-incoming_numbers_settings-allowed_numbers"
+              ],
+              "apply_policy": "ALWAYS APPLY",
+              "tags": [
+                "fixture-v2-get--v2-blueprints-blueprint-id-versions-success-content-results-settings-android-incoming_numbers_settings-tags"
+              ]
+            },
+            "language_settings": {
+              "apply_policy": "ALWAYS APPLY",
+              "device_locale": "fixture-v2-get--v2-blueprints-blueprint-id-versions-success-content-results-settings-android-language_settings-device_locale"
+            },
+            "launcher_settings": {
+              "apply_policy": "ALWAYS APPLY",
+              "launcher": "ESPER"
+            },
+            "local_app_install_settings": {
+              "allow_local_app_install": true,
+              "apply_policy": "ALWAYS APPLY"
+            },
+            "location_settings": {
+              "allow_location": true,
+              "apply_policy": "ALWAYS APPLY"
+            },
+            "lock_screen_settings": {
+              "allow_keyguard": true,
+              "apply_policy": "ALWAYS APPLY",
+              "minimum_password_length": 1,
+              "password_quality": "NONE"
+            },
+            "mac_address_randomization_settings": {
+              "allow_mac_address_randomization": true,
+              "apply_policy": "ALWAYS APPLY"
+            },
+            "nfc_settings": {
+              "allow_nfc": true,
+              "apply_policy": "ALWAYS APPLY"
+            },
+            "notification_bar_settings": {
+              "allow_notification_bar": true,
+              "apply_policy": "ALWAYS APPLY"
+            },
+            "outgoing_numbers_settings": {
+              "allow_all_numbers": true,
+              "allow_ussd_codes": true,
+              "allowed_numbers": [
+                "fixture-v2-get--v2-blueprints-blueprint-id-versions-success-content-results-settings-android-outgoing_numbers_settings-allowed_numbers"
+              ],
+              "apply_policy": "ALWAYS APPLY",
+              "tags": [
+                "fixture-v2-get--v2-blueprints-blueprint-id-versions-success-content-results-settings-android-outgoing_numbers_settings-tags"
+              ]
+            },
+            "safe_boot_settings": {
+              "allow_safe_boot": true,
+              "apply_policy": "ALWAYS APPLY"
+            },
+            "saved_ap_settings": {
+              "apply_policy": "ALWAYS APPLY",
+              "use_only_saved_ap": true
+            },
+            "screen_orientation_settings": {
+              "apply_policy": "ALWAYS APPLY",
+              "orientation_type": "PORTRAIT"
+            },
+            "screen_timeout_settings": {
+              "apply_policy": "ALWAYS APPLY",
+              "screentimeout_value": 1
+            },
+            "screenshot_settings": {
+              "allow_screenshot": true,
+              "apply_policy": "ALWAYS APPLY"
+            },
+            "sms_settings": {
+              "allow_sms": true,
+              "apply_policy": "ALWAYS APPLY"
+            },
+            "sound_settings": {
+              "alarm_settings": {
+                "alarm_volume": 1,
+                "apply_policy": "ALWAYS APPLY"
+              },
+              "music_settings": {
+                "apply_policy": "ALWAYS APPLY",
+                "music_volume": 1
+              },
+              "notification_settings": {
+                "apply_policy": "ALWAYS APPLY",
+                "notification_volume": 1
+              },
+              "ringtone_settings": {
+                "apply_policy": "ALWAYS APPLY",
+                "ringtone_volume": 1
+              },
+              "voice_call_settings": {
+                "apply_policy": "ALWAYS APPLY",
+                "voice_call_volume": 1
+              }
+            },
+            "strict_app_synchronization_settings": {
+              "allow_strict_app_synchronization": true,
+              "apply_policy": "ALWAYS APPLY"
+            },
+            "strict_wifi_synchronization_settings": {
+              "allow_strict_wifi_synchronization": true,
+              "apply_policy": "ALWAYS APPLY"
+            },
+            "system_updates_settings": {
+              "apply_policy": "ALWAYS APPLY",
+              "maintenance_end": "fixture-v2-get--v2-blueprints-blueprint-id-versions-success-content-results-settings-android-system_updates_settings-maintenance_end",
+              "maintenance_start": "fixture-v2-get--v2-blueprints-blueprint-id-versions-success-content-results-settings-android-system_updates_settings-maintenance_start",
+              "system_update_policy_type": "UPDATE AUTOMATICALLY"
+            },
+            "time_date_settings": {
+              "allow_edit_time_date": true,
+              "apply_policy": "ALWAYS APPLY"
+            },
+            "timezone_settings": {
+              "apply_policy": "ALWAYS APPLY",
+              "timezone": "fixture-v2-get--v2-blueprints-blueprint-id-versions-success-content-results-settings-android-timezone_settings-timezone"
+            },
+            "usb_tethering_settings": {
+              "allow_usb_tethering": true,
+              "apply_policy": "ALWAYS APPLY"
+            },
+            "wallpaper_settings": {
+              "homescreen": {
+                "apply_policy": "ALWAYS APPLY",
+                "landscape": {
+                  "wallpaper_id": "fixture-v2-get--v2-blueprints-blueprint-id-versions-success-content-results-settings-android-wallpaper_settings-homescreen-landscape-wallpaper_id"
+                },
+                "portrait": {
+                  "wallpaper_id": "fixture-v2-get--v2-blueprints-blueprint-id-versions-success-content-results-settings-android-wallpaper_settings-homescreen-portrait-wallpaper_id"
+                }
+              },
+              "lockscreen": {
+                "apply_policy": "ALWAYS APPLY",
+                "portrait": {
+                  "wallpaper_id": "fixture-v2-get--v2-blueprints-blueprint-id-versions-success-content-results-settings-android-wallpaper_settings-lockscreen-portrait-wallpaper_id"
+                }
+              }
+            },
+            "wifi_networks": [
+              {
+                "certificate_file_password": "fixture-v2-get--v2-blueprints-blueprint-id-versions-success-content-results-settings-android-wifi_networks-certificate_file_password",
+                "certificate_file_path": "fixture-v2-get--v2-blueprints-blueprint-id-versions-success-content-results-settings-android-wifi_networks-certificate_file_path",
+                "wifi_network_id": "fixture-v2-get--v2-blueprints-blueprint-id-versions-success-content-results-settings-android-wifi_networks-wifi_network_id"
+              }
+            ],
+            "wifi_settings": {
+              "allow_wifi": true,
+              "apply_policy": "ALWAYS APPLY",
+              "wifi_state": "ENABLE"
+            }
+          },
+          "ios": {
+            "app_uninstall_settings": {
+              "allow_app_uninstallation": true,
+              "apply_policy": "ALWAYS APPLY"
+            },
+            "apps": [
+              {
+                "app_id": "fixture-v2-get--v2-blueprints-blueprint-id-versions-success-content-results-settings-ios-apps-app_id",
+                "app_type": "VPP",
+                "app_version_id": "fixture-v2-get--v2-blueprints-blueprint-id-versions-success-content-results-settings-ios-apps-app_version_id",
+                "base64_app_config": "fixture-v2-get--v2-blueprints-blueprint-id-versions-success-content-results-settings-ios-apps-base64_app_config",
+                "state": "SHOW"
+              }
+            ],
+            "bluetooth_settings": {
+              "apply_policy": "ALWAYS APPLY",
+              "edit_bluetooth": true
+            },
+            "camera_settings": {
+              "allow_camera_access": true,
+              "apply_policy": "ALWAYS APPLY"
+            },
+            "custom_device_level_profile_settings": {
+              "apply_policy": "ALWAYS APPLY",
+              "custom_profile": "fixture-v2-get--v2-blueprints-blueprint-id-versions-success-content-results-settings-ios-custom_device_level_profile_settings-custom_profile",
+              "customized_profile": {}
+            },
+            "defer_os_updates": {
+              "apply_policy": "ALWAYS APPLY",
+              "defer_os_updates_delay": 1
+            },
+            "device_mode_settings": {
+              "apply_policy": "ALWAYS APPLY",
+              "device_mode": "KIOSK"
+            },
+            "factory_reset_settings": {
+              "allow_factory_reset": true,
+              "apply_policy": "ALWAYS APPLY"
+            },
+            "hide_preloaded_apps_settings": {
+              "apply_policy": "ALWAYS APPLY",
+              "hide_preloaded_apps": true
+            },
+            "kiosk_app": {
+              "app_id": "fixture-v2-get--v2-blueprints-blueprint-id-versions-success-content-results-settings-ios-kiosk_app-app_id",
+              "app_type": "VPP"
+            },
+            "local_app_install_settings": {
+              "allow_local_app_install": true,
+              "apply_policy": "ALWAYS APPLY"
+            },
+            "nfc_settings": {
+              "allow_nfc": true,
+              "apply_policy": "ALWAYS APPLY"
+            },
+            "provisioning_profiles": [
+              {
+                "profile_id": "00000000-0000-4000-8000-000000000001",
+                "profile_version_id": "00000000-0000-4000-8000-000000000001"
+              }
+            ],
+            "screenshot_settings": {
+              "allow_screenshot": true,
+              "apply_policy": "ALWAYS APPLY"
+            },
+            "siri_settings": {
+              "allow_siri": true,
+              "apply_policy": "ALWAYS APPLY"
+            },
+            "tethering_settings": {
+              "apply_policy": "ALWAYS APPLY",
+              "edit_hotspot": true
+            },
+            "time_date_settings": {
+              "apply_policy": "ALWAYS APPLY",
+              "force_automatic_time_date": true
+            },
+            "wallpaper_settings": {
+              "homescreen": {
+                "apply_policy": "ALWAYS APPLY",
+                "portrait": {
+                  "wallpaper_id": "fixture-v2-get--v2-blueprints-blueprint-id-versions-success-content-results-settings-ios-wallpaper_settings-homescreen-portrait-wallpaper_id"
+                }
+              },
+              "lockscreen": {
+                "apply_policy": "ALWAYS APPLY",
+                "portrait": {
+                  "wallpaper_id": "fixture-v2-get--v2-blueprints-blueprint-id-versions-success-content-results-settings-ios-wallpaper_settings-lockscreen-portrait-wallpaper_id"
+                }
+              }
+            },
+            "web_content_settings": {
+              "apply_policy": "ALWAYS APPLY",
+              "url_allowlist": [
+                "fixture-v2-get--v2-blueprints-blueprint-id-versions-success-content-results-settings-ios-web_content_settings-url_allowlist"
+              ],
+              "url_blocklist": [
+                "fixture-v2-get--v2-blueprints-blueprint-id-versions-success-content-results-settings-ios-web_content_settings-url_blocklist"
+              ]
+            },
+            "wifi_networks": [
+              {
+                "wifi_network_id": "fixture-v2-get--v2-blueprints-blueprint-id-versions-success-content-results-settings-ios-wifi_networks-wifi_network_id"
+              }
+            ]
+          },
+          "linux": {
+            "custom_actions_multiple": {
+              "custom_actions": [
+                {
+                  "apply_policy": "ALWAYS APPLY",
+                  "id": "00000000-0000-4000-8000-000000000001",
+                  "options_key": "00000000-0000-4000-8000-000000000001"
+                }
+              ]
+            },
+            "custom_shell_scripts_multiple": {
+              "shell_scripts": [
+                {
+                  "alias": "fixture-v2-get--v2-blueprints-blueprint-id-versions-success-content-results-settings-linux-custom_shell_scripts_multiple-shell_scripts-alias",
+                  "apply_policy": "ALWAYS APPLY",
+                  "description": "fixture-v2-get--v2-blueprints-blueprint-id-versions-success-content-results-settings-linux-custom_shell_scripts_multiple-shell_scripts-description",
+                  "interpreter": "fixture-v2-get--v2-blueprints-blueprint-id-versions-success-content-results-settings-linux-custom_shell_scripts_multiple-shell_scripts-interpreter",
+                  "script": "fixture-v2-get--v2-blueprints-blueprint-id-versions-success-content-results-settings-linux-custom_shell_scripts_multiple-shell_scripts-script"
+                }
+              ]
+            },
+            "files": [
+              {
+                "destination_path": "fixture-v2-get--v2-blueprints-blueprint-id-versions-success-content-results-settings-linux-files-destination_path",
+                "file_id": 1
+              }
+            ]
+          },
+          "windows": {
+            "active_hours_settings": {
+              "active_hours_end": {
+                "apply_policy": "ALWAYS APPLY",
+                "time": 1
+              },
+              "active_hours_start": {
+                "apply_policy": "ALWAYS APPLY",
+                "time": 1
+              }
+            },
+            "apps": [
+              {
+                "app_id": "fixture-v2-get--v2-blueprints-blueprint-id-versions-success-content-results-settings-windows-apps-app_id",
+                "app_type": "TENANT_WINDOWS",
+                "app_version_id": "fixture-v2-get--v2-blueprints-blueprint-id-versions-success-content-results-settings-windows-apps-app_version_id",
+                "base64_app_config": "fixture-v2-get--v2-blueprints-blueprint-id-versions-success-content-results-settings-windows-apps-base64_app_config",
+                "state": "SHOW"
+              }
+            ],
+            "auto_update_settings": {
+              "apply_policy": "ALWAYS APPLY",
+              "auto_update_type": "DEFAULT"
+            },
+            "bluetooth_settings": {
+              "allow_bluetooth": true,
+              "apply_policy": "ALWAYS APPLY",
+              "bluetooth_state": "ENABLE",
+              "drift_policy": "IGNORE"
+            },
+            "camera_settings": {
+              "allow_camera_access": true,
+              "apply_policy": "ALWAYS APPLY"
+            },
+            "custom_shell_scripts_multiple": {
+              "shell_scripts": [
+                {
+                  "alias": "fixture-v2-get--v2-blueprints-blueprint-id-versions-success-content-results-settings-windows-custom_shell_scripts_multiple-shell_scripts-alias",
+                  "apply_policy": "ALWAYS APPLY",
+                  "description": "fixture-v2-get--v2-blueprints-blueprint-id-versions-success-content-results-settings-windows-custom_shell_scripts_multiple-shell_scripts-description",
+                  "interpreter": "fixture-v2-get--v2-blueprints-blueprint-id-versions-success-content-results-settings-windows-custom_shell_scripts_multiple-shell_scripts-interpreter",
+                  "script": "fixture-v2-get--v2-blueprints-blueprint-id-versions-success-content-results-settings-windows-custom_shell_scripts_multiple-shell_scripts-script"
+                }
+              ]
+            },
+            "defer_os_updates": {
+              "feature_updates": {
+                "apply_policy": "ALWAYS APPLY",
+                "defer_days": 1
+              },
+              "quality_updates": {
+                "apply_policy": "ALWAYS APPLY",
+                "defer_days": 1
+              }
+            },
+            "device_mode_settings": {
+              "apply_policy": "ALWAYS APPLY",
+              "device_mode": "KIOSK"
+            },
+            "factory_reset_settings": {
+              "allow_factory_reset": true,
+              "apply_policy": "ALWAYS APPLY"
+            },
+            "kiosk_settings": {
+              "win32_single_app_config": {
+                "auto_launch": true,
+                "auto_launch_arguments": "fixture-v2-get--v2-blueprints-blueprint-id-versions-success-content-results-settings-windows-kiosk_settings-win32_single_app_config-auto_launch_arguments",
+                "desktop_app_path": "fixture-v2-get--v2-blueprints-blueprint-id-versions-success-content-results-settings-windows-kiosk_settings-win32_single_app_config-desktop_app_path",
+                "hide_power_button": true,
+                "hide_start_recommended_section": true,
+                "hide_taskbar": true,
+                "name": "fixture-v2-get--v2-blueprints-blueprint-id-versions-success-content-results-settings-windows-kiosk_settings-win32_single_app_config-name"
+              }
+            },
+            "pause_os_updates": {
+              "apply_policy": "ALWAYS APPLY",
+              "pause_os_updates": true
+            },
+            "timezone_settings": {
+              "apply_policy": "ALWAYS APPLY",
+              "timezone": "fixture-v2-get--v2-blueprints-blueprint-id-versions-success-content-results-settings-windows-timezone_settings-timezone"
+            },
+            "unenrollment_settings": {
+              "allow_unenrollment_from_device": true,
+              "apply_policy": "ALWAYS APPLY"
+            },
+            "wallpaper_settings": {
+              "homescreen": {
+                "apply_policy": "ALWAYS APPLY",
+                "landscape": {
+                  "wallpaper_id": "00000000-0000-4000-8000-000000000001"
+                }
+              },
+              "lockscreen": {
+                "apply_policy": "ALWAYS APPLY",
+                "landscape": {
+                  "wallpaper_id": "00000000-0000-4000-8000-000000000001"
+                }
+              }
+            },
+            "wifi_networks": [
+              {
+                "wifi_network_id": "fixture-v2-get--v2-blueprints-blueprint-id-versions-success-content-results-settings-windows-wifi_networks-wifi_network_id"
+              }
+            ]
+          }
+        },
+        "updated_at": "2026-08-24T12:00:00Z",
+        "updated_by": "fixture-v2-get--v2-blueprints-blueprint-id-versions-success-content-results-updated_by",
+        "version_id": "00000000-0000-4000-8000-000000000001",
+        "version_number": 1
+      }
+    ]
+  }
+}

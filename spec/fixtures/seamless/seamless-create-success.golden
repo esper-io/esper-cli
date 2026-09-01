@@ -1,0 +1,27 @@
+{
+  "content": {
+    "count": 1,
+    "next": null,
+    "prev": null,
+    "results": [
+      {
+        "alias": "Warehouse scanner",
+        "assigned_blueprint_id": "22222222-2222-4222-8222-222222222222",
+        "group_id": "33333333-3333-4333-8333-333333333333",
+        "id": "11111111-1111-4111-8111-111111111111",
+        "meta": {
+          "source": "seamless"
+        },
+        "platform": "APPLE",
+        "status": "IN_QUEUE",
+        "tags": [
+          "warehouse",
+          "pilot"
+        ],
+        "tenant_id": "tenant-1",
+        "unique_id_type": "UUID",
+        "unique_ids": "550e8400-e29b-41d4-a716-446655440000"
+      }
+    ]
+  }
+}

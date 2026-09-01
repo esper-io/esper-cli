@@ -30,6 +30,13 @@ MANIFEST
 #  before PyInstaller builds the exe, so as to inject date/other infos into it.
 *.manifest
 *.spec
+!.spec/
+.spec/*
+!.spec/cli-revamp/
+.spec/cli-revamp/*
+!.spec/cli-revamp/phase2-packets.md
+!.spec/cli-revamp/overlay-schema.md
+!.spec/cli-revamp/smoke-test.md
 
 # Installer logs
 pip-log.txt

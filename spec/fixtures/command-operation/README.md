@@ -1,0 +1,1 @@
+Synthetic offline fixtures for packet 9 command and operation command coverage. Responses are schema-shaped and pagination fixtures exercise both page envelope formats.

@@ -1,0 +1,12 @@
+[
+  {
+    "id": "device-1",
+    "name": "Kiosk One",
+    "state": "ONLINE"
+  },
+  {
+    "id": "device-2",
+    "name": "Kiosk Two",
+    "state": "OFFLINE"
+  }
+]

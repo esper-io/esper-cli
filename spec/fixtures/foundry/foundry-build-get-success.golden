@@ -1,0 +1,48 @@
+{
+  "content": {
+    "ab_update": true,
+    "android_major_version": 14,
+    "android_minimum_sdk_level": 26,
+    "android_minor_version": "0",
+    "android_sdk_level": 34,
+    "approved": true,
+    "build_arch": "arm64",
+    "build_details_id": 101,
+    "build_fingerprint_hash": "fingerprint-hash-1",
+    "build_flavor": "user",
+    "build_hash": "build-hash-1",
+    "build_id": "11111111-1111-4111-8111-111111111111",
+    "build_job_id": 9001,
+    "build_job_params": {
+      "target": "arm64"
+    },
+    "build_job_url": "https://example.test/jobs/9001",
+    "build_ota_hash": "ota-hash-1",
+    "build_state": "released",
+    "build_type": "ota",
+    "build_update_metadata": {
+      "channel": "stable"
+    },
+    "build_update_url": "https://example.test/builds/1/update",
+    "build_url": "https://example.test/builds/1",
+    "created_at": "2026-08-24T10:00:00Z",
+    "created_by": "foundry-admin",
+    "deprecated_on": null,
+    "device_model_id": "22222222-2222-4222-8222-222222222222",
+    "file_size_kb": 512000,
+    "foundation_build_number": 15,
+    "foundation_major_number": 15,
+    "foundation_minor_number": 2,
+    "foundation_name": "Esper Foundation",
+    "prebuilt_app_info": {
+      "count": 0
+    },
+    "release_notes": {
+      "en": "Initial release"
+    },
+    "release_rating": "stable",
+    "source_build_id": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+    "updated_at": "2026-08-24T11:00:00Z",
+    "updated_by": "foundry-admin"
+  }
+}

@@ -1,0 +1,14 @@
+[
+  {
+    "created_by": "fixture",
+    "fixture": "tenant-vpptoken-list-page-1",
+    "tenant_id": "tenant-1",
+    "updated_by": "fixture"
+  },
+  {
+    "created_by": "fixture",
+    "fixture": "tenant-vpptoken-list-page-2",
+    "tenant_id": "tenant-1",
+    "updated_by": "fixture"
+  }
+]

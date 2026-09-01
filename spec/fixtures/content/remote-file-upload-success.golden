@@ -1,0 +1,9 @@
+{
+  "auto_delete_after_minutes": 1440,
+  "bucket": "REMOTE_FILE_MANAGER",
+  "content_type": "application/pdf",
+  "download_expires_in": 3600,
+  "download_url": "https://example.invalid/download/guide.pdf",
+  "file_key": "enterprise-1/files/guide.pdf",
+  "file_size": 15
+}

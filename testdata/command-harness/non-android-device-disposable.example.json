@@ -1,0 +1,27 @@
+{
+  "name": "disposable non-Android device removal",
+  "disposable_scope": "device",
+  "disposable_device": "${DEVICE}",
+  "steps": [
+    {
+      "name": "verify device",
+      "args": ["device", "get", "${DEVICE}", "--json"],
+      "expected_exit": 0,
+      "mutation": false
+    },
+    {
+      "name": "remove disposable non-Android device",
+      "args": ["device", "delete-non-android-device", "${DEVICE}", "--yes", "--json"],
+      "expected_exit": 0,
+      "mutation": true
+    }
+  ],
+  "cleanup": [
+    {
+      "name": "clear active context",
+      "args": ["context", "clear", "--all"],
+      "expected_exit": 0,
+      "mutation": false
+    }
+  ]
+}

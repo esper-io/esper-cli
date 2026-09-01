@@ -1,0 +1,21 @@
+{
+  "count": 1,
+  "next": "",
+  "previous": "https://fixture.example.test/packet-3",
+  "results": [
+    {
+      "created_on": "2026-08-24T12:00:00Z",
+      "device": "fixture-v0-get--v0-enterprise-enterprise-id-emm-emm-id-product-product-id-install-two-results-device",
+      "enterprise": "fixture-v0-get--v0-enterprise-enterprise-id-emm-emm-id-product-product-id-install-two-results-enterprise",
+      "id": "00000000-0000-4000-8000-000000000001",
+      "install_state": "fixture-v0-get--v0-enterprise-enterprise-id-emm-emm-id-product-product-id-install-two-results-install_state",
+      "install_type": 1,
+      "is_active": true,
+      "is_force_install": true,
+      "objects": {},
+      "reason_details": "fixture-v0-get--v0-enterprise-enterprise-id-emm-emm-id-product-product-id-install-two-results-reason_details",
+      "updated_on": "2026-08-24T12:00:00Z",
+      "version_code": "fixture-v0-get--v0-enterprise-enterprise-id-emm-emm-id-product-product-id-install-two-results-version_code"
+    }
+  ]
+}

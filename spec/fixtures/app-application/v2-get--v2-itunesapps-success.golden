@@ -1,0 +1,48 @@
+[
+  {
+    "app_id": "00000000-0000-4000-8000-000000000001",
+    "app_name": "fixture-v2-get--v2-itunesapps-one-content-results-app_name",
+    "app_size": 1,
+    "app_version_id": "00000000-0000-4000-8000-000000000001",
+    "apple_app_id": "fixture-v2-get--v2-itunesapps-one-content-results-apple_app_id",
+    "apple_app_version": "fixture-v2-get--v2-itunesapps-one-content-results-apple_app_version",
+    "bundle_id": "fixture-v2-get--v2-itunesapps-one-content-results-bundle_id",
+    "description": "fixture-v2-get--v2-itunesapps-one-content-results-description",
+    "developer": "fixture-v2-get--v2-itunesapps-one-content-results-developer",
+    "device_families": [
+      "fixture-v2-get--v2-itunesapps-one-content-results-device_families"
+    ],
+    "genres": [
+      "fixture-v2-get--v2-itunesapps-one-content-results-genres"
+    ],
+    "icon_url": "fixture-v2-get--v2-itunesapps-one-content-results-icon_url",
+    "itunes_url": "fixture-v2-get--v2-itunesapps-one-content-results-itunes_url",
+    "last_updated_date": "fixture-v2-get--v2-itunesapps-one-content-results-last_updated_date",
+    "minimum_os_version": "fixture-v2-get--v2-itunesapps-one-content-results-minimum_os_version",
+    "price": 1,
+    "pricing_param": "fixture-v2-get--v2-itunesapps-one-content-results-pricing_param"
+  },
+  {
+    "app_id": "00000000-0000-4000-8000-000000000001",
+    "app_name": "fixture-v2-get--v2-itunesapps-two-content-results-app_name",
+    "app_size": 1,
+    "app_version_id": "00000000-0000-4000-8000-000000000001",
+    "apple_app_id": "fixture-v2-get--v2-itunesapps-two-content-results-apple_app_id",
+    "apple_app_version": "fixture-v2-get--v2-itunesapps-two-content-results-apple_app_version",
+    "bundle_id": "fixture-v2-get--v2-itunesapps-two-content-results-bundle_id",
+    "description": "fixture-v2-get--v2-itunesapps-two-content-results-description",
+    "developer": "fixture-v2-get--v2-itunesapps-two-content-results-developer",
+    "device_families": [
+      "fixture-v2-get--v2-itunesapps-two-content-results-device_families"
+    ],
+    "genres": [
+      "fixture-v2-get--v2-itunesapps-two-content-results-genres"
+    ],
+    "icon_url": "fixture-v2-get--v2-itunesapps-two-content-results-icon_url",
+    "itunes_url": "fixture-v2-get--v2-itunesapps-two-content-results-itunes_url",
+    "last_updated_date": "fixture-v2-get--v2-itunesapps-two-content-results-last_updated_date",
+    "minimum_os_version": "fixture-v2-get--v2-itunesapps-two-content-results-minimum_os_version",
+    "price": 1,
+    "pricing_param": "fixture-v2-get--v2-itunesapps-two-content-results-pricing_param"
+  }
+]

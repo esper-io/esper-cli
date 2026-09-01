@@ -1,0 +1,43 @@
+[
+  {
+    "actor": {
+      "id": "user-1",
+      "name": "Release Manager"
+    },
+    "created_timestamp": 1787565600,
+    "enterprise_id": "tenant-1",
+    "event_message": "Approved build for rollout",
+    "event_type": "build.updated",
+    "meta": {
+      "change_type": "approved",
+      "device_model": "Acme Kiosk",
+      "user_remarks": "Approved for rollout"
+    },
+    "resource": {
+      "id": "11111111-1111-4111-8111-111111111111",
+      "type": "build"
+    },
+    "stack": "develop",
+    "tenant": "tenant-1"
+  },
+  {
+    "actor": {
+      "id": "user-2",
+      "name": "Foundry Admin"
+    },
+    "created_timestamp": 1787569200,
+    "enterprise_id": "tenant-1",
+    "event_message": "Updated device model policy",
+    "event_type": "device_model.updated",
+    "meta": {
+      "change_type": "auto_update",
+      "device_model": "Acme Kiosk"
+    },
+    "resource": {
+      "id": "22222222-2222-4222-8222-222222222222",
+      "type": "device_model"
+    },
+    "stack": "develop",
+    "tenant": "tenant-1"
+  }
+]

@@ -1,0 +1,16 @@
+[
+  {
+    "converge_with_provision_option": true,
+    "device_id": "device-1",
+    "id": "converge-1",
+    "schedule_type": "IMMEDIATE",
+    "status": "QUEUED"
+  },
+  {
+    "converge_with_provision_option": false,
+    "device_id": "device-2",
+    "id": "converge-2",
+    "schedule_type": "WINDOW",
+    "status": "SUCCESS"
+  }
+]

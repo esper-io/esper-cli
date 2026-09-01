@@ -1,0 +1,14 @@
+{
+  "code": 1,
+  "content": {
+    "app_id": "fixture-v0-get--apps-v0-vpp-appid-success-content-app_id",
+    "assigned_count": 1,
+    "available_count": 1,
+    "pricing_param": "fixture-v0-get--apps-v0-vpp-appid-success-content-pricing_param",
+    "supported_platforms": [
+      "fixture-v0-get--apps-v0-vpp-appid-success-content-supported_platforms"
+    ],
+    "total_count": 1
+  },
+  "message": "fixture-v0-get--apps-v0-vpp-appid-success-message"
+}

@@ -1,0 +1,24 @@
+[
+  {
+    "callback_url": "https://example.test/callback",
+    "completion_token": "completion-1",
+    "enterprise_token": "enterprise-token-1",
+    "google_enterprise_id": "google-enterprise-1",
+    "id": 17,
+    "is_active": true,
+    "name": "Fixture Google Enterprise",
+    "signup_url": "https://example.test/signup",
+    "state": 1
+  },
+  {
+    "callback_url": "https://example.test/callback-2",
+    "completion_token": "completion-2",
+    "enterprise_token": "enterprise-token-2",
+    "google_enterprise_id": "google-enterprise-2",
+    "id": 18,
+    "is_active": false,
+    "name": "Second Fixture Google Enterprise",
+    "signup_url": "https://example.test/signup-2",
+    "state": 2
+  }
+]

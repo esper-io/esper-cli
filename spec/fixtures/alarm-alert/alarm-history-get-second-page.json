@@ -1,0 +1,1 @@
+{"total":51,"next":null,"previous":"https://example.test/page?limit=50&offset=0","results":[{"device_name":"device-2","device_id":"device-2","group_id":[],"group_name":"group","alert_time":"2026-01-02T00:00:00Z","latest_seen":"2026-01-02T00:01:00Z"}]}

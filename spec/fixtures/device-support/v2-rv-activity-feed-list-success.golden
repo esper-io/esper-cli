@@ -1,0 +1,12 @@
+[
+  {
+    "session_id": "session-1",
+    "state": "TERMINATED",
+    "video_quality": "STANDARD"
+  },
+  {
+    "session_id": "session-2",
+    "state": "FAILED",
+    "video_quality": "DATA_SAVER"
+  }
+]

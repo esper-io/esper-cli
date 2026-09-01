@@ -1,0 +1,21 @@
+apis:
+  authn2@v1:
+    root: openapi/authn2.yaml
+  authz2@v1:
+    root: openapi/authz2.yaml
+  foundry@v1:
+    root: openapi/foundry.yaml
+  legacy@v1:
+    root: openapi/legacy.yaml
+  pipelines-v0@v1:
+    root: openapi/pipelines-v0.yaml
+  v0@v1:
+    root: openapi/v0.yaml
+  v1@v1:
+    root: openapi/v1.yaml
+  v2@v1:
+    root: openapi/v2.yaml
+
+rules:
+  no-path-trailing-slash: off
+  no-unused-components: off

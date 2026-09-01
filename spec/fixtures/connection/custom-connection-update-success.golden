@@ -1,0 +1,9 @@
+{
+  "config": {
+    "client_id": "client-1",
+    "issuer_url": "https://login.example.test"
+  },
+  "display_name": "Acme SSO",
+  "id": "connection-1",
+  "strategy": "oidc"
+}

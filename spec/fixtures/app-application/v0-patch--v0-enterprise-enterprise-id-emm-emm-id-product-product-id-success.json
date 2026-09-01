@@ -1,0 +1,12 @@
+{
+  "created_on": "2026-08-24T12:00:00Z",
+  "google_enterprise": 1,
+  "google_product_id": "fixture-v0-patch--v0-enterprise-enterprise-id-emm-emm-id-product-product-id-success-google_product_id",
+  "icon_url": "https://fixture.example.test/packet-3",
+  "id": "00000000-0000-4000-8000-000000000001",
+  "is_active": true,
+  "min_sdk_version": "fixture-v0-patch--v0-enterprise-enterprise-id-emm-emm-id-product-product-id-success-min_sdk_version",
+  "package_name": "fixture-v0-patch--v0-enterprise-enterprise-id-emm-emm-id-product-product-id-success-package_name",
+  "title": "fixture-v0-patch--v0-enterprise-enterprise-id-emm-emm-id-product-product-id-success-title",
+  "updated_on": "2026-08-24T12:00:00Z"
+}
