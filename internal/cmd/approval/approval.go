@@ -40,7 +40,7 @@ func NewCommand(options *esperruntime.GlobalOptions) *cobra.Command {
 			if err := write(command.ErrOrStderr(), false, request); err != nil {
 				return err
 			}
-			if _, err := fmt.Fprintf(command.ErrOrStderr(), "Type approve %s to approve this exact request: ", request.ID); err != nil {
+			if _, err := fmt.Fprint(command.ErrOrStderr(), approvalInstruction(request.ID)); err != nil {
 				return err
 			}
 			answer, err := bufio.NewReader(command.InOrStdin()).ReadString('\n')
@@ -96,4 +96,8 @@ func displayValue(value string) string {
 		return "<none>"
 	}
 	return value
+}
+
+func approvalInstruction(id string) string {
+	return fmt.Sprintf("Type %q to approve this exact request: ", "approve "+id)
 }

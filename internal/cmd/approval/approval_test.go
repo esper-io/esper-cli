@@ -36,3 +36,11 @@ func TestShowRedactsRequestValuesAndApproveRejectsNonTerminal(t *testing.T) {
 		t.Fatalf("non-terminal approve error = %v", err)
 	}
 }
+
+func TestApprovalInstructionQuotesCommand(t *testing.T) {
+	const id = "bcd24991cfcd0db60f557c65"
+	want := `Type "approve bcd24991cfcd0db60f557c65" to approve this exact request: `
+	if got := approvalInstruction(id); got != want {
+		t.Fatalf("approvalInstruction() = %q, want %q", got, want)
+	}
+}
