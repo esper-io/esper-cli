@@ -15,6 +15,7 @@ func TestConfigureNonInteractiveRoundTrip(t *testing.T) {
 	t.Setenv(esperruntime.CredentialsFileEnvironment, path)
 	options := &esperruntime.GlobalOptions{Environment: "develop", APIKey: "secret-api-key"}
 	command := &cobra.Command{}
+	command.SetIn(strings.NewReader("enterprise-1\n"))
 	var stdout bytes.Buffer
 	command.SetOut(&stdout)
 	if err := runConfigure(command, options); err != nil {
@@ -27,7 +28,7 @@ func TestConfigureNonInteractiveRoundTrip(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if state.Config.Environment != "develop" || state.Config.APIKey != "secret-api-key" {
+	if state.Config.Environment != "develop" || state.Config.EnterpriseID != "enterprise-1" || state.Config.APIKey != "secret-api-key" {
 		t.Fatalf("config = %#v", state.Config)
 	}
 }
@@ -36,21 +37,21 @@ func TestConfigurePromptsForMissingValues(t *testing.T) {
 	path := filepath.Join(t.TempDir(), "creds.json")
 	t.Setenv(esperruntime.CredentialsFileEnvironment, path)
 	command := &cobra.Command{}
-	command.SetIn(strings.NewReader("staging\nprompted-key\n"))
+	command.SetIn(strings.NewReader("staging\nenterprise-1\nprompted-key\n"))
 	var prompts bytes.Buffer
 	command.SetErr(&prompts)
 	command.SetOut(&bytes.Buffer{})
 	if err := runConfigure(command, &esperruntime.GlobalOptions{}); err != nil {
 		t.Fatalf("runConfigure() error = %v", err)
 	}
-	if prompts.String() != "Environment: API key: " {
+	if prompts.String() != "Tenant name: Enterprise ID: API key: " {
 		t.Fatalf("prompts = %q", prompts.String())
 	}
 	state, err := (&esperruntime.StateStore{Path: path}).Load()
 	if err != nil {
 		t.Fatal(err)
 	}
-	if state.Config.Environment != "staging" || state.Config.APIKey != "prompted-key" {
+	if state.Config.Environment != "staging" || state.Config.EnterpriseID != "enterprise-1" || state.Config.APIKey != "prompted-key" {
 		t.Fatalf("config = %#v", state.Config)
 	}
 }
@@ -59,7 +60,7 @@ func TestConfigureShowRedactsAPIKey(t *testing.T) {
 	path := filepath.Join(t.TempDir(), "creds.json")
 	t.Setenv(esperruntime.CredentialsFileEnvironment, path)
 	store := &esperruntime.StateStore{Path: path}
-	if err := store.Save(esperruntime.State{Config: esperruntime.Config{Environment: "develop", APIKey: "secret-api-key"}}); err != nil {
+	if err := store.Save(esperruntime.State{Config: esperruntime.Config{Environment: "develop", EnterpriseID: "enterprise-1", APIKey: "secret-api-key"}}); err != nil {
 		t.Fatal(err)
 	}
 	tests := []struct {
@@ -68,8 +69,8 @@ func TestConfigureShowRedactsAPIKey(t *testing.T) {
 		want    string
 		notWant string
 	}{
-		{name: "human", want: "environment: develop\napi_key: **********-key\n", notWant: "secret-api-key"},
-		{name: "json", json: true, want: `{"environment":"develop","api_key":"**********-key"}` + "\n", notWant: "secret-api-key"},
+		{name: "human", want: "tenant_name: develop\nenterprise_id: enterprise-1\napi_key: **********-key\n", notWant: "secret-api-key"},
+		{name: "json", json: true, want: `{"tenant_name":"develop","enterprise_id":"enterprise-1","api_key":"**********-key"}` + "\n", notWant: "secret-api-key"},
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {

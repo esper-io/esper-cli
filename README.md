@@ -37,8 +37,8 @@ go install github.com/esper-io/esper-cli/cmd/espercli@latest
 
 ## Quick Start
 
-Configure an environment and API key. Without flags, `configure` prompts for
-both values.
+Configure a tenant name, enterprise ID, and API key. Without flags, `configure`
+prompts for all three values.
 
 ```bash
 espercli configure
@@ -93,8 +93,13 @@ Key rules:
   active context where the canonical parameter name supports it.
 - JSON request bodies accept scalar property flags or `--body`. `--body` accepts
   inline JSON, `@path`, or `-` for stdin and cannot be mixed with property flags.
-- Destructive operations prompt for the exact target and count. Use `--yes` only
-  when intentional non-interactive confirmation is appropriate.
+- Every API write requires a one-time human approval. A write first prints an
+  approval ID; a human must review it with `espercli approval show <id>` and run
+  `espercli approval approve <id>` from an interactive terminal before the exact
+  request can be retried. Approval binds the method, target, query, body, and
+  environment, expires after 15 minutes, and is consumed once.
+- Destructive operations also prompt for the exact target and count after human
+  approval. `--yes` skips only that second prompt; it never bypasses approval.
 - `--json` writes the raw API JSON envelope without field-name or shape changes.
   `--all --json` writes one merged result array for supported paginated lists.
 
@@ -107,6 +112,21 @@ Exit codes are stable:
 | `2` | Usage error or cancelled confirmation |
 | `3` | Authentication or configuration error |
 | `4` | Network or timeout error |
+
+## Human Approval
+
+For example, a create command from an agent or script exits before making an API
+call and prints an approval ID:
+
+```text
+approval required for POST /v2/blueprints/
+review: espercli approval show <id>
+human approval: espercli approval approve <id>
+```
+
+The human terminal command displays only a sanitized request summary. Request
+bodies, tokens, passwords, and API keys are not stored in the approval ledger.
+The original command must then be retried unchanged.
 
 ## Shell Completion
 

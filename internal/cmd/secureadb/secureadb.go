@@ -22,14 +22,11 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
-	"sync"
 	"time"
 
 	esperruntime "github.com/esper-io/esper-cli/internal/runtime"
 	"github.com/spf13/cobra"
 )
-
-var negativeSerialCompatibilityMutex sync.Mutex
 
 const (
 	CertificatesDirectoryEnvironment = "ESPER_CERTS_DIR"
@@ -144,6 +141,18 @@ func runConnect(command *cobra.Command, options *esperruntime.GlobalOptions, dev
 	if enterpriseID == "" {
 		return esperruntime.NewError(esperruntime.CategoryAuth, fmt.Errorf("enterprise ID is not configured (run espercli context set enterprise <id>)"))
 	}
+	requestPath := remoteADBCollectionPath(enterpriseID, deviceID)
+	approvalSpec, err := secureADBApprovalSpec(credentials, enterpriseID, deviceID, forceEnable, requestPath)
+	if err != nil {
+		return esperruntime.NewError(esperruntime.CategoryUsage, err)
+	}
+	approval, approved, err := esperruntime.RequireApproval(approvalSpec)
+	if err != nil {
+		return esperruntime.NewError(esperruntime.CategoryAuth, err)
+	}
+	if !approved {
+		return esperruntime.NewError(esperruntime.CategoryUsage, fmt.Errorf("approval required for secureadb connect\nreview: espercli approval show %s\nhuman approval: espercli approval approve %s", approval.ID, approval.ID))
+	}
 
 	certificatesDirectory, err := defaultCertificatesDirectory()
 	if err != nil {
@@ -153,10 +162,12 @@ func runConnect(command *cobra.Command, options *esperruntime.GlobalOptions, dev
 	if err != nil {
 		return fmt.Errorf("prepare secure ADB certificates: %w", err)
 	}
-
+	sessionBody, err := remoteADBSessionBody(clientCertificatePEM)
+	if err != nil {
+		return err
+	}
 	client := esperruntime.NewHTTPClient(credentials)
-	requestPath := remoteADBCollectionPath(enterpriseID, deviceID)
-	session, err := createRemoteADBSession(command.Context(), client, requestPath, clientCertificatePEM)
+	session, err := createRemoteADBSession(command.Context(), client, requestPath, sessionBody)
 	if err != nil {
 		return err
 	}
@@ -200,14 +211,14 @@ func runConnect(command *cobra.Command, options *esperruntime.GlobalOptions, dev
 			return err
 		}
 	}
-	tlsConfig, negativeSerial, err := pinnedTLSConfig(clientCertificate, deviceCertificatePEM)
+	tlsConfig, err := pinnedTLSConfig(clientCertificate, deviceCertificatePEM)
 	if err != nil {
 		return esperruntime.NewError(esperruntime.CategoryAPI, err)
 	}
 
 	signalContext, stopSignals := signal.NotifyContext(command.Context(), os.Interrupt)
 	defer stopSignals()
-	relayConnection, err := dialTLS(signalContext, net.JoinHostPort(relayHost, strconv.Itoa(relayPort)), tlsConfig, negativeSerial)
+	relayConnection, err := dialTLS(signalContext, net.JoinHostPort(relayHost, strconv.Itoa(relayPort)), tlsConfig)
 	if err != nil {
 		return esperruntime.NewError(esperruntime.CategoryNetwork, err)
 	}
@@ -239,6 +250,18 @@ func runConnect(command *cobra.Command, options *esperruntime.GlobalOptions, dev
 		return esperruntime.NewError(esperruntime.CategoryNetwork, bridgeErr)
 	}
 	return nil
+}
+
+func secureADBApprovalSpec(credentials esperruntime.Credentials, enterpriseID, deviceID string, forceEnable bool, requestPath string) (esperruntime.ApprovalSpec, error) {
+	body, err := esperruntime.EncodeBody(map[string]any{"enterprise_id": enterpriseID, "device_id": deviceID, "force_enable": forceEnable})
+	if err != nil {
+		return esperruntime.ApprovalSpec{}, err
+	}
+	spec := esperruntime.ApprovalSpec{BaseURL: credentials.BaseURL(), Method: http.MethodPost, Path: requestPath, ContentType: "application/json", Body: body}
+	if forceEnable {
+		spec.AdditionalTargets = []esperruntime.ApprovalTarget{{Method: http.MethodPost, Path: enableADBCommandPath(enterpriseID)}}
+	}
+	return spec, nil
 }
 
 func sendEnableADBCommand(ctx context.Context, client *esperruntime.HTTPClient, credentials esperruntime.Credentials, enterpriseID, deviceID string, session remoteADBSession, detailPath string) error {
@@ -273,11 +296,15 @@ func sendEnableADBCommand(ctx context.Context, client *esperruntime.HTTPClient, 
 	if err != nil {
 		return err
 	}
-	path := fmt.Sprintf("/v0/enterprise/%s/command/", url.PathEscape(enterpriseID))
+	path := enableADBCommandPath(enterpriseID)
 	if _, err := client.Do(ctx, http.MethodPost, path, nil, body); err != nil {
 		return fmt.Errorf("send Remote ADB enable command: %w", err)
 	}
 	return nil
+}
+
+func enableADBCommandPath(enterpriseID string) string {
+	return fmt.Sprintf("/v0/enterprise/%s/command/", url.PathEscape(enterpriseID))
 }
 
 func defaultCertificatesDirectory() (string, error) {
@@ -361,11 +388,11 @@ func remoteADBCollectionPath(enterpriseID, deviceID string) string {
 	return fmt.Sprintf("/v0/enterprise/%s/device/%s/remoteadb/", url.PathEscape(enterpriseID), url.PathEscape(deviceID))
 }
 
-func createRemoteADBSession(ctx context.Context, client *esperruntime.HTTPClient, path string, clientCertificate []byte) (remoteADBSession, error) {
-	body, err := esperruntime.EncodeBody(map[string]string{"client_certificate": string(clientCertificate)})
-	if err != nil {
-		return remoteADBSession{}, err
-	}
+func remoteADBSessionBody(clientCertificate []byte) ([]byte, error) {
+	return esperruntime.EncodeBody(map[string]string{"client_certificate": string(clientCertificate)})
+}
+
+func createRemoteADBSession(ctx context.Context, client *esperruntime.HTTPClient, path string, body []byte) (remoteADBSession, error) {
 	response, err := client.Do(ctx, http.MethodPost, path, nil, body)
 	if err != nil {
 		return remoteADBSession{}, err
@@ -449,10 +476,10 @@ func resolveRelayHost(ctx context.Context, session remoteADBSession) (string, er
 	return addresses[0], nil
 }
 
-func pinnedTLSConfig(clientCertificate tls.Certificate, deviceCertificatePEM []byte) (*tls.Config, bool, error) {
-	roots, negativeSerial, err := deviceCertificatePool(deviceCertificatePEM)
+func pinnedTLSConfig(clientCertificate tls.Certificate, deviceCertificatePEM []byte) (*tls.Config, error) {
+	roots, err := deviceCertificatePool(deviceCertificatePEM)
 	if err != nil {
-		return nil, false, err
+		return nil, err
 	}
 	return &tls.Config{
 		MinVersion:         tls.VersionTLS12,
@@ -483,90 +510,48 @@ func pinnedTLSConfig(clientCertificate tls.Certificate, deviceCertificatePEM []b
 			}
 			return nil
 		},
-	}, negativeSerial, nil
+	}, nil
 }
 
-func deviceCertificatePool(data []byte) (*x509.CertPool, bool, error) {
+func deviceCertificatePool(data []byte) (*x509.CertPool, error) {
 	roots := x509.NewCertPool()
 	rest := bytes.TrimSpace(data)
 	count := 0
-	negativeSerial := false
 	for len(rest) > 0 {
 		block, remaining := pem.Decode(rest)
 		if block == nil || block.Type != "CERTIFICATE" {
-			return nil, false, fmt.Errorf("device certificate is not valid PEM")
+			return nil, fmt.Errorf("device certificate is not valid PEM")
 		}
-		certificate, negative, err := parseDeviceCertificate(block.Bytes)
+		certificate, err := parseDeviceCertificate(block.Bytes)
 		if err != nil {
-			return nil, false, fmt.Errorf("parse device certificate: %w", err)
+			return nil, fmt.Errorf("parse device certificate: %w", err)
 		}
-		negativeSerial = negativeSerial || negative
 		roots.AddCert(certificate)
 		count++
 		rest = bytes.TrimSpace(remaining)
 	}
 	if count == 0 {
-		return nil, false, fmt.Errorf("device certificate is not valid PEM")
+		return nil, fmt.Errorf("device certificate is not valid PEM")
 	}
-	return roots, negativeSerial, nil
+	return roots, nil
 }
 
-func parseDeviceCertificate(raw []byte) (*x509.Certificate, bool, error) {
+func parseDeviceCertificate(raw []byte) (*x509.Certificate, error) {
 	certificate, err := x509.ParseCertificate(raw)
-	if err == nil || !strings.Contains(err.Error(), "negative serial number") {
-		return certificate, false, err
+	if err != nil && strings.Contains(err.Error(), "negative serial number") {
+		return nil, fmt.Errorf("negative serial device certificates are not supported: %w", err)
 	}
-	// Device certificates generated by the legacy relay can have negative serials.
-	// Go 1.23 offers this compatibility switch without changing chain verification.
-	var parsed *x509.Certificate
-	if err := withNegativeSerialCompatibility(func() error {
-		var parseErr error
-		parsed, parseErr = x509.ParseCertificate(raw)
-		return parseErr
-	}); err != nil {
-		return nil, false, err
-	}
-	return parsed, true, nil
+	return certificate, err
 }
 
-func withNegativeSerialCompatibility(run func() error) error {
-	negativeSerialCompatibilityMutex.Lock()
-	defer negativeSerialCompatibilityMutex.Unlock()
-	original, hadOriginal := os.LookupEnv("GODEBUG")
-	settings := strings.Split(os.Getenv("GODEBUG"), ",")
-	filtered := make([]string, 0, len(settings)+1)
-	for _, setting := range settings {
-		if setting != "" && !strings.HasPrefix(setting, "x509negativeserial=") {
-			filtered = append(filtered, setting)
-		}
-	}
-	filtered = append(filtered, "x509negativeserial=1")
-	if err := os.Setenv("GODEBUG", strings.Join(filtered, ",")); err != nil {
-		return fmt.Errorf("enable negative X.509 serial compatibility: %w", err)
-	}
-	defer func() {
-		if hadOriginal {
-			_ = os.Setenv("GODEBUG", original)
-		} else {
-			_ = os.Unsetenv("GODEBUG")
-		}
-	}()
-	return run()
-}
-
-func dialTLS(ctx context.Context, address string, config *tls.Config, negativeSerial bool) (*tls.Conn, error) {
+func dialTLS(ctx context.Context, address string, config *tls.Config) (*tls.Conn, error) {
 	dialer := &net.Dialer{Timeout: 30 * time.Second}
 	connection, err := dialer.DialContext(ctx, "tcp", address)
 	if err != nil {
 		return nil, fmt.Errorf("connect to secure ADB relay: %w", err)
 	}
 	secureConnection := tls.Client(connection, config)
-	handshake := func() error { return secureConnection.HandshakeContext(ctx) }
-	if negativeSerial {
-		err = withNegativeSerialCompatibility(handshake)
-	} else {
-		err = handshake()
-	}
+	err = secureConnection.HandshakeContext(ctx)
 	if err != nil {
 		connection.Close()
 		return nil, fmt.Errorf("perform secure ADB TLS handshake: %w", err)
@@ -623,7 +608,7 @@ func bridge(ctx context.Context, local, relay net.Conn) (int64, error) {
 		select {
 		case result := <-results:
 			bytesCopied += result.bytes
-			if result.err != nil && firstErr == nil && !strings.Contains(result.err.Error(), "use of closed network connection") {
+			if result.err != nil && firstErr == nil && !errors.Is(result.err, net.ErrClosed) {
 				firstErr = result.err
 			}
 		case <-ctx.Done():

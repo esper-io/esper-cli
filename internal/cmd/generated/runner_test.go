@@ -2,8 +2,12 @@ package generated
 
 import (
 	"bytes"
+	"context"
+	"errors"
 	"mime"
 	"mime/multipart"
+	"net/http"
+	"net/http/httptest"
 	"os"
 	"path/filepath"
 	"strings"
@@ -73,6 +77,83 @@ func TestRequiredBodies(t *testing.T) {
 				t.Fatalf("bodyFor() = %s, %v", body, err)
 			}
 		})
+	}
+}
+
+func TestPathValuesAreEscaped(t *testing.T) {
+	operation := Operation{Path: "/devices/{device_id}/events/{event_id}", Parameters: []Parameter{{Name: "device_id", In: "path"}, {Name: "event_id", In: "path"}}}
+	path := replacePathValues(operation, map[string]string{"device_id": "device/other", "event_id": "../event"})
+	if path != "/devices/device%2Fother/events/..%2Fevent" {
+		t.Fatalf("replacePathValues() = %q", path)
+	}
+
+	resourcePath := resourcePathForParameter("/enterprise/{enterprise_id}/policy/", "enterprise_id", map[string]string{"enterprise_id": "enterprise/other"})
+	if resourcePath != "/enterprise/enterprise%2Fother/" {
+		t.Fatalf("resourcePathForParameter() = %q", resourcePath)
+	}
+}
+
+func TestBodyRejectsInvalidScalarValues(t *testing.T) {
+	for _, test := range []struct {
+		name, kind, value string
+	}{
+		{name: "boolean", kind: "boolean", value: "not-a-bool"},
+		{name: "integer", kind: "integer", value: "123oops"},
+		{name: "number", kind: "number", value: "not-a-number"},
+		{name: "non-finite number", kind: "number", value: "NaN"},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			operation := Operation{Body: &Body{MediaType: "application/json", Properties: []Property{{Name: "value", Type: test.kind}}}}
+			command := &cobra.Command{Use: "create"}
+			addFlags(command, []Operation{operation})
+			if err := command.Flags().Set("value", test.value); err != nil {
+				t.Fatal(err)
+			}
+			_, _, err := bodyFor(command, operation)
+			if err == nil || esperruntime.ExitCode(err) != 2 {
+				t.Fatalf("bodyFor() error = %v", err)
+			}
+		})
+	}
+}
+
+func TestAllPagesRejectsRepeatedNextURL(t *testing.T) {
+	requests := 0
+	server := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, _ *http.Request) {
+		requests++
+		_, _ = writer.Write([]byte(`{"results":[],"next":"/devices?offset=1"}`))
+	}))
+	defer server.Close()
+
+	client := &esperruntime.HTTPClient{BaseURL: server.URL, Client: server.Client(), Retry: esperruntime.RetryPolicy{MaxAttempts: 1}}
+	command := &cobra.Command{}
+	command.SetContext(context.Background())
+	_, err := allPages(command, client, Operation{Method: http.MethodGet, Pagination: "limit-offset"}, []byte(`{"results":[],"next":"/devices?offset=1"}`))
+	if err == nil || esperruntime.ErrorCategory(err) != esperruntime.CategoryAPI {
+		t.Fatalf("allPages() error = %v", err)
+	}
+	if requests != 1 {
+		t.Fatalf("requests = %d, want 1", requests)
+	}
+}
+
+func TestAllPagesRejectsPageLimit(t *testing.T) {
+	requests := 0
+	server := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, _ *http.Request) {
+		requests++
+		_, _ = writer.Write([]byte(`{"results":[],"next":"/devices?offset=2"}`))
+	}))
+	defer server.Close()
+
+	client := &esperruntime.HTTPClient{BaseURL: server.URL, Client: server.Client(), Retry: esperruntime.RetryPolicy{MaxAttempts: 1}}
+	command := &cobra.Command{}
+	command.SetContext(context.Background())
+	_, err := allPagesWithLimit(command, client, Operation{Method: http.MethodGet, Pagination: "limit-offset"}, []byte(`{"results":[],"next":"/devices?offset=1"}`), 1)
+	if err == nil || !strings.Contains(err.Error(), "pagination exceeded 1 pages") {
+		t.Fatalf("allPagesWithLimit() error = %v", err)
+	}
+	if requests != 1 {
+		t.Fatalf("requests = %d, want 1", requests)
 	}
 }
 
@@ -303,6 +384,53 @@ func TestAliasesDoNotCreateRoutes(t *testing.T) {
 	group := groups["geofence\x00get"]
 	if len(groups) != 1 || len(group) != 1 || group[0].OperationID != "canonical" {
 		t.Fatalf("executable groups = %#v", groups)
+	}
+}
+
+func TestWriteRequiresApprovalEvenWithYes(t *testing.T) {
+	requests := 0
+	server := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
+		requests++
+		writer.Header().Set("Content-Type", "application/json")
+		_, _ = writer.Write([]byte(`{}`))
+	}))
+	defer server.Close()
+	t.Setenv(esperruntime.CredentialsFileEnvironment, filepath.Join(t.TempDir(), "creds.json"))
+	store, err := esperruntime.NewStateStore()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := store.Save(esperruntime.State{Config: esperruntime.Config{Environment: server.URL, APIKey: "fixture-key"}}); err != nil {
+		t.Fatal(err)
+	}
+	operation := Operation{Command: []string{"thing", "create"}, Method: http.MethodPost, Path: "/things", SuccessMedia: "application/json"}
+	runCommand := func() error {
+		root := &cobra.Command{Use: "espercli", SilenceErrors: true, SilenceUsage: true}
+		options := &esperruntime.GlobalOptions{}
+		root.PersistentFlags().BoolVarP(&options.Yes, "yes", "y", false, "")
+		addCommand(root, operation.Command, []Operation{operation}, options)
+		root.SetArgs([]string{"thing", "create", "--yes"})
+		return root.Execute()
+	}
+	if err := runCommand(); err == nil || esperruntime.ExitCode(err) != 2 || requests != 0 {
+		t.Fatalf("unapproved write error=%v requests=%d", err, requests)
+	}
+	approvalStore, err := esperruntime.NewApprovalStore()
+	if err != nil {
+		t.Fatal(err)
+	}
+	request, _, err := approvalStore.Request(esperruntime.ApprovalSpec{BaseURL: server.URL, Method: http.MethodPost, Path: "/things", ContentType: "application/json", Query: map[string][]string{}, Headers: map[string][]string{}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := approvalStore.Approve(request.ID); err != nil {
+		t.Fatal(err)
+	}
+	if err := runCommand(); err != nil || requests != 1 {
+		t.Fatalf("approved write error=%v requests=%d", err, requests)
+	}
+	if err := runCommand(); err == nil || !errors.Is(err, esperruntime.ErrUsage) && esperruntime.ExitCode(err) != 2 || requests != 1 {
+		t.Fatalf("reused approval error=%v requests=%d", err, requests)
 	}
 }
 

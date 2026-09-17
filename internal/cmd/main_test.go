@@ -16,7 +16,9 @@ func TestMain(m *testing.M) {
 	_ = os.Setenv(esperruntime.CredentialsFileEnvironment, filepath.Join(directory, "creds.json"))
 	_ = os.Unsetenv(esperruntime.EnvironmentVariable)
 	_ = os.Unsetenv(esperruntime.APIKeyVariable)
+	restoreApproval := esperruntime.SetApprovalOverrideForTesting(func(esperruntime.ApprovalSpec) error { return nil })
 	code := m.Run()
+	restoreApproval()
 	_ = os.RemoveAll(directory)
 	os.Exit(code)
 }

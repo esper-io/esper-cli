@@ -82,7 +82,7 @@ func TestReportTelemetryOperationCoverage(t *testing.T) {
 		"getSubscriptionReport":    {"legacy", "GET", "/enterprise/report/subscription/{subscription_id}/", "subscription-report", "get", "none", "", "application/json", []string{"subscription-report", "get"}, false},
 		"updateSubscriptionReport": {"legacy", "PUT", "/enterprise/report/subscription/{subscription_id}/", "subscription-report", "update", "none", "", "application/json", []string{"subscription-report", "update"}, false},
 		"patchSubscriptionReport":  {"legacy", "PATCH", "/enterprise/report/subscription/{subscription_id}/", "subscription-report", "patch", "none", "", "application/json", []string{"subscription-report", "patch"}, false},
-		"deleteSubscriptionReport": {"legacy", "DELETE", "/enterprise/report/subscription/{subscription_id}/", "subscription-report", "delete", "none", "", "application/json", []string{"subscription-report", "delete"}, true},
+		"deleteSubscriptionReport": {"legacy", "DELETE", "/enterprise/report/subscription/{subscription_id}/", "subscription-report", "delete", "none", "", "", []string{"subscription-report", "delete"}, true},
 		"getReportTypes":           {"v0", "GET", "/report/v0/report-types", "report-type", "list", "none", "", "application/json", []string{"report-type", "list"}, false},
 		"createReportStatus":       {"v0", "POST", "/report/v0/reports", "report-status", "create", "none", "", "application/json", []string{"report-status", "create"}, false},
 		"getReportStatus":          {"v0", "GET", "/report/v0/reports/{report_id}", "report-status", "get", "none", "", "application/json", []string{"report-status", "get"}, false},

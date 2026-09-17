@@ -71,7 +71,7 @@ func renderSkill(operations []generated.Operation) []byte {
 	output.WriteString("## Operating Rules\n\n")
 	output.WriteString("1. Run `espercli <command> --help` before execution when required arguments or flags are not explicit below. Never invent flags.\n")
 	output.WriteString("2. Use `--json` when parsing output. Keep stdout machine-readable and use exit codes to detect failure.\n")
-	output.WriteString("3. Ask for explicit confirmation before destructive operations. Add `--yes` only after the user confirms.\n")
+	output.WriteString("3. For every API write, wait for the user to run `espercli approval approve <id>` from their terminal. Never run approval approve yourself; `--yes` does not bypass human approval.\n")
 	output.WriteString("4. Prefer `--all` only when the user asks for complete paginated results.\n")
 	output.WriteString("5. Use `--environment` and `--api-key` only when the user explicitly supplies overrides; otherwise rely on the configured environment.\n")
 	output.WriteString("6. Do not call an API operation merely to discover whether it is safe. Use help and the command reference.\n\n")
@@ -81,12 +81,14 @@ func renderSkill(operations []generated.Operation) []byte {
 	output.WriteString("- `espercli context set <device|app|group|enterprise> <id>` - Set active context.\n")
 	output.WriteString("- `espercli context get [device|app|group|enterprise]` - Show active context.\n")
 	output.WriteString("- `espercli context clear <device|app|group|enterprise>|--all` - Clear active context.\n")
+	output.WriteString("- `espercli approval show <id>` - Show a sanitized pending API write.\n")
+	output.WriteString("- `espercli approval approve <id>` - Human-only terminal approval for one pending API write.\n")
 	output.WriteString("- `espercli discover <query-or-docs-url>` - Find commands by name, request fields, OpenAPI metadata, or an api.esper.io documentation URL.\n")
 	output.WriteString("- `espercli secureadb connect --device <id>` - Open a pinned mutual-TLS ADB relay.\n")
 	output.WriteString("- `espercli completion <bash|fish|powershell|zsh>` - Write a shell completion script to stdout.\n")
 	output.WriteString("- `espercli version` - Show build version, commit, and date.\n\n")
 	output.WriteString("## Spec-Generated Operations\n\n")
-	output.WriteString("Commands marked **destructive** require confirmation or `--yes`. Use each command's `--help` for positional arguments, request-body flags, nested body fields, scope flags, and pagination options. `espercli api <generation> ...` accesses older colliding API generations; it is not a general API escape hatch.\n")
+	output.WriteString("All API writes require a one-time human approval. Commands marked **destructive** also require confirmation unless `--yes` is supplied after approval. Use each command's `--help` for positional arguments, request-body flags, nested body fields, scope flags, and pagination options. `espercli api <generation> ...` accesses older colliding API generations; it is not a general API escape hatch.\n")
 
 	currentGroup := ""
 	for _, path := range paths {

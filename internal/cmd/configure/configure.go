@@ -5,21 +5,24 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"os"
 	"strings"
 
 	esperruntime "github.com/esper-io/esper-cli/internal/runtime"
 	"github.com/spf13/cobra"
+	"golang.org/x/term"
 )
 
 type configView struct {
-	Environment string `json:"environment"`
-	APIKey      string `json:"api_key"`
+	TenantName   string `json:"tenant_name"`
+	EnterpriseID string `json:"enterprise_id"`
+	APIKey       string `json:"api_key"`
 }
 
 func NewCommand(options *esperruntime.GlobalOptions) *cobra.Command {
 	command := &cobra.Command{
 		Use:   "configure",
-		Short: "Configure the Esper environment and API key",
+		Short: "Configure the Esper tenant name, enterprise ID, and API key",
 		Args:  cobra.NoArgs,
 		RunE: func(command *cobra.Command, _ []string) error {
 			return runConfigure(command, options)
@@ -27,7 +30,7 @@ func NewCommand(options *esperruntime.GlobalOptions) *cobra.Command {
 	}
 	command.AddCommand(&cobra.Command{
 		Use:   "show",
-		Short: "Show the configured environment and redacted API key",
+		Short: "Show the configured tenant name, enterprise ID, and redacted API key",
 		Args:  cobra.NoArgs,
 		RunE: func(command *cobra.Command, _ []string) error {
 			return runShow(command, options)
@@ -37,18 +40,23 @@ func NewCommand(options *esperruntime.GlobalOptions) *cobra.Command {
 }
 
 func runConfigure(command *cobra.Command, options *esperruntime.GlobalOptions) error {
-	environment := strings.TrimSpace(options.Environment)
+	tenantName := strings.TrimSpace(options.Environment)
 	apiKey := strings.TrimSpace(options.APIKey)
-	reader := bufio.NewReader(command.InOrStdin())
+	input := command.InOrStdin()
+	reader := bufio.NewReader(input)
 	var err error
-	if environment == "" {
-		environment, err = prompt(reader, command.ErrOrStderr(), "Environment")
+	if tenantName == "" {
+		tenantName, err = prompt(reader, command.ErrOrStderr(), "Tenant name")
 		if err != nil {
 			return esperruntime.NewError(esperruntime.CategoryUsage, err)
 		}
 	}
+	enterpriseID, err := prompt(reader, command.ErrOrStderr(), "Enterprise ID")
+	if err != nil {
+		return esperruntime.NewError(esperruntime.CategoryUsage, err)
+	}
 	if apiKey == "" {
-		apiKey, err = prompt(reader, command.ErrOrStderr(), "API key")
+		apiKey, err = promptAPIKey(input, reader, command.ErrOrStderr())
 		if err != nil {
 			return esperruntime.NewError(esperruntime.CategoryUsage, err)
 		}
@@ -58,7 +66,8 @@ func runConfigure(command *cobra.Command, options *esperruntime.GlobalOptions) e
 	if err != nil {
 		return err
 	}
-	state.Config.Environment = environment
+	state.Config.Environment = tenantName
+	state.Config.EnterpriseID = enterpriseID
 	state.Config.APIKey = apiKey
 	if err := store.Save(state); err != nil {
 		return esperruntime.NewError(esperruntime.CategoryAuth, err)
@@ -75,11 +84,11 @@ func runShow(command *cobra.Command, options *esperruntime.GlobalOptions) error 
 	if state.Config.Environment == "" || state.Config.APIKey == "" {
 		return esperruntime.NewError(esperruntime.CategoryAuth, fmt.Errorf("Esper credentials are not configured"))
 	}
-	view := configView{Environment: state.Config.Environment, APIKey: redact(state.Config.APIKey)}
+	view := configView{TenantName: state.Config.Environment, EnterpriseID: state.Config.EnterpriseID, APIKey: redact(state.Config.APIKey)}
 	if options.JSON {
 		return json.NewEncoder(command.OutOrStdout()).Encode(view)
 	}
-	_, err = fmt.Fprintf(command.OutOrStdout(), "environment: %s\napi_key: %s\n", view.Environment, view.APIKey)
+	_, err = fmt.Fprintf(command.OutOrStdout(), "tenant_name: %s\nenterprise_id: %s\napi_key: %s\n", view.TenantName, view.EnterpriseID, view.APIKey)
 	return err
 }
 
@@ -95,6 +104,24 @@ func loadState() (*esperruntime.StateStore, esperruntime.State, error) {
 	return store, state, nil
 }
 
+func promptAPIKey(input io.Reader, reader *bufio.Reader, output io.Writer) (string, error) {
+	file, ok := input.(*os.File)
+	if !ok || !term.IsTerminal(int(file.Fd())) {
+		return prompt(reader, output, "API key")
+	}
+	if _, err := fmt.Fprint(output, "API key: "); err != nil {
+		return "", err
+	}
+	value, err := term.ReadPassword(int(file.Fd()))
+	if _, writeErr := fmt.Fprintln(output); writeErr != nil {
+		return "", writeErr
+	}
+	if err != nil {
+		return "", fmt.Errorf("read API key: %w", err)
+	}
+	return requiredPromptValue(string(value), "API key")
+}
+
 func prompt(reader *bufio.Reader, output io.Writer, label string) (string, error) {
 	if _, err := fmt.Fprintf(output, "%s: ", label); err != nil {
 		return "", err
@@ -103,6 +130,10 @@ func prompt(reader *bufio.Reader, output io.Writer, label string) (string, error
 	if err != nil && len(value) == 0 {
 		return "", fmt.Errorf("read %s: %w", strings.ToLower(label), err)
 	}
+	return requiredPromptValue(value, label)
+}
+
+func requiredPromptValue(value, label string) (string, error) {
 	value = strings.TrimSpace(value)
 	if value == "" {
 		return "", fmt.Errorf("%s cannot be empty", strings.ToLower(label))

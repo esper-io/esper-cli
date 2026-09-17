@@ -100,6 +100,18 @@ func TestPipelineCommandAndOperationAlwaysUseSideFamilyPrefix(t *testing.T) {
 	}
 }
 
+func TestSuccessMediaReturnsEmptyForNoContent(t *testing.T) {
+	if media := successMedia(map[string]response{"204": {}}); media != "" {
+		t.Fatalf("successMedia() = %q, want empty", media)
+	}
+}
+
+func TestValidateGenerationRejectsUnknownValue(t *testing.T) {
+	if err := validateGeneration("v99"); err == nil {
+		t.Fatal("validateGeneration() error = nil")
+	}
+}
+
 func TestDeriveResponseEnvelopesByServiceFamily(t *testing.T) {
 	operations := []generatedOperation{
 		{Path: "/v2/devices/", Pagination: "apps-envelope"},

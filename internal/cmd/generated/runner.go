@@ -4,11 +4,13 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"math"
 	"mime/multipart"
 	"net/url"
 	"os"
 	"path/filepath"
 	"sort"
+	"strconv"
 	"strings"
 
 	esperruntime "github.com/esper-io/esper-cli/internal/runtime"
@@ -67,6 +69,8 @@ type BodyField struct {
 }
 
 var generatedOperations []Operation
+
+const maximumPaginationPages = 10000
 
 const usageTemplate = `Usage:{{if .Runnable}}
   {{.UseLine}}{{end}}{{if .HasAvailableSubCommands}}
@@ -385,15 +389,6 @@ func run(command *cobra.Command, args []string, operations []Operation, options 
 	if err != nil {
 		return err
 	}
-	if operation.Destructive {
-		ok, err := esperruntime.Confirm(command.InOrStdin(), command.ErrOrStderr(), requestPath, 1, options.Yes)
-		if err != nil {
-			return err
-		}
-		if !ok {
-			return esperruntime.NewError(esperruntime.CategoryUsage, fmt.Errorf("operation cancelled"))
-		}
-	}
 	credentials, err := esperruntime.ResolveCredentials(state.Config, options.Environment, options.APIKey)
 	if err != nil {
 		return err
@@ -419,8 +414,30 @@ func run(command *cobra.Command, args []string, operations []Operation, options 
 			}
 		}
 	}
+	if isWriteOperation(operation) {
+		request, approved, err := esperruntime.RequireApproval(esperruntime.ApprovalSpec{BaseURL: credentials.BaseURL(), Method: operation.Method, Path: requestPath, ContentType: contentType, Query: query, Headers: headers, Body: body})
+		if err != nil {
+			return esperruntime.NewError(esperruntime.CategoryAuth, err)
+		}
+		if !approved {
+			return esperruntime.NewError(esperruntime.CategoryUsage, fmt.Errorf("approval required for %s %s\nreview: espercli approval show %s\nhuman approval: espercli approval approve %s", operation.Method, requestPath, request.ID, request.ID))
+		}
+	}
+	if operation.Destructive {
+		ok, err := esperruntime.Confirm(command.InOrStdin(), command.ErrOrStderr(), requestPath, 1, options.Yes)
+		if err != nil {
+			return err
+		}
+		if !ok {
+			return esperruntime.NewError(esperruntime.CategoryUsage, fmt.Errorf("operation cancelled"))
+		}
+	}
 	client := esperruntime.NewHTTPClient(credentials)
-	response, err := client.DoWithContentTypeAndHeaders(command.Context(), operation.Method, requestPath, query, headers, body, contentType, operation.SuccessMedia)
+	accept := operation.SuccessMedia
+	if accept == "" {
+		accept = "application/json"
+	}
+	response, err := client.DoWithContentTypeAndHeaders(command.Context(), operation.Method, requestPath, query, headers, body, contentType, accept)
 	if err != nil {
 		return err
 	}
@@ -442,6 +459,10 @@ func run(command *cobra.Command, args []string, operations []Operation, options 
 		return esperruntime.NewError(esperruntime.CategoryAPI, err)
 	}
 	return esperruntime.WriteHuman(command.OutOrStdout(), response)
+}
+
+func isWriteOperation(operation Operation) bool {
+	return operation.Method == "POST" || operation.Method == "PUT" || operation.Method == "PATCH" || operation.Method == "DELETE"
 }
 
 func writeRawResponse(command *cobra.Command, response []byte) error {
@@ -484,11 +505,19 @@ func formatFlagNames(names []string) string {
 }
 
 func allPages(command *cobra.Command, client *esperruntime.HTTPClient, operation Operation, response []byte) ([]byte, error) {
+	return allPagesWithLimit(command, client, operation, response, maximumPaginationPages)
+}
+
+func allPagesWithLimit(command *cobra.Command, client *esperruntime.HTTPClient, operation Operation, response []byte, limit int) ([]byte, error) {
 	if operation.Pagination == "none" {
 		return response, nil
 	}
 	var results []json.RawMessage
-	for {
+	seenNext := map[string]struct{}{}
+	for pageCount := 0; ; pageCount++ {
+		if pageCount >= limit {
+			return nil, esperruntime.NewError(esperruntime.CategoryAPI, fmt.Errorf("pagination exceeded %d pages", limit))
+		}
 		page, err := unwrapPage(operation.Pagination, response)
 		if err != nil {
 			return nil, esperruntime.NewError(esperruntime.CategoryAPI, err)
@@ -501,6 +530,14 @@ func allPages(command *cobra.Command, client *esperruntime.HTTPClient, operation
 		if err != nil || next.Path == "" {
 			return nil, esperruntime.NewError(esperruntime.CategoryAPI, fmt.Errorf("invalid pagination next URL %q", page.Next))
 		}
+		nextKey := next.EscapedPath()
+		if query := next.Query().Encode(); query != "" {
+			nextKey += "?" + query
+		}
+		if _, seen := seenNext[nextKey]; seen {
+			return nil, esperruntime.NewError(esperruntime.CategoryAPI, fmt.Errorf("pagination next URL repeated: %q", page.Next))
+		}
+		seenNext[nextKey] = struct{}{}
 		response, err = client.DoWithContentType(command.Context(), operation.Method, next.EscapedPath(), next.Query(), nil, "application/json")
 		if err != nil {
 			return nil, err
@@ -709,7 +746,7 @@ func replacePathValues(operation Operation, values map[string]string) string {
 			continue
 		}
 		name := "{" + parameter.Name + "}"
-		result = strings.ReplaceAll(result, name, values[parameter.Name])
+		result = strings.ReplaceAll(result, name, url.PathEscape(values[parameter.Name]))
 	}
 	return result
 }
@@ -832,7 +869,11 @@ func bodyForValues(command *cobra.Command, operation Operation, pathValues map[s
 	autoValues := map[string]any{}
 	// Optional bodies remain absent unless the caller supplies a body input.
 	if operation.Body.Required || bodyFlag || propertiesSet {
-		autoValues = bodyAutoFill(operation, pathValues)
+		var err error
+		autoValues, err = bodyAutoFill(operation, pathValues)
+		if err != nil {
+			return nil, "", err
+		}
 	}
 	if operation.Body.Required && !operation.Body.Empty && !bodyFlag && !propertiesSet && len(autoValues) == 0 {
 		return nil, "", esperruntime.NewError(esperruntime.CategoryUsage, fmt.Errorf("required request body needs at least one input: %s", strings.Join(bodyInputFlags(operation.Body), ", ")))
@@ -858,7 +899,11 @@ func bodyForValues(command *cobra.Command, operation Operation, pathValues map[s
 		if !command.Flags().Changed(kebab(property.Name)) {
 			continue
 		}
-		values[property.Name] = typedValue(flagString(command, property.Name), property.Type)
+		value, err := typedValue(flagString(command, property.Name), property.Type)
+		if err != nil {
+			return nil, "", esperruntime.NewError(esperruntime.CategoryUsage, err)
+		}
+		values[property.Name] = value
 	}
 	if operation.Body.Required || propertiesSet {
 		for _, property := range operation.Body.Properties {
@@ -888,31 +933,35 @@ func bodyInputFlags(body *Body) []string {
 	return flags
 }
 
-func bodyAutoFill(operation Operation, pathValues map[string]string) map[string]any {
+func bodyAutoFill(operation Operation, pathValues map[string]string) (map[string]any, error) {
 	values := map[string]any{}
 	for _, fill := range operation.Body.AutoFill {
 		if value, ok := pathValues[fill.Parameter]; ok {
 			if isURLFormat(fill.Format) && operation.Body.MediaType == "application/json" {
 				value = resourcePathForParameter(operation.Path, fill.Parameter, pathValues)
 			}
-			values[fill.Name] = typedValue(value, fill.Type)
+			typed, err := typedValue(value, fill.Type)
+			if err != nil {
+				return nil, esperruntime.NewError(esperruntime.CategoryUsage, err)
+			}
+			values[fill.Name] = typed
 		}
 	}
-	return values
+	return values, nil
 }
 
 func resourcePathForParameter(operationPath, parameter string, pathValues map[string]string) string {
 	marker := "{" + parameter + "}"
 	index := strings.Index(operationPath, marker)
 	if index < 0 {
-		return pathValues[parameter]
+		return url.PathEscape(pathValues[parameter])
 	}
 	path := operationPath[:index+len(marker)]
 	if !strings.HasSuffix(path, "/") {
 		path += "/"
 	}
 	for name, value := range pathValues {
-		path = strings.ReplaceAll(path, "{"+name+"}", value)
+		path = strings.ReplaceAll(path, "{"+name+"}", url.PathEscape(value))
 	}
 	return path
 }
@@ -1023,21 +1072,32 @@ func readJSONBody(value string, input io.Reader) ([]byte, error) {
 	}
 	return data, nil
 }
-func typedValue(value, kind string) any {
+func typedValue(value, kind string) (any, error) {
 	if kind == "boolean" {
-		return value == "true"
+		parsed, err := strconv.ParseBool(value)
+		if err != nil {
+			return nil, fmt.Errorf("invalid boolean value %q: %w", value, err)
+		}
+		return parsed, nil
 	}
 	if kind == "integer" {
-		var number int64
-		_, _ = fmt.Sscan(value, &number)
-		return number
+		parsed, err := strconv.ParseInt(value, 10, 64)
+		if err != nil {
+			return nil, fmt.Errorf("invalid integer value %q: %w", value, err)
+		}
+		return parsed, nil
 	}
 	if kind == "number" {
-		var number float64
-		_, _ = fmt.Sscan(value, &number)
-		return number
+		parsed, err := strconv.ParseFloat(value, 64)
+		if err != nil {
+			return nil, fmt.Errorf("invalid number value %q: %w", value, err)
+		}
+		if math.IsNaN(parsed) || math.IsInf(parsed, 0) {
+			return nil, fmt.Errorf("invalid number value %q", value)
+		}
+		return parsed, nil
 	}
-	return value
+	return value, nil
 }
 func flagString(command *cobra.Command, name string) string {
 	value, _ := command.Flags().GetString(kebab(name))

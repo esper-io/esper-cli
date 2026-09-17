@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/esper-io/esper-cli/internal/cmd/approval"
 	"github.com/esper-io/esper-cli/internal/cmd/configure"
 	contextcmd "github.com/esper-io/esper-cli/internal/cmd/context"
 	"github.com/esper-io/esper-cli/internal/cmd/discover"
@@ -27,7 +28,7 @@ func NewRootCommand() *cobra.Command {
 	command.SetUsageTemplate(generated.UsageTemplate("Command groups"))
 	flags := command.PersistentFlags()
 	flags.BoolVarP(&options.JSON, "json", "j", false, "write raw API JSON")
-	flags.BoolVarP(&options.Yes, "yes", "y", false, "skip destructive-operation confirmation")
+	flags.BoolVarP(&options.Yes, "yes", "y", false, "skip destructive y/n prompt after human approval")
 	flags.BoolVarP(&options.Verbose, "verbose", "v", false, "write verbose diagnostics to stderr")
 	flags.BoolVar(&options.NoColor, "no-color", false, "disable colored output")
 	flags.StringVar(&options.Environment, "environment", "", "Esper environment (overrides ESPER_ENVIRONMENT)")
@@ -35,6 +36,7 @@ func NewRootCommand() *cobra.Command {
 	generated.AddCommands(command, options)
 	command.AddCommand(configure.NewCommand(options))
 	command.AddCommand(contextcmd.NewCommand(options))
+	command.AddCommand(approval.NewCommand(options))
 	command.AddCommand(discover.NewCommand(options))
 	command.AddCommand(secureadb.NewCommand(options))
 	addVersionCommand(command, options)

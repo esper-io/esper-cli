@@ -34,7 +34,10 @@ func DefaultRetryPolicy() RetryPolicy {
 
 func (policy RetryPolicy) delay(attempt int, response *http.Response) time.Duration {
 	if response != nil {
-		if seconds, err := strconv.Atoi(response.Header.Get("Retry-After")); err == nil && seconds > 0 {
+		if seconds, err := strconv.ParseInt(response.Header.Get("Retry-After"), 10, 64); err == nil && seconds > 0 {
+			if seconds > int64(policy.MaxWait/time.Second) {
+				return policy.MaxWait
+			}
 			return time.Duration(seconds) * time.Second
 		}
 	}
@@ -51,7 +54,7 @@ func retryableStatus(status int) bool {
 
 func retryableMethod(method string) bool {
 	switch method {
-	case http.MethodGet, http.MethodHead, http.MethodOptions, http.MethodPut, http.MethodDelete:
+	case http.MethodGet, http.MethodHead, http.MethodOptions, http.MethodPut:
 		return true
 	default:
 		return false

@@ -110,6 +110,16 @@ func TestSendEnableADBCommand(t *testing.T) {
 	}
 }
 
+func TestSecureADBApprovalSpecIncludesEnableCommandTarget(t *testing.T) {
+	spec, err := secureADBApprovalSpec(esperruntime.Credentials{Environment: "https://example.test"}, "enterprise-1", "device-1", true, "/v0/enterprise/enterprise-1/device/device-1/remoteadb/")
+	if err != nil || spec.Method != http.MethodPost || spec.Path == "" || !strings.Contains(string(spec.Body), `"force_enable":true`) || strings.Contains(string(spec.Body), "certificate") {
+		t.Fatalf("approval spec = %#v, %v", spec, err)
+	}
+	if len(spec.AdditionalTargets) != 1 || spec.AdditionalTargets[0] != (esperruntime.ApprovalTarget{Method: http.MethodPost, Path: "/v0/enterprise/enterprise-1/command/"}) {
+		t.Fatalf("additional approval targets = %#v", spec.AdditionalTargets)
+	}
+}
+
 func TestPrepareCertificatesReplacesFilesWithPrivatePermissions(t *testing.T) {
 	directory := filepath.Join(t.TempDir(), "certs")
 	if err := os.MkdirAll(directory, 0o755); err != nil {
@@ -255,7 +265,7 @@ func TestPinnedTLSConfig(t *testing.T) {
 	_, unrelatedCertificatePEM := newServerCertificate(t, "other.invalid")
 
 	t.Run("accepts pinned certificate without hostname verification", func(t *testing.T) {
-		config, _, err := pinnedTLSConfig(clientCertificate, serverCertificatePEM)
+		config, err := pinnedTLSConfig(clientCertificate, serverCertificatePEM)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -265,7 +275,7 @@ func TestPinnedTLSConfig(t *testing.T) {
 	})
 
 	t.Run("rejects certificate outside pin", func(t *testing.T) {
-		config, _, err := pinnedTLSConfig(clientCertificate, unrelatedCertificatePEM)
+		config, err := pinnedTLSConfig(clientCertificate, unrelatedCertificatePEM)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -275,8 +285,7 @@ func TestPinnedTLSConfig(t *testing.T) {
 	})
 }
 
-func TestPinnedTLSConfigAcceptsCapturedNegativeSerialPEMFormat(t *testing.T) {
-	t.Setenv("GODEBUG", "")
+func TestPinnedTLSConfigRejectsNegativeSerialCertificate(t *testing.T) {
 	clientCertificatePEM, clientKeyPEM, err := generateClientCertificate(time.Now(), cryptorand.Reader)
 	if err != nil {
 		t.Fatal(err)
@@ -292,24 +301,8 @@ func TestPinnedTLSConfigAcceptsCapturedNegativeSerialPEMFormat(t *testing.T) {
 	if _, err := x509.ParseCertificate(serverCertificate.Certificate[0]); err == nil || !strings.Contains(err.Error(), "negative serial number") {
 		t.Fatalf("default parser error = %v, want negative serial rejection", err)
 	}
-	config, negativeSerial, err := pinnedTLSConfig(clientCertificate, serverCertificatePEM)
-	if err != nil {
+	if _, err := pinnedTLSConfig(clientCertificate, serverCertificatePEM); err == nil || !strings.Contains(err.Error(), "negative serial device certificates are not supported") {
 		t.Fatalf("pinnedTLSConfig() error = %v", err)
-	}
-	if !negativeSerial {
-		t.Fatal("negative serial compatibility was not detected")
-	}
-	if err := withNegativeSerialCompatibility(func() error { return localTLSHandshake(config, serverCertificate) }); err != nil {
-		t.Fatalf("TLS handshake error = %v", err)
-	}
-	if os.Getenv("GODEBUG") != "" {
-		t.Fatalf("GODEBUG was not restored: %q", os.Getenv("GODEBUG"))
-	}
-
-	untrustedCertificate, _ := newNegativeSerialServerCertificate(t)
-	err = withNegativeSerialCompatibility(func() error { return localTLSHandshake(config, untrustedCertificate) })
-	if err == nil {
-		t.Fatal("TLS handshake unexpectedly trusted an unpinned negative-serial certificate")
 	}
 }
 

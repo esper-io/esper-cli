@@ -189,6 +189,9 @@ func load(directory string) ([]generatedOperation, error) {
 		if err := json.Unmarshal(data, &spec); err != nil {
 			return nil, fmt.Errorf("decode %s: %w", entry.Name(), err)
 		}
+		if err := validateGeneration(spec.Info.Generation); err != nil {
+			return nil, fmt.Errorf("validate %s: %w", entry.Name(), err)
+		}
 		for apiPath, item := range spec.Paths {
 			for method, operation := range item {
 				if !methods[method] {
@@ -434,7 +437,17 @@ func successMedia(responses map[string]response) string {
 			return mediaType
 		}
 	}
-	return "application/json"
+	return ""
+}
+
+func validateGeneration(generation string) error {
+	if _, ok := coreGenerationRank[generation]; ok {
+		return nil
+	}
+	if _, ok := sideFamilyPrefixes[generation]; ok {
+		return nil
+	}
+	return fmt.Errorf("unsupported API generation %q", generation)
 }
 
 func assignCommands(operations []generatedOperation) {

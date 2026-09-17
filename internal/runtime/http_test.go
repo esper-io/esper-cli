@@ -76,6 +76,41 @@ func TestHTTPClientDoesNotRetryPost(t *testing.T) {
 	}
 }
 
+func TestHTTPClientDoesNotRetryDelete(t *testing.T) {
+	attempts := 0
+	server := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, _ *http.Request) {
+		attempts++
+		http.Error(writer, "temporary", http.StatusServiceUnavailable)
+	}))
+	defer server.Close()
+	client := &HTTPClient{
+		BaseURL: server.URL,
+		Client:  server.Client(),
+		Retry: RetryPolicy{
+			MaxAttempts: 4,
+			Sleep:       func(context.Context, time.Duration) error { return nil },
+		},
+	}
+	_, err := client.Do(context.Background(), http.MethodDelete, "/devices/1", nil, nil)
+	var apiError *APIError
+	if !errors.As(err, &apiError) || apiError.StatusCode != http.StatusServiceUnavailable {
+		t.Fatalf("Do() error = %v", err)
+	}
+	if attempts != 1 {
+		t.Fatalf("attempts = %d, want 1", attempts)
+	}
+}
+
+func TestRetryAfterIsCapped(t *testing.T) {
+	policy := RetryPolicy{InitialWait: time.Second, MaxWait: 8 * time.Second}
+	for _, retryAfter := range []string{"86400", "9223372036854775807"} {
+		response := &http.Response{Header: http.Header{"Retry-After": []string{retryAfter}}}
+		if got := policy.delay(0, response); got != 8*time.Second {
+			t.Fatalf("delay(%q) = %s, want 8s", retryAfter, got)
+		}
+	}
+}
+
 func TestHTTPClientUsesSelectedResponseMedia(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
 		if got := request.Header.Get("Accept"); got != "application/x-pem-file" {
