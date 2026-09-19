@@ -143,9 +143,6 @@ an exclusive iOS contract. `version list` still supports blueprint and tenant-ap
 scopes. Use `--help` for the applicable scope flags; the same command can expose
 different endpoints for different scopes.
 
-The comparison results and decisions are recorded in
-[`.spec/cli-api-consolidation/decisions.md`](.spec/cli-api-consolidation/decisions.md).
-
 ## Human Approval
 
 For example, a create command from an agent or script exits before making an API
