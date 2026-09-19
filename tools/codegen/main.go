@@ -199,6 +199,9 @@ func load(directory string) ([]generatedOperation, error) {
 				if !methods[method] {
 					continue
 				}
+				if commandpolicy.Excluded(strings.ToUpper(method), apiPath) {
+					continue
+				}
 				generated := generatedOperation{Generation: spec.Info.Generation, Method: strings.ToUpper(method), Path: apiPath, Noun: operation.Noun, Verb: operation.Verb, Pagination: operation.Pagination, ResponseEnvelope: operation.Envelope, RequireOneOf: operation.RequireOneOf, Destructive: operation.Destructive, ScopeParent: operation.ScopeParent, Summary: operation.Summary, Description: operation.Description, Tags: operation.Tags, DocsSlugs: operation.DocsSlugs, OperationID: operation.OperationID, AliasOf: operation.AliasOf, SuccessMedia: successMedia(operation.Responses)}
 				if replacement := commandpolicy.Replacement(generated.Method, apiPath); replacement != "" {
 					generated.AliasOf = replacement

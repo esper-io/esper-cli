@@ -36,11 +36,7 @@ func blueprintFixtureTests() []blueprintFixtureTest {
 		{"v2 PUT /v2/blueprints/{blueprint_id}/", "blueprint update", http.MethodPut, "/v2/blueprints/blueprint-1/", `{"name":"Updated warehouse blueprint"}`, "v2-blueprint-update", []string{"blueprint", "update", "blueprint-1", "--body", `{"name":"Updated warehouse blueprint"}`, "--json"}, nil, http.StatusOK, http.StatusBadRequest, false, false, nil},
 		{"v2 DELETE /v2/blueprints/{blueprint_id}/", "blueprint delete", http.MethodDelete, "/v2/blueprints/blueprint-1/", "", "v2-blueprint-delete", []string{"blueprint", "delete", "blueprint-1", "--yes", "--json"}, nil, http.StatusNoContent, http.StatusNotFound, false, true, nil},
 		{"v2 GET /v2/blueprints/{blueprint_id}/versions/{version_id}/", "blueprint-version get", http.MethodGet, "/v2/blueprints/blueprint-1/versions/version-1/", "", "v2-blueprint-version-get", []string{"blueprint-version", "get", "version-1", "--blueprint", "blueprint-1", "--json"}, nil, http.StatusOK, http.StatusNotFound, false, false, nil},
-		{"legacy GET /enterprise/{enterprise_id}/devicegroup/{group_id}/blueprint/", "legacy blueprint list", http.MethodGet, "/enterprise/enterprise-1/devicegroup/group-1/blueprint/", "", "legacy-blueprint-list", []string{"api", "legacy", "blueprint", "list", "--enterprise", "enterprise-1", "--device-group", "group-1", "--limit", "1", "--offset", "0", "--all", "--json"}, url.Values{"limit": {"1"}, "offset": {"0"}}, http.StatusOK, http.StatusBadRequest, true, false, nil},
-		{"legacy POST /enterprise/{enterprise_id}/devicegroup/{group_id}/blueprint/", "legacy blueprint create", http.MethodPost, "/enterprise/enterprise-1/devicegroup/group-1/blueprint/", `{"description":"Created through property flags","name":"Legacy created blueprint"}`, "legacy-blueprint-create", []string{"api", "legacy", "blueprint", "create", "--enterprise", "enterprise-1", "--device-group", "group-1", "--name", "Legacy created blueprint", "--description", "Created through property flags", "--json"}, nil, http.StatusCreated, http.StatusBadRequest, false, false, nil},
-		{"legacy GET /enterprise/{enterprise_id}/devicegroup/{group_id}/blueprint/{blueprint_id}/", "legacy blueprint get", http.MethodGet, "/enterprise/enterprise-1/devicegroup/group-1/blueprint/blueprint-1/", "", "legacy-blueprint-get", []string{"api", "legacy", "blueprint", "get", "blueprint-1", "--enterprise", "enterprise-1", "--device-group", "group-1", "--json"}, nil, http.StatusOK, http.StatusBadRequest, false, false, nil},
 		{"legacy PATCH /enterprise/{enterprise_id}/devicegroup/{group_id}/blueprint/{blueprint_id}/", "legacy blueprint partial-update", http.MethodPatch, "/enterprise/enterprise-1/devicegroup/group-1/blueprint/blueprint-1/", `{"name":"Legacy renamed blueprint"}`, "legacy-blueprint-partial-update", []string{"blueprint", "partial-update", "blueprint-1", "--enterprise", "enterprise-1", "--device-group", "group-1", "--name", "Legacy renamed blueprint", "--json"}, nil, http.StatusOK, http.StatusBadRequest, false, false, nil},
-		{"legacy DELETE /enterprise/{enterprise_id}/devicegroup/{group_id}/blueprint/{blueprint_id}/", "legacy blueprint delete", http.MethodDelete, "/enterprise/enterprise-1/devicegroup/group-1/blueprint/blueprint-1/", "", "legacy-blueprint-delete", []string{"api", "legacy", "blueprint", "delete", "blueprint-1", "--enterprise", "enterprise-1", "--device-group", "group-1", "--yes", "--json"}, nil, http.StatusNoContent, http.StatusUnauthorized, false, true, nil},
 		{"legacy GET /enterprise/{enterprise_id}/devicegroup/{group_id}/blueprint/{blueprint_id}/revisions/", "revision list", http.MethodGet, "/enterprise/enterprise-1/devicegroup/group-1/blueprint/blueprint-1/revisions/", "", "legacy-revision-list", []string{"revision", "list", "--enterprise", "enterprise-1", "--device-group", "group-1", "--blueprint", "blueprint-1", "--limit", "1", "--offset", "0", "--all", "--json"}, url.Values{"limit": {"1"}, "offset": {"0"}}, http.StatusOK, http.StatusBadRequest, true, false, nil},
 		{"legacy GET /enterprise/{enterprise_id}/devicegroup/{group_id}/blueprint/{blueprint_id}/revisions/{revision_id}/", "blueprint-revision get", http.MethodGet, "/enterprise/enterprise-1/devicegroup/group-1/blueprint/blueprint-1/revisions/revision-1/", "", "legacy-blueprint-revision-get", []string{"blueprint-revision", "get", "revision-1", "--enterprise", "enterprise-1", "--device-group", "group-1", "--blueprint", "blueprint-1", "--json"}, nil, http.StatusOK, http.StatusBadRequest, false, false, nil},
 		{"legacy POST /enterprise/{enterprise_id}/devicegroup/{group_id}/blueprint/restore/", "blueprint-revision restore", http.MethodPost, "/enterprise/enterprise-1/devicegroup/group-1/blueprint/restore/", `{"revision_id":"revision-1"}`, "legacy-blueprint-revision-restore", []string{"blueprint-revision", "restore", "--enterprise", "enterprise-1", "--device-group", "group-1", "--revision-id", "revision-1", "--json"}, nil, http.StatusCreated, http.StatusBadRequest, false, false, nil},
@@ -57,8 +53,8 @@ func TestBlueprintOperationCoverage(t *testing.T) {
 		}
 		expected[test.key] = true
 	}
-	if len(expected) != 15 {
-		t.Fatalf("fixture rows = %d, want 15", len(expected))
+	if len(expected) != 11 {
+		t.Fatalf("fixture rows = %d, want 11", len(expected))
 	}
 	actual := map[string]bool{}
 	for _, operation := range generated.Operations() {
@@ -66,7 +62,7 @@ func TestBlueprintOperationCoverage(t *testing.T) {
 			actual[operation.Generation+" "+operation.Method+" "+operation.Path] = true
 		}
 	}
-	if len(actual) != 15 || !reflect.DeepEqual(expected, actual) {
+	if len(actual) != 11 || !reflect.DeepEqual(expected, actual) {
 		t.Fatalf("packet operation keys mismatch: rows=%d generated=%d", len(expected), len(actual))
 	}
 }
@@ -93,7 +89,6 @@ func TestBlueprintInputValidation(t *testing.T) {
 		{"blueprint-revision", "restore", "--enterprise", "enterprise-1", "--device-group", "group-1"},
 		{"blueprint", "upload", "--enterprise", "enterprise-1", "--device-group", "group-1"},
 		{"blueprint-revision", "restore", "--enterprise", "enterprise-1", "--device-group", "group-1", "--body", `{}`, "--revision-id", "revision-1"},
-		{"api", "legacy", "blueprint", "list", "--enterprise", "enterprise-1"},
 	} {
 		command := NewRootCommand()
 		command.SetArgs(arguments)

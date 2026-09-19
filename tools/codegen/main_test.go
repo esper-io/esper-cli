@@ -132,6 +132,52 @@ func TestReviewedInstallationReplacementUsesCanonicalV1(t *testing.T) {
 	}
 }
 
+func TestLegacyOperationsWithNewerEndpointsAreExcluded(t *testing.T) {
+	operations, err := load("../../spec/openapi")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	excluded := map[string]bool{
+		"GET /enterprise/{enterprise_id}/application/":                                          true,
+		"GET /enterprise/{enterprise_id}/application/{application_id}/":                         true,
+		"DELETE /enterprise/{enterprise_id}/application/{application_id}/":                      true,
+		"GET /enterprise/{enterprise_id}/application/{application_id}/version/":                 true,
+		"GET /enterprise/{enterprise_id}/application/{application_id}/version/{version_id}/":    true,
+		"DELETE /enterprise/{enterprise_id}/application/{application_id}/version/{version_id}/": true,
+		"PATCH /enterprise/{enterprise_id}/application/{application_id}/version/{version_id}/":  true,
+		"GET /enterprise/{enterprise_id}/device/":                                               true,
+		"GET /enterprise/{enterprise_id}/device/{device_id}/":                                   true,
+		"GET /enterprise/{enterprise_id}/device/{device_id}/install/":                           true,
+		"GET /enterprise/{enterprise_id}/device/{device_id}/download/eventfeed/":                true,
+		"GET /enterprise/{enterprise_id}/group/{group_id}/download/eventfeed/":                  true,
+		"GET /user/": true,
+		"GET /enterprise/{enterprise_id}/devicegroup/{group_id}/blueprint/":                   true,
+		"POST /enterprise/{enterprise_id}/devicegroup/{group_id}/blueprint/":                  true,
+		"GET /enterprise/{enterprise_id}/devicegroup/{group_id}/blueprint/{blueprint_id}/":    true,
+		"DELETE /enterprise/{enterprise_id}/devicegroup/{group_id}/blueprint/{blueprint_id}/": true,
+	}
+	retained := map[string]bool{
+		"GET /authn2/v1/users/":                                      true,
+		"GET /enterprise/{enterprise_id}/device/{device_id}/app/":    true,
+		"GET /enterprise/{enterprise_id}/device/{device_id}/status/": true,
+		"GET /enterprise/{enterprise_id}/devicegroup/":               true,
+		"POST /enterprise/{enterprise_id}/devicegroup/":              true,
+	}
+	for _, operation := range operations {
+		key := operation.Method + " " + operation.Path
+		if excluded[key] {
+			t.Errorf("excluded legacy operation remains generated: %s", key)
+		}
+		if retained[key] {
+			delete(retained, key)
+		}
+	}
+	for key := range retained {
+		t.Errorf("retained legacy operation is missing: %s", key)
+	}
+}
+
 func TestPipelineCommandAndOperationAlwaysUseSideFamilyPrefix(t *testing.T) {
 	operations := []generatedOperation{
 		{Generation: "pipelines-v0", Noun: "command", Verb: "list", ScopeParent: "target-run"},

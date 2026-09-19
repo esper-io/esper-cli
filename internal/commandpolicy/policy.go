@@ -12,6 +12,28 @@ func Replacement(method, path string) string {
 	return ""
 }
 
+// Excluded removes legacy commands when a newer API is available. Keep this
+// list explicit so legacy-only routes and reviewed exceptions remain generated.
+func Excluded(method, path string) bool {
+	switch path {
+	case "/enterprise/{enterprise_id}/application/":
+		return method == "GET"
+	case "/enterprise/{enterprise_id}/application/{application_id}/":
+		return method == "GET" || method == "DELETE"
+	case "/enterprise/{enterprise_id}/application/{application_id}/version/":
+		return method == "GET"
+	case "/enterprise/{enterprise_id}/application/{application_id}/version/{version_id}/":
+		return method == "GET" || method == "DELETE" || method == "PATCH"
+	case "/enterprise/{enterprise_id}/device/", "/enterprise/{enterprise_id}/device/{device_id}/", "/enterprise/{enterprise_id}/device/{device_id}/install/", "/enterprise/{enterprise_id}/device/{device_id}/download/eventfeed/", "/enterprise/{enterprise_id}/group/{group_id}/download/eventfeed/", "/user/":
+		return method == "GET"
+	case "/enterprise/{enterprise_id}/devicegroup/{group_id}/blueprint/":
+		return method == "GET" || method == "POST"
+	case "/enterprise/{enterprise_id}/devicegroup/{group_id}/blueprint/{blueprint_id}/":
+		return method == "GET" || method == "DELETE"
+	}
+	return false
+}
+
 // Command names only confirmed iOS routes. Keep the original resource noun and
 // generation routing intact, including unrelated commands under api legacy.
 func Command(path string, command []string) []string {

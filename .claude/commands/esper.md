@@ -60,21 +60,7 @@ All API writes require a one-time human approval. Commands marked **destructive*
 ### api
 
 - `espercli api legacy app list` - List all device apps
-- `espercli api legacy app-version delete` - Delete app version **destructive**
-- `espercli api legacy app-version get` - Get app version information
-- `espercli api legacy app-version patch` - Patch an App version instance
-- `espercli api legacy application delete` - Delete an application **destructive**
-- `espercli api legacy application get` - Get application information
-- `espercli api legacy application list` - List apps in enterprise
-- `espercli api legacy blueprint create` - Create a Blueprint
-- `espercli api legacy blueprint delete` - Delete a Blueprint **destructive**
-- `espercli api legacy blueprint get` - Get Blueprint detail
-- `espercli api legacy blueprint list` - Get list of Blueprints for the group
-- `espercli api legacy device get` - Fetch device details by ID
-- `espercli api legacy device list` - Fetch all devices in an enterprise
-- `espercli api legacy install list` - List installed apps
 - `espercli api legacy status get` - Get latest device event
-- `espercli api legacy version list` - List App versions
 - `espercli api v0 command list` - List command requests
 - `espercli api v0 device list` - Get all DeviceOperations for a specific Operation
 - `espercli api v0 geofence create` - Create a geofence
@@ -132,10 +118,6 @@ All API writes require a one-time human approval. Commands marked **destructive*
 ### artifact
 
 - `espercli artifact create` - Add an artifact to a UWP app version
-
-### authn-user
-
-- `espercli authn-user list` - Get Users details
 
 ### background-script
 
@@ -261,10 +243,6 @@ All API writes require a one-time human approval. Commands marked **destructive*
 
 - `espercli device-app get` - Get device app details
 - `espercli device-app list` - Get list of devices with an app by app_id or app_version_id.
-
-### device-eventfeed
-
-- `espercli device-eventfeed list` - Download Event Feed for Device
 
 ### device-google-account-emm-managed
 
@@ -434,10 +412,6 @@ All API writes require a one-time human approval. Commands marked **destructive*
 - `espercli group list` - Get user groups
 - `espercli group partial-update` - Partially update a device group
 - `espercli group update` - Update device group
-
-### group-eventfeed
-
-- `espercli group-eventfeed list` - Download Event Feed for Group
 
 ### group-thumbnail
 
@@ -753,7 +727,7 @@ All API writes require a one-time human approval. Commands marked **destructive*
 
 - `espercli user create` - Create a new User
 - `espercli user get` - Get User Information
-- `espercli user list` - Get Users
+- `espercli user list` - Get Users details
 - `espercli user partial-update` - Partial update a User
 - `espercli user update` - Update a User
 

@@ -85,11 +85,10 @@ espercli application upload <enterprise-id> --app-file ./app.apk
 
 Key rules:
 
-- By default, the newest API generation owns the bare noun/verb command. Older
-  collisions remain under `espercli api <generation> <noun> <verb>`, such as
-  `espercli api legacy device list`. Explicitly reviewed replacements and
-  iOS-only command names are listed below. A shared noun is not proof that two
-  generations return the same resource or accept the same parameters.
+- By default, the newest API generation owns the bare noun/verb command. Legacy
+  routes with a newer endpoint are not exposed. Retained legacy-only routes and
+  reviewed exceptions can remain under `espercli api legacy <noun> <verb>`.
+  Explicitly reviewed replacements and iOS-only command names are listed below.
 - Parent-scoped routes use scope flags such as `--enterprise`, `--device`, or
   `--pipeline`. Required device, app, group, and enterprise IDs can fall back to
   active context where the canonical parameter name supports it.
@@ -121,7 +120,6 @@ These are command-name changes; update scripts that use the old spelling.
 
 | Previous command | Current command |
 |---|---|
-| `api legacy installdevice list` | `installdevice list` (v1 API) |
 | `app list` | `ios-app list` |
 | `itunesapp list` | `ios-itunesapp list` |
 | `webclip <verb>` | `ios-webclip <verb>` |
@@ -129,12 +127,11 @@ These are command-name changes; update scripts that use the old spelling.
 | `provisioning-profile-version <verb>` | `ios-provisioning-profile-version <verb>` |
 | `version list --provisioning-profile <id>` | `ios-provisioning-profile-version list --provisioning-profile <id>` |
 
-The retired legacy installation-list command has the same documented contract
-and matched the complete live v1 response. Other legacy application, device,
-blueprint, event-feed, and status APIs remain available: their contracts differ
-or a replacement has not been established. Existing flags and API payloads on
-the renamed iOS commands are preserved. Old spellings are not compatibility
-aliases.
+Legacy commands with newer endpoints are removed, even where their API
+contracts differ. The retained legacy exceptions are device app inventory
+(`api legacy app list`), latest device events (`api legacy status get`), and
+device-group list and create. Existing flags and API payloads on the renamed
+iOS commands are preserved. Old spellings are not compatibility aliases.
 
 `api legacy app list` remains device app inventory, distinct from the iOS app
 catalog. Cross-platform `tenant-app`, `device-app`, and `seamless` commands retain

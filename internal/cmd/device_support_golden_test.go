@@ -30,7 +30,6 @@ type deviceSupportFixture struct {
 
 func deviceSupportFixtures() []deviceSupportFixture {
 	return []deviceSupportFixture{
-		{"legacy GET /enterprise/{enterprise_id}/device/{device_id}/download/eventfeed/", "legacy-device-eventfeed-list", http.MethodGet, "/enterprise/tenant-1/device/device-1/download/eventfeed/", "", []string{"device-eventfeed", "list", "--enterprise", "tenant-1", "--device", "device-1", "--limit", "1", "--offset", "0", "--all", "--json"}, url.Values{"limit": {"1"}, "offset": {"0"}}, 200, 401, "limit-offset", false},
 		{"v0 GET /device/v0/devices/{id}/", "v0-device-request-get", http.MethodGet, "/device/v0/devices/device-1/", "", []string{"device-request", "get", "device-1", "--json"}, nil, 200, 404, "", false},
 		{"v0 DELETE /device/v0/devices/{id}/", "v0-device-delete-non-android-device", http.MethodDelete, "/device/v0/devices/device-1/", "", []string{"device", "delete-non-android-device", "device-1", "--yes", "--json"}, nil, 200, 404, "", true},
 		{"v0 GET /device/v0/devices/{id}/devicestate", "v0-devicestate-get", http.MethodGet, "/device/v0/devices/device-1/devicestate", "", []string{"devicestate", "get", "device-1", "--json"}, nil, 200, 404, "", false},
@@ -57,17 +56,17 @@ func TestDeviceSupportOperationCoverage(t *testing.T) {
 		}
 		want[row.key] = true
 	}
-	if len(want) != 16 {
-		t.Fatalf("fixture rows = %d, want 16", len(want))
+	if len(want) != 15 {
+		t.Fatalf("fixture rows = %d, want 15", len(want))
 	}
-	nouns := map[string]bool{"device-eventfeed": true, "device-google-account-emm-managed": true, "device-google-account-policy": true, "device-heartbeat": true, "device-heartbeat-list": true, "device-request": true, "devicestate": true, "foundation-version-list": true, "google-account": true, "rv-activity-feed": true}
+	nouns := map[string]bool{"device-google-account-emm-managed": true, "device-google-account-policy": true, "device-heartbeat": true, "device-heartbeat-list": true, "device-request": true, "devicestate": true, "foundation-version-list": true, "google-account": true, "rv-activity-feed": true}
 	got := map[string]bool{}
 	for _, operation := range generated.Operations() {
 		if nouns[operation.Noun] || operation.OperationID == "deleteDeviceRequest" {
 			got[operation.Generation+" "+operation.Method+" "+operation.Path] = true
 		}
 	}
-	if len(got) != 16 || !reflect.DeepEqual(want, got) {
+	if len(got) != 15 || !reflect.DeepEqual(want, got) {
 		t.Fatalf("packet operation keys mismatch: rows=%d generated=%d", len(want), len(got))
 	}
 }

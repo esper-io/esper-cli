@@ -32,16 +32,8 @@ type appApplicationFixtureTest struct {
 
 func appApplicationFixtureTests() []appApplicationFixtureTest {
 	return []appApplicationFixtureTest{
-		{"legacy DELETE /enterprise/{enterprise_id}/application/{application_id}/", "api legacy application delete", []string{"api", "legacy", "application", "delete", "fixture-id", "fixture-id", "--yes", "--json"}, "DELETE", "/enterprise/fixture-id/application/fixture-id/", nil, "", "legacy-delete--enterprise-enterprise-id-application-application-id", 204, 401, false, true, nil},
-		{"legacy DELETE /enterprise/{enterprise_id}/application/{application_id}/version/{version_id}/", "api legacy app-version delete", []string{"api", "legacy", "app-version", "delete", "fixture-id", "fixture-id", "fixture-id", "--yes", "--json"}, "DELETE", "/enterprise/fixture-id/application/fixture-id/version/fixture-id/", nil, "", "legacy-delete--enterprise-enterprise-id-application-application-id-version-version-id", 200, 404, false, true, nil},
-		{"legacy GET /enterprise/{enterprise_id}/application/", "api legacy application list", []string{"api", "legacy", "application", "list", "--enterprise", "fixture-id", "--limit", "1", "--offset", "0", "--all", "--json"}, "GET", "/enterprise/fixture-id/application/", url.Values{"limit": {"1"}, "offset": {"0"}}, "", "legacy-get--enterprise-enterprise-id-application", 200, 401, true, false, nil},
-		{"legacy GET /enterprise/{enterprise_id}/application/{application_id}/", "api legacy application get", []string{"api", "legacy", "application", "get", "fixture-id", "fixture-id", "--json"}, "GET", "/enterprise/fixture-id/application/fixture-id/", nil, "", "legacy-get--enterprise-enterprise-id-application-application-id", 200, 401, false, false, nil},
-		{"legacy GET /enterprise/{enterprise_id}/application/{application_id}/version/", "api legacy version list", []string{"api", "legacy", "version", "list", "--application", "fixture-id", "--enterprise", "fixture-id", "--limit", "1", "--offset", "0", "--all", "--json"}, "GET", "/enterprise/fixture-id/application/fixture-id/version/", url.Values{"limit": {"1"}, "offset": {"0"}}, "", "legacy-get--enterprise-enterprise-id-application-application-id-version", 200, 401, true, false, nil},
-		{"legacy GET /enterprise/{enterprise_id}/application/{application_id}/version/{version_id}/", "api legacy app-version get", []string{"api", "legacy", "app-version", "get", "fixture-id", "fixture-id", "fixture-id", "--json"}, "GET", "/enterprise/fixture-id/application/fixture-id/version/fixture-id/", nil, "", "legacy-get--enterprise-enterprise-id-application-application-id-version-version-id", 200, 401, false, false, nil},
 		{"legacy GET /enterprise/{enterprise_id}/device/{device_id}/app/", "api legacy app list", []string{"api", "legacy", "app", "list", "--enterprise", "fixture-id", "--device", "fixture-id", "--limit", "1", "--offset", "0", "--all", "--json"}, "GET", "/enterprise/fixture-id/device/fixture-id/app/", url.Values{"limit": {"1"}, "offset": {"0"}}, "", "legacy-get--enterprise-enterprise-id-device-device-id-app", 200, 401, true, false, nil},
 		{"legacy GET /enterprise/{enterprise_id}/device/{device_id}/app/{app_id}/", "device-app get", []string{"device-app", "get", "fixture-id", "fixture-id", "fixture-id", "--json"}, "GET", "/enterprise/fixture-id/device/fixture-id/app/fixture-id/", nil, "", "legacy-get--enterprise-enterprise-id-device-device-id-app-app-id", 200, 401, false, false, nil},
-		{"legacy GET /enterprise/{enterprise_id}/device/{device_id}/install/", "api legacy install list", []string{"api", "legacy", "install", "list", "--enterprise", "fixture-id", "--device", "fixture-id", "--limit", "1", "--offset", "0", "--all", "--json"}, "GET", "/enterprise/fixture-id/device/fixture-id/install/", url.Values{"device": {"fixture-id"}, "limit": {"1"}, "offset": {"0"}}, "", "legacy-get--enterprise-enterprise-id-device-device-id-install", 200, 401, true, false, nil},
-		{"legacy PATCH /enterprise/{enterprise_id}/application/{application_id}/version/{version_id}/", "api legacy app-version patch", []string{"api", "legacy", "app-version", "patch", "fixture-id", "fixture-id", "fixture-id", "--approval-status", "fixture-value", "--json"}, "PATCH", "/enterprise/fixture-id/application/fixture-id/version/fixture-id/", nil, "{\"approval_status\":\"fixture-value\"}", "legacy-patch--enterprise-enterprise-id-application-application-id-version-version-id", 200, 400, false, false, nil},
 		{"legacy POST /enterprise/{enterprise_id}/application/upload/", "application upload", []string{"application", "upload", "fixture-id", "--app-file", "FIXTURE_FILE", "--json"}, "POST", "/enterprise/fixture-id/application/upload/", nil, "", "legacy-post--enterprise-enterprise-id-application-upload", 201, 415, false, false, map[string]string{"app_file": "fixture upload"}},
 		{"v0 DELETE /v0/enterprise/{enterprise_id}/emm/{emm_id}/product/{product_id}", "app-instance delete", []string{"app-instance", "delete", "fixture-id", "fixture-id", "fixture-id", "--yes", "--json"}, "DELETE", "/v0/enterprise/fixture-id/emm/fixture-id/product/fixture-id", nil, "", "v0-delete--v0-enterprise-enterprise-id-emm-emm-id-product-product-id", 204, 400, false, true, nil},
 		{"v0 GET /apps/v0/vpp", "app-vpp list", []string{"app-vpp", "list", "--json"}, "GET", "/apps/v0/vpp", nil, "", "v0-get--apps-v0-vpp", 200, 401, false, false, nil},
@@ -96,8 +88,8 @@ func TestAppApplicationOperationCoverage(t *testing.T) {
 		}
 		expected[test.key] = true
 	}
-	if len(expected) != 52 {
-		t.Fatalf("fixture rows = %d, want 52", len(expected))
+	if len(expected) != 44 {
+		t.Fatalf("fixture rows = %d, want 44", len(expected))
 	}
 	actual := map[string]bool{}
 	for _, operation := range generated.Operations() {
@@ -105,7 +97,7 @@ func TestAppApplicationOperationCoverage(t *testing.T) {
 			actual[operation.Generation+" "+operation.Method+" "+operation.Path] = true
 		}
 	}
-	if len(actual) != 52 || !reflect.DeepEqual(expected, actual) {
+	if len(actual) != 44 || !reflect.DeepEqual(expected, actual) {
 		t.Fatalf("packet operation keys mismatch: rows=%d generated=%d", len(expected), len(actual))
 	}
 }

@@ -44,16 +44,25 @@ func TestIOSCommandsAreSeparatedFromCrossPlatformCommands(t *testing.T) {
 	}
 }
 
-func TestRetiredInstallationListUsesOnlyNewerCommand(t *testing.T) {
+func TestLegacyCommandsWithNewerEndpointsAreRemoved(t *testing.T) {
 	root := NewRootCommand()
-	command, _, err := root.Find([]string{"api", "legacy", "installdevice", "list"})
-	if err == nil && command.CommandPath() == "espercli api legacy installdevice list" {
-		t.Fatal("retired legacy installation-list command is still exposed")
+	for _, path := range []string{
+		"api legacy installdevice list",
+		"api legacy application list", "api legacy application get", "api legacy application delete",
+		"api legacy app-version get", "api legacy app-version patch", "api legacy app-version delete",
+		"api legacy version list", "api legacy device list", "api legacy device get", "api legacy install list",
+		"api legacy blueprint list", "api legacy blueprint create", "api legacy blueprint get", "api legacy blueprint delete",
+		"device-eventfeed list", "group-eventfeed list",
+	} {
+		command, _, err := root.Find(strings.Fields(path))
+		if err == nil && command.CommandPath() == "espercli "+path {
+			t.Errorf("removed command %q is still exposed", path)
+		}
 	}
-	for _, path := range []string{"installdevice list", "device-eventfeed list", "event-feed list", "api legacy device get", "device get"} {
+	for _, path := range []string{"installdevice list", "user list", "api legacy app list", "api legacy status get", "device-group list", "device-group create"} {
 		command, _, err := root.Find(strings.Fields(path))
 		if err != nil || command.CommandPath() != "espercli "+path {
-			t.Errorf("retained command %q not reachable: %v", path, err)
+			t.Errorf("retained exception %q not reachable: %v", path, err)
 		}
 	}
 }

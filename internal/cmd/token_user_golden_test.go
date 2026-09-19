@@ -29,7 +29,7 @@ type tokenUserFixture struct {
 
 func tokenUserFixtures() []tokenUserFixture {
 	return []tokenUserFixture{
-		{"authn2 GET /authn2/v1/users/", "authn-user-list", "GET", "/authn2/v1/users/", "", []string{"authn-user", "list", "--legacy-user-id", "legacy-1", "--json"}, url.Values{"legacy_user_id": {"legacy-1"}}, 200, 400, false, false, false, false},
+		{"authn2 GET /authn2/v1/users/", "authn-user-list", "GET", "/authn2/v1/users/", "", []string{"user", "list", "--legacy-user-id", "legacy-1", "--json"}, url.Values{"legacy_user_id": {"legacy-1"}}, 200, 400, false, false, false, false},
 		{"v0 POST /tenant/v0/deptokens/", "dep-token-create", "POST", "/tenant/v0/deptokens/", "", []string{"dep-token", "create"}, nil, 200, 400, false, false, true, false},
 		{"v0 GET /tenant/v0/deptokens/", "dep-token-list", "GET", "/tenant/v0/deptokens/", "", []string{"dep-token", "list", "--state", "CSR_GENERATED", "--limit", "1", "--offset", "0", "--all", "--json"}, url.Values{"state": {"CSR_GENERATED"}, "limit": {"1"}, "offset": {"0"}}, 200, 401, true, false, false, false},
 		{"v0 GET /tenant/v0/deptokens/{id}/", "dep-token-based-on-get", "GET", "/tenant/v0/deptokens/token-1/", "", []string{"dep-token-based-on", "get", "token-1", "--json"}, nil, 200, 401, false, false, false, false},
@@ -49,7 +49,6 @@ func tokenUserFixtures() []tokenUserFixture {
 		{"v0 POST /tenant/v0/vpptokens/", "tenant-vpptoken-create", "POST", "/tenant/v0/vpptokens/", "", []string{"tenant-vpptoken", "create", "--filename", "FIXTURE_FILE", "--json"}, nil, 201, 400, false, false, false, true},
 		{"v0 DELETE /tenant/v0/vpptokens/{id}", "tenant-vpptoken-delete", "DELETE", "/tenant/v0/vpptokens/1", "", []string{"tenant-vpptoken", "delete", "1", "--yes", "--json"}, nil, 204, 401, false, true, false, false},
 		{"v1 GET /v1/token-info/", "token-info-get", "GET", "/v1/token-info/", "", []string{"token-info", "get", "--json"}, nil, 200, 401, false, false, false, false},
-		{"legacy GET /user/", "user-list", "GET", "/user/", "", []string{"user", "list", "--limit", "1", "--offset", "0", "--all", "--json"}, url.Values{"limit": {"1"}, "offset": {"0"}}, 200, 401, true, false, false, false},
 		{"legacy POST /user/", "user-create", "POST", "/user/", `{"profile":{}}`, []string{"user", "create", "--body", `{"profile":{}}`, "--json"}, nil, 201, 400, false, false, false, false},
 		{"legacy GET /user/{user_id}/", "user-get", "GET", "/user/1/", "", []string{"user", "get", "1", "--json"}, nil, 200, 401, false, false, false, false},
 		{"legacy PUT /user/{user_id}/", "user-update", "PUT", "/user/1/", `{"profile":{}}`, []string{"user", "update", "1", "--body", `{"profile":{}}`, "--json"}, nil, 200, 400, false, false, false, false},
@@ -71,8 +70,8 @@ func TestTokenUserOperationCoverage(t *testing.T) {
 	for _, row := range tokenUserFixtures() {
 		rows[row.key] = true
 	}
-	if len(rows) != 33 {
-		t.Fatalf("fixture rows = %d, want 33", len(rows))
+	if len(rows) != 32 {
+		t.Fatalf("fixture rows = %d, want 32", len(rows))
 	}
 	actual := map[string]bool{}
 	for _, op := range generated.Operations() {

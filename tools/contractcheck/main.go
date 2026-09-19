@@ -102,6 +102,9 @@ func check(specDir string) []string {
 				if !methods[method] {
 					continue
 				}
+				if commandpolicy.Excluded(strings.ToUpper(method), apiPath) {
+					continue
+				}
 				location := fmt.Sprintf("%s %s %s", strings.ToUpper(method), apiPath, document.Info.Generation)
 				if replacement := commandpolicy.Replacement(strings.ToUpper(method), apiPath); replacement != "" {
 					operation.AliasOf = replacement
