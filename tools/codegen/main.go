@@ -10,6 +10,8 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+
+	"github.com/esper-io/esper-cli/internal/commandpolicy"
 )
 
 var methods = map[string]bool{"get": true, "post": true, "put": true, "patch": true, "delete": true}
@@ -198,6 +200,9 @@ func load(directory string) ([]generatedOperation, error) {
 					continue
 				}
 				generated := generatedOperation{Generation: spec.Info.Generation, Method: strings.ToUpper(method), Path: apiPath, Noun: operation.Noun, Verb: operation.Verb, Pagination: operation.Pagination, ResponseEnvelope: operation.Envelope, RequireOneOf: operation.RequireOneOf, Destructive: operation.Destructive, ScopeParent: operation.ScopeParent, Summary: operation.Summary, Description: operation.Description, Tags: operation.Tags, DocsSlugs: operation.DocsSlugs, OperationID: operation.OperationID, AliasOf: operation.AliasOf, SuccessMedia: successMedia(operation.Responses)}
+				if replacement := commandpolicy.Replacement(generated.Method, apiPath); replacement != "" {
+					generated.AliasOf = replacement
+				}
 				for _, parameter := range operation.Parameters {
 					parameter = resolveParameter(parameter, spec.Components.Parameters)
 					resolved := resolve(parameter.Schema, spec.Components.Schemas)
@@ -511,6 +516,10 @@ func assignCommands(operations []generatedOperation) {
 				operation.Command = []string{operation.Noun, operation.Verb}
 			}
 		}
+	}
+	for index := range operations {
+		operation := &operations[index]
+		operation.Command = commandpolicy.Command(operation.Path, operation.Command)
 	}
 	byID := map[string]generatedOperation{}
 	for _, operation := range operations {

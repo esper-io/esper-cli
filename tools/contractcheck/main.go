@@ -11,6 +11,7 @@ import (
 
 	"github.com/esper-io/esper-cli/internal/cmd"
 	"github.com/esper-io/esper-cli/internal/cmd/generated"
+	"github.com/esper-io/esper-cli/internal/commandpolicy"
 	"github.com/spf13/cobra"
 )
 
@@ -102,6 +103,9 @@ func check(specDir string) []string {
 					continue
 				}
 				location := fmt.Sprintf("%s %s %s", strings.ToUpper(method), apiPath, document.Info.Generation)
+				if replacement := commandpolicy.Replacement(strings.ToUpper(method), apiPath); replacement != "" {
+					operation.AliasOf = replacement
+				}
 				if operation.Destructive == nil || operation.Pagination == "" || operation.Verb == "" || operation.Noun == "" {
 					issues = append(issues, location+": missing required x-esper annotation")
 					continue
@@ -263,6 +267,7 @@ func checkCommandGrammar(root interface {
 			} else {
 				expected = []string{operation.Noun, operation.Verb}
 			}
+			expected = commandpolicy.Command(operation.Path, expected)
 			if strings.Join(operation.Command, "\x00") != strings.Join(expected, "\x00") {
 				issues = append(issues, fmt.Sprintf("%s %s %s: violates generation collision namespace", operation.Method, operation.Path, operation.Generation))
 			}

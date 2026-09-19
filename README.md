@@ -85,9 +85,11 @@ espercli application upload <enterprise-id> --app-file ./app.apk
 
 Key rules:
 
-- The newest API generation owns the bare noun/verb command. Older collisions
-  remain available under `espercli api <generation> <noun> <verb>`, such as
-  `espercli api legacy device list`.
+- By default, the newest API generation owns the bare noun/verb command. Older
+  collisions remain under `espercli api <generation> <noun> <verb>`, such as
+  `espercli api legacy device list`. Explicitly reviewed replacements and
+  iOS-only command names are listed below. A shared noun is not proof that two
+  generations return the same resource or accept the same parameters.
 - Parent-scoped routes use scope flags such as `--enterprise`, `--device`, or
   `--pipeline`. Required device, app, group, and enterprise IDs can fall back to
   active context where the canonical parameter name supports it.
@@ -112,6 +114,37 @@ Exit codes are stable:
 | `2` | Usage error or cancelled confirmation |
 | `3` | Authentication or configuration error |
 | `4` | Network or timeout error |
+
+## API consolidation and iOS command names
+
+These are command-name changes; update scripts that use the old spelling.
+
+| Previous command | Current command |
+|---|---|
+| `api legacy installdevice list` | `installdevice list` (v1 API) |
+| `app list` | `ios-app list` |
+| `itunesapp list` | `ios-itunesapp list` |
+| `webclip <verb>` | `ios-webclip <verb>` |
+| `provisioning-profile <verb>` | `ios-provisioning-profile <verb>` |
+| `provisioning-profile-version <verb>` | `ios-provisioning-profile-version <verb>` |
+| `version list --provisioning-profile <id>` | `ios-provisioning-profile-version list --provisioning-profile <id>` |
+
+The retired legacy installation-list command has the same documented contract
+and matched the complete live v1 response. Other legacy application, device,
+blueprint, event-feed, and status APIs remain available: their contracts differ
+or a replacement has not been established. Existing flags and API payloads on
+the renamed iOS commands are preserved. Old spellings are not compatibility
+aliases.
+
+`api legacy app list` remains device app inventory, distinct from the iOS app
+catalog. Cross-platform `tenant-app`, `device-app`, and `seamless` commands retain
+their names. Apple-wide APNs, DEP, and VPP APIs are not labeled iOS-only without
+an exclusive iOS contract. `version list` still supports blueprint and tenant-app
+scopes. Use `--help` for the applicable scope flags; the same command can expose
+different endpoints for different scopes.
+
+The comparison results and decisions are recorded in
+[`.spec/cli-api-consolidation/decisions.md`](.spec/cli-api-consolidation/decisions.md).
 
 ## Human Approval
 

@@ -73,7 +73,6 @@ All API writes require a one-time human approval. Commands marked **destructive*
 - `espercli api legacy device get` - Fetch device details by ID
 - `espercli api legacy device list` - Fetch all devices in an enterprise
 - `espercli api legacy install list` - List installed apps
-- `espercli api legacy installdevice list` - List install devices
 - `espercli api legacy status get` - Get latest device event
 - `espercli api legacy version list` - List App versions
 - `espercli api v0 command list` - List command requests
@@ -93,10 +92,6 @@ All API writes require a one-time human approval. Commands marked **destructive*
 ### apns-csr
 
 - `espercli apns-csr list` - Get the CSR file to upload to the apple identity console
-
-### app
-
-- `espercli app list` - Get unified list of iOS apps (IPAs and Webclips) for a tenant
 
 ### app-info
 
@@ -464,9 +459,32 @@ All API writes require a one-time human approval. Commands marked **destructive*
 - `espercli invite create` - Invite a user
 - `espercli invite list` - List user invites
 
-### itunesapp
+### ios-app
 
-- `espercli itunesapp list` - Get iOS App Info (v2)
+- `espercli ios-app list` - Get unified list of iOS apps (IPAs and Webclips) for a tenant
+
+### ios-itunesapp
+
+- `espercli ios-itunesapp list` - Get iOS App Info (v2)
+
+### ios-provisioning-profile
+
+- `espercli ios-provisioning-profile create` - Upload provisioning profile for a tenant
+- `espercli ios-provisioning-profile get` - Get provisioning profile by ID
+- `espercli ios-provisioning-profile list` - Get provisioning profiles for a tenant
+
+### ios-provisioning-profile-version
+
+- `espercli ios-provisioning-profile-version delete` - Delete provisioning profile version by ID **destructive**
+- `espercli ios-provisioning-profile-version get` - Get provisioning profile version by ID
+- `espercli ios-provisioning-profile-version list` - Get provisioning profile versions list
+
+### ios-webclip
+
+- `espercli ios-webclip create` - Create webclip for a tenant
+- `espercli ios-webclip delete` - Delete webclip for a tenant **destructive**
+- `espercli ios-webclip get` - Get webclip by id for a tenant
+- `espercli ios-webclip list` - Get webclips for a tenant
 
 ### mdm-service-config
 
@@ -549,17 +567,6 @@ All API writes require a one-time human approval. Commands marked **destructive*
 
 - `espercli product add` - Post a Google play application
 - `espercli product list` - List Google Play applications
-
-### provisioning-profile
-
-- `espercli provisioning-profile create` - Upload provisioning profile for a tenant
-- `espercli provisioning-profile get` - Get provisioning profile by ID
-- `espercli provisioning-profile list` - Get provisioning profiles for a tenant
-
-### provisioning-profile-version
-
-- `espercli provisioning-profile-version delete` - Delete provisioning profile version by ID **destructive**
-- `espercli provisioning-profile-version get` - Get provisioning profile version by ID
 
 ### refresh-version
 
@@ -768,13 +775,6 @@ All API writes require a one-time human approval. Commands marked **destructive*
 - `espercli wallpaper delete` - Deletes instance of wallpaper **destructive**
 - `espercli wallpaper get` - Get instance of wallpaper
 - `espercli wallpaper list` - Get list of wallpapers
-
-### webclip
-
-- `espercli webclip create` - Create webclip for a tenant
-- `espercli webclip delete` - Delete webclip for a tenant **destructive**
-- `espercli webclip get` - Get webclip by id for a tenant
-- `espercli webclip list` - Get webclips for a tenant
 
 ### webtoken
 

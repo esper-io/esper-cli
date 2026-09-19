@@ -176,10 +176,13 @@ func commandLongHelp(summary string, operations []Operation) string {
 	if bodyHelp := bodySchemaHelp(operations); bodyHelp != "" {
 		sections = append(sections, bodyHelp)
 	}
-	if len(operations) > 0 && !strings.HasPrefix(strings.Join(operations[0].Command, " "), "api ") {
+	if len(operations) > 0 && len(operations[0].Command) >= 2 && !strings.HasPrefix(strings.Join(operations[0].Command, " "), "api ") {
 		paths := map[string]bool{}
 		for _, candidate := range generatedOperations {
 			if candidate.AliasOf != "" || candidate.Noun != operations[0].Noun || candidate.Verb != operations[0].Verb {
+				continue
+			}
+			if len(candidate.Command) < 2 || candidate.Command[len(candidate.Command)-2] != operations[0].Command[len(operations[0].Command)-2] {
 				continue
 			}
 			path := strings.Join(candidate.Command, " ")
