@@ -72,6 +72,9 @@ var generatedOperations []Operation
 
 const maximumPaginationPages = 10000
 
+// Multipart bodies are included in the single-use approval fingerprint.
+const multipartBoundary = "espercli-form-data-boundary"
+
 const usageTemplate = `Usage:{{if .Runnable}}
   {{.UseLine}}{{end}}{{if .HasAvailableSubCommands}}
   {{.CommandPath}} [command]{{end}}{{if gt (len .Aliases) 0}}
@@ -1017,6 +1020,9 @@ func mergeAutoFillJSON(data []byte, values map[string]any) ([]byte, string, erro
 func multipartBody(command *cobra.Command, body *Body, autoValues map[string]any) ([]byte, string, error) {
 	var output strings.Builder
 	writer := multipart.NewWriter(&output)
+	if err := writer.SetBoundary(multipartBoundary); err != nil {
+		return nil, "", err
+	}
 	for name, value := range autoValues {
 		if err := writer.WriteField(name, fmt.Sprint(value)); err != nil {
 			return nil, "", err

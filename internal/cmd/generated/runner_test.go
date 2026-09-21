@@ -165,6 +165,10 @@ func TestRequiredEmptyMultipartSendsForm(t *testing.T) {
 	if err != nil || len(body) == 0 || !strings.HasPrefix(contentType, "multipart/form-data") {
 		t.Fatalf("bodyFor() = %q, %q, %v", body, contentType, err)
 	}
+	secondBody, secondContentType, err := bodyFor(command, operation)
+	if err != nil || string(secondBody) != string(body) || secondContentType != contentType {
+		t.Fatalf("second bodyFor() = %q, %q, %v; want identical multipart output", secondBody, secondContentType, err)
+	}
 }
 
 func TestRequiredParametersAreConditionalOnSelectedRoute(t *testing.T) {
