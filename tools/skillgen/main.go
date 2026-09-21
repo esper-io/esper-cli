@@ -75,6 +75,7 @@ func renderSkill(operations []generated.Operation) []byte {
 	output.WriteString("4. Prefer `--all` only when the user asks for complete paginated results.\n")
 	output.WriteString("5. Use `--environment` and `--api-key` only when the user explicitly supplies overrides; otherwise rely on the configured environment.\n")
 	output.WriteString("6. Do not call an API operation merely to discover whether it is safe. Use help and the command reference.\n\n")
+	output.WriteString("7. For Linux, iOS, and Windows devices, use current `device` commands and `device-app list`. Do not fall back to `api legacy app list`, `api legacy status get`, or `device-app get` when a current device API returns an error; those legacy routes are Android compatibility surfaces.\n\n")
 	output.WriteString("## Hand-Written Commands\n\n")
 	output.WriteString("- `espercli configure [--environment <name>] [--api-key <key>]` - Store Esper credentials.\n")
 	output.WriteString("- `espercli configure show` - Show the environment and redacted API key.\n")

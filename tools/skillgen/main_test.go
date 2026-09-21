@@ -43,6 +43,7 @@ func TestRenderSkillIncludesGeneratedAndHandWrittenCommands(t *testing.T) {
 		"`espercli discover <query-or-docs-url>`",
 		"`espercli secureadb connect --device <id>`",
 		"`espercli version`",
+		"For Linux, iOS, and Windows devices, use current `device` commands and `device-app list`.",
 		"`espercli device list` - List devices",
 		"`espercli device delete` - Delete device **destructive**",
 	} {
