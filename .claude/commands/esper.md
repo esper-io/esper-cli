@@ -65,8 +65,6 @@ All API writes require a one-time human approval. Commands marked **destructive*
 - `espercli api legacy status get` - Get latest device event
 - `espercli api v0 command list` - List command requests
 - `espercli api v0 device list` - Get all DeviceOperations for a specific Operation
-- `espercli api v0 geofence create` - Create a geofence
-- `espercli api v0 geofence list` - List Geofences in Enterprise
 - `espercli api v1 status-metric list` - Get status metrics report for enterprise
 - `espercli api v1 version list` - List App versions
 
@@ -364,29 +362,10 @@ All API writes require a one-time human approval. Commands marked **destructive*
 
 - `espercli foundation-version-list list` - Get all distinct foundation versions
 
-### foundry-build
-
-- `espercli foundry-build get` - Get Foundry Build
-- `espercli foundry-build list` - Get Foundry builds
-- `espercli foundry-build update` - Update Foundry build
-
-### foundry-device-model
-
-- `espercli foundry-device-model list` - Get device models
-- `espercli foundry-device-model update` - Update Tenant Device Model
-
-### foundry-event
-
-- `espercli foundry-event list` - Get Foundry events
-
 ### geofence
 
 - `espercli geofence create` - Create a new geofence
-- `espercli geofence delete` - Delete a geofence **destructive**
-- `espercli geofence get` - Get geofence information
 - `espercli geofence list` - List all geofences
-- `espercli geofence partial-update` - Partially updates geofence information
-- `espercli geofence update` - Update geofence information
 
 ### geofence-blueprint
 

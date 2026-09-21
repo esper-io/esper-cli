@@ -156,6 +156,21 @@ func TestLegacyOperationsWithNewerEndpointsAreExcluded(t *testing.T) {
 		"POST /enterprise/{enterprise_id}/devicegroup/{group_id}/blueprint/":                  true,
 		"GET /enterprise/{enterprise_id}/devicegroup/{group_id}/blueprint/{blueprint_id}/":    true,
 		"DELETE /enterprise/{enterprise_id}/devicegroup/{group_id}/blueprint/{blueprint_id}/": true,
+		"GET /v0/enterprise/{enterprise_id}/geofence/":                                        true,
+		"GET /v0/enterprise/{enterprise_id}/geofence/{geofence_id}/":                          true,
+		"PUT /v0/enterprise/{enterprise_id}/geofence/{geofence_id}/":                          true,
+		"PATCH /v0/enterprise/{enterprise_id}/geofence/{geofence_id}/":                        true,
+		"DELETE /v0/enterprise/{enterprise_id}/geofence/{geofence_id}/":                       true,
+		"GET /v0/enterprise/{enterprise_id}/create-apply-geo-fence/":                          true,
+		"POST /v0/enterprise/{enterprise_id}/create-apply-geo-fence/":                         true,
+		"GET /v0/enterprise/{enterprise_id}/create-apply-geofence/{geofence_id}/":             true,
+		"DELETE /v0/enterprise/{enterprise_id}/create-apply-geofence/{geofence_id}/":          true,
+		"GET /v1/foundry/builds/":                          true,
+		"GET /v1/foundry/builds/{build_id}/":               true,
+		"PUT /v1/foundry/builds/{build_id}/":               true,
+		"GET /v1/foundry/device-models/":                   true,
+		"PUT /v1/foundry/device-models/{device_model_id}/": true,
+		"GET /v1/foundry/events/":                          true,
 	}
 	retained := map[string]bool{
 		"GET /authn2/v1/users/":                                      true,
@@ -163,6 +178,11 @@ func TestLegacyOperationsWithNewerEndpointsAreExcluded(t *testing.T) {
 		"GET /enterprise/{enterprise_id}/device/{device_id}/status/": true,
 		"GET /enterprise/{enterprise_id}/devicegroup/":               true,
 		"POST /enterprise/{enterprise_id}/devicegroup/":              true,
+		"POST /geofence/v1/geofences":                                true,
+		"GET /geofence/v1/geofences":                                 true,
+		"GET /geofence/v1/geofences/{geofence_id}/device-summary":    true,
+		"GET /geofence/v1/geofences/{geofence_id}/blueprints":        true,
+		"GET /geofence/v1/geofences/{geofence_id}/devices":           true,
 	}
 	for _, operation := range operations {
 		key := operation.Method + " " + operation.Path

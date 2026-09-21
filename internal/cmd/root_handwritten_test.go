@@ -67,7 +67,7 @@ func TestGeneratedDiscoveryAndHelpContext(t *testing.T) {
 		}
 	}
 
-	for _, path := range [][]string{{"geofence", "list"}, {"api", "v0", "geofence", "list"}} {
+	for _, path := range [][]string{{"geofence", "list"}} {
 		if command, _, err := NewRootCommand().Find(path); err != nil || command.CommandPath() != "espercli "+strings.Join(path, " ") {
 			t.Fatalf("find %v = %v, %v", path, command, err)
 		}

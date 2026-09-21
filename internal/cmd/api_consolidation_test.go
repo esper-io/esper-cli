@@ -53,13 +53,19 @@ func TestLegacyCommandsWithNewerEndpointsAreRemoved(t *testing.T) {
 		"api legacy version list", "api legacy device list", "api legacy device get", "api legacy install list",
 		"api legacy blueprint list", "api legacy blueprint create", "api legacy blueprint get", "api legacy blueprint delete",
 		"device-eventfeed list", "group-eventfeed list",
+		"api v0 geofence list", "api v0 geofence create", "geofence get", "geofence update", "geofence partial-update", "geofence delete",
+		"foundry-build list", "foundry-build get", "foundry-build update",
+		"foundry-device-model list", "foundry-device-model update", "foundry-event list",
 	} {
 		command, _, err := root.Find(strings.Fields(path))
 		if err == nil && command.CommandPath() == "espercli "+path {
 			t.Errorf("removed command %q is still exposed", path)
 		}
 	}
-	for _, path := range []string{"installdevice list", "user list", "api legacy app list", "api legacy status get", "device-group list", "device-group create"} {
+	for _, path := range []string{
+		"installdevice list", "user list", "api legacy app list", "api legacy status get", "device-group list", "device-group create",
+		"geofence create", "geofence list", "geofence-device-summary get", "geofence-blueprint list", "geofence-device list",
+	} {
 		command, _, err := root.Find(strings.Fields(path))
 		if err != nil || command.CommandPath() != "espercli "+path {
 			t.Errorf("retained exception %q not reachable: %v", path, err)

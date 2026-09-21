@@ -10,7 +10,6 @@ import (
 func TestSearchMatchesPublicDocumentationURL(t *testing.T) {
 	operations := []generated.Operation{
 		{Command: []string{"geofence", "list"}, Method: "GET", Path: "/geofence/v1/geofences", Summary: "List all geofences", DocsSlugs: []string{"geofence_geofences"}},
-		{Command: []string{"api", "v0", "geofence", "list"}, Method: "GET", Path: "/v0/enterprise/{enterprise_id}/geofence/", Summary: "List legacy geofences"},
 	}
 	matches := search(operations, "https://api.esper.io/openapi/geofence_geofences")
 	if len(matches) != 1 || matches[0].Command != "geofence list" || matches[0].Docs[0] != "https://api.esper.io/openapi/geofence_geofences" {

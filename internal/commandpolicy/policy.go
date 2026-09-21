@@ -30,6 +30,20 @@ func Excluded(method, path string) bool {
 		return method == "GET" || method == "POST"
 	case "/enterprise/{enterprise_id}/devicegroup/{group_id}/blueprint/{blueprint_id}/":
 		return method == "GET" || method == "DELETE"
+	case "/v0/enterprise/{enterprise_id}/geofence/":
+		return method == "GET"
+	case "/v0/enterprise/{enterprise_id}/geofence/{geofence_id}/":
+		return method == "GET" || method == "PUT" || method == "PATCH" || method == "DELETE"
+	case "/v0/enterprise/{enterprise_id}/create-apply-geo-fence/":
+		return method == "GET" || method == "POST"
+	case "/v0/enterprise/{enterprise_id}/create-apply-geofence/{geofence_id}/":
+		return method == "GET" || method == "DELETE"
+	case "/v1/foundry/builds/", "/v1/foundry/device-models/", "/v1/foundry/events/":
+		return method == "GET"
+	case "/v1/foundry/builds/{build_id}/":
+		return method == "GET" || method == "PUT"
+	case "/v1/foundry/device-models/{device_model_id}/":
+		return method == "PUT"
 	}
 	return false
 }
