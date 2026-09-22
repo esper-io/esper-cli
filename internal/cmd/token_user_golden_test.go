@@ -49,11 +49,7 @@ func tokenUserFixtures() []tokenUserFixture {
 		{"v0 POST /tenant/v0/vpptokens/", "tenant-vpptoken-create", "POST", "/tenant/v0/vpptokens/", "", []string{"tenant-vpptoken", "create", "--filename", "FIXTURE_FILE", "--json"}, nil, 201, 400, false, false, false, true},
 		{"v0 DELETE /tenant/v0/vpptokens/{id}", "tenant-vpptoken-delete", "DELETE", "/tenant/v0/vpptokens/1", "", []string{"tenant-vpptoken", "delete", "1", "--yes", "--json"}, nil, 204, 401, false, true, false, false},
 		{"v1 GET /v1/token-info/", "token-info-get", "GET", "/v1/token-info/", "", []string{"token-info", "get", "--json"}, nil, 200, 401, false, false, false, false},
-		{"legacy POST /user/", "user-create", "POST", "/user/", `{"profile":{}}`, []string{"user", "create", "--body", `{"profile":{}}`, "--json"}, nil, 201, 400, false, false, false, false},
 		{"legacy GET /user/{user_id}/", "user-get", "GET", "/user/1/", "", []string{"user", "get", "1", "--json"}, nil, 200, 401, false, false, false, false},
-		{"legacy PUT /user/{user_id}/", "user-update", "PUT", "/user/1/", `{"profile":{}}`, []string{"user", "update", "1", "--body", `{"profile":{}}`, "--json"}, nil, 200, 400, false, false, false, false},
-		{"legacy PATCH /user/{user_id}/", "user-partial-update", "PATCH", "/user/1/", `{"first_name":"Ada"}`, []string{"user", "partial-update", "1", "--first-name", "Ada", "--json"}, nil, 200, 400, false, false, false, false},
-		{"legacy DELETE /user/{user_id}/", "user-delete-delete", "DELETE", "/user/1/", "", []string{"user-delete", "delete", "1", "--yes", "--json"}, nil, 204, 401, false, true, false, false},
 		{"legacy GET /user_info/", "user-info-get", "GET", "/user_info/", "", []string{"user-info", "get", "--json"}, nil, 200, 401, false, false, false, false},
 		{"v0 GET /v0/enterprise/{enterprise_id}/emm/{emm_id}/webtoken/", "webtoken-list", "GET", "/v0/enterprise/enterprise-1/emm/1/webtoken/", "", []string{"webtoken", "list", "--enterprise", "enterprise-1", "--emm", "1", "--limit", "1", "--offset", "0", "--all", "--json"}, url.Values{"limit": {"1"}, "offset": {"0"}}, 200, 401, true, false, false, false},
 		{"v0 POST /v0/enterprise/{enterprise_id}/emm/{emm_id}/webtoken/", "webtoken-create", "POST", "/v0/enterprise/enterprise-1/emm/1/webtoken/", `{"emm":1,"parent_url":"https://example.test"}`, []string{"webtoken", "create", "--enterprise", "enterprise-1", "--emm", "1", "--parent-url", "https://example.test", "--json"}, nil, 201, 401, false, false, false, false},
@@ -65,13 +61,13 @@ func tokenUserFixtures() []tokenUserFixture {
 }
 
 func TestTokenUserOperationCoverage(t *testing.T) {
-	nouns := map[string]bool{"authn-user": true, "dep-token": true, "dep-token-based-on": true, "dep-token-upload": true, "different-user": true, "invite": true, "own-user": true, "personal-access-token": true, "renew-token": true, "tenant-user": true, "tenant-user-invite": true, "tenant-vpptoken": true, "token-info": true, "user": true, "user-delete": true, "user-info": true, "webtoken": true, "webtoken-instance": true}
+	nouns := map[string]bool{"authn-user": true, "dep-token": true, "dep-token-based-on": true, "dep-token-upload": true, "different-user": true, "invite": true, "own-user": true, "personal-access-token": true, "renew-token": true, "tenant-user": true, "tenant-user-invite": true, "tenant-vpptoken": true, "token-info": true, "user": true, "user-info": true, "webtoken": true, "webtoken-instance": true}
 	rows := map[string]bool{}
 	for _, row := range tokenUserFixtures() {
 		rows[row.key] = true
 	}
-	if len(rows) != 32 {
-		t.Fatalf("fixture rows = %d, want 32", len(rows))
+	if len(rows) != 28 {
+		t.Fatalf("fixture rows = %d, want 28", len(rows))
 	}
 	actual := map[string]bool{}
 	for _, op := range generated.Operations() {
@@ -186,7 +182,7 @@ func executeTokenUserFixture(t *testing.T, row tokenUserFixture, apiError bool) 
 }
 
 func TestTokenUserInputValidation(t *testing.T) {
-	for _, args := range [][]string{{"dep-token", "create", "--json"}, {"dep-token-upload", "update", "id", "--file", "x"}, {"different-user", "update", "id"}, {"invite", "create", "--tenant", "t"}, {"own-user", "update", "id"}, {"personal-access-token", "create", "--name", "n"}, {"user", "create"}, {"user", "partial-update", "1"}, {"user", "partial-update", "1", "--body", `{}`, "--first-name", "Ada"}, {"webtoken", "create", "--enterprise", "e", "--emm", "1"}, {"webtoken-instance", "get", "id", "--enterprise", "e"}} {
+	for _, args := range [][]string{{"dep-token", "create", "--json"}, {"dep-token-upload", "update", "id", "--file", "x"}, {"different-user", "update", "id"}, {"invite", "create", "--tenant", "t"}, {"own-user", "update", "id"}, {"personal-access-token", "create", "--name", "n"}, {"webtoken", "create", "--enterprise", "e", "--emm", "1"}, {"webtoken-instance", "get", "id", "--enterprise", "e"}} {
 		c := NewRootCommand()
 		c.SetArgs(args)
 		if err := c.Execute(); err == nil || esperruntime.ExitCode(err) != 2 {

@@ -695,15 +695,8 @@ All API writes require a one-time human approval. Commands marked **destructive*
 
 ### user
 
-- `espercli user create` - Create a new User
 - `espercli user get` - Get User Information
 - `espercli user list` - Get Users details
-- `espercli user partial-update` - Partial update a User
-- `espercli user update` - Update a User
-
-### user-delete
-
-- `espercli user-delete delete` - Delete a user **destructive**
 
 ### user-info
 

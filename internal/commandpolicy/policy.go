@@ -25,7 +25,9 @@ func Excluded(method, path string) bool {
 	case "/enterprise/{enterprise_id}/application/{application_id}/version/{version_id}/":
 		return method == "GET" || method == "DELETE" || method == "PATCH"
 	case "/enterprise/{enterprise_id}/device/", "/enterprise/{enterprise_id}/device/{device_id}/", "/enterprise/{enterprise_id}/device/{device_id}/install/", "/enterprise/{enterprise_id}/device/{device_id}/download/eventfeed/", "/enterprise/{enterprise_id}/group/{group_id}/download/eventfeed/", "/user/":
-		return method == "GET"
+		return method == "GET" || (path == "/user/" && method == "POST")
+	case "/user/{user_id}/":
+		return method == "PUT" || method == "PATCH" || method == "DELETE"
 	case "/enterprise/{enterprise_id}/devicegroup/{group_id}/blueprint/":
 		return method == "GET" || method == "POST"
 	case "/enterprise/{enterprise_id}/devicegroup/{group_id}/blueprint/{blueprint_id}/":

@@ -53,6 +53,7 @@ func TestLegacyCommandsWithNewerEndpointsAreRemoved(t *testing.T) {
 		"api legacy version list", "api legacy device list", "api legacy device get", "api legacy install list",
 		"api legacy blueprint list", "api legacy blueprint create", "api legacy blueprint get", "api legacy blueprint delete",
 		"blueprint partial-update", "blueprint upload", "revision list", "blueprint-revision get", "blueprint-revision restore",
+		"user create", "user partial-update", "user update", "user-delete delete",
 		"device-eventfeed list", "group-eventfeed list",
 		"api v0 geofence list", "api v0 geofence create", "geofence get", "geofence update", "geofence partial-update", "geofence delete",
 		"foundry-build list", "foundry-build get", "foundry-build update",
@@ -64,7 +65,7 @@ func TestLegacyCommandsWithNewerEndpointsAreRemoved(t *testing.T) {
 		}
 	}
 	for _, path := range []string{
-		"installdevice list", "user list", "api legacy app list", "api legacy status get", "device-group list", "device-group create",
+		"installdevice list", "user list", "user get", "user-info get", "api legacy app list", "api legacy status get", "device-group list", "device-group create",
 		"geofence create", "geofence list", "geofence-device-summary get", "geofence-blueprint list", "geofence-device list",
 		"blueprint create", "blueprint list", "blueprint get", "blueprint update", "blueprint delete", "blueprint-version get",
 	} {
