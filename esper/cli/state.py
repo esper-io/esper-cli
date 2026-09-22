@@ -25,6 +25,10 @@ CERTS_FOLDER = os.environ.get(
     "ESPER_CERTS_DIR",
     os.path.expanduser("~/.esper/certs"),
 )
+ADB_PUB_KEY = os.environ.get(
+    "ESPER_ADB_PUB_KEY",
+    os.path.expanduser("~/.android/adbkey.pub"),
+)
 
 
 class EsperState:
@@ -39,6 +43,7 @@ class EsperState:
         self.local_cert = os.path.join(CERTS_FOLDER, "local.pem")
         self.device_cert = os.path.join(CERTS_FOLDER, "device.pem")
         self.certs_path = CERTS_FOLDER
+        self.adb_pub_key = ADB_PUB_KEY
 
         # Logger
         logging.basicConfig(
