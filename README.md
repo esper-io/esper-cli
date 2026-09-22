@@ -1,26 +1,88 @@
 # espercli
 
-`espercli` is a Go command-line client for the public Esper APIs. Its command
-tree is generated from the canonical API specifications and checked for complete
-public-operation coverage. The CLI is designed for direct use and for automation
-through stable JSON output, exit codes, help, completion, and the `/esper` agent
-skill.
+## Give your Agent a Helper Andi
+
+`espercli` gives people and AI agents a practical command-line interface for
+Esper. It turns the public Esper API surface into discoverable commands with
+structured JSON output, stable exit codes, shell completion, and generated
+agent guidance.
+
+## What Is espercli?
+
+Esper CLI is a Go client generated from Esper's canonical API specifications.
+Run it directly from a terminal, use it in scripts, or let an agent discover
+commands with `--help` before it acts.
+
+The command tree is checked against the public API specification so command
+names, flags, scopes, pagination, and destructive-operation metadata stay in
+sync with the supported API surface.
+
+## Why Your Agent Will Like It
+
+- **Discoverable**: Every resource and operation has built-in help.
+- **Structured**: `--json` preserves the raw API response for reliable parsing.
+- **Scoped**: Commands use explicit resource scope flags such as `--enterprise`,
+  `--device`, and `--pipeline`.
+- **Guarded**: API writes require human approval, and destructive operations
+  require a separate confirmation.
+- **Current**: Newer API generations own the default command names; retained
+  legacy routes are explicit rather than silent fallbacks.
+
+## Try It
+
+Configure the CLI with a tenant name, enterprise ID, and API key. Running
+`configure` without flags prompts for each value.
+
+```bash
+espercli configure
+espercli configure show
+```
+
+Ask the CLI what it can do, then fetch a small set of devices as JSON:
+
+```bash
+espercli device --help
+espercli device list --limit 5 --json |
+  jq '.content.results[] | {id, name, state}'
+```
+
+Set context when several commands should operate on the same resources:
+
+```bash
+espercli context set enterprise <enterprise-id>
+espercli context set device <device-id>
+espercli context get
+```
+
+The normal command form is:
+
+```text
+espercli <singular-noun> <verb> [positional IDs] [flags]
+```
+
+For example:
+
+```bash
+espercli device get <device-id>
+espercli application upload <enterprise-id> --app-file ./app.apk
+espercli geofence list --limit 20
+```
 
 ## Install
 
 ### Release artifacts
 
-GoReleaser builds archives for Linux, macOS, and Windows on amd64 and arm64.
-Download the matching `espercli_<version>_<os>_<arch>` archive from the GitHub
-release, extract it, and place `espercli` on `PATH`.
+GitHub releases contain archives for Linux, macOS, and Windows on amd64 and
+arm64. Download the matching `espercli_<version>_<os>_<arch>` archive, extract
+it, and place `espercli` on `PATH`.
 
-CI snapshot builds are attached to their GitHub Actions run as the
+CI snapshot builds are available from their GitHub Actions run as the
 `espercli-snapshot` artifact. Snapshots are not published as releases.
 
-### Homebrew tap placeholder
+### Homebrew
 
 The release configuration generates an `espercli` formula for the
-`esper-io/homebrew-tap` repository. After tap publishing is enabled:
+`esper-io/homebrew-tap` repository. After the tap is published:
 
 ```bash
 brew tap esper-io/tap
@@ -29,94 +91,58 @@ brew install espercli
 
 ### Go install
 
-Go 1.23 or newer is required. After the Go rewrite is published as a release:
+Go 1.23 or newer is required.
 
 ```bash
 go install github.com/esper-io/esper-cli/cmd/espercli@latest
 ```
 
-## Quick Start
+## Safe Writes
 
-Configure a tenant name, enterprise ID, and API key. Without flags, `configure`
-prompts for all three values.
-
-```bash
-espercli configure
-espercli configure show
-```
-
-Set active resource IDs when commands should use context fallback:
-
-```bash
-espercli context set enterprise <enterprise-id>
-espercli context set device <device-id>
-espercli context get
-```
-
-List devices and process the raw API envelope:
-
-```bash
-espercli device list --limit 5 --json |
-  jq '.content.results[] | {id, name, state}'
-```
-
-Use `--help` to inspect any group or operation:
-
-```bash
-espercli device --help
-espercli device get --help
-```
-
-## Command Grammar
-
-The standard form is:
+Reads run normally. Before an API write, the CLI stops and prints an approval
+ID without making the request:
 
 ```text
-espercli <singular-noun> <verb> [positional IDs] [flags]
+approval required for POST /v2/blueprints/
+review: espercli approval show <id>
+human approval: espercli approval approve <id>
 ```
 
-Examples:
+A human reviews the sanitized request in an interactive terminal, then approves
+that exact request. The original command must be retried unchanged. Approval is
+bound to the method, target, query, body, and environment; it expires after 15
+minutes and is consumed once.
+
+Destructive operations require a second target confirmation after approval.
+`--yes` skips only that confirmation. It never creates or bypasses approval.
+
+## API Coverage
+
+The live command tree is the canonical command reference:
 
 ```bash
-espercli device list --limit 20
-espercli device get <device-id>
-espercli application upload <enterprise-id> --app-file ./app.apk
+espercli --help
+espercli <resource> --help
+espercli <resource> <operation> --help
 ```
 
-Key rules:
+Use `--json` for machine-readable responses. For supported paginated lists,
+`--all --json` writes one merged result array.
 
-- By default, the newest API generation owns the bare noun/verb command. Legacy
-  routes with a newer endpoint are not exposed. Retained legacy-only routes and
-  reviewed exceptions can remain under `espercli api legacy <noun> <verb>`.
-  Explicitly reviewed replacements and iOS-only command names are listed below.
-- Parent-scoped routes use scope flags such as `--enterprise`, `--device`, or
-  `--pipeline`. Required device, app, group, and enterprise IDs can fall back to
-  active context where the canonical parameter name supports it.
-- JSON request bodies accept scalar property flags or `--body`. `--body` accepts
-  inline JSON, `@path`, or `-` for stdin and cannot be mixed with property flags.
-- Every API write requires a one-time human approval. A write first prints an
-  approval ID; a human must review it with `espercli approval show <id>` and run
-  `espercli approval approve <id>` from an interactive terminal before the exact
-  request can be retried. Approval binds the method, target, query, body, and
-  environment, expires after 15 minutes, and is consumed once.
-- Destructive operations also prompt for the exact target and count after human
-  approval. `--yes` skips only that second prompt; it never bypasses approval.
-- `--json` writes the raw API JSON envelope without field-name or shape changes.
-  `--all --json` writes one merged result array for supported paginated lists.
+Older API generations are available only where their behavior remains distinct:
 
-Exit codes are stable:
+```bash
+espercli api legacy --help
+espercli api v1 --help
+```
 
-| Code | Meaning |
-|---:|---|
-| `0` | Success |
-| `1` | API or user error |
-| `2` | Usage error or cancelled confirmation |
-| `3` | Authentication or configuration error |
-| `4` | Network or timeout error |
+Newer APIs own the standard command name. Legacy routes with a newer replacement
+are removed instead of preserved as compatibility aliases.
 
-## API consolidation and iOS command names
+## iOS Command Names
 
-These are command-name changes; update scripts that use the old spelling.
+The following resource names were made explicit. Update scripts that still use
+the previous spelling.
 
 | Previous command | Current command |
 |---|---|
@@ -127,33 +153,17 @@ These are command-name changes; update scripts that use the old spelling.
 | `provisioning-profile-version <verb>` | `ios-provisioning-profile-version <verb>` |
 | `version list --provisioning-profile <id>` | `ios-provisioning-profile-version list --provisioning-profile <id>` |
 
-Legacy commands with newer endpoints are removed, even where their API
-contracts differ. The retained legacy exceptions are device app inventory
-(`api legacy app list`), latest device events (`api legacy status get`), and
-device-group list and create. Existing flags and API payloads on the renamed
-iOS commands are preserved. Old spellings are not compatibility aliases.
+`api legacy app list` remains the Android device-app inventory, not the iOS app
+catalog. Cross-platform `tenant-app`, `device-app`, and `seamless` commands keep
+their names. Apple-wide APNs, DEP, and VPP APIs are not labelled iOS-only unless
+their contracts are exclusive to iOS.
 
-`api legacy app list` remains device app inventory, distinct from the iOS app
-catalog. Cross-platform `tenant-app`, `device-app`, and `seamless` commands retain
-their names. Apple-wide APNs, DEP, and VPP APIs are not labeled iOS-only without
-an exclusive iOS contract. `version list` still supports blueprint and tenant-app
-scopes. Use `--help` for the applicable scope flags; the same command can expose
-different endpoints for different scopes.
+## Agent Guidance
 
-## Human Approval
-
-For example, a create command from an agent or script exits before making an API
-call and prints an approval ID:
-
-```text
-approval required for POST /v2/blueprints/
-review: espercli approval show <id>
-human approval: espercli approval approve <id>
-```
-
-The human terminal command displays only a sanitized request summary. Request
-bodies, tokens, passwords, and API keys are not stored in the approval ledger.
-The original command must then be retried unchanged.
+The generated `/esper` command at `.claude/commands/esper.md` maps
+natural-language requests to the CLI, uses JSON for parsing, and follows the
+same approval boundaries. It is generated from the same operation metadata as
+the CLI and checked for drift in CI.
 
 ## Shell Completion
 
@@ -170,23 +180,13 @@ espercli completion fish | source
 espercli completion powershell | Out-String | Invoke-Expression
 ```
 
-Run `espercli completion <shell> --help` for the shell-specific persistent
-installation command.
-
-## `/esper` Skill
-
-`.claude/commands/esper.md` provides the `/esper` Claude Code command. It maps
-natural-language requests to the generated command tree, uses JSON for parsing,
-and requires confirmation before destructive actions.
-
-The skill is generated from the same operation metadata as the CLI and checked
-for drift in CI. To use it in every project, install the file in the user-level
-Claude Code commands directory.
+Run `espercli completion <shell> --help` for shell-specific persistent install
+instructions.
 
 ## Development
 
-The canonical OpenAPI specifications and Esper overlay annotations drive Go
-command generation. Generated command metadata must not be edited by hand.
+The OpenAPI specifications and Esper overlay annotations drive code generation.
+Do not edit generated command metadata by hand.
 
 ```bash
 go run ./tools/codegen
@@ -196,29 +196,16 @@ go vet ./...
 go build ./...
 ```
 
-The contract checker verifies that every public API operation remains reachable
-and that flags, scopes, pagination, and destructive-operation metadata match the
-specification. Tests use committed HTTP fixtures and must not require live
-credentials. CI also checks deterministic code generation and the generated
-`/esper` skill.
-
-The repeatable command harness is documented in
-[`docs/command-harness.md`](docs/command-harness.md):
-
-```bash
-./scripts/test-commands.sh offline
-./scripts/test-commands.sh live-readonly
-./scripts/test-commands.sh live-mutations
-```
-
-Offline mode checks every generated command and hand-written command through
-`--help`. Live read-only mode runs bounded GET operations. Mutation mode requires
-an explicit disposable-enterprise confirmation and a scenario cleanup section.
-All modes write machine-readable reports under `dist/`.
-
-The previous Python CLI is preserved on the `python-legacy` branch. New Go CLI
-work belongs on `go-rewrite` until that branch becomes the default.
+The contract checker verifies that every supported public API operation remains
+reachable and that flags, scopes, pagination, and destructive-operation metadata
+match the specification. CI also checks deterministic code generation and
+generated agent guidance.
 
 ## License
 
 Apache-2.0. See [LICENSE](LICENSE).
+
+## Tagline Credit
+
+"Give your Agent a Helper Andi" is inspired by DataDog's
+[Pup CLI](https://github.com/DataDog/pup) tagline, "Give Your Agent a Puppy."
