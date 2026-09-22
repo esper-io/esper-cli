@@ -2,7 +2,7 @@ import time
 from logging import Logger
 from typing import Tuple
 import socket
-
+from pathlib import Path
 import requests
 
 
@@ -177,6 +177,7 @@ def initiate_remoteadb_connection(environment: str,
                                   device_id: str,
                                   api_key: str,
                                   client_cert_path: str,
+                                  client_adb_pub_key_path: str,
                                   log: Logger) -> str:
     """
     Create a Remote ADB session for given enterprise and device, and return its id.
@@ -197,13 +198,25 @@ def initiate_remoteadb_connection(environment: str,
     # Convert byte stream to utf-8
     client_cert = client_cert.decode('utf-8')
 
+    adb_pub_key = ""
+    if Path(client_adb_pub_key_path).exists():
+        with open(client_adb_pub_key_path, 'rb') as f:
+            adb_pub_key = f.read()
+            # Convert byte stream to utf-8
+            adb_pub_key = adb_pub_key.decode('utf-8')
+
+    
+    adb_pub_key_exists = adb_pub_key != ""
+    log.debug(f"ADB public key exists: {adb_pub_key_exists}")
+
     log.debug("Initiating RemoteADB connection...")
     log.debug(f"Creating RemoteADB session at {url}")
 
     response = requests.post(
         url,
         json={
-            'client_certificate': client_cert
+            'client_certificate': client_cert,
+            'adb_pub_key': adb_pub_key
         },
         headers={
             'Authorization': f'Bearer {api_key}'

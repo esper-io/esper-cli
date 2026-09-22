@@ -101,6 +101,7 @@ def secureadb_connect(
             device_id=device_id,
             api_key=api_key,
             client_cert_path=state.local_cert,
+            client_adb_pub_key_path=state.adb_pub_key,
             log=state.log,
         )
 
