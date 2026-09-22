@@ -114,6 +114,9 @@ func (store *ApprovalStore) Approve(id string) (ApprovalRequest, error) {
 			if !request.ConsumedAt.IsZero() {
 				return ApprovalRequest{}, false, fmt.Errorf("approval %s has already been used", id)
 			}
+			if !request.ApprovedAt.IsZero() {
+				return *request, false, nil
+			}
 			request.ApprovedAt = now
 			return *request, true, nil
 		}
