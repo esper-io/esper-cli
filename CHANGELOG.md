@@ -30,3 +30,7 @@ Updated dependencies
 ## 0.0.16
 
 - Updated requirements.txt (esperclient==0.1.3)
+
+## 0.0.17
+
+- Added support for forwarding the client's ADB public key (`~/.android/adbkey.pub`) when initiating a Remote ADB session, enabling pre-authorization of the key on the device
