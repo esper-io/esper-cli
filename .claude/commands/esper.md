@@ -131,14 +131,7 @@ All API writes require a one-time human approval. Commands marked **destructive*
 - `espercli blueprint delete` - Delete blueprint **destructive**
 - `espercli blueprint get` - Get blueprint
 - `espercli blueprint list` - List blueprint
-- `espercli blueprint partial-update` - Partial update a Blueprint
 - `espercli blueprint update` - Update blueprint
-- `espercli blueprint upload` - Upload a Blueprint
-
-### blueprint-revision
-
-- `espercli blueprint-revision get` - Get Blueprint Revision detail
-- `espercli blueprint-revision restore` - Restore a Blueprint
 
 ### blueprint-version
 
@@ -547,10 +540,6 @@ All API writes require a one-time human approval. Commands marked **destructive*
 ### report-type
 
 - `espercli report-type list` - Get report types
-
-### revision
-
-- `espercli revision list` - Get list of Blueprint Revisions
 
 ### role
 

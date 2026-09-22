@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"errors"
 	"io"
-	"mime"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
@@ -25,27 +24,21 @@ type blueprintFixtureTest struct {
 	query                                  url.Values
 	status, errorStatus                    int
 	all, destructive                       bool
-	multipart                              map[string]string
 }
 
 func blueprintFixtureTests() []blueprintFixtureTest {
 	return []blueprintFixtureTest{
-		{"v2 GET /v2/blueprints/", "blueprint list", http.MethodGet, "/v2/blueprints/", "", "v2-blueprint-list", []string{"blueprint", "list", "--limit", "1", "--offset", "0", "--all", "--json"}, url.Values{"limit": {"1"}, "offset": {"0"}}, http.StatusOK, http.StatusBadRequest, true, false, nil},
-		{"v2 POST /v2/blueprints/", "blueprint create", http.MethodPost, "/v2/blueprints/", `{"description":"Created through scalar flags","name":"New warehouse blueprint"}`, "v2-blueprint-create", []string{"blueprint", "create", "--name", "New warehouse blueprint", "--description", "Created through scalar flags", "--json"}, nil, http.StatusCreated, http.StatusBadRequest, false, false, nil},
-		{"v2 GET /v2/blueprints/{blueprint_id}/", "blueprint get", http.MethodGet, "/v2/blueprints/blueprint-1/", "", "v2-blueprint-get", []string{"blueprint", "get", "blueprint-1", "--json"}, nil, http.StatusOK, http.StatusNotFound, false, false, nil},
-		{"v2 PUT /v2/blueprints/{blueprint_id}/", "blueprint update", http.MethodPut, "/v2/blueprints/blueprint-1/", `{"name":"Updated warehouse blueprint"}`, "v2-blueprint-update", []string{"blueprint", "update", "blueprint-1", "--body", `{"name":"Updated warehouse blueprint"}`, "--json"}, nil, http.StatusOK, http.StatusBadRequest, false, false, nil},
-		{"v2 DELETE /v2/blueprints/{blueprint_id}/", "blueprint delete", http.MethodDelete, "/v2/blueprints/blueprint-1/", "", "v2-blueprint-delete", []string{"blueprint", "delete", "blueprint-1", "--yes", "--json"}, nil, http.StatusNoContent, http.StatusNotFound, false, true, nil},
-		{"v2 GET /v2/blueprints/{blueprint_id}/versions/{version_id}/", "blueprint-version get", http.MethodGet, "/v2/blueprints/blueprint-1/versions/version-1/", "", "v2-blueprint-version-get", []string{"blueprint-version", "get", "version-1", "--blueprint", "blueprint-1", "--json"}, nil, http.StatusOK, http.StatusNotFound, false, false, nil},
-		{"legacy PATCH /enterprise/{enterprise_id}/devicegroup/{group_id}/blueprint/{blueprint_id}/", "legacy blueprint partial-update", http.MethodPatch, "/enterprise/enterprise-1/devicegroup/group-1/blueprint/blueprint-1/", `{"name":"Legacy renamed blueprint"}`, "legacy-blueprint-partial-update", []string{"blueprint", "partial-update", "blueprint-1", "--enterprise", "enterprise-1", "--device-group", "group-1", "--name", "Legacy renamed blueprint", "--json"}, nil, http.StatusOK, http.StatusBadRequest, false, false, nil},
-		{"legacy GET /enterprise/{enterprise_id}/devicegroup/{group_id}/blueprint/{blueprint_id}/revisions/", "revision list", http.MethodGet, "/enterprise/enterprise-1/devicegroup/group-1/blueprint/blueprint-1/revisions/", "", "legacy-revision-list", []string{"revision", "list", "--enterprise", "enterprise-1", "--device-group", "group-1", "--blueprint", "blueprint-1", "--limit", "1", "--offset", "0", "--all", "--json"}, url.Values{"limit": {"1"}, "offset": {"0"}}, http.StatusOK, http.StatusBadRequest, true, false, nil},
-		{"legacy GET /enterprise/{enterprise_id}/devicegroup/{group_id}/blueprint/{blueprint_id}/revisions/{revision_id}/", "blueprint-revision get", http.MethodGet, "/enterprise/enterprise-1/devicegroup/group-1/blueprint/blueprint-1/revisions/revision-1/", "", "legacy-blueprint-revision-get", []string{"blueprint-revision", "get", "revision-1", "--enterprise", "enterprise-1", "--device-group", "group-1", "--blueprint", "blueprint-1", "--json"}, nil, http.StatusOK, http.StatusBadRequest, false, false, nil},
-		{"legacy POST /enterprise/{enterprise_id}/devicegroup/{group_id}/blueprint/restore/", "blueprint-revision restore", http.MethodPost, "/enterprise/enterprise-1/devicegroup/group-1/blueprint/restore/", `{"revision_id":"revision-1"}`, "legacy-blueprint-revision-restore", []string{"blueprint-revision", "restore", "--enterprise", "enterprise-1", "--device-group", "group-1", "--revision-id", "revision-1", "--json"}, nil, http.StatusCreated, http.StatusBadRequest, false, false, nil},
-		{"legacy POST /enterprise/{enterprise_id}/devicegroup/{group_id}/blueprint/upload/", "legacy blueprint upload", http.MethodPost, "/enterprise/enterprise-1/devicegroup/group-1/blueprint/upload/", "", "legacy-blueprint-upload", []string{"blueprint", "upload", "--enterprise", "enterprise-1", "--device-group", "group-1", "--file", "FIXTURE_FILE", "--json"}, nil, http.StatusCreated, http.StatusBadRequest, false, false, map[string]string{"file": "blueprint upload fixture"}},
+		{"v2 GET /v2/blueprints/", "blueprint list", http.MethodGet, "/v2/blueprints/", "", "v2-blueprint-list", []string{"blueprint", "list", "--limit", "1", "--offset", "0", "--all", "--json"}, url.Values{"limit": {"1"}, "offset": {"0"}}, http.StatusOK, http.StatusBadRequest, true, false},
+		{"v2 POST /v2/blueprints/", "blueprint create", http.MethodPost, "/v2/blueprints/", `{"description":"Created through scalar flags","name":"New warehouse blueprint"}`, "v2-blueprint-create", []string{"blueprint", "create", "--name", "New warehouse blueprint", "--description", "Created through scalar flags", "--json"}, nil, http.StatusCreated, http.StatusBadRequest, false, false},
+		{"v2 GET /v2/blueprints/{blueprint_id}/", "blueprint get", http.MethodGet, "/v2/blueprints/blueprint-1/", "", "v2-blueprint-get", []string{"blueprint", "get", "blueprint-1", "--json"}, nil, http.StatusOK, http.StatusNotFound, false, false},
+		{"v2 PUT /v2/blueprints/{blueprint_id}/", "blueprint update", http.MethodPut, "/v2/blueprints/blueprint-1/", `{"name":"Updated warehouse blueprint"}`, "v2-blueprint-update", []string{"blueprint", "update", "blueprint-1", "--body", `{"name":"Updated warehouse blueprint"}`, "--json"}, nil, http.StatusOK, http.StatusBadRequest, false, false},
+		{"v2 DELETE /v2/blueprints/{blueprint_id}/", "blueprint delete", http.MethodDelete, "/v2/blueprints/blueprint-1/", "", "v2-blueprint-delete", []string{"blueprint", "delete", "blueprint-1", "--yes", "--json"}, nil, http.StatusNoContent, http.StatusNotFound, false, true},
+		{"v2 GET /v2/blueprints/{blueprint_id}/versions/{version_id}/", "blueprint-version get", http.MethodGet, "/v2/blueprints/blueprint-1/versions/version-1/", "", "v2-blueprint-version-get", []string{"blueprint-version", "get", "version-1", "--blueprint", "blueprint-1", "--json"}, nil, http.StatusOK, http.StatusNotFound, false, false},
 	}
 }
 
 func TestBlueprintOperationCoverage(t *testing.T) {
-	nouns := map[string]bool{"blueprint": true, "blueprint-revision": true, "blueprint-version": true, "revision": true}
+	nouns := map[string]bool{"blueprint": true, "blueprint-version": true}
 	expected := map[string]bool{}
 	for _, test := range blueprintFixtureTests() {
 		if expected[test.key] {
@@ -53,8 +46,8 @@ func TestBlueprintOperationCoverage(t *testing.T) {
 		}
 		expected[test.key] = true
 	}
-	if len(expected) != 11 {
-		t.Fatalf("fixture rows = %d, want 11", len(expected))
+	if len(expected) != 6 {
+		t.Fatalf("fixture rows = %d, want 6", len(expected))
 	}
 	actual := map[string]bool{}
 	for _, operation := range generated.Operations() {
@@ -62,7 +55,7 @@ func TestBlueprintOperationCoverage(t *testing.T) {
 			actual[operation.Generation+" "+operation.Method+" "+operation.Path] = true
 		}
 	}
-	if len(actual) != 11 || !reflect.DeepEqual(expected, actual) {
+	if len(actual) != 6 || !reflect.DeepEqual(expected, actual) {
 		t.Fatalf("packet operation keys mismatch: rows=%d generated=%d", len(expected), len(actual))
 	}
 }
@@ -84,17 +77,6 @@ func TestBlueprintInputValidation(t *testing.T) {
 	create, _, err := root.Find([]string{"blueprint", "create"})
 	if err != nil || create.Flags().Lookup("publish") != nil {
 		t.Fatal("blueprint create exposes read-only --publish")
-	}
-	for _, arguments := range [][]string{
-		{"blueprint-revision", "restore", "--enterprise", "enterprise-1", "--device-group", "group-1"},
-		{"blueprint", "upload", "--enterprise", "enterprise-1", "--device-group", "group-1"},
-		{"blueprint-revision", "restore", "--enterprise", "enterprise-1", "--device-group", "group-1", "--body", `{}`, "--revision-id", "revision-1"},
-	} {
-		command := NewRootCommand()
-		command.SetArgs(arguments)
-		if err := command.Execute(); err == nil || esperruntime.ExitCode(err) != 2 {
-			t.Fatalf("Execute(%v) error = %v", arguments, err)
-		}
 	}
 }
 
@@ -158,21 +140,11 @@ func executeBlueprintFixture(t *testing.T, test blueprintFixtureTest, apiError b
 	defer server.Close()
 	t.Setenv(esperruntime.EnvironmentVariable, server.URL)
 	t.Setenv(esperruntime.APIKeyVariable, "fixture-key")
-	args := append([]string(nil), test.arguments...)
-	for index, argument := range args {
-		if argument == "FIXTURE_FILE" {
-			file := filepath.Join(t.TempDir(), "blueprint.json")
-			if err := os.WriteFile(file, []byte("blueprint upload fixture"), 0o600); err != nil {
-				t.Fatal(err)
-			}
-			args[index] = file
-		}
-	}
 	command := NewRootCommand()
 	var output bytes.Buffer
 	command.SetOut(&output)
 	command.SetErr(&output)
-	command.SetArgs(args)
+	command.SetArgs(test.arguments)
 	err := command.Execute()
 	if apiError {
 		var value *esperruntime.APIError
@@ -211,27 +183,6 @@ func executeBlueprintFixture(t *testing.T, test blueprintFixtureTest, apiError b
 
 func assertBlueprintBody(t *testing.T, request *http.Request, test blueprintFixtureTest) {
 	t.Helper()
-	if len(test.multipart) > 0 {
-		mediaType, _, err := mime.ParseMediaType(request.Header.Get("Content-Type"))
-		if err != nil || mediaType != "multipart/form-data" {
-			t.Fatalf("content type = %q", request.Header.Get("Content-Type"))
-		}
-		if err := request.ParseMultipartForm(1 << 20); err != nil {
-			t.Fatal(err)
-		}
-		for name, want := range test.multipart {
-			file, err := request.MultipartForm.File[name][0].Open()
-			if err != nil {
-				t.Fatal(err)
-			}
-			got, _ := io.ReadAll(file)
-			file.Close()
-			if string(got) != want {
-				t.Errorf("multipart %s = %q, want %q", name, got, want)
-			}
-		}
-		return
-	}
 	if test.body == "" {
 		return
 	}

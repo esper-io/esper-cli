@@ -560,10 +560,6 @@ func requiredResource(operation generated.Operation, parameter string) string {
 		if parameter == "versionId" || parameter == "version_id" {
 			return "tenant-app-version"
 		}
-	case "blueprint", "blueprint-revision", "revision":
-		if operation.Generation == "legacy" && parameter == "blueprint_id" {
-			return "legacy-blueprint"
-		}
 	case "blueprint-version":
 		if parameter == "blueprint_id" {
 			return "blueprint"

@@ -87,7 +87,6 @@ func TestReadonlyArgsDoNotReuseUnrelatedResourceIDs(t *testing.T) {
 		{Noun: "app-vpp", Parameters: []generated.Parameter{{Name: "appId", In: "path"}}},
 		{Noun: "device-app", Parameters: []generated.Parameter{{Name: "app_id", In: "path"}}},
 		{Noun: "tenant-app-version", Parameters: []generated.Parameter{{Name: "appId", In: "path"}, {Name: "versionId", In: "path"}}},
-		{Generation: "legacy", Noun: "blueprint", Parameters: []generated.Parameter{{Name: "blueprint_id", In: "path"}}},
 	}
 	for _, operation := range tests {
 		for _, parameter := range operation.Parameters {
@@ -130,10 +129,6 @@ func TestReadonlyArgsKeepBlueprintFamiliesSeparate(t *testing.T) {
 	versionArgs, missing := readonlyArgs(generated.Operation{Noun: "blueprint-version", Parameters: []generated.Parameter{{Name: "blueprint_id", In: "path"}, {Name: "version_id", In: "path"}}}, known)
 	if len(missing) != 0 || !contains(versionArgs, "blueprint-v2") || !contains(versionArgs, "blueprint-version-v2") {
 		t.Fatalf("blueprint version args = %v, missing = %v", versionArgs, missing)
-	}
-	_, missing = readonlyArgs(generated.Operation{Generation: "legacy", Noun: "revision", Parameters: []generated.Parameter{{Name: "blueprint_id", In: "path"}}}, known)
-	if len(missing) != 1 || missing[0] != "blueprint_id" {
-		t.Fatalf("legacy blueprint missing = %v", missing)
 	}
 }
 
