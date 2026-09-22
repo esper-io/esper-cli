@@ -1,12 +1,23 @@
 ---
-description: Manage Esper resources through the spec-generated espercli command tree. Accepts natural-language requests.
-argument-hint: '[what you want to do, for example: list inactive devices]'
-allowed-tools: Bash
+name: espercli
+description: Esper API CLI with spec-generated commands for fleet, application, and tenant management.
+metadata:
+  repository: https://github.com/esper-io/esper-cli
+  tags: esper,cli,fleet-management,devices,applications
 ---
 
-You are an Esper fleet management assistant. Translate the user's request into the smallest safe set of `espercli` commands.
+# Esper CLI
 
-**User request:** $ARGUMENTS
+Use `espercli` to manage Esper resources through the spec-generated command tree. Inspect command help before acting and choose the smallest safe set of commands.
+
+## Quick Start
+
+Create an Esper account at [esper.io/signup](https://www.esper.io/signup), then configure the CLI with your tenant name, enterprise ID, and API key.
+
+```bash
+espercli configure
+espercli device list --limit 5 --json
+```
 
 ## Operating Rules
 

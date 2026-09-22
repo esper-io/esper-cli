@@ -11,7 +11,7 @@ import (
 	"github.com/esper-io/esper-cli/internal/cmd/generated"
 )
 
-const defaultOutputPath = ".claude/commands/esper.md"
+const defaultOutputPath = "SKILL.md"
 
 type commandDoc struct {
 	Path        string
@@ -62,12 +62,20 @@ func renderSkill(operations []generated.Operation) []byte {
 
 	var output strings.Builder
 	output.WriteString("---\n")
-	output.WriteString("description: Manage Esper resources through the spec-generated espercli command tree. Accepts natural-language requests.\n")
-	output.WriteString("argument-hint: '[what you want to do, for example: list inactive devices]'\n")
-	output.WriteString("allowed-tools: Bash\n")
+	output.WriteString("name: espercli\n")
+	output.WriteString("description: Esper API CLI with spec-generated commands for fleet, application, and tenant management.\n")
+	output.WriteString("metadata:\n")
+	output.WriteString("  repository: https://github.com/esper-io/esper-cli\n")
+	output.WriteString("  tags: esper,cli,fleet-management,devices,applications\n")
 	output.WriteString("---\n\n")
-	output.WriteString("You are an Esper fleet management assistant. Translate the user's request into the smallest safe set of `espercli` commands.\n\n")
-	output.WriteString("**User request:** $ARGUMENTS\n\n")
+	output.WriteString("# Esper CLI\n\n")
+	output.WriteString("Use `espercli` to manage Esper resources through the spec-generated command tree. Inspect command help before acting and choose the smallest safe set of commands.\n\n")
+	output.WriteString("## Quick Start\n\n")
+	output.WriteString("Create an Esper account at [esper.io/signup](https://www.esper.io/signup), then configure the CLI with your tenant name, enterprise ID, and API key.\n\n")
+	output.WriteString("```bash\n")
+	output.WriteString("espercli configure\n")
+	output.WriteString("espercli device list --limit 5 --json\n")
+	output.WriteString("```\n\n")
 	output.WriteString("## Operating Rules\n\n")
 	output.WriteString("1. Run `espercli <command> --help` before execution when required arguments or flags are not explicit below. Never invent flags.\n")
 	output.WriteString("2. Use `--json` when parsing output. Keep stdout machine-readable and use exit codes to detect failure.\n")

@@ -38,12 +38,17 @@ func TestRenderSkillIncludesGeneratedAndHandWrittenCommands(t *testing.T) {
 		{Command: []string{"old", "alias"}, AliasOf: "canonical"},
 	}))
 	for _, expected := range []string{
+		"name: espercli",
+		"# Esper CLI",
+		"https://www.esper.io/signup",
+		"espercli device list --limit 5 --json",
 		"`espercli configure",
 		"`espercli context set",
 		"`espercli discover <query-or-docs-url>`",
 		"`espercli secureadb connect --device <id>`",
 		"`espercli version`",
 		"For Linux, iOS, and Windows devices, use current `device` commands and `device-app list`.",
+		"Never run approval approve yourself",
 		"`espercli device list` - List devices",
 		"`espercli device delete` - Delete device **destructive**",
 	} {
@@ -53,5 +58,8 @@ func TestRenderSkillIncludesGeneratedAndHandWrittenCommands(t *testing.T) {
 	}
 	if strings.Contains(content, "espercli old alias") {
 		t.Fatal("generated skill includes an alias-only operation")
+	}
+	if strings.Contains(content, "$ARGUMENTS") {
+		t.Fatal("generated skill includes Claude command arguments")
 	}
 }

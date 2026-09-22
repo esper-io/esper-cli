@@ -30,7 +30,8 @@ sync with the supported API surface.
 
 ## Try It
 
-Configure the CLI with a tenant name, enterprise ID, and API key. Running
+Create an Esper account at [esper.io/signup](https://www.esper.io/signup), then
+configure the CLI with a tenant name, enterprise ID, and API key. Running
 `configure` without flags prompts for each value.
 
 ```bash
@@ -139,31 +140,12 @@ espercli api v1 --help
 Newer APIs own the standard command name. Legacy routes with a newer replacement
 are removed instead of preserved as compatibility aliases.
 
-## iOS Command Names
-
-The following resource names were made explicit. Update scripts that still use
-the previous spelling.
-
-| Previous command | Current command |
-|---|---|
-| `app list` | `ios-app list` |
-| `itunesapp list` | `ios-itunesapp list` |
-| `webclip <verb>` | `ios-webclip <verb>` |
-| `provisioning-profile <verb>` | `ios-provisioning-profile <verb>` |
-| `provisioning-profile-version <verb>` | `ios-provisioning-profile-version <verb>` |
-| `version list --provisioning-profile <id>` | `ios-provisioning-profile-version list --provisioning-profile <id>` |
-
-`api legacy app list` remains the Android device-app inventory, not the iOS app
-catalog. Cross-platform `tenant-app`, `device-app`, and `seamless` commands keep
-their names. Apple-wide APNs, DEP, and VPP APIs are not labelled iOS-only unless
-their contracts are exclusive to iOS.
-
 ## Agent Guidance
 
-The generated `/esper` command at `.claude/commands/esper.md` maps
-natural-language requests to the CLI, uses JSON for parsing, and follows the
-same approval boundaries. It is generated from the same operation metadata as
-the CLI and checked for drift in CI.
+[`SKILL.md`](SKILL.md) is the generated, agent-agnostic Esper CLI guide. It
+maps natural-language requests to the CLI, uses JSON for parsing, and follows
+the same approval boundaries. It is generated from the same operation metadata
+as the CLI and checked for drift in CI.
 
 ## Shell Completion
 
