@@ -241,7 +241,7 @@ def app_download(
     url = response.app_file
     file_size = int(response.size_in_mb * 1024 * 1024)
     pbar = tqdm(total=file_size, initial=0, unit="B", unit_scale=True, desc="Downloading......")
-    req = requests.get(url, stream=True)
+    req = requests.get(url, stream=True, timeout=30)
     with open(dest, "ab") as f:
         for chunk in req.iter_content(chunk_size=1024):
             if chunk:

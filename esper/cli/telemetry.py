@@ -110,7 +110,7 @@ def telemetry_get_data(
         category, metric_name, from_str, to_str, period, statistic,
     )
 
-    api_response = requests.get(url, headers={"Authorization": f"Bearer {api_key}"})
+    api_response = requests.get(url, headers={"Authorization": f"Bearer {api_key}"}, timeout=30)
     response_json = api_response.json()
 
     if api_response.status_code != 200:
