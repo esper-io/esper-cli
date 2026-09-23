@@ -12,10 +12,12 @@ func Replacement(method, path string) string {
 	return ""
 }
 
-// Excluded removes legacy commands when a newer API is available. Keep this
-// list explicit so legacy-only routes and reviewed exceptions remain generated.
+// Excluded removes reviewed operations from the generated command surface.
+// Keep this list explicit so other public routes remain generated.
 func Excluded(method, path string) bool {
 	switch path {
+	case "/v0/enterprise/{enterprise_id}/content/remote-file/generate_download_url/":
+		return method == "POST" // Unavailable on the deployed API; see .spec/retire-download-generate.
 	case "/enterprise/{enterprise_id}/application/":
 		return method == "GET"
 	case "/enterprise/{enterprise_id}/application/{application_id}/":

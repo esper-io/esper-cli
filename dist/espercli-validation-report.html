@@ -1,0 +1,535 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <title>Esper CLI Validation Report</title>
+  <style type="text/css">
+    :root {
+      --ink: #e8f0ff;
+      --muted: #9eafca;
+      --background: #07101f;
+      --surface: #0c1930;
+      --surface-raised: #112340;
+      --line: rgba(181, 208, 255, 0.14);
+      --blue: #62a9ff;
+      --cyan: #50e1d5;
+      --green: #74d68a;
+      --yellow: #f6cf75;
+      --red: #f19093;
+      --violet: #bb9cff;
+      --shadow: 0 22px 60px rgba(0, 0, 0, 0.25);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 15% -5%, rgba(70, 140, 255, 0.22), transparent 29rem),
+        radial-gradient(circle at 95% 10%, rgba(80, 225, 213, 0.13), transparent 27rem),
+        var(--background);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.5;
+    }
+
+    .shell { max-width: 1160px; margin: 0 auto; padding: 28px; }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 9px;
+      color: var(--cyan);
+      font-size: 0.78rem;
+      font-weight: 800;
+      letter-spacing: 0.13em;
+      text-transform: uppercase;
+    }
+
+    .eyebrow::before {
+      width: 8px;
+      height: 8px;
+      border-radius: 99px;
+      background: var(--green);
+      box-shadow: 0 0 0 5px rgba(116, 214, 138, 0.12);
+      content: "";
+    }
+
+    .hero {
+      position: relative;
+      overflow: hidden;
+      min-height: 350px;
+      padding: 54px;
+      border: 1px solid var(--line);
+      border-radius: 28px;
+      background: linear-gradient(130deg, rgba(17, 35, 64, 0.96), rgba(10, 25, 48, 0.88));
+      box-shadow: var(--shadow);
+    }
+
+    .hero::after {
+      position: absolute;
+      top: -145px;
+      right: -115px;
+      width: 380px;
+      height: 380px;
+      border: 1px solid rgba(98, 169, 255, 0.22);
+      border-radius: 50%;
+      box-shadow: 0 0 0 55px rgba(98, 169, 255, 0.045), 0 0 0 110px rgba(98, 169, 255, 0.035);
+      content: "";
+    }
+
+    .hero-content { position: relative; z-index: 1; max-width: 720px; }
+
+    h1, h2, h3, p { margin-top: 0; }
+
+    h1 {
+      max-width: 690px;
+      margin: 14px 0 20px;
+      font-size: clamp(2.4rem, 5vw, 4.85rem);
+      line-height: 0.98;
+      letter-spacing: -0.065em;
+    }
+
+    .lede {
+      max-width: 660px;
+      margin-bottom: 28px;
+      color: #c6d4ed;
+      font-size: 1.08rem;
+    }
+
+    .pill-row { display: flex; flex-wrap: wrap; gap: 10px; }
+
+    .pill {
+      padding: 7px 11px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      color: #c6d4ed;
+      background: rgba(7, 16, 31, 0.38);
+      font-size: 0.82rem;
+      font-weight: 650;
+    }
+
+    .section { margin-top: 56px; }
+
+    .section-heading {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 28px;
+      margin-bottom: 20px;
+    }
+
+    .section-heading h2 {
+      margin: 0;
+      font-size: clamp(1.5rem, 2.7vw, 2.25rem);
+      letter-spacing: -0.045em;
+    }
+
+    .section-heading p { max-width: 505px; margin: 0; color: var(--muted); }
+
+    .metric-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .metric {
+      min-height: 145px;
+      padding: 20px;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: rgba(12, 25, 48, 0.9);
+      box-shadow: 0 9px 28px rgba(0, 0, 0, 0.12);
+    }
+
+    .metric-link {
+      color: inherit;
+      text-decoration: none;
+      transition: border-color 160ms ease, transform 160ms ease, background 160ms ease;
+    }
+
+    .metric-link:hover,
+    .metric-link:focus-visible {
+      border-color: currentColor;
+      background: rgba(17, 35, 64, 1);
+      outline: none;
+      transform: translateY(-3px);
+    }
+
+    .metric-link small::after { content: " Browse records"; color: #c6d4ed; }
+
+    .metric .number {
+      display: block;
+      margin-bottom: 5px;
+      font-size: 2.5rem;
+      font-weight: 800;
+      letter-spacing: -0.06em;
+    }
+
+    .metric strong { display: block; font-size: 0.95rem; }
+    .metric small { display: block; margin-top: 6px; color: var(--muted); }
+    .metric.pass .number { color: var(--green); }
+    .metric.blocked .number { color: var(--yellow); }
+    .metric.fail .number { color: var(--red); }
+    .metric.scope .number { color: var(--cyan); }
+
+    .outcome-card {
+      display: grid;
+      grid-template-columns: 1.1fr 1fr;
+      gap: 24px;
+      padding: 26px;
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      background: linear-gradient(140deg, rgba(17, 35, 64, 0.88), rgba(12, 25, 48, 0.88));
+    }
+
+    .outcome-card h3 { margin-bottom: 8px; font-size: 1.22rem; }
+    .outcome-card p { color: var(--muted); }
+
+    .bar-list { display: grid; gap: 14px; }
+    .bar-label { display: flex; justify-content: space-between; gap: 10px; font-size: 0.9rem; }
+    .bar-label span:last-child { color: var(--muted); font-variant-numeric: tabular-nums; }
+    .bar-track { height: 9px; margin-top: 7px; overflow: hidden; border-radius: 99px; background: rgba(255, 255, 255, 0.075); }
+    .bar { height: 100%; border-radius: inherit; }
+    .bar.pass { width: 90.6%; background: linear-gradient(90deg, #50c879, var(--green)); }
+    .bar.blocked { width: 6.8%; background: linear-gradient(90deg, #e2ae55, var(--yellow)); }
+    .bar.fail { width: 1.0%; min-width: 5px; background: linear-gradient(90deg, #d8636e, var(--red)); }
+    .bar.not-run { width: 0.8%; min-width: 5px; background: var(--violet); }
+
+    .notice {
+      margin-top: 18px;
+      padding: 15px 17px;
+      border-left: 3px solid var(--cyan);
+      border-radius: 0 12px 12px 0;
+      color: #c6d4ed;
+      background: rgba(80, 225, 213, 0.08);
+      font-size: 0.92rem;
+    }
+
+    .lifecycle-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .lifecycle {
+      position: relative;
+      min-height: 215px;
+      padding: 21px;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: var(--surface);
+    }
+
+    .lifecycle::before {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 3px;
+      background: linear-gradient(90deg, var(--cyan), var(--blue));
+      content: "";
+    }
+
+    .lifecycle .tag {
+      color: var(--cyan);
+      font-size: 0.77rem;
+      font-weight: 800;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+
+    .lifecycle h3 { margin: 11px 0 9px; font-size: 1.1rem; }
+    .lifecycle p { margin: 0; color: var(--muted); font-size: 0.92rem; }
+    .checkline { display: flex; gap: 8px; margin-top: 16px; color: #bcefc9; font-size: 0.86rem; font-weight: 700; }
+    .checkline::before { content: "OK"; color: var(--green); }
+
+    .coverage-grid {
+      display: grid;
+      grid-template-columns: 0.92fr 1.08fr;
+      gap: 18px;
+    }
+
+    .coverage, .constraints {
+      padding: 25px;
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      background: var(--surface);
+    }
+
+    .coverage h3, .constraints h3 { margin-bottom: 15px; font-size: 1.1rem; }
+    .clean-list { display: grid; gap: 10px; margin: 0; padding: 0; list-style: none; }
+    .clean-list li { position: relative; padding-left: 20px; color: #cad8ed; }
+    .clean-list li::before { position: absolute; left: 0; color: var(--cyan); content: "+"; font-weight: 800; }
+    .constraints .clean-list li::before { color: var(--yellow); content: "!"; }
+
+    .timeline {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      background: var(--surface);
+    }
+
+    .timeline-item { min-height: 172px; padding: 20px; border-right: 1px solid var(--line); }
+    .timeline-item:last-child { border-right: 0; }
+    .timeline-item .step { color: var(--violet); font-size: 0.78rem; font-weight: 800; letter-spacing: 0.1em; }
+    .timeline-item h3 { margin: 10px 0 7px; font-size: 1rem; }
+    .timeline-item p { margin: 0; color: var(--muted); font-size: 0.88rem; }
+
+    .callout {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 18px;
+      align-items: center;
+      padding: 25px;
+      border: 1px solid rgba(116, 214, 138, 0.26);
+      border-radius: 20px;
+      background: linear-gradient(115deg, rgba(30, 85, 66, 0.34), rgba(12, 25, 48, 0.86));
+    }
+
+    .callout-mark {
+      display: grid;
+      width: 48px;
+      height: 48px;
+      place-items: center;
+      border-radius: 14px;
+      color: var(--green);
+      background: rgba(116, 214, 138, 0.12);
+      font-size: 1.4rem;
+      font-weight: 900;
+    }
+
+    .callout h2 { margin: 0 0 5px; font-size: 1.28rem; }
+    .callout p { margin: 0; color: #c6d4ed; }
+
+    .footer {
+      display: flex;
+      justify-content: space-between;
+      gap: 24px;
+      margin: 42px 0 8px;
+      padding-top: 18px;
+      border-top: 1px solid var(--line);
+      color: #8192af;
+      font-size: 0.8rem;
+    }
+
+    @media (max-width: 860px) {
+      .hero { min-height: auto; padding: 36px 28px; }
+      .metric-grid, .lifecycle-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .coverage-grid, .outcome-card { grid-template-columns: 1fr; }
+      .timeline { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .timeline-item:nth-child(2) { border-right: 0; }
+      .timeline-item:nth-child(-n+2) { border-bottom: 1px solid var(--line); }
+    }
+
+    @media (max-width: 560px) {
+      .shell { padding: 16px; }
+      .hero { padding: 30px 23px; border-radius: 20px; }
+      .metric-grid, .lifecycle-grid, .timeline { grid-template-columns: 1fr; }
+      .section-heading { display: block; }
+      .section-heading p { margin-top: 8px; }
+      .timeline-item { border-right: 0; border-bottom: 1px solid var(--line); }
+      .timeline-item:last-child { border-bottom: 0; }
+      .footer { display: block; }
+      .footer span + span { display: block; margin-top: 7px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <div class="hero">
+      <div class="hero-content">
+        <span class="eyebrow">Evidence snapshot</span>
+        <h1>Esper CLI<br>Validation Report</h1>
+        <p class="lede">A sanitized record of command-surface consolidation, end-to-end lifecycle checks, and bounded API validation in the development environment.</p>
+        <div class="pill-row">
+          <span class="pill">September 17-21, 2026</span>
+          <span class="pill">Development environment</span>
+          <span class="pill">Human-approved writes</span>
+          <span class="pill">No secrets in this report</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-heading">
+        <h2>Validation at a glance</h2>
+        <p>Scenario outcomes are evidence records, not a claim that every external integration was available or that every endpoint had safe test data.</p>
+      </div>
+      <div class="metric-grid">
+        <div class="metric scope">
+          <span class="number">990</span>
+          <strong>Evidence scenarios</strong>
+          <small>33 command families tracked</small>
+        </div>
+        <a class="metric metric-link pass" href="espercli-validation-passed.html">
+          <span class="number">897</span>
+          <strong>PASS outcomes</strong>
+          <small>607 functional checks completed</small>
+        </a>
+        <a class="metric metric-link blocked" href="espercli-validation-blocked.html">
+          <span class="number">67</span>
+          <strong>Blocked outcomes</strong>
+          <small>Permission, input, or integration-bound</small>
+        </a>
+        <a class="metric metric-link fail" href="espercli-validation-failed.html">
+          <span class="number">10</span>
+          <strong>Non-alarm failures</strong>
+          <small>8 alarm records excluded</small>
+        </a>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="outcome-card">
+        <div>
+          <h3>Outcome distribution</h3>
+          <p>Most shareable records are successful validation evidence. Blocked cases remain visible when a safe input, permission, or external integration was unavailable. 8 scenarios were not run.</p>
+          <div class="notice">8 alarm-related historical failure records are excluded from the shareable index at request. 4 records for a retired CLI command are excluded from active totals and remain in the local CSV audit source.</div>
+        </div>
+        <div class="bar-list">
+          <div>
+            <div class="bar-label"><span>PASS</span><span>897 / 90.6%</span></div>
+            <div class="bar-track"><div class="bar pass"></div></div>
+          </div>
+          <div>
+            <div class="bar-label"><span>BLOCKED</span><span>67 / 6.8%</span></div>
+            <div class="bar-track"><div class="bar blocked"></div></div>
+          </div>
+          <div>
+            <div class="bar-label"><span>NON-ALARM FAIL</span><span>10 / 1.0%</span></div>
+            <div class="bar-track"><div class="bar fail"></div></div>
+          </div>
+          <div>
+            <div class="bar-label"><span>NOT RUN</span><span>8 / 0.8%</span></div>
+            <div class="bar-track"><div class="bar not-run"></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-heading">
+        <h2>Lifecycle proof, not just help output</h2>
+        <p>Write paths were validated with isolated disposable resources, a separate human approval for each mutation, and a read-only postcondition check.</p>
+      </div>
+      <div class="lifecycle-grid">
+        <div class="lifecycle">
+          <span class="tag">Applications</span>
+          <h3>Version and application lifecycle</h3>
+          <p>Validated upload, read, version patch, version deletion, and direct parent deletion. Disposable applications were never assigned to a device.</p>
+          <span class="checkline">Fixtures cleaned</span>
+        </div>
+        <div class="lifecycle">
+          <span class="tag">Policy controls</span>
+          <h3>Alarm rule lifecycle</h3>
+          <p>Validated create, get, history read, patch, full update, deletion, and a 404 postcondition using a single authorized device target.</p>
+          <span class="checkline">Fixture cleaned</span>
+        </div>
+        <div class="lifecycle">
+          <span class="tag">Custom actions</span>
+          <h3>Draft action lifecycle</h3>
+          <p>Created an unplaced draft action, verified its state, updated a field, and confirmed deletion without assigning it to a blueprint or device.</p>
+          <span class="checkline">Fixture cleaned</span>
+        </div>
+        <div class="lifecycle">
+          <span class="tag">Content</span>
+          <h3>File-backed content lifecycle</h3>
+          <p>Uploaded a temporary ASCII text file, read it, patched metadata, deleted it, and confirmed both remote and local cleanup.</p>
+          <span class="checkline">Fixture cleaned</span>
+        </div>
+        <div class="lifecycle">
+          <span class="tag">Apple resources</span>
+          <h3>iOS web clip lifecycle</h3>
+          <p>Created, read, and deleted a removable web clip with no device assignment. A 404 read confirmed cleanup.</p>
+          <span class="checkline">Fixture cleaned</span>
+        </div>
+        <div class="lifecycle">
+          <span class="tag">Command execution</span>
+          <h3>Install request dispatch</h3>
+          <p>Validated command request acceptance and status retrieval. The supplied APK was rejected by the device parser, which was recorded separately from command dispatch.</p>
+          <span class="checkline">Dispatch contract verified</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-heading">
+        <h2>CLI modernization delivered</h2>
+        <p>The CLI now favors current APIs while retaining legacy commands only where no current replacement exists or behavior still requires the older contract.</p>
+      </div>
+      <div class="timeline">
+        <div class="timeline-item">
+          <span class="step">01</span>
+          <h3>Current APIs first</h3>
+          <p>Superseded legacy command surfaces were removed through explicit path policy, not broad generation hiding.</p>
+        </div>
+        <div class="timeline-item">
+          <span class="step">02</span>
+          <h3>Clear iOS naming</h3>
+          <p>iOS-only resources use an explicit prefix while genuinely cross-platform commands remain neutral.</p>
+        </div>
+        <div class="timeline-item">
+          <span class="step">03</span>
+          <h3>Platform-safe guidance</h3>
+          <p>Generated agent guidance directs Linux, iOS, and Windows validation to current device APIs rather than Android compatibility routes.</p>
+        </div>
+        <div class="timeline-item">
+          <span class="step">04</span>
+          <h3>Retired surfaces removed</h3>
+          <p>v0 geofence and Foundry command surfaces were removed from the CLI while current v1 geofencing remains available.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="coverage-grid">
+        <div class="coverage">
+          <h3>Read-only coverage includes</h3>
+          <ul class="clean-list">
+            <li>Applications, versions, catalogs, and install status</li>
+            <li>Android, iOS, and Linux device queries using current APIs</li>
+            <li>Pipelines, runs, stages, targets, and command statistics</li>
+            <li>Policies, roles, scopes, reports, subscriptions, and content</li>
+            <li>Provisioning profiles, Apple app catalog, and DEP metadata</li>
+            <li>Telemetry, locations, events, heartbeats, and device state</li>
+          </ul>
+        </div>
+        <div class="constraints">
+          <h3>Intentional boundaries and remaining prerequisites</h3>
+          <ul class="clean-list">
+            <li>Directory-record listing remains blocked by the onboarding feature flag; tenant Esper app listing returns HTTP 403 for this caller.</li>
+            <li>The AuthN user list still times out. Isolated configure tests and the script GET response-contract review have cleared their earlier blocked rows.</li>
+            <li>APNs certificate and provisioning creation require real integration artifacts.</li>
+            <li>Shared tenant and user mutations were not performed without a purpose-built disposable fixture.</li>
+            <li>Secure ADB and operational pipeline actions require dedicated runtime access and a separate action decision.</li>
+            <li>Non-Android devices were never deleted; platform checks used current device APIs only.</li>
+            <li>Known server-side alert-channel postcondition discrepancies are documented but were not investigated further.</li>
+            <li>An inactive disposable webtoken remains after an HTTP 200 delete response; its identifier and secret are excluded from this report.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="callout">
+        <div class="callout-mark">OK</div>
+        <div>
+          <h2>Evidence remains reviewable and sanitized.</h2>
+          <p>The underlying local CSV preserves scenario outcomes, expected behavior, observed behavior, and prerequisites. This presentation intentionally excludes credentials, signed URLs, device identifiers, personal data, locations, certificate details, and raw API payloads.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer">
+      <span>Esper CLI validation evidence snapshot</span>
+      <span>Generated from local sanitized evidence on September 23, 2026</span>
+    </div>
+  </div>
+</body>
+</html>

@@ -307,10 +307,6 @@ All API writes require a one-time human approval. Commands marked **destructive*
 - `espercli directory-record list` - Get all Directory Records
 - `espercli directory-record update` - Update a Directory Record
 
-### download
-
-- `espercli download generate` - Generate download URL for existing file
-
 ### emm
 
 - `espercli emm list` - List Google enterprises
