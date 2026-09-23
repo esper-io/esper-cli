@@ -12,6 +12,7 @@ import (
 	"path/filepath"
 	"testing"
 
+	"github.com/esper-io/esper-cli/internal/cmd/generated"
 	esperruntime "github.com/esper-io/esper-cli/internal/runtime"
 )
 
@@ -36,7 +37,6 @@ func TestContentCommandsGoldenFixtures(t *testing.T) {
 		{name: "content patch success", arguments: []string{"content", "patch", "enterprise-1", "content-1", "--description", "Updated fixture", "--json"}, method: http.MethodPatch, path: "/v0/enterprise/enterprise-1/content/content-1/", body: `{"description":"Updated fixture"}`, fixture: "content-patch-success.json", golden: "content-patch-success.golden", status: http.StatusOK},
 		{name: "content create success", arguments: []string{"content", "create", "--enterprise", "enterprise-1", "--key", file, "--json"}, method: http.MethodPost, path: "/v0/enterprise/enterprise-1/content/upload/", multipart: map[string]string{"key": "content fixture"}, fixture: "content-create-success.json", golden: "content-create-success.golden", status: http.StatusOK},
 		{name: "remote file upload success", arguments: []string{"remote-file", "upload", "enterprise-1", "--file", file, "--filename", "guide.pdf", "--content-type", "application/pdf", "--json"}, method: http.MethodPost, path: "/v0/enterprise/enterprise-1/content/remote-file/", multipart: map[string]string{"file": "content fixture", "filename": "guide.pdf", "content_type": "application/pdf"}, fixture: "remote-file-upload-success.json", golden: "remote-file-upload-success.golden", status: http.StatusCreated},
-		{name: "download generate success", arguments: []string{"download", "generate", "enterprise-1", "--file-key", "enterprise-1/files/guide.pdf", "--expires-in", "600", "--json"}, method: http.MethodPost, path: "/v0/enterprise/enterprise-1/content/remote-file/generate_download_url/", body: `{"expires_in":600,"file_key":"enterprise-1/files/guide.pdf"}`, fixture: "download-generate-success.json", golden: "download-generate-success.golden", status: http.StatusOK},
 	}
 
 	for _, test := range tests {
@@ -63,7 +63,6 @@ func TestContentCommandsAPIErrors(t *testing.T) {
 		{name: "content patch API error", arguments: []string{"content", "patch", "enterprise-1", "content-1", "--description", "Updated fixture", "--json"}, method: http.MethodPatch, path: "/v0/enterprise/enterprise-1/content/content-1/", body: `{"description":"Updated fixture"}`, fixture: "content-patch-api-error.json"},
 		{name: "content create API error", arguments: []string{"content", "create", "--enterprise", "enterprise-1", "--key", file, "--json"}, method: http.MethodPost, path: "/v0/enterprise/enterprise-1/content/upload/", multipart: map[string]string{"key": "content fixture"}, fixture: "content-create-api-error.json"},
 		{name: "remote file upload API error", arguments: []string{"remote-file", "upload", "enterprise-1", "--file", file, "--json"}, method: http.MethodPost, path: "/v0/enterprise/enterprise-1/content/remote-file/", multipart: map[string]string{"file": "content fixture"}, fixture: "remote-file-upload-api-error.json"},
-		{name: "download generate API error", arguments: []string{"download", "generate", "enterprise-1", "--file-key", "enterprise-1/files/guide.pdf", "--json"}, method: http.MethodPost, path: "/v0/enterprise/enterprise-1/content/remote-file/generate_download_url/", body: `{"file_key":"enterprise-1/files/guide.pdf"}`, fixture: "download-generate-api-error.json"},
 	}
 
 	for _, test := range tests {
@@ -80,7 +79,6 @@ func TestContentCommandInputValidation(t *testing.T) {
 	}{
 		{name: "content create requires key", arguments: []string{"content", "create", "--enterprise", "enterprise-1"}},
 		{name: "remote file upload requires file", arguments: []string{"remote-file", "upload", "enterprise-1"}},
-		{name: "download generate requires file key", arguments: []string{"download", "generate", "enterprise-1"}},
 		{name: "content patch body cannot combine property flags", arguments: []string{"content", "patch", "enterprise-1", "content-1", "--body", `{}`, "--description", "Updated fixture"}},
 	}
 
@@ -93,6 +91,23 @@ func TestContentCommandInputValidation(t *testing.T) {
 				t.Fatalf("Execute() error = %v", err)
 			}
 		})
+	}
+}
+
+func TestDownloadGenerateRetired(t *testing.T) {
+	for _, operation := range generated.Operations() {
+		if operation.Path == "/v0/enterprise/{enterprise_id}/content/remote-file/generate_download_url/" {
+			t.Fatal("download generate operation is still generated")
+		}
+	}
+	root := NewRootCommand()
+	command, _, err := root.Find([]string{"download", "generate"})
+	if err == nil && command.CommandPath() == "espercli download generate" {
+		t.Fatal("download generate is still exposed")
+	}
+	upload, _, err := root.Find([]string{"remote-file", "upload"})
+	if err != nil || upload.CommandPath() != "espercli remote-file upload" {
+		t.Fatalf("remote-file upload is unavailable: %v", err)
 	}
 }
 

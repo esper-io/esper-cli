@@ -28,11 +28,11 @@ func TestProvisioningProfileCommandsGoldenFixtures(t *testing.T) {
 		multipart                           bool
 		all                                 bool
 	}{
-		{"create", "provisioning-profile-create-success.json", "provisioning-profile-create-success.golden", http.MethodPost, "/v2/provisioning-profiles", []string{"provisioning-profile", "create", "--file", file, "--json"}, "", nil, true, false},
-		{"list", "provisioning-profile-list-success.json", "provisioning-profile-list-success.golden", http.MethodGet, "/v2/provisioning-profiles", []string{"provisioning-profile", "list", "--profile-type", "enterprise", "--limit", "1", "--offset", "0", "--all", "--json"}, "", url.Values{"profile_type": {"enterprise"}, "limit": {"1"}, "offset": {"0"}}, false, true},
-		{"get", "provisioning-profile-get-success.json", "provisioning-profile-get-success.golden", http.MethodGet, "/v2/provisioning-profiles/profile-1", []string{"provisioning-profile", "get", "profile-1", "--json"}, "", nil, false, false},
-		{"version get", "provisioning-profile-version-get-success.json", "provisioning-profile-version-get-success.golden", http.MethodGet, "/v2/provisioning-profiles/profile-1/versions/version-1", []string{"provisioning-profile-version", "get", "version-1", "--provisioning-profile", "profile-1", "--json"}, "", nil, false, false},
-		{"version delete", "provisioning-profile-version-delete-success.json", "provisioning-profile-version-delete-success.golden", http.MethodDelete, "/v2/provisioning-profiles/profile-1/versions/version-1", []string{"provisioning-profile-version", "delete", "version-1", "--provisioning-profile", "profile-1", "--json"}, "yes\n", nil, false, false},
+		{"create", "provisioning-profile-create-success.json", "provisioning-profile-create-success.golden", http.MethodPost, "/v2/provisioning-profiles", []string{"ios-provisioning-profile", "create", "--file", file, "--json"}, "", nil, true, false},
+		{"list", "provisioning-profile-list-success.json", "provisioning-profile-list-success.golden", http.MethodGet, "/v2/provisioning-profiles", []string{"ios-provisioning-profile", "list", "--profile-type", "enterprise", "--limit", "1", "--offset", "0", "--all", "--json"}, "", url.Values{"profile_type": {"enterprise"}, "limit": {"1"}, "offset": {"0"}}, false, true},
+		{"get", "provisioning-profile-get-success.json", "provisioning-profile-get-success.golden", http.MethodGet, "/v2/provisioning-profiles/profile-1", []string{"ios-provisioning-profile", "get", "profile-1", "--json"}, "", nil, false, false},
+		{"version get", "provisioning-profile-version-get-success.json", "provisioning-profile-version-get-success.golden", http.MethodGet, "/v2/provisioning-profiles/profile-1/versions/version-1", []string{"ios-provisioning-profile-version", "get", "version-1", "--provisioning-profile", "profile-1", "--json"}, "", nil, false, false},
+		{"version delete", "provisioning-profile-version-delete-success.json", "provisioning-profile-version-delete-success.golden", http.MethodDelete, "/v2/provisioning-profiles/profile-1/versions/version-1", []string{"ios-provisioning-profile-version", "delete", "version-1", "--provisioning-profile", "profile-1", "--json"}, "yes\n", nil, false, false},
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
@@ -48,11 +48,11 @@ func TestProvisioningProfileCommandsAPIErrors(t *testing.T) {
 		path, fixture, method string
 		multipart             bool
 	}{
-		{[]string{"provisioning-profile", "create", "--file", file, "--json"}, "/v2/provisioning-profiles", "provisioning-profile-create-api-error.json", http.MethodPost, true},
-		{[]string{"provisioning-profile", "list", "--json"}, "/v2/provisioning-profiles", "provisioning-profile-list-api-error.json", http.MethodGet, false},
-		{[]string{"provisioning-profile", "get", "profile-1", "--json"}, "/v2/provisioning-profiles/profile-1", "provisioning-profile-get-api-error.json", http.MethodGet, false},
-		{[]string{"provisioning-profile-version", "get", "version-1", "--provisioning-profile", "profile-1", "--json"}, "/v2/provisioning-profiles/profile-1/versions/version-1", "provisioning-profile-version-get-api-error.json", http.MethodGet, false},
-		{[]string{"provisioning-profile-version", "delete", "version-1", "--provisioning-profile", "profile-1", "--yes", "--json"}, "/v2/provisioning-profiles/profile-1/versions/version-1", "provisioning-profile-version-delete-api-error.json", http.MethodDelete, false},
+		{[]string{"ios-provisioning-profile", "create", "--file", file, "--json"}, "/v2/provisioning-profiles", "provisioning-profile-create-api-error.json", http.MethodPost, true},
+		{[]string{"ios-provisioning-profile", "list", "--json"}, "/v2/provisioning-profiles", "provisioning-profile-list-api-error.json", http.MethodGet, false},
+		{[]string{"ios-provisioning-profile", "get", "profile-1", "--json"}, "/v2/provisioning-profiles/profile-1", "provisioning-profile-get-api-error.json", http.MethodGet, false},
+		{[]string{"ios-provisioning-profile-version", "get", "version-1", "--provisioning-profile", "profile-1", "--json"}, "/v2/provisioning-profiles/profile-1/versions/version-1", "provisioning-profile-version-get-api-error.json", http.MethodGet, false},
+		{[]string{"ios-provisioning-profile-version", "delete", "version-1", "--provisioning-profile", "profile-1", "--yes", "--json"}, "/v2/provisioning-profiles/profile-1/versions/version-1", "provisioning-profile-version-delete-api-error.json", http.MethodDelete, false},
 	}
 	for _, test := range tests {
 		t.Run(test.fixture, func(t *testing.T) {
@@ -63,9 +63,9 @@ func TestProvisioningProfileCommandsAPIErrors(t *testing.T) {
 
 func TestProvisioningProfileInputValidation(t *testing.T) {
 	for _, arguments := range [][]string{
-		{"provisioning-profile", "create"},
-		{"provisioning-profile-version", "get", "version-1"},
-		{"provisioning-profile-version", "delete", "version-1"},
+		{"ios-provisioning-profile", "create"},
+		{"ios-provisioning-profile-version", "get", "version-1"},
+		{"ios-provisioning-profile-version", "delete", "version-1"},
 	} {
 		command := NewRootCommand()
 		command.SetArgs(arguments)

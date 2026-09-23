@@ -1,6 +1,9 @@
 package main
 
-import "testing"
+import (
+	"reflect"
+	"testing"
+)
 
 func TestExtractBodyRetainsRequirednessAndCollisionAutoFill(t *testing.T) {
 	body := extractBody(map[string]requestMedia{
@@ -86,6 +89,127 @@ func TestAliasesUseCanonicalCommand(t *testing.T) {
 	assignCommands(operations)
 	if operations[1].Noun != "geofence" || len(operations[1].Command) != 2 || operations[1].Command[0] != "geofence" {
 		t.Fatalf("alias command = %#v", operations[1])
+	}
+}
+
+func TestReviewedInstallationReplacementUsesCanonicalV1(t *testing.T) {
+	operations, err := load("../../spec/openapi")
+	if err != nil {
+		t.Fatal(err)
+	}
+	assignCommands(operations)
+	var legacy, current *generatedOperation
+	for index := range operations {
+		operation := &operations[index]
+		switch operation.OperationID {
+		case "getInstallDevices":
+			legacy = operation
+		case "getInstallDevicesV1":
+			current = operation
+		}
+	}
+	if legacy == nil || current == nil {
+		t.Fatal("replacement or canonical installation operation is missing")
+	}
+	if legacy.AliasOf != current.OperationID || current.AliasOf != "" || !reflect.DeepEqual(legacy.Command, current.Command) {
+		t.Fatalf("installation replacement = %#v; canonical = %#v", legacy, current)
+	}
+	if !reflect.DeepEqual(current.Command, []string{"installdevice", "list"}) {
+		t.Fatalf("canonical command = %v", current.Command)
+	}
+	// Input compatibility must survive future spec refreshes. Descriptive text
+	// differs slightly between generations but is not sent to either API.
+	oldParameters := append([]generatedParameter(nil), legacy.Parameters...)
+	newParameters := append([]generatedParameter(nil), current.Parameters...)
+	for index := range oldParameters {
+		oldParameters[index].Description = ""
+	}
+	for index := range newParameters {
+		newParameters[index].Description = ""
+	}
+	if !reflect.DeepEqual(oldParameters, newParameters) || legacy.Pagination != current.Pagination || legacy.SuccessMedia != current.SuccessMedia {
+		t.Fatal("installation-list contracts drifted; review the replacement policy")
+	}
+}
+
+func TestLegacyOperationsWithNewerEndpointsAreExcluded(t *testing.T) {
+	operations, err := load("../../spec/openapi")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	excluded := map[string]bool{
+		"GET /enterprise/{enterprise_id}/application/":                                          true,
+		"GET /enterprise/{enterprise_id}/application/{application_id}/":                         true,
+		"DELETE /enterprise/{enterprise_id}/application/{application_id}/":                      true,
+		"GET /enterprise/{enterprise_id}/application/{application_id}/version/":                 true,
+		"GET /enterprise/{enterprise_id}/application/{application_id}/version/{version_id}/":    true,
+		"DELETE /enterprise/{enterprise_id}/application/{application_id}/version/{version_id}/": true,
+		"PATCH /enterprise/{enterprise_id}/application/{application_id}/version/{version_id}/":  true,
+		"GET /enterprise/{enterprise_id}/device/":                                               true,
+		"GET /enterprise/{enterprise_id}/device/{device_id}/":                                   true,
+		"GET /enterprise/{enterprise_id}/device/{device_id}/install/":                           true,
+		"GET /enterprise/{enterprise_id}/device/{device_id}/download/eventfeed/":                true,
+		"GET /enterprise/{enterprise_id}/group/{group_id}/download/eventfeed/":                  true,
+		"GET /user/":              true,
+		"POST /user/":             true,
+		"PUT /user/{user_id}/":    true,
+		"PATCH /user/{user_id}/":  true,
+		"DELETE /user/{user_id}/": true,
+		"GET /enterprise/{enterprise_id}/devicegroup/{group_id}/blueprint/":                                        true,
+		"POST /enterprise/{enterprise_id}/devicegroup/{group_id}/blueprint/":                                       true,
+		"GET /enterprise/{enterprise_id}/devicegroup/{group_id}/blueprint/{blueprint_id}/":                         true,
+		"PATCH /enterprise/{enterprise_id}/devicegroup/{group_id}/blueprint/{blueprint_id}/":                       true,
+		"DELETE /enterprise/{enterprise_id}/devicegroup/{group_id}/blueprint/{blueprint_id}/":                      true,
+		"GET /enterprise/{enterprise_id}/devicegroup/{group_id}/blueprint/{blueprint_id}/revisions/":               true,
+		"GET /enterprise/{enterprise_id}/devicegroup/{group_id}/blueprint/{blueprint_id}/revisions/{revision_id}/": true,
+		"POST /enterprise/{enterprise_id}/devicegroup/{group_id}/blueprint/restore/":                               true,
+		"POST /enterprise/{enterprise_id}/devicegroup/{group_id}/blueprint/upload/":                                true,
+		"GET /v0/enterprise/{enterprise_id}/geofence/":                                                             true,
+		"GET /v0/enterprise/{enterprise_id}/geofence/{geofence_id}/":                                               true,
+		"PUT /v0/enterprise/{enterprise_id}/geofence/{geofence_id}/":                                               true,
+		"PATCH /v0/enterprise/{enterprise_id}/geofence/{geofence_id}/":                                             true,
+		"DELETE /v0/enterprise/{enterprise_id}/geofence/{geofence_id}/":                                            true,
+		"GET /v0/enterprise/{enterprise_id}/create-apply-geo-fence/":                                               true,
+		"POST /v0/enterprise/{enterprise_id}/create-apply-geo-fence/":                                              true,
+		"GET /v0/enterprise/{enterprise_id}/create-apply-geofence/{geofence_id}/":                                  true,
+		"DELETE /v0/enterprise/{enterprise_id}/create-apply-geofence/{geofence_id}/":                               true,
+		"GET /v1/foundry/builds/":                          true,
+		"GET /v1/foundry/builds/{build_id}/":               true,
+		"PUT /v1/foundry/builds/{build_id}/":               true,
+		"GET /v1/foundry/device-models/":                   true,
+		"PUT /v1/foundry/device-models/{device_model_id}/": true,
+		"GET /v1/foundry/events/":                          true,
+	}
+	retained := map[string]bool{
+		"GET /authn2/v1/users/":                                      true,
+		"GET /enterprise/{enterprise_id}/device/{device_id}/app/":    true,
+		"GET /enterprise/{enterprise_id}/device/{device_id}/status/": true,
+		"GET /enterprise/{enterprise_id}/devicegroup/":               true,
+		"POST /enterprise/{enterprise_id}/devicegroup/":              true,
+		"POST /geofence/v1/geofences":                                true,
+		"GET /geofence/v1/geofences":                                 true,
+		"GET /geofence/v1/geofences/{geofence_id}/device-summary":    true,
+		"GET /geofence/v1/geofences/{geofence_id}/blueprints":        true,
+		"GET /geofence/v1/geofences/{geofence_id}/devices":           true,
+		"GET /v2/blueprints/":                                        true,
+		"POST /v2/blueprints/":                                       true,
+		"GET /v2/blueprints/{blueprint_id}/":                         true,
+		"PUT /v2/blueprints/{blueprint_id}/":                         true,
+		"DELETE /v2/blueprints/{blueprint_id}/":                      true,
+		"GET /v2/blueprints/{blueprint_id}/versions/{version_id}/":   true,
+	}
+	for _, operation := range operations {
+		key := operation.Method + " " + operation.Path
+		if excluded[key] {
+			t.Errorf("excluded legacy operation remains generated: %s", key)
+		}
+		if retained[key] {
+			delete(retained, key)
+		}
+	}
+	for key := range retained {
+		t.Errorf("retained legacy operation is missing: %s", key)
 	}
 }
 

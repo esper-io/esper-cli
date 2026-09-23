@@ -1,12 +1,23 @@
 ---
-description: Manage Esper resources through the spec-generated espercli command tree. Accepts natural-language requests.
-argument-hint: '[what you want to do, for example: list inactive devices]'
-allowed-tools: Bash
+name: espercli
+description: Esper API CLI with spec-generated commands for fleet, application, and tenant management.
+metadata:
+  repository: https://github.com/esper-io/esper-cli
+  tags: esper,cli,fleet-management,devices,applications
 ---
 
-You are an Esper fleet management assistant. Translate the user's request into the smallest safe set of `espercli` commands.
+# Esper CLI
 
-**User request:** $ARGUMENTS
+Use `espercli` to manage Esper resources through the spec-generated command tree. Inspect command help before acting and choose the smallest safe set of commands.
+
+## Quick Start
+
+Create an Esper account at [esper.io/signup](https://www.esper.io/signup), then configure the CLI with your tenant name, enterprise ID, and API key.
+
+```bash
+espercli configure
+espercli device list --limit 5 --json
+```
 
 ## Operating Rules
 
@@ -16,6 +27,8 @@ You are an Esper fleet management assistant. Translate the user's request into t
 4. Prefer `--all` only when the user asks for complete paginated results.
 5. Use `--environment` and `--api-key` only when the user explicitly supplies overrides; otherwise rely on the configured environment.
 6. Do not call an API operation merely to discover whether it is safe. Use help and the command reference.
+
+7. For Linux, iOS, and Windows devices, use current `device` commands and `device-app list`. Do not fall back to `api legacy app list`, `api legacy status get`, or `device-app get` when a current device API returns an error; those legacy routes are Android compatibility surfaces.
 
 ## Hand-Written Commands
 
@@ -60,26 +73,9 @@ All API writes require a one-time human approval. Commands marked **destructive*
 ### api
 
 - `espercli api legacy app list` - List all device apps
-- `espercli api legacy app-version delete` - Delete app version **destructive**
-- `espercli api legacy app-version get` - Get app version information
-- `espercli api legacy app-version patch` - Patch an App version instance
-- `espercli api legacy application delete` - Delete an application **destructive**
-- `espercli api legacy application get` - Get application information
-- `espercli api legacy application list` - List apps in enterprise
-- `espercli api legacy blueprint create` - Create a Blueprint
-- `espercli api legacy blueprint delete` - Delete a Blueprint **destructive**
-- `espercli api legacy blueprint get` - Get Blueprint detail
-- `espercli api legacy blueprint list` - Get list of Blueprints for the group
-- `espercli api legacy device get` - Fetch device details by ID
-- `espercli api legacy device list` - Fetch all devices in an enterprise
-- `espercli api legacy install list` - List installed apps
-- `espercli api legacy installdevice list` - List install devices
 - `espercli api legacy status get` - Get latest device event
-- `espercli api legacy version list` - List App versions
 - `espercli api v0 command list` - List command requests
 - `espercli api v0 device list` - Get all DeviceOperations for a specific Operation
-- `espercli api v0 geofence create` - Create a geofence
-- `espercli api v0 geofence list` - List Geofences in Enterprise
 - `espercli api v1 status-metric list` - Get status metrics report for enterprise
 - `espercli api v1 version list` - List App versions
 
@@ -93,10 +89,6 @@ All API writes require a one-time human approval. Commands marked **destructive*
 ### apns-csr
 
 - `espercli apns-csr list` - Get the CSR file to upload to the apple identity console
-
-### app
-
-- `espercli app list` - Get unified list of iOS apps (IPAs and Webclips) for a tenant
 
 ### app-info
 
@@ -138,10 +130,6 @@ All API writes require a one-time human approval. Commands marked **destructive*
 
 - `espercli artifact create` - Add an artifact to a UWP app version
 
-### authn-user
-
-- `espercli authn-user list` - Get Users details
-
 ### background-script
 
 - `espercli background-script create` - Create background-script
@@ -154,14 +142,7 @@ All API writes require a one-time human approval. Commands marked **destructive*
 - `espercli blueprint delete` - Delete blueprint **destructive**
 - `espercli blueprint get` - Get blueprint
 - `espercli blueprint list` - List blueprint
-- `espercli blueprint partial-update` - Partial update a Blueprint
 - `espercli blueprint update` - Update blueprint
-- `espercli blueprint upload` - Upload a Blueprint
-
-### blueprint-revision
-
-- `espercli blueprint-revision get` - Get Blueprint Revision detail
-- `espercli blueprint-revision restore` - Restore a Blueprint
 
 ### blueprint-version
 
@@ -267,10 +248,6 @@ All API writes require a one-time human approval. Commands marked **destructive*
 - `espercli device-app get` - Get device app details
 - `espercli device-app list` - Get list of devices with an app by app_id or app_version_id.
 
-### device-eventfeed
-
-- `espercli device-eventfeed list` - Download Event Feed for Device
-
 ### device-google-account-emm-managed
 
 - `espercli device-google-account-emm-managed get` - Get the List of Google EMM Managed Devices for a user's devices.
@@ -330,10 +307,6 @@ All API writes require a one-time human approval. Commands marked **destructive*
 - `espercli directory-record list` - Get all Directory Records
 - `espercli directory-record update` - Update a Directory Record
 
-### download
-
-- `espercli download generate` - Generate download URL for existing file
-
 ### emm
 
 - `espercli emm list` - List Google enterprises
@@ -389,29 +362,10 @@ All API writes require a one-time human approval. Commands marked **destructive*
 
 - `espercli foundation-version-list list` - Get all distinct foundation versions
 
-### foundry-build
-
-- `espercli foundry-build get` - Get Foundry Build
-- `espercli foundry-build list` - Get Foundry builds
-- `espercli foundry-build update` - Update Foundry build
-
-### foundry-device-model
-
-- `espercli foundry-device-model list` - Get device models
-- `espercli foundry-device-model update` - Update Tenant Device Model
-
-### foundry-event
-
-- `espercli foundry-event list` - Get Foundry events
-
 ### geofence
 
 - `espercli geofence create` - Create a new geofence
-- `espercli geofence delete` - Delete a geofence **destructive**
-- `espercli geofence get` - Get geofence information
 - `espercli geofence list` - List all geofences
-- `espercli geofence partial-update` - Partially updates geofence information
-- `espercli geofence update` - Update geofence information
 
 ### geofence-blueprint
 
@@ -440,10 +394,6 @@ All API writes require a one-time human approval. Commands marked **destructive*
 - `espercli group partial-update` - Partially update a device group
 - `espercli group update` - Update device group
 
-### group-eventfeed
-
-- `espercli group-eventfeed list` - Download Event Feed for Group
-
 ### group-thumbnail
 
 - `espercli group-thumbnail delete` - Delete group thumbnail **destructive**
@@ -464,9 +414,32 @@ All API writes require a one-time human approval. Commands marked **destructive*
 - `espercli invite create` - Invite a user
 - `espercli invite list` - List user invites
 
-### itunesapp
+### ios-app
 
-- `espercli itunesapp list` - Get iOS App Info (v2)
+- `espercli ios-app list` - Get unified list of iOS apps (IPAs and Webclips) for a tenant
+
+### ios-itunesapp
+
+- `espercli ios-itunesapp list` - Get iOS App Info (v2)
+
+### ios-provisioning-profile
+
+- `espercli ios-provisioning-profile create` - Upload provisioning profile for a tenant
+- `espercli ios-provisioning-profile get` - Get provisioning profile by ID
+- `espercli ios-provisioning-profile list` - Get provisioning profiles for a tenant
+
+### ios-provisioning-profile-version
+
+- `espercli ios-provisioning-profile-version delete` - Delete provisioning profile version by ID **destructive**
+- `espercli ios-provisioning-profile-version get` - Get provisioning profile version by ID
+- `espercli ios-provisioning-profile-version list` - Get provisioning profile versions list
+
+### ios-webclip
+
+- `espercli ios-webclip create` - Create webclip for a tenant
+- `espercli ios-webclip delete` - Delete webclip for a tenant **destructive**
+- `espercli ios-webclip get` - Get webclip by id for a tenant
+- `espercli ios-webclip list` - Get webclips for a tenant
 
 ### mdm-service-config
 
@@ -550,17 +523,6 @@ All API writes require a one-time human approval. Commands marked **destructive*
 - `espercli product add` - Post a Google play application
 - `espercli product list` - List Google Play applications
 
-### provisioning-profile
-
-- `espercli provisioning-profile create` - Upload provisioning profile for a tenant
-- `espercli provisioning-profile get` - Get provisioning profile by ID
-- `espercli provisioning-profile list` - Get provisioning profiles for a tenant
-
-### provisioning-profile-version
-
-- `espercli provisioning-profile-version delete` - Delete provisioning profile version by ID **destructive**
-- `espercli provisioning-profile-version get` - Get provisioning profile version by ID
-
 ### refresh-version
 
 - `espercli refresh-version create` - Force refresh of VPP app version metadata
@@ -585,10 +547,6 @@ All API writes require a one-time human approval. Commands marked **destructive*
 ### report-type
 
 - `espercli report-type list` - Get report types
-
-### revision
-
-- `espercli revision list` - Get list of Blueprint Revisions
 
 ### role
 
@@ -744,15 +702,8 @@ All API writes require a one-time human approval. Commands marked **destructive*
 
 ### user
 
-- `espercli user create` - Create a new User
 - `espercli user get` - Get User Information
-- `espercli user list` - Get Users
-- `espercli user partial-update` - Partial update a User
-- `espercli user update` - Update a User
-
-### user-delete
-
-- `espercli user-delete delete` - Delete a user **destructive**
+- `espercli user list` - Get Users details
 
 ### user-info
 
@@ -768,13 +719,6 @@ All API writes require a one-time human approval. Commands marked **destructive*
 - `espercli wallpaper delete` - Deletes instance of wallpaper **destructive**
 - `espercli wallpaper get` - Get instance of wallpaper
 - `espercli wallpaper list` - Get list of wallpapers
-
-### webclip
-
-- `espercli webclip create` - Create webclip for a tenant
-- `espercli webclip delete` - Delete webclip for a tenant **destructive**
-- `espercli webclip get` - Get webclip by id for a tenant
-- `espercli webclip list` - Get webclips for a tenant
 
 ### webtoken
 

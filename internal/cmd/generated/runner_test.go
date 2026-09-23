@@ -165,6 +165,10 @@ func TestRequiredEmptyMultipartSendsForm(t *testing.T) {
 	if err != nil || len(body) == 0 || !strings.HasPrefix(contentType, "multipart/form-data") {
 		t.Fatalf("bodyFor() = %q, %q, %v", body, contentType, err)
 	}
+	secondBody, secondContentType, err := bodyFor(command, operation)
+	if err != nil || string(secondBody) != string(body) || secondContentType != contentType {
+		t.Fatalf("second bodyFor() = %q, %q, %v; want identical multipart output", secondBody, secondContentType, err)
+	}
 }
 
 func TestRequiredParametersAreConditionalOnSelectedRoute(t *testing.T) {
@@ -633,9 +637,9 @@ func TestMergedCommandUseFollowsPrimaryRoute(t *testing.T) {
 }
 
 func TestCommandLongHelpListsOlderAPIGenerations(t *testing.T) {
-	operations := []Operation{{Command: []string{"application", "list"}, Noun: "application", Verb: "list"}}
-	help := commandLongHelp("List applications", operations)
-	if !strings.Contains(help, "Other API generations:") || !strings.Contains(help, "espercli api legacy application list") {
+	operations := []Operation{{Command: []string{"version", "list"}, Noun: "version", Verb: "list"}}
+	help := commandLongHelp("List versions", operations)
+	if !strings.Contains(help, "Other API generations:") || !strings.Contains(help, "espercli api v1 version list") {
 		t.Fatalf("commandLongHelp() = %q", help)
 	}
 }

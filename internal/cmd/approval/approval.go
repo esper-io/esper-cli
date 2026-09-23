@@ -30,11 +30,17 @@ func NewCommand(options *esperruntime.GlobalOptions) *cobra.Command {
 		Short: "Approve one pending API write from an interactive terminal",
 		Args:  cobra.ExactArgs(1),
 		RunE: func(command *cobra.Command, args []string) error {
-			if err := esperruntime.RequireTerminal(command.InOrStdin()); err != nil {
-				return esperruntime.NewError(esperruntime.CategoryUsage, err)
-			}
 			request, err := load(args[0])
 			if err != nil {
+				return esperruntime.NewError(esperruntime.CategoryUsage, err)
+			}
+			if !request.ConsumedAt.IsZero() {
+				return esperruntime.NewError(esperruntime.CategoryUsage, fmt.Errorf("approval %s has already been used", request.ID))
+			}
+			if !request.ApprovedAt.IsZero() {
+				return write(command.OutOrStdout(), options.JSON, request)
+			}
+			if err := esperruntime.RequireTerminal(command.InOrStdin()); err != nil {
 				return esperruntime.NewError(esperruntime.CategoryUsage, err)
 			}
 			if err := write(command.ErrOrStderr(), false, request); err != nil {
@@ -80,8 +86,18 @@ func write(writer io.Writer, asJSON bool, request esperruntime.ApprovalRequest) 
 	for _, target := range request.AdditionalTargets {
 		additional = append(additional, target.Method+" "+target.Path)
 	}
-	_, err := fmt.Fprintf(writer, "Approval %s\n  %s %s\n  Additional writes: %s\n  Query keys: %s\n  Body fields: %s\n  Body SHA-256: %s\n  Expires: %s\n", request.ID, request.Method, request.Path, display(additional), display(request.QueryKeys), display(request.BodyFields), displayValue(request.BodySHA256), request.ExpiresAt.Format("2006-01-02T15:04:05Z07:00"))
+	_, err := fmt.Fprintf(writer, "Approval %s\n  Status: %s\n  %s %s\n  Additional writes: %s\n  Query keys: %s\n  Body fields: %s\n  Body SHA-256: %s\n  Expires: %s\n", request.ID, approvalStatus(request), request.Method, request.Path, display(additional), display(request.QueryKeys), display(request.BodyFields), displayValue(request.BodySHA256), request.ExpiresAt.Format("2006-01-02T15:04:05Z07:00"))
 	return err
+}
+
+func approvalStatus(request esperruntime.ApprovalRequest) string {
+	if !request.ConsumedAt.IsZero() {
+		return "consumed"
+	}
+	if !request.ApprovedAt.IsZero() {
+		return "approved"
+	}
+	return "pending"
 }
 
 func display(values []string) string {

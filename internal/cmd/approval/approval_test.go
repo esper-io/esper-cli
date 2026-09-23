@@ -5,6 +5,7 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+	"time"
 
 	esperruntime "github.com/esper-io/esper-cli/internal/runtime"
 )
@@ -42,5 +43,47 @@ func TestApprovalInstructionQuotesCommand(t *testing.T) {
 	want := `Type "approve bcd24991cfcd0db60f557c65" to approve this exact request: `
 	if got := approvalInstruction(id); got != want {
 		t.Fatalf("approvalInstruction() = %q, want %q", got, want)
+	}
+}
+
+func TestApproveIsIdempotentAfterApproval(t *testing.T) {
+	t.Setenv(esperruntime.CredentialsFileEnvironment, filepath.Join(t.TempDir(), "creds.json"))
+	now := time.Now().UTC()
+	store, err := esperruntime.NewApprovalStore()
+	if err != nil {
+		t.Fatal(err)
+	}
+	store.Now = func() time.Time { return now }
+	request, _, err := store.Request(esperruntime.ApprovalSpec{BaseURL: "https://example.test", Method: "DELETE", Path: "/things/1"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	first, err := store.Approve(request.ID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	now = now.Add(time.Minute)
+	second, err := store.Approve(request.ID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !second.ApprovedAt.Equal(first.ApprovedAt) {
+		t.Fatalf("second approval changed ApprovedAt from %s to %s", first.ApprovedAt, second.ApprovedAt)
+	}
+
+	command := NewCommand(&esperruntime.GlobalOptions{})
+	var output, stderr bytes.Buffer
+	command.SetIn(strings.NewReader(""))
+	command.SetOut(&output)
+	command.SetErr(&stderr)
+	command.SetArgs([]string{"approve", request.ID})
+	if err := command.Execute(); err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(output.String(), "Status: approved") {
+		t.Fatalf("approved request output = %q", output.String())
+	}
+	if stderr.Len() != 0 {
+		t.Fatalf("approved request prompted again: %q", stderr.String())
 	}
 }

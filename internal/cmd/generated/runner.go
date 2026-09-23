@@ -72,6 +72,9 @@ var generatedOperations []Operation
 
 const maximumPaginationPages = 10000
 
+// Multipart bodies are included in the single-use approval fingerprint.
+const multipartBoundary = "espercli-form-data-boundary"
+
 const usageTemplate = `Usage:{{if .Runnable}}
   {{.UseLine}}{{end}}{{if .HasAvailableSubCommands}}
   {{.CommandPath}} [command]{{end}}{{if gt (len .Aliases) 0}}
@@ -176,10 +179,13 @@ func commandLongHelp(summary string, operations []Operation) string {
 	if bodyHelp := bodySchemaHelp(operations); bodyHelp != "" {
 		sections = append(sections, bodyHelp)
 	}
-	if len(operations) > 0 && !strings.HasPrefix(strings.Join(operations[0].Command, " "), "api ") {
+	if len(operations) > 0 && len(operations[0].Command) >= 2 && !strings.HasPrefix(strings.Join(operations[0].Command, " "), "api ") {
 		paths := map[string]bool{}
 		for _, candidate := range generatedOperations {
 			if candidate.AliasOf != "" || candidate.Noun != operations[0].Noun || candidate.Verb != operations[0].Verb {
+				continue
+			}
+			if len(candidate.Command) < 2 || candidate.Command[len(candidate.Command)-2] != operations[0].Command[len(operations[0].Command)-2] {
 				continue
 			}
 			path := strings.Join(candidate.Command, " ")
@@ -1014,6 +1020,9 @@ func mergeAutoFillJSON(data []byte, values map[string]any) ([]byte, string, erro
 func multipartBody(command *cobra.Command, body *Body, autoValues map[string]any) ([]byte, string, error) {
 	var output strings.Builder
 	writer := multipart.NewWriter(&output)
+	if err := writer.SetBoundary(multipartBoundary); err != nil {
+		return nil, "", err
+	}
 	for name, value := range autoValues {
 		if err := writer.WriteField(name, fmt.Sprint(value)); err != nil {
 			return nil, "", err
