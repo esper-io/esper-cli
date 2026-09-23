@@ -1,0 +1,1 @@
+{"count":2,"next":null,"previous":"https://example.test/page?offset=0","results":[{"id":"alarm-2","enterprise":"enterprise-1","devices":[],"groups":[],"name":"memory","metric":"memory","conditions":{"value":80},"alert_channels":[],"realert_interval":5}]}

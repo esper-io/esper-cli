@@ -1,0 +1,45 @@
+[
+  {
+    "alert_channels": [
+      {
+        "id": "1",
+        "name": "mail"
+      }
+    ],
+    "conditions": {
+      "value": 90
+    },
+    "devices": [
+      {
+        "alias_name": null,
+        "device_name": "device",
+        "id": "device-1"
+      }
+    ],
+    "enterprise": "enterprise-1",
+    "groups": [
+      {
+        "id": "group-1",
+        "name": "group",
+        "path": null
+      }
+    ],
+    "id": "alarm-1",
+    "metric": "cpu",
+    "name": "cpu",
+    "realert_interval": 5
+  },
+  {
+    "alert_channels": [],
+    "conditions": {
+      "value": 80
+    },
+    "devices": [],
+    "enterprise": "enterprise-1",
+    "groups": [],
+    "id": "alarm-2",
+    "metric": "memory",
+    "name": "memory",
+    "realert_interval": 5
+  }
+]

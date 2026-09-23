@@ -1,0 +1,12 @@
+{
+  "enterprise": "enterprise-1",
+  "id": 1,
+  "linked_alerts": [],
+  "name": "mail-updated",
+  "properties": {
+    "to_address": [
+      "ops@example.test"
+    ]
+  },
+  "type": "email"
+}

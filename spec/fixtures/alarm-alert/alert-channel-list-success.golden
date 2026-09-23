@@ -1,0 +1,32 @@
+[
+  {
+    "enterprise": "enterprise-1",
+    "id": 1,
+    "linked_alerts": [
+      {
+        "alarm_name": "cpu",
+        "id": "alarm-1",
+        "type": "email"
+      }
+    ],
+    "name": "mail",
+    "properties": {
+      "to_address": [
+        "ops@example.test"
+      ]
+    },
+    "type": "email"
+  },
+  {
+    "enterprise": "enterprise-1",
+    "id": 2,
+    "linked_alerts": [],
+    "name": "backup",
+    "properties": {
+      "to_address": [
+        "backup@example.test"
+      ]
+    },
+    "type": "email"
+  }
+]

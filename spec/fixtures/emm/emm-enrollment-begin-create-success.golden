@@ -1,0 +1,8 @@
+{
+  "content": {
+    "callback_url": "https://example.test/callback",
+    "completion_token": "completion-1",
+    "signup_url": "https://example.test/signup",
+    "tenant_id": "tenant-1"
+  }
+}

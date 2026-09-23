@@ -1,0 +1,15 @@
+{
+  "content": {
+    "callback_url": "https://example.test/callback",
+    "completion_token": "completion-1",
+    "created_at": "2026-08-24T10:00:00Z",
+    "enterprise_token": "enterprise-token-1",
+    "google_enterprise_id": "google-enterprise-1",
+    "is_synced_to_scapi": null,
+    "name": "Fixture Enterprise 1",
+    "signup_url": "https://example.test/signup",
+    "state": 1,
+    "tenant_id": "tenant-1",
+    "updated_at": "2026-08-24T11:00:00Z"
+  }
+}

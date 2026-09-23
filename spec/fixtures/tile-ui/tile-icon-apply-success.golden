@@ -1,0 +1,9 @@
+{
+  "apply_mode": "devices",
+  "device_model": null,
+  "devices": [
+    "device-1"
+  ],
+  "groups": null,
+  "icon": "44444444-4444-4444-8444-444444444444"
+}

@@ -1,0 +1,1771 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "ESPER API REFERENCE - authn2",
+    "version": "1.0.0",
+    "x-esper-generation": "authn2",
+    "x-esper-auth": "bearer"
+  },
+  "servers": [
+    {
+      "url": "https://{foo}-api.esper.cloud/api",
+      "variables": {
+        "foo": {
+          "default": "develop",
+          "description": "Custom end point"
+        }
+      }
+    }
+  ],
+  "tags": [
+    {
+      "name": "0_User",
+      "description": "APIs for User Management",
+      "externalDocs": {
+        "description": "Find out more about User management",
+        "url": "https://help.esper.io/hc/en-us/articles/12656615814929"
+      },
+      "x-displayName": "User"
+    },
+    {
+      "name": "0_SSO Connections",
+      "x-displayName": "SSO Connections"
+    },
+    {
+      "name": "0_Personal Access Token",
+      "x-displayName": "Personal Access Token"
+    }
+  ],
+  "paths": {
+    "/authn2/v0/tenant/{enterprise_id}/invite": {
+      "post": {
+        "x-badges": [
+          {
+            "name": "Stable",
+            "color": "green"
+          }
+        ],
+        "tags": [
+          "0_User"
+        ],
+        "summary": "Invite a user",
+        "description": "Invite a user to a tenant",
+        "operationId": "tenantUserInvite",
+        "security": [
+          {
+            "apiKey": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/EnterpriseID"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TenantUserInviteRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Invite sent to user",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TenantUserInviteCreateResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "tenant user invite create error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenericErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenericErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "x-esper-destructive": false,
+        "x-esper-pagination": "none",
+        "x-esper-verb": "create",
+        "x-esper-noun": "invite",
+        "x-esper-scope-parent": "tenant"
+      },
+      "get": {
+        "x-badges": [
+          {
+            "name": "Stable",
+            "color": "green"
+          }
+        ],
+        "tags": [
+          "0_User"
+        ],
+        "summary": "List user invites",
+        "description": "List user invites in a tenant",
+        "operationId": "getTenantUserInvites",
+        "security": [
+          {
+            "apiKey": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/EnterpriseID"
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Tenant user invites",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "count": {
+                      "type": "integer"
+                    },
+                    "userinvites": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/TenantUserInviteResponse"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "List tenant user invites error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenericErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenericErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "x-esper-destructive": false,
+        "x-esper-pagination": "none",
+        "x-esper-verb": "list",
+        "x-esper-noun": "invite",
+        "x-esper-scope-parent": "tenant"
+      }
+    },
+    "/authn2/v0/tenant/{enterprise_id}/invite/{invite_id}": {
+      "delete": {
+        "x-badges": [
+          {
+            "name": "Stable",
+            "color": "green"
+          }
+        ],
+        "tags": [
+          "0_User"
+        ],
+        "summary": "Delete a invite",
+        "description": "Delete a invite",
+        "operationId": "deleteTenantUserInvite",
+        "security": [
+          {
+            "apiKey": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/EnterpriseID"
+          },
+          {
+            "$ref": "#/components/parameters/InviteID"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Deleted tenant user invite"
+          },
+          "400": {
+            "description": "Tenant user invite delete error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenericErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenericErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "x-esper-destructive": true,
+        "x-esper-pagination": "none",
+        "x-esper-verb": "delete",
+        "x-esper-noun": "tenant-user-invite",
+        "x-esper-scope-parent": "tenant"
+      }
+    },
+    "/authn2/v0/user/{user_id}": {
+      "put": {
+        "x-badges": [
+          {
+            "name": "Stable",
+            "color": "green"
+          }
+        ],
+        "tags": [
+          "0_User"
+        ],
+        "summary": "Update user profile",
+        "description": "Update user's profile",
+        "operationId": "updateOwnUser",
+        "security": [
+          {
+            "apiKey": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/AuthNUserID"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateOwnUserRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "User Updated Successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenericErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenericErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden, no permission to perform this action.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenericErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "x-esper-destructive": false,
+        "x-esper-pagination": "none",
+        "x-esper-verb": "update",
+        "x-esper-noun": "own-user"
+      }
+    },
+    "/authn2/v0/tenant/{enterprise_id}/user/{user_id}/": {
+      "delete": {
+        "x-badges": [
+          {
+            "name": "Stable",
+            "color": "green"
+          }
+        ],
+        "tags": [
+          "0_User"
+        ],
+        "summary": "Delete a user from Enterprise",
+        "description": "Delete a user from Enterprise",
+        "operationId": "deleteTenantUser",
+        "security": [
+          {
+            "apiKey": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/EnterpriseID"
+          },
+          {
+            "$ref": "#/components/parameters/AuthNUserID"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Deleted enterprise user"
+          },
+          "400": {
+            "description": "Enterprise user delete error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenericErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenericErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "x-esper-destructive": true,
+        "x-esper-pagination": "none",
+        "x-esper-verb": "delete",
+        "x-esper-noun": "tenant-user",
+        "x-esper-scope-parent": "tenant"
+      }
+    },
+    "/authn2/v0/tenant/{enterprise_id}/connection": {
+      "get": {
+        "x-badges": [
+          {
+            "name": "Stable",
+            "color": "green"
+          }
+        ],
+        "tags": [
+          "0_SSO Connections"
+        ],
+        "summary": "List SSO connections",
+        "description": "List SSO connections of a tenant. Learn more about <a target=\"_blank\" href=\"https://help.esper.io/hc/en-us/articles/14266541959569-Introduction-to-User-Authentication\">SSO Connections</a>.\n",
+        "operationId": "getConnections",
+        "security": [
+          {
+            "apiKey": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/EnterpriseID"
+          },
+          {
+            "$ref": "#/components/parameters/IsDefault"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Tenant connections",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "count": {
+                      "type": "integer"
+                    },
+                    "connections": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/CustomConnectionsListResponse"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "List custom connections error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenericErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenericErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "x-esper-destructive": false,
+        "x-esper-pagination": "none",
+        "x-esper-verb": "list",
+        "x-esper-noun": "connection",
+        "x-esper-scope-parent": "tenant"
+      }
+    },
+    "/authn2/v0/tenant/{enterprise_id}/connection/{connection_id}": {
+      "put": {
+        "x-badges": [
+          {
+            "name": "Stable",
+            "color": "green"
+          }
+        ],
+        "tags": [
+          "0_SSO Connections"
+        ],
+        "summary": "Edit SSO connections",
+        "description": "Edit SSO connections",
+        "operationId": "editCustomConnection",
+        "security": [
+          {
+            "apiKey": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/EnterpriseID"
+          },
+          {
+            "$ref": "#/components/parameters/ConnectionID"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CustomConnectionRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated connection",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CustomConnectionResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "custom connection update error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenericErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenericErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden, no permission to perform this action.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "x-esper-destructive": false,
+        "x-esper-pagination": "none",
+        "x-esper-verb": "update",
+        "x-esper-noun": "custom-connection"
+      }
+    },
+    "/authn2/v0/personal-access-token/": {
+      "post": {
+        "x-badges": [
+          {
+            "name": "Stable",
+            "color": "green"
+          }
+        ],
+        "tags": [
+          "0_Personal Access Token"
+        ],
+        "summary": "Generate a new personal access token",
+        "description": "This endpoint allows clients to generate a new personal access token for a specific user and tenant.\n",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "description": "name for the token."
+                  },
+                  "description": {
+                    "type": "string",
+                    "description": "description for the token."
+                  },
+                  "expiry_at": {
+                    "type": "integer",
+                    "description": "exipy date for token."
+                  }
+                },
+                "required": [
+                  "name",
+                  "description",
+                  "expiry_at"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Token successfully generated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PersonalAccessTokenCreateResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenericErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenericErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "x-esper-destructive": false,
+        "x-esper-pagination": "none",
+        "x-esper-verb": "create",
+        "x-esper-noun": "personal-access-token"
+      },
+      "get": {
+        "x-badges": [
+          {
+            "name": "Stable",
+            "color": "green"
+          }
+        ],
+        "tags": [
+          "0_Personal Access Token"
+        ],
+        "summary": "Get tokens for corresponding user and tenant",
+        "description": "Get all tokens associated with the given user and tenant.",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PersonalAccessTokenGetResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenericErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenericErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "x-esper-destructive": false,
+        "x-esper-pagination": "none",
+        "x-esper-verb": "list",
+        "x-esper-noun": "personal-access-token"
+      }
+    },
+    "/authn2/v0/personal-access-token/{personal_access_token_id}": {
+      "put": {
+        "x-badges": [
+          {
+            "name": "Stable",
+            "color": "green"
+          }
+        ],
+        "tags": [
+          "0_Personal Access Token"
+        ],
+        "summary": "Renew personal access token",
+        "description": "Renew token associated with the given token_id.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/PersonalAccessTokenID"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "expiry_at": {
+                    "type": "integer",
+                    "description": "exipy date for token."
+                  }
+                },
+                "required": [
+                  "expiry_at"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PersonalAccessTokenUpdateResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenericErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenericErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "x-esper-destructive": false,
+        "x-esper-pagination": "none",
+        "x-esper-verb": "update",
+        "x-esper-noun": "personal-access-token"
+      },
+      "delete": {
+        "x-badges": [
+          {
+            "name": "Stable",
+            "color": "green"
+          }
+        ],
+        "tags": [
+          "0_Personal Access Token"
+        ],
+        "summary": "Delete personal access token",
+        "description": "Delete token.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/PersonalAccessTokenID"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenericErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenericErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "x-esper-destructive": true,
+        "x-esper-pagination": "none",
+        "x-esper-verb": "delete",
+        "x-esper-noun": "personal-access-token"
+      }
+    },
+    "/authn2/v1/users/": {
+      "get": {
+        "x-badges": [
+          {
+            "name": "Stable",
+            "color": "green"
+          }
+        ],
+        "tags": [
+          "0_User"
+        ],
+        "summary": "Get Users details",
+        "description": "This endpoint allows to fetch user list of a tenant\n",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/LegacyUserID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Users fetched successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UsersListResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenericErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenericErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "x-esper-destructive": false,
+        "x-esper-pagination": "none",
+        "x-esper-verb": "list",
+        "x-esper-noun": "user"
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "UsersListResponse": {
+        "title": "UsersListResponse",
+        "type": "object",
+        "properties": {
+          "user_id": {
+            "title": "user id",
+            "type": "string"
+          },
+          "tenant_id": {
+            "title": "tenant id",
+            "type": "string",
+            "format": "uuid"
+          },
+          "partner_id": {
+            "title": "partner id",
+            "type": "string",
+            "format": "uuid"
+          },
+          "email": {
+            "title": "email",
+            "type": "string"
+          },
+          "name": {
+            "title": "name",
+            "type": "string"
+          },
+          "connection_id": {
+            "title": "connection id",
+            "type": "string"
+          },
+          "created_at": {
+            "title": "created_at",
+            "type": "string",
+            "format": "timestamp"
+          },
+          "updated_at": {
+            "title": "updated_at",
+            "type": "string",
+            "format": "timestamp"
+          }
+        }
+      },
+      "PersonalAccessTokenUpdateResponse": {
+        "title": "PersonalAccessTokenUpdateResponse",
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Unique ID for the generated token."
+          },
+          "name": {
+            "type": "string",
+            "description": "Name for the token."
+          },
+          "description": {
+            "type": "string",
+            "description": "Description for the token."
+          },
+          "created_at": {
+            "type": "string",
+            "format": "timestamp",
+            "description": "Timestamp indicating when the token was created."
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "timestamp",
+            "description": "Timestamp indicating when the token was last updated."
+          },
+          "token": {
+            "type": "string",
+            "description": "The generated access token value."
+          },
+          "prefix": {
+            "type": "string",
+            "description": "Prefix for the generated token value."
+          },
+          "expiry_at": {
+            "type": "integer",
+            "description": "exipy date for token."
+          },
+          "legacy_token_id": {
+            "type": "integer",
+            "description": "token id corresponding to legacy system"
+          },
+          "legacy_developer_app_id": {
+            "type": "string",
+            "description": "developer app id corresponding to legacy system"
+          }
+        }
+      },
+      "PersonalAccessTokenGetResponse": {
+        "title": "PersonalAccessTokenGetResponse",
+        "type": "object",
+        "properties": {
+          "count": {
+            "type": "integer"
+          },
+          "personal_access_tokens": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "format": "uuid",
+                  "description": "The unique identifier of the token."
+                },
+                "name": {
+                  "type": "string",
+                  "description": "The name of the token."
+                },
+                "description": {
+                  "type": "string",
+                  "description": "A description of the token."
+                },
+                "created_at": {
+                  "type": "string",
+                  "format": "timestamp",
+                  "description": "Timestamp indicating when the token was created."
+                },
+                "updated_at": {
+                  "type": "string",
+                  "format": "timestamp",
+                  "description": "Timestamp indicating when the token was updated."
+                },
+                "prefix": {
+                  "type": "string",
+                  "description": "The token prefix."
+                },
+                "token": {
+                  "type": "string",
+                  "description": "The token value."
+                },
+                "expiry_at": {
+                  "type": "integer",
+                  "description": "exipy date for token, -1 indicates no expiry."
+                },
+                "legacy_token_id": {
+                  "type": "integer",
+                  "description": "token id corresponding to legacy system"
+                },
+                "legacy_developer_app_id": {
+                  "type": "string",
+                  "description": "developer app id corresponding to legacy system"
+                }
+              }
+            }
+          }
+        }
+      },
+      "PersonalAccessTokenCreateResponse": {
+        "title": "PersonalAccessTokenCreateResponse",
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Unique ID for the generated token."
+          },
+          "name": {
+            "type": "string",
+            "description": "Name for the token."
+          },
+          "description": {
+            "type": "string",
+            "description": "Description for the token."
+          },
+          "created_at": {
+            "type": "string",
+            "format": "timestamp",
+            "description": "Timestamp indicating when the token was created."
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "timestamp",
+            "description": "Timestamp indicating when the token was last updated."
+          },
+          "token": {
+            "type": "string",
+            "description": "The generated access token value."
+          },
+          "prefix": {
+            "type": "string",
+            "description": "Prefix for the generated token value."
+          },
+          "expiry_at": {
+            "type": "integer",
+            "description": "exipy date for token."
+          }
+        }
+      },
+      "ErrorResponse": {
+        "type": "object",
+        "properties": {
+          "errors": {
+            "title": "Messages describing the error",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "message": {
+            "title": "Message describing the error",
+            "type": "string"
+          },
+          "status": {
+            "title": "alias name",
+            "type": "integer"
+          }
+        }
+      },
+      "CustomConnectionResponse": {
+        "title": "CustomConnectionResponse",
+        "type": "object",
+        "properties": {
+          "id": {
+            "title": "id",
+            "type": "string"
+          },
+          "name": {
+            "title": "name",
+            "type": "string"
+          },
+          "display_name": {
+            "title": "display name",
+            "type": "string"
+          },
+          "strategy": {
+            "title": "strategy",
+            "enum": [
+              "samlp",
+              "oidc"
+            ],
+            "description": "Strategy:\n * `samlp` - SAML connection\n * `oidc` - OIDC connection\n"
+          },
+          "service_provider_acs_url": {
+            "title": "service provider ACS url",
+            "type": "string",
+            "format": "url"
+          },
+          "service_provider_entity_id": {
+            "title": "service provider entity id",
+            "type": "string"
+          },
+          "service_provider_logout_url": {
+            "title": "service provider logout url",
+            "type": "string"
+          },
+          "signing_certificate_link": {
+            "title": "signing certificate link",
+            "type": "string"
+          },
+          "callback_url": {
+            "title": "callback url",
+            "type": "string",
+            "format": "url"
+          },
+          "config": {
+            "type": "object",
+            "$ref": "#/components/schemas/CustomConnectionConfigResponse"
+          }
+        }
+      },
+      "CustomConnectionConfigResponse": {
+        "title": "CustomConnectionConfigResponse",
+        "type": "object",
+        "properties": {
+          "sign_in_url": {
+            "title": "Sign in url",
+            "type": "string",
+            "format": "url",
+            "description": "Required for SAML connection"
+          },
+          "disable_sign_out": {
+            "title": "Disable sign out",
+            "type": "boolean"
+          },
+          "sign_out_url": {
+            "title": "Sign out url",
+            "type": "string",
+            "format": "url"
+          },
+          "x509_certificate": {
+            "title": "x509 certificate",
+            "type": "string",
+            "description": "Required for SAML connection"
+          },
+          "issuer_url": {
+            "title": "Issuer url",
+            "type": "string",
+            "format": "url",
+            "description": "Required for OIDC connection"
+          },
+          "client_id": {
+            "title": "client id",
+            "type": "string",
+            "description": "Required for OIDC connection"
+          }
+        }
+      },
+      "CustomConnectionRequest": {
+        "title": "CustomConnectionRequest",
+        "type": "object",
+        "required": [
+          "display_name",
+          "strategy",
+          "config"
+        ],
+        "properties": {
+          "display_name": {
+            "title": "display name",
+            "type": "string"
+          },
+          "strategy": {
+            "title": "strategy",
+            "enum": [
+              "samlp",
+              "oidc"
+            ],
+            "description": "Strategy:\n * `samlp` - SAML connection\n * `oidc` - OIDC connection\n"
+          },
+          "config": {
+            "type": "object",
+            "$ref": "#/components/schemas/CustomConnectionConfigResponse"
+          }
+        }
+      },
+      "CustomConnectionsListResponse": {
+        "title": "CustomConnectionsListResponse",
+        "type": "object",
+        "properties": {
+          "connection_id": {
+            "title": "connection id",
+            "type": "string"
+          },
+          "connection": {
+            "type": "object",
+            "$ref": "#/components/schemas/CustomConnectionList"
+          }
+        }
+      },
+      "CustomConnectionList": {
+        "title": "CustomConnectionList",
+        "type": "object",
+        "properties": {
+          "name": {
+            "title": "name",
+            "type": "string"
+          },
+          "strategy": {
+            "title": "strategy",
+            "enum": [
+              "samlp",
+              "oidc"
+            ],
+            "description": "Strategy:\n * `samlp` - SAML connection\n * `oidc` - OIDC connection\n"
+          },
+          "is_default": {
+            "title": "is default",
+            "type": "boolean"
+          }
+        }
+      },
+      "User": {
+        "title": "UserInfo",
+        "type": "object",
+        "properties": {
+          "id": {
+            "title": "ID",
+            "type": "integer"
+          },
+          "username": {
+            "title": "User name",
+            "type": "string"
+          },
+          "email": {
+            "title": "Email",
+            "type": "string",
+            "format": "email"
+          },
+          "first_name": {
+            "title": "First name",
+            "type": "string"
+          },
+          "last_name": {
+            "title": "Last name",
+            "type": "string"
+          },
+          "full_name": {
+            "title": "Last name",
+            "type": "string"
+          },
+          "is_staff": {
+            "type": "boolean",
+            "readOnly": true
+          },
+          "is_superuser": {
+            "type": "boolean",
+            "readOnly": true
+          },
+          "is_active": {
+            "title": "Is user active",
+            "type": "boolean"
+          },
+          "profile": {
+            "title": "User Profile",
+            "type": "object",
+            "$ref": "#/components/schemas/UserProfile"
+          },
+          "emm": {
+            "title": "EMM details",
+            "type": "object",
+            "$ref": "#/components/schemas/EMM",
+            "readOnly": true
+          },
+          "last_login": {
+            "title": "Last login",
+            "type": "string"
+          },
+          "token": {
+            "title": "Token",
+            "type": "string"
+          },
+          "has_emm": {
+            "title": "Has EMM",
+            "type": "boolean"
+          },
+          "is_email_verified": {
+            "title": "Is Email Verified",
+            "type": "boolean"
+          }
+        }
+      },
+      "EMM": {
+        "title": "UserEMM",
+        "type": "object",
+        "properties": {
+          "id": {
+            "title": "ID",
+            "type": "integer"
+          },
+          "user": {
+            "title": "User ID",
+            "type": "integer"
+          },
+          "account_identifier": {
+            "title": "Account Identifier",
+            "type": "string"
+          },
+          "account_type": {
+            "title": "Account Type",
+            "type": "string"
+          },
+          "display_name": {
+            "title": "Display Name",
+            "type": "string"
+          },
+          "google_user_id": {
+            "title": "Google User ID",
+            "type": "string"
+          },
+          "google_enterprise": {
+            "title": "Google Enterprise",
+            "type": "integer"
+          },
+          "is_active": {
+            "title": "Is Active",
+            "type": "boolean"
+          },
+          "created_on": {
+            "title": "Created On",
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_on": {
+            "title": "Updated On",
+            "type": "string",
+            "format": "date-time"
+          },
+          "authentication_token": {
+            "title": "Authentication Token",
+            "type": "object",
+            "$ref": "#/components/schemas/AuthenticationToken",
+            "readOnly": true
+          }
+        }
+      },
+      "AuthenticationToken": {
+        "title": "AuthenticationToken",
+        "type": "object",
+        "properties": {
+          "id": {
+            "title": "ID",
+            "type": "integer"
+          },
+          "token": {
+            "title": "Token",
+            "type": "string"
+          },
+          "is_active": {
+            "title": "Is Active",
+            "type": "boolean"
+          },
+          "updated_on": {
+            "title": "Updated On",
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "UserProfile": {
+        "title": "UserProfileInfo",
+        "type": "object",
+        "properties": {
+          "id": {
+            "title": "ID",
+            "type": "integer"
+          },
+          "enterprise_user_id": {
+            "title": "Enterprise User ID",
+            "type": "string"
+          },
+          "authn_user_id": {
+            "title": "AuthN User ID",
+            "type": "string",
+            "format": "uuid"
+          },
+          "authn_connection_id": {
+            "title": "AuthN Connection ID",
+            "type": "string",
+            "format": "uuid"
+          },
+          "authz_role_id": {
+            "title": "AuthZ Role ID",
+            "type": "string",
+            "format": "uuid"
+          },
+          "role": {
+            "title": "Role",
+            "type": "string",
+            "enum": [
+              "Shoonya Admin",
+              "Enterprise Admin",
+              "Enterprise User",
+              "Viewer",
+              "Group Admin",
+              "Group Viewer"
+            ]
+          },
+          "enterprise": {
+            "title": "Enterprise ID",
+            "type": "string",
+            "format": "uuid"
+          },
+          "is_customer": {
+            "title": "Is Customer",
+            "type": "boolean"
+          },
+          "is_endpoint_creator": {
+            "title": "Is Endpoint Creator",
+            "type": "boolean"
+          },
+          "created_on": {
+            "title": "Created On",
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_on": {
+            "title": "Updated On",
+            "type": "string",
+            "format": "date-time"
+          },
+          "setup_wizard_complete": {
+            "title": "Setup Wizard Complete",
+            "type": "boolean"
+          },
+          "default_password_changed": {
+            "title": "Default Password Changed",
+            "type": "boolean"
+          },
+          "is_developer": {
+            "title": "Is Developer",
+            "type": "boolean"
+          },
+          "can_factory_reset": {
+            "title": "Can Factory Reset",
+            "type": "boolean"
+          },
+          "groups": {
+            "title": "Groups",
+            "type": "array",
+            "items": {
+              "type": "object",
+              "$ref": "#/components/schemas/Group"
+            }
+          }
+        }
+      },
+      "Group": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "title": "ID",
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "title": "Group Name",
+            "type": "string"
+          },
+          "path": {
+            "title": "Group Path",
+            "type": "string"
+          },
+          "device_count": {
+            "type": "integer"
+          }
+        }
+      },
+      "UpdateOwnUserRequest": {
+        "type": "object",
+        "properties": {
+          "first_name": {
+            "title": "first name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "first_name"
+        ]
+      },
+      "TenantUserInviteResponse": {
+        "title": "TenantUserInviteResponse",
+        "type": "object",
+        "properties": {
+          "id": {
+            "title": "id",
+            "type": "string"
+          },
+          "email": {
+            "title": "email",
+            "type": "string",
+            "format": "email"
+          },
+          "tenant_id": {
+            "title": "id of the tenant",
+            "type": "string"
+          },
+          "idp_invite_id": {
+            "title": "id of the idp invitation",
+            "type": "string"
+          },
+          "meta": {
+            "title": "meta data of user",
+            "type": "object"
+          },
+          "connection_id": {
+            "title": "connection id",
+            "type": "string"
+          },
+          "send_invitation_email": {
+            "title": "send invitation email",
+            "type": "boolean"
+          },
+          "created_at": {
+            "title": "created at",
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "title": "updated at",
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "GenericErrorResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Either 'status' or 'code' will be present, but not both."
+          },
+          "code": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Either 'status' or 'code' will be present, but not both."
+          },
+          "error": {
+            "type": "string",
+            "description": "Either 'error' or 'errors' will be present, but not both."
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Either 'error' or 'errors' will be present, but not both."
+          },
+          "message": {
+            "title": "Message describing the error",
+            "type": "string"
+          }
+        }
+      },
+      "TenantUserInviteCreateResponse": {
+        "title": "TenantUserInviteResponse",
+        "type": "object",
+        "properties": {
+          "id": {
+            "title": "id",
+            "type": "string"
+          },
+          "email": {
+            "title": "email",
+            "type": "string",
+            "format": "email"
+          },
+          "tenant_id": {
+            "title": "id of the tenant",
+            "type": "string"
+          },
+          "idp_invite_id": {
+            "title": "id of the idp invitation",
+            "type": "string"
+          },
+          "meta": {
+            "title": "meta data of user",
+            "type": "object"
+          },
+          "connection_id": {
+            "title": "connection id",
+            "type": "string"
+          },
+          "send_invitation_email": {
+            "title": "send invitation email",
+            "type": "boolean"
+          },
+          "invitation_url": {
+            "title": "invitation URL",
+            "type": "string"
+          },
+          "created_at": {
+            "title": "created at",
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "title": "updated at",
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "TenantUserInviteRequest": {
+        "title": "TenantUserInviteRequest",
+        "type": "object",
+        "properties": {
+          "email": {
+            "title": "email",
+            "type": "string",
+            "format": "email"
+          },
+          "meta": {
+            "title": "meta data of user",
+            "type": "object",
+            "$ref": "#/components/schemas/TenantUserInviteMeta"
+          },
+          "connection_id": {
+            "title": "connection id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "email",
+          "meta"
+        ]
+      },
+      "TenantUserInviteMeta": {
+        "title": "TenantUserInviteMeta",
+        "type": "object",
+        "properties": {
+          "email": {
+            "title": "email",
+            "type": "string",
+            "format": "email"
+          },
+          "profile": {
+            "title": "profile details",
+            "type": "object",
+            "properties": {
+              "role": {
+                "title": "role",
+                "type": "string",
+                "enum": [
+                  "Enterprise Admin",
+                  "Viewer",
+                  "Group Admin",
+                  "Group Viewer",
+                  "Support",
+                  "AuthZ Role User"
+                ]
+              },
+              "enterprise": {
+                "title": "tenant id",
+                "type": "string",
+                "format": "uuid"
+              },
+              "groups": {
+                "title": "groups associated. required only if role is Group Admin or Group Viewer or AuthZ User Role",
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "format": "uuid"
+                }
+              },
+              "authz_role_id": {
+                "title": "custom role id. required only if role is AuthZ Role User",
+                "type": "string",
+                "format": "uuid"
+              }
+            },
+            "required": [
+              "role",
+              "enterprise"
+            ]
+          }
+        },
+        "required": [
+          "email",
+          "profile"
+        ]
+      }
+    },
+    "parameters": {
+      "LegacyUserID": {
+        "name": "legacy_user_id",
+        "description": "Legacy User ID",
+        "in": "query",
+        "required": false,
+        "schema": {
+          "type": "integer"
+        }
+      },
+      "PersonalAccessTokenID": {
+        "name": "personal_access_token_id",
+        "description": "Personal Access Token Id",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "format": "uuid"
+        }
+      },
+      "ConnectionID": {
+        "name": "connection_id",
+        "description": "Connection ID",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "format": "uuid"
+        }
+      },
+      "IsDefault": {
+        "name": "is_default",
+        "description": "Is Default",
+        "in": "query",
+        "required": false,
+        "schema": {
+          "type": "boolean"
+        }
+      },
+      "AuthNUserID": {
+        "name": "user_id",
+        "description": "AuthN User Id. The authn_user_id from the Get Users response.",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "format": "uuid"
+        }
+      },
+      "InviteID": {
+        "name": "invite_id",
+        "description": "Invite ID",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "format": "uuid"
+        }
+      },
+      "EnterpriseID": {
+        "name": "enterprise_id",
+        "description": "Enterprise ID",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "format": "uuid"
+        }
+      }
+    },
+    "securitySchemes": {
+      "apiKey": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "#### API KEY - Access Token\nAccess token for API is passed as authorization header in calls. You need to generate this from your Esper Console at `<domain>-api.esper.cloud` where foo is the sub-domain name you gave for your Esper Dev environment when you signed up for your Esper account. Please follow the instructions [in this Help article](https://help.esper.io/hc/en-us/articles/12656959508497) to generate an access token.\nOnce you have the access token, you need to send an authorization header as below\n\n```bash\n\n    curl -X GET \\\n      https://<domain>-api.esper.cloud/api/enterprise/<enterprise_id>/device/ \\\n      -H 'Authorization: Bearer <ACCESS_TOKEN>' \\\n      -H 'Content-Type: application/json' \\\n```\n\n> Please note the use of keyword **Bearer** before the token value.\n\n\nYou can read more about api key authentication [here](https://help.esper.io/hc/en-us/articles/12656959508497).\n"
+      }
+    }
+  }
+}

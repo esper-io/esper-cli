@@ -1,0 +1,1 @@
+{"content":{"id":"custom-action-1","name":"Restart kiosk","type":"button","state":"active","position_in_blueprints":"blueprints_scripts","position_in_device_settings":"device_quick_settings","properties":{"description":"Restart kiosk"},"options":[],"created_at":"2026-08-24T00:00:00Z","updated_at":"2026-08-24T00:00:00Z","created_by":1,"updated_by":1},"message":"ok","code":200}

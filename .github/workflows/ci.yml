@@ -1,0 +1,63 @@
+name: CI
+
+on:
+  push:
+    branches: [go-rewrite]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # v5
+        with:
+          go-version: "1.23.x"
+          check-latest: true
+      - name: Verify generated command metadata
+        run: |
+          go run ./tools/codegen
+          git diff --exit-code -- internal/cmd/generated/zz_generated_commands.go
+      - name: Verify generated Esper skill
+        run: go run ./tools/skillgen --check
+      - name: Lint formatting
+        run: test -z "$(gofmt -l cmd internal tools)"
+      - name: Build
+        run: go build ./...
+      - name: Vet
+        run: go vet ./...
+      - name: Test
+        run: go test ./...
+      - name: Check spec-to-command contract
+        run: go run ./tools/contractcheck
+      - name: Check command harness
+        run: go run ./tools/command-harness --mode offline --report dist/command-harness-offline.json
+
+  snapshot:
+    needs: verify
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # v5
+        with:
+          go-version: "1.23.x"
+          check-latest: true
+      - name: Build snapshot artifacts
+        uses: goreleaser/goreleaser-action@f06c13b6b1a9625abc9e6e439d9c05a8f2190e94 # v7
+        with:
+          distribution: goreleaser
+          version: "~> v2"
+          args: release --snapshot --clean
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Upload snapshot artifacts
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: espercli-snapshot
+          path: dist/
+          if-no-files-found: error

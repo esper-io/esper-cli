@@ -1,0 +1,6018 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "ESPER API REFERENCE - pipelines-v0",
+    "version": "1.0.0",
+    "x-esper-generation": "pipelines-v0",
+    "x-esper-auth": "bearer"
+  },
+  "servers": [
+    {
+      "url": "https://{foo}-api.esper.cloud/api",
+      "variables": {
+        "foo": {
+          "default": "develop",
+          "description": "Custom end point"
+        }
+      }
+    }
+  ],
+  "tags": [
+    {
+      "name": "2_Pipelines",
+      "description": "Pipelines composition APIs",
+      "x-displayName": "Pipelines"
+    },
+    {
+      "name": "2_Stages",
+      "description": "APIs to modify Stage information",
+      "x-displayName": "Stages"
+    },
+    {
+      "name": "2_Target Lists",
+      "description": "APIs to modify Target List",
+      "x-displayName": "Target Lists"
+    },
+    {
+      "name": "2_Targets",
+      "description": "Targets subsystem",
+      "x-displayName": "Targets"
+    },
+    {
+      "name": "2_Device Groups",
+      "description": "APIs to modify Device Groups",
+      "x-displayName": "Device Groups"
+    },
+    {
+      "name": "2_Operation Lists",
+      "description": "APIs to modify Operation List",
+      "x-displayName": "Operation Lists"
+    },
+    {
+      "name": "2_Operations",
+      "description": "Operations subsystem",
+      "x-displayName": "Operations"
+    },
+    {
+      "name": "2_Pipeline Runs",
+      "description": "APIs to manage Pipeline Runs. Pipeline run status descriptions\n  * PENDING - Pipeline run created.\n  * QUEUED - Pipeline run queued for processing.\n  * PROCESSING - Pipeline run received by scheduler for processing. (Processing a pipeline involves performing the operations required before starting a pipeline)\n  * RUNNING - Pipeline run has started running.\n  * WAITING -  Pipeline run is waiting for an action (manual/automatic).\n  * COMPLETE - The pipeline run has completed processing i.e. All stage runs are processed. A complete pipeline run can move to success or failure.\n  * SUCCESS - A completed pipeline run moves to success if all stage runs are successful.\n  * FAILURE - A completed pipeline run moves to failure if all stage runs are not successful.\n  * CANCELLED - Pipeline run is cancelled by the user.\n  * TIMEOUT -  The pipeline run has a timed out. This happens when the pipeline has not completed processing even after the timeout period (Default 21 days).\n  * INVALID - A pipeline run moves to invalid state when Pipeline run has no stageruns i.e pipeline has zero stages.\n",
+      "x-displayName": "Pipeline Runs"
+    },
+    {
+      "name": "2_Stage Runs",
+      "description": "APIs to manage Stage Runs. Stage run status descriptions\n  * PENDING - Stage run created.\n  * QUEUED - Stage run queued for processing.\n  * PROCESSING - Stage run received by scheduler for processing.(Processing a stage run can involve performing the operations required before starting a stage run. In this case creating the target runs for the stage.)\n  * RUNNING - Stage run has started running.  \n  * COMPLETE - Stage run moves to complete if all target runs are complete (target runs are complete if they are in a terminal state).\n  * SUCCESS - A completed stage run moves to success if all target runs are successful. \n  * FAILURE - A completed stage moves to failure if all target runs are not successful.\n  * CANCELLED - Stage run cancelled by user.\n  * TIMEOUT - The stage run has a timed out. This happens when the stage run has not completed processing even after the timeout period (Default 7 days).\n  * INVALID -  A stage run moves to invalid state when \n                a. The associated stage has no targets.\n                b. The associated stage has no operations.\n",
+      "x-displayName": "Stage Runs"
+    },
+    {
+      "name": "2_Target Runs",
+      "description": "APIs to manage Target Runs. Target run status descriptions\n  * PENDING - Target run created.\n  * QUEUED - Target run queued for processing.\n  * PROCESSING - Target run received by scheduler for processing (During target run processing the command request for the target run is created).\n  * DISPATCHED - Target run moves to dispatched when a command is successfully queued for the target run. (Command status - QUEUED)\n  * RUNNING - Target run moves to running state when the command has been sent to the device (Command status - INITIATED, ACKNOWLEDGED, INPROGRESS)\n  * COMPLETE - Target run moves to complete state when it has completed running (Command status - FAILURE, SUCCESS, TIMEOUT, CANCELLED)\n  * SUCCESS - A completed target run moves to success when the associated command is successful (Command status - SUCCESS)\n  * FAILURE - A completed target run moves to success when the associated command is unsuccessful (Command status - FAILED, TIMEOUT, CANCELLED)\n  * CANCELLED - Target run cancelled by the user (Target runs ind Pending, Queued and Processing state can be cancelled by the user)\n  * TIMEOUT -  The target run has a timed out. This happens when the target run has not completed processing even after the timeout period (7 days).\n  * INVALID - Target run is invalid.\n",
+      "x-displayName": "Target Runs"
+    }
+  ],
+  "paths": {
+    "/pipelines/v0/pipelines/": {
+      "get": {
+        "x-badges": [
+          {
+            "name": "Stable",
+            "color": "green"
+          }
+        ],
+        "summary": "Get all Pipelines for the Enterprise",
+        "description": "Returns all the Pipelines that are not deleted",
+        "operationId": "getPipelines",
+        "tags": [
+          "2_Pipelines"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "default",
+            "schema": {
+              "type": "boolean",
+              "enum": [
+                true,
+                false
+              ]
+            }
+          },
+          {
+            "in": "query",
+            "name": "name",
+            "description": "Filter by name",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "ordering",
+            "description": "Sorting pipelines based on the field name",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "name",
+                "-name"
+              ]
+            }
+          }
+        ],
+        "security": [
+          {
+            "SCAPIAuthToken": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Pipelines list for the Enterprise",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "integer"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "content": {
+                      "type": "object",
+                      "properties": {
+                        "count": {
+                          "type": "integer"
+                        },
+                        "previous": {
+                          "type": "string"
+                        },
+                        "next": {
+                          "type": "string"
+                        },
+                        "results": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/Pipeline"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "x-esper-destructive": false,
+        "x-esper-pagination": "apps-envelope",
+        "x-esper-verb": "list",
+        "x-esper-noun": "pipeline"
+      },
+      "post": {
+        "x-badges": [
+          {
+            "name": "Stable",
+            "color": "green"
+          }
+        ],
+        "summary": "Create a new Pipeline",
+        "description": "Create a Pipeline for the enterprise using logged in user token",
+        "operationId": "createPipeline",
+        "tags": [
+          "2_Pipelines"
+        ],
+        "security": [
+          {
+            "SCAPIAuthToken": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Pipeline_POST"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "integer"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "content": {
+                      "$ref": "#/components/schemas/Pipeline"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Pipelines create error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_400_Bad_Data"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Pipelines create error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_401_Unauthorized"
+                }
+              }
+            }
+          }
+        },
+        "x-esper-destructive": false,
+        "x-esper-pagination": "none",
+        "x-esper-verb": "create",
+        "x-esper-noun": "pipeline"
+      }
+    },
+    "/pipelines/v0/pipelines/{pipeline_id}/": {
+      "get": {
+        "x-badges": [
+          {
+            "name": "Stable",
+            "color": "green"
+          }
+        ],
+        "summary": "Get a Pipeline",
+        "operationId": "getPipeline",
+        "tags": [
+          "2_Pipelines"
+        ],
+        "security": [
+          {
+            "SCAPIAuthToken": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "pipeline_id",
+            "in": "path",
+            "description": "ID of the Pipeline",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Pipeline information",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "integer"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "content": {
+                      "$ref": "#/components/schemas/Pipeline"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "x-esper-destructive": false,
+        "x-esper-pagination": "none",
+        "x-esper-verb": "get",
+        "x-esper-noun": "pipeline"
+      },
+      "put": {
+        "x-badges": [
+          {
+            "name": "Stable",
+            "color": "green"
+          }
+        ],
+        "summary": "Update a Pipeline",
+        "operationId": "updatePipeline",
+        "tags": [
+          "2_Pipelines"
+        ],
+        "security": [
+          {
+            "SCAPIAuthToken": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "pipeline_id",
+            "in": "path",
+            "description": "ID of the Pipeline",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Pipeline_PUT"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated Pipeline Information",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "integer"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "content": {
+                      "$ref": "#/components/schemas/Pipeline"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Pipelines update error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_400_Bad_Data"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Pipelines update error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_401_Unauthorized"
+                }
+              }
+            }
+          }
+        },
+        "x-esper-destructive": false,
+        "x-esper-pagination": "none",
+        "x-esper-verb": "update",
+        "x-esper-noun": "pipeline"
+      },
+      "delete": {
+        "x-badges": [
+          {
+            "name": "Stable",
+            "color": "green"
+          }
+        ],
+        "summary": "Delete a Pipeline",
+        "operationId": "deletePipeline",
+        "tags": [
+          "2_Pipelines"
+        ],
+        "security": [
+          {
+            "SCAPIAuthToken": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "pipeline_id",
+            "in": "path",
+            "description": "ID of the Pipeline",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Deleted Pipeline Information",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "integer"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "content": {
+                      "$ref": "#/components/schemas/Pipeline"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Pipelines delete error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_401_Unauthorized"
+                }
+              }
+            }
+          }
+        },
+        "x-esper-destructive": true,
+        "x-esper-pagination": "none",
+        "x-esper-verb": "delete",
+        "x-esper-noun": "pipeline"
+      }
+    },
+    "/pipelines/v0/pipelines/{pipeline_id}/stages/": {
+      "get": {
+        "x-badges": [
+          {
+            "name": "Stable",
+            "color": "green"
+          }
+        ],
+        "summary": "Get all Pipeline stages",
+        "security": [
+          {
+            "SCAPIAuthToken": []
+          }
+        ],
+        "operationId": "getPipelineStages",
+        "tags": [
+          "2_Stages"
+        ],
+        "parameters": [
+          {
+            "name": "pipeline_id",
+            "in": "path",
+            "description": "ID of the Pipeline",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Pipelines stages response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "integer"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "content": {
+                      "type": "object",
+                      "properties": {
+                        "count": {
+                          "type": "integer"
+                        },
+                        "previous": {
+                          "type": "string"
+                        },
+                        "next": {
+                          "type": "string"
+                        },
+                        "results": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/Stage"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "x-esper-destructive": false,
+        "x-esper-pagination": "apps-envelope",
+        "x-esper-verb": "list",
+        "x-esper-noun": "stage",
+        "x-esper-scope-parent": "pipeline"
+      },
+      "post": {
+        "x-badges": [
+          {
+            "name": "Stable",
+            "color": "green"
+          }
+        ],
+        "summary": "Create a Pipeline stage",
+        "security": [
+          {
+            "SCAPIAuthToken": []
+          }
+        ],
+        "operationId": "createPipelineStage",
+        "tags": [
+          "2_Stages"
+        ],
+        "parameters": [
+          {
+            "name": "pipeline_id",
+            "in": "path",
+            "description": "ID of the Pipeline",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Stage_POST"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Pipelines stages create response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "integer"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "content": {
+                      "$ref": "#/components/schemas/Stage"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Stage create error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_400_Bad_Data"
+                }
+              }
+            }
+          }
+        },
+        "x-esper-destructive": false,
+        "x-esper-pagination": "none",
+        "x-esper-verb": "create",
+        "x-esper-noun": "stage",
+        "x-esper-scope-parent": "pipeline"
+      }
+    },
+    "/pipelines/v0/pipelines/{pipeline_id}/stages/{stage_id}/": {
+      "get": {
+        "x-badges": [
+          {
+            "name": "Stable",
+            "color": "green"
+          }
+        ],
+        "summary": "Get a Pipeline Stage",
+        "security": [
+          {
+            "SCAPIAuthToken": []
+          }
+        ],
+        "operationId": "getPipelineStage",
+        "tags": [
+          "2_Stages"
+        ],
+        "parameters": [
+          {
+            "name": "pipeline_id",
+            "in": "path",
+            "description": "ID of the Pipeline",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "stage_id",
+            "in": "path",
+            "description": "ID of the Stage",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Pipelines stage get response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "integer"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "content": {
+                      "$ref": "#/components/schemas/Stage"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "x-esper-destructive": false,
+        "x-esper-pagination": "none",
+        "x-esper-verb": "get",
+        "x-esper-noun": "stage",
+        "x-esper-scope-parent": "pipeline"
+      },
+      "put": {
+        "x-badges": [
+          {
+            "name": "Stable",
+            "color": "green"
+          }
+        ],
+        "summary": "Update a Pipeline Stage",
+        "security": [
+          {
+            "SCAPIAuthToken": []
+          }
+        ],
+        "operationId": "updatePipelineStage",
+        "tags": [
+          "2_Stages"
+        ],
+        "parameters": [
+          {
+            "name": "pipeline_id",
+            "in": "path",
+            "description": "ID of the Pipeline",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "stage_id",
+            "in": "path",
+            "description": "ID of the Stage",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Stage_PUT"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated Stage Information",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "integer"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "content": {
+                      "$ref": "#/components/schemas/Stage"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Stage update error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_400_Bad_Data"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Stage update error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_401_Unauthorized"
+                }
+              }
+            }
+          }
+        },
+        "x-esper-destructive": false,
+        "x-esper-pagination": "none",
+        "x-esper-verb": "update",
+        "x-esper-noun": "stage",
+        "x-esper-scope-parent": "pipeline"
+      },
+      "delete": {
+        "x-badges": [
+          {
+            "name": "Stable",
+            "color": "green"
+          }
+        ],
+        "summary": "Delete a pipeline stage",
+        "security": [
+          {
+            "SCAPIAuthToken": []
+          }
+        ],
+        "operationId": "deletePipelineStage",
+        "tags": [
+          "2_Stages"
+        ],
+        "parameters": [
+          {
+            "name": "pipeline_id",
+            "in": "path",
+            "description": "ID of the Pipeline",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "stage_id",
+            "in": "path",
+            "description": "ID of the Stage",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Deleted Stage Information",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "integer"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "content": {
+                      "$ref": "#/components/schemas/Stage"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Stage delete error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_401_Unauthorized"
+                }
+              }
+            }
+          }
+        },
+        "x-esper-destructive": true,
+        "x-esper-pagination": "none",
+        "x-esper-verb": "delete",
+        "x-esper-noun": "stage",
+        "x-esper-scope-parent": "pipeline"
+      }
+    },
+    "/pipelines/v0/stages/{stage_id}/targetlists/": {
+      "get": {
+        "x-badges": [
+          {
+            "name": "Stable",
+            "color": "green"
+          }
+        ],
+        "summary": "Get all Target Lists attached to the Stage",
+        "security": [
+          {
+            "SCAPIAuthToken": []
+          }
+        ],
+        "operationId": "getStageTargetLists",
+        "tags": [
+          "2_Stages"
+        ],
+        "parameters": [
+          {
+            "name": "stage_id",
+            "in": "path",
+            "description": "ID of the Stage",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "in": "query",
+            "name": "type",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "groups",
+                "devices",
+                "collections"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "All Targets Lists attached to the Stage",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "integer"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "content": {
+                      "type": "object",
+                      "properties": {
+                        "count": {
+                          "type": "integer"
+                        },
+                        "previous": {
+                          "type": "string"
+                        },
+                        "next": {
+                          "type": "string"
+                        },
+                        "results": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/TargetList"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Target List get error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_401_Unauthorized"
+                }
+              }
+            }
+          }
+        },
+        "x-esper-destructive": false,
+        "x-esper-pagination": "apps-envelope",
+        "x-esper-verb": "list",
+        "x-esper-noun": "target-list",
+        "x-esper-scope-parent": "stage"
+      },
+      "post": {
+        "x-badges": [
+          {
+            "name": "Stable",
+            "color": "green"
+          }
+        ],
+        "summary": "Attach the Target List to the Stage",
+        "security": [
+          {
+            "SCAPIAuthToken": []
+          }
+        ],
+        "operationId": "addStageTargetList",
+        "tags": [
+          "2_Stages"
+        ],
+        "parameters": [
+          {
+            "name": "stage_id",
+            "in": "path",
+            "description": "ID of the Stage",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StageTargetList_POST"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Attach target list to a Stage",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "integer"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "content": {
+                      "$ref": "#/components/schemas/TargetList"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Target list attach error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_401_Unauthorized"
+                }
+              }
+            }
+          }
+        },
+        "x-esper-destructive": false,
+        "x-esper-pagination": "none",
+        "x-esper-verb": "add",
+        "x-esper-noun": "target-list",
+        "x-esper-scope-parent": "stage"
+      }
+    },
+    "/pipelines/v0/stages/{stage_id}/targetlists/{targetlist_id}/": {
+      "delete": {
+        "x-badges": [
+          {
+            "name": "Stable",
+            "color": "green"
+          }
+        ],
+        "summary": "Detach the Target List from the Stage",
+        "security": [
+          {
+            "SCAPIAuthToken": []
+          }
+        ],
+        "operationId": "deleteStageTargetList",
+        "tags": [
+          "2_Stages"
+        ],
+        "parameters": [
+          {
+            "name": "stage_id",
+            "in": "path",
+            "description": "ID of the Stage",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "targetlist_id",
+            "in": "path",
+            "description": "ID of the Target List",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Detach target list from stage",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "integer"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "content": {
+                      "$ref": "#/components/schemas/TargetList"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Target list attach error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_401_Unauthorized"
+                }
+              }
+            }
+          }
+        },
+        "x-esper-destructive": true,
+        "x-esper-pagination": "none",
+        "x-esper-verb": "delete",
+        "x-esper-noun": "target-list",
+        "x-esper-scope-parent": "stage"
+      }
+    },
+    "/pipelines/v0/stages/{stage_id}/operationlists/": {
+      "get": {
+        "x-badges": [
+          {
+            "name": "Stable",
+            "color": "green"
+          }
+        ],
+        "summary": "Get all Operation Lists attached to the Stage",
+        "security": [
+          {
+            "SCAPIAuthToken": []
+          }
+        ],
+        "operationId": "getStageOperationLists",
+        "tags": [
+          "2_Operation Lists"
+        ],
+        "parameters": [
+          {
+            "name": "stage_id",
+            "in": "path",
+            "description": "ID of the Stage",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "All Operation Lists attached to the Stage",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "integer"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "content": {
+                      "type": "object",
+                      "properties": {
+                        "count": {
+                          "type": "integer"
+                        },
+                        "previous": {
+                          "type": "string"
+                        },
+                        "next": {
+                          "type": "string"
+                        },
+                        "results": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/OperationList"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Operation List get error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_401_Unauthorized"
+                }
+              }
+            }
+          }
+        },
+        "x-esper-destructive": false,
+        "x-esper-pagination": "apps-envelope",
+        "x-esper-verb": "list",
+        "x-esper-noun": "operation-list",
+        "x-esper-scope-parent": "stage"
+      },
+      "post": {
+        "x-badges": [
+          {
+            "name": "Stable",
+            "color": "green"
+          }
+        ],
+        "summary": "Create an Operation list for the Stage",
+        "security": [
+          {
+            "SCAPIAuthToken": []
+          }
+        ],
+        "operationId": "addStageOperationList",
+        "tags": [
+          "2_Operation Lists"
+        ],
+        "parameters": [
+          {
+            "name": "stage_id",
+            "in": "path",
+            "description": "ID of the Stage",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OperationList_POST"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Attach Operation list to a Stage",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "integer"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "content": {
+                      "$ref": "#/components/schemas/OperationList"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Operation list attach error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_401_Unauthorized"
+                }
+              }
+            }
+          }
+        },
+        "x-esper-destructive": false,
+        "x-esper-pagination": "none",
+        "x-esper-verb": "add",
+        "x-esper-noun": "operation-list",
+        "x-esper-scope-parent": "stage"
+      }
+    },
+    "/pipelines/v0/stages/{stage_id}/operationlists/{operationlist_id}/": {
+      "put": {
+        "x-badges": [
+          {
+            "name": "Stable",
+            "color": "green"
+          }
+        ],
+        "summary": "Update an Operation List",
+        "operationId": "updatePipelineOperationList",
+        "tags": [
+          "2_Operation Lists"
+        ],
+        "security": [
+          {
+            "SCAPIAuthToken": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "stage_id",
+            "in": "path",
+            "description": "ID of the Stage",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "operationlist_id",
+            "in": "path",
+            "description": "ID of the Operation List",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OperationList"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated Operation List Information",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "integer"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "content": {
+                      "$ref": "#/components/schemas/OperationList"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Operation List update error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_400_Bad_Data"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Operation List update error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_401_Unauthorized"
+                }
+              }
+            }
+          }
+        },
+        "x-esper-destructive": false,
+        "x-esper-pagination": "none",
+        "x-esper-verb": "update",
+        "x-esper-noun": "operation-list",
+        "x-esper-scope-parent": "stage"
+      },
+      "delete": {
+        "x-badges": [
+          {
+            "name": "Stable",
+            "color": "green"
+          }
+        ],
+        "summary": "Delete stage operation list",
+        "security": [
+          {
+            "SCAPIAuthToken": []
+          }
+        ],
+        "operationId": "deleteStageOperationList",
+        "tags": [
+          "2_Operation Lists"
+        ],
+        "parameters": [
+          {
+            "name": "stage_id",
+            "in": "path",
+            "description": "ID of the Stage",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "operationlist_id",
+            "in": "path",
+            "description": "ID of the Operation List",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Delete operation list from stage",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "integer"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "content": {
+                      "$ref": "#/components/schemas/OperationList"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Operation list detach error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_401_Unauthorized"
+                }
+              }
+            }
+          }
+        },
+        "x-esper-destructive": true,
+        "x-esper-pagination": "none",
+        "x-esper-verb": "delete",
+        "x-esper-noun": "operation-list",
+        "x-esper-scope-parent": "stage"
+      }
+    },
+    "/pipelines/v0/pipelines/{pipeline_id}/targetlists/": {
+      "get": {
+        "x-badges": [
+          {
+            "name": "Stable",
+            "color": "green"
+          }
+        ],
+        "summary": "Get all Target Lists in Pipeline",
+        "security": [
+          {
+            "SCAPIAuthToken": []
+          }
+        ],
+        "operationId": "getPipelineTargetLists",
+        "tags": [
+          "2_Target Lists"
+        ],
+        "parameters": [
+          {
+            "name": "pipeline_id",
+            "in": "path",
+            "description": "ID of the Pipeline",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "All Target Lists in Pipeline",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "integer"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "content": {
+                      "type": "object",
+                      "properties": {
+                        "count": {
+                          "type": "integer"
+                        },
+                        "previous": {
+                          "type": "string"
+                        },
+                        "next": {
+                          "type": "string"
+                        },
+                        "results": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/TargetList"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Target List get error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_401_Unauthorized"
+                }
+              }
+            }
+          }
+        },
+        "x-esper-destructive": false,
+        "x-esper-pagination": "apps-envelope",
+        "x-esper-verb": "list",
+        "x-esper-noun": "target-list",
+        "x-esper-scope-parent": "pipeline"
+      },
+      "post": {
+        "x-badges": [
+          {
+            "name": "Stable",
+            "color": "green"
+          }
+        ],
+        "summary": "Create a Target List",
+        "security": [
+          {
+            "SCAPIAuthToken": []
+          }
+        ],
+        "operationId": "addPipelineTargetList",
+        "tags": [
+          "2_Target Lists"
+        ],
+        "parameters": [
+          {
+            "name": "pipeline_id",
+            "in": "path",
+            "description": "ID of the Pipeline",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TargetList_POST"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "All Targets in Target List",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "integer"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "content": {
+                      "$ref": "#/components/schemas/TargetList"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Target List get error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_401_Unauthorized"
+                }
+              }
+            }
+          }
+        },
+        "x-esper-destructive": false,
+        "x-esper-pagination": "none",
+        "x-esper-verb": "add",
+        "x-esper-noun": "target-list",
+        "x-esper-scope-parent": "pipeline"
+      }
+    },
+    "/pipelines/v0/pipelines/{pipeline_id}/targetlists/{targetlist_id}/": {
+      "get": {
+        "x-badges": [
+          {
+            "name": "Stable",
+            "color": "green"
+          }
+        ],
+        "summary": "Get a Pipeline Target list",
+        "security": [
+          {
+            "SCAPIAuthToken": []
+          }
+        ],
+        "operationId": "getPipelineTargetList",
+        "tags": [
+          "2_Target Lists"
+        ],
+        "parameters": [
+          {
+            "name": "pipeline_id",
+            "in": "path",
+            "description": "ID of the Pipeline",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "targetlist_id",
+            "in": "path",
+            "description": "ID of the Target list",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Get target list",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "integer"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "content": {
+                      "$ref": "#/components/schemas/TargetList"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Target list attach error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_401_Unauthorized"
+                }
+              }
+            }
+          }
+        },
+        "x-esper-destructive": false,
+        "x-esper-pagination": "none",
+        "x-esper-verb": "get",
+        "x-esper-noun": "target-list",
+        "x-esper-scope-parent": "pipeline"
+      },
+      "put": {
+        "x-badges": [
+          {
+            "name": "Stable",
+            "color": "green"
+          }
+        ],
+        "summary": "Update a Pipeline Target List",
+        "operationId": "updatePipelineTargetList",
+        "tags": [
+          "2_Target Lists"
+        ],
+        "security": [
+          {
+            "SCAPIAuthToken": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "pipeline_id",
+            "in": "path",
+            "description": "ID of the Pipeline",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "targetlist_id",
+            "in": "path",
+            "description": "ID of the Target List",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TargetList"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated Target List Information",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "integer"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "content": {
+                      "$ref": "#/components/schemas/TargetList"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Target List update error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_400_Bad_Data"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Target List update error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_401_Unauthorized"
+                }
+              }
+            }
+          }
+        },
+        "x-esper-destructive": false,
+        "x-esper-pagination": "none",
+        "x-esper-verb": "update",
+        "x-esper-noun": "target-list",
+        "x-esper-scope-parent": "pipeline"
+      },
+      "delete": {
+        "x-badges": [
+          {
+            "name": "Stable",
+            "color": "green"
+          }
+        ],
+        "summary": "Delete a Pipeline Target list",
+        "security": [
+          {
+            "SCAPIAuthToken": []
+          }
+        ],
+        "operationId": "deletePipelineTargetList",
+        "tags": [
+          "2_Target Lists"
+        ],
+        "parameters": [
+          {
+            "name": "pipeline_id",
+            "in": "path",
+            "description": "ID of the Pipeline",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "targetlist_id",
+            "in": "path",
+            "description": "ID of the Target List",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Delete target list",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "integer"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "content": {
+                      "$ref": "#/components/schemas/TargetList"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Target list delete error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_401_Unauthorized"
+                }
+              }
+            }
+          }
+        },
+        "x-esper-destructive": true,
+        "x-esper-pagination": "none",
+        "x-esper-verb": "delete",
+        "x-esper-noun": "target-list",
+        "x-esper-scope-parent": "pipeline"
+      }
+    },
+    "/pipelines/v0/pipelines/{pipeline_id}/targetlists/{targetlist_id}/targets/": {
+      "get": {
+        "x-badges": [
+          {
+            "name": "Stable",
+            "color": "green"
+          }
+        ],
+        "summary": "Get all Targets in the Target List",
+        "security": [
+          {
+            "SCAPIAuthToken": []
+          }
+        ],
+        "operationId": "getTargetListTargets",
+        "tags": [
+          "2_Targets"
+        ],
+        "parameters": [
+          {
+            "name": "pipeline_id",
+            "in": "path",
+            "description": "ID of the Pipeline",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "targetlist_id",
+            "in": "path",
+            "description": "ID of the Target List",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "All Targets in Target List",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "integer"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "content": {
+                      "type": "object",
+                      "properties": {
+                        "count": {
+                          "type": "integer"
+                        },
+                        "previous": {
+                          "type": "string"
+                        },
+                        "next": {
+                          "type": "string"
+                        },
+                        "results": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/Target"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Target List get error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_401_Unauthorized"
+                }
+              }
+            }
+          }
+        },
+        "x-esper-destructive": false,
+        "x-esper-pagination": "apps-envelope",
+        "x-esper-verb": "list",
+        "x-esper-noun": "target",
+        "x-esper-scope-parent": "target-list"
+      },
+      "post": {
+        "x-badges": [
+          {
+            "name": "Stable",
+            "color": "green"
+          }
+        ],
+        "summary": "Create a target for the target list",
+        "security": [
+          {
+            "SCAPIAuthToken": []
+          }
+        ],
+        "operationId": "createTargetListTargets",
+        "tags": [
+          "2_Targets"
+        ],
+        "parameters": [
+          {
+            "name": "pipeline_id",
+            "in": "path",
+            "description": "ID of the Pipeline",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "targetlist_id",
+            "in": "path",
+            "description": "ID of the Target List",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Target_POST"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "All Targets in Target List",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "integer"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "content": {
+                      "$ref": "#/components/schemas/Target"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Target List get error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_401_Unauthorized"
+                }
+              }
+            }
+          }
+        },
+        "x-esper-destructive": false,
+        "x-esper-pagination": "none",
+        "x-esper-verb": "create",
+        "x-esper-noun": "target",
+        "x-esper-scope-parent": "target-list"
+      }
+    },
+    "/pipelines/v0/pipelines/{pipeline_id}/targetlists/{targetlist_id}/targets/{target_id}/": {
+      "get": {
+        "x-badges": [
+          {
+            "name": "Stable",
+            "color": "green"
+          }
+        ],
+        "summary": "Get one target from target list",
+        "security": [
+          {
+            "SCAPIAuthToken": []
+          }
+        ],
+        "operationId": "getTargetListTarget",
+        "tags": [
+          "2_Targets"
+        ],
+        "parameters": [
+          {
+            "name": "pipeline_id",
+            "in": "path",
+            "description": "ID of the Pipeline",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "targetlist_id",
+            "in": "path",
+            "description": "ID of the Target List",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "target_id",
+            "in": "path",
+            "description": "ID of the Target",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Target from Target List",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "integer"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "content": {
+                      "$ref": "#/components/schemas/Target"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Target List device delete error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_401_Unauthorized"
+                }
+              }
+            }
+          }
+        },
+        "x-esper-destructive": false,
+        "x-esper-pagination": "none",
+        "x-esper-verb": "get",
+        "x-esper-noun": "target",
+        "x-esper-scope-parent": "target-list"
+      },
+      "put": {
+        "x-badges": [
+          {
+            "name": "Stable",
+            "color": "green"
+          }
+        ],
+        "summary": "Update a target in the target list",
+        "security": [
+          {
+            "SCAPIAuthToken": []
+          }
+        ],
+        "operationId": "updateTargetListTarget",
+        "tags": [
+          "2_Targets"
+        ],
+        "parameters": [
+          {
+            "name": "pipeline_id",
+            "in": "path",
+            "description": "ID of the Pipeline",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "targetlist_id",
+            "in": "path",
+            "description": "ID of the Target List",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "target_id",
+            "in": "path",
+            "description": "ID of the Target",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Target_PUT"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated Target from Target List",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Target"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Target List device delete error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_401_Unauthorized"
+                }
+              }
+            }
+          }
+        },
+        "x-esper-destructive": false,
+        "x-esper-pagination": "none",
+        "x-esper-verb": "update",
+        "x-esper-noun": "target",
+        "x-esper-scope-parent": "target-list"
+      },
+      "delete": {
+        "x-badges": [
+          {
+            "name": "Stable",
+            "color": "green"
+          }
+        ],
+        "summary": "Delete a Target or Device from a Target List",
+        "security": [
+          {
+            "SCAPIAuthToken": []
+          }
+        ],
+        "operationId": "deleteTargetListTarget",
+        "tags": [
+          "2_Targets"
+        ],
+        "parameters": [
+          {
+            "name": "pipeline_id",
+            "in": "path",
+            "description": "ID of the Pipeline",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "targetlist_id",
+            "in": "path",
+            "description": "ID of the Target List",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "target_id",
+            "in": "path",
+            "description": "ID of the Target",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Deleted Target from Target List",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "integer"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "content": {
+                      "$ref": "#/components/schemas/Target"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Target List device delete error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_401_Unauthorized"
+                }
+              }
+            }
+          }
+        },
+        "x-esper-destructive": true,
+        "x-esper-pagination": "none",
+        "x-esper-verb": "delete",
+        "x-esper-noun": "target",
+        "x-esper-scope-parent": "target-list"
+      }
+    },
+    "/pipelines/v0/pipelines/{pipeline_id}/targetlists/{targetlist_id}/targets-bulk/": {
+      "post": {
+        "x-badges": [
+          {
+            "name": "Stable",
+            "color": "green"
+          }
+        ],
+        "summary": "Bulk add targets to a target list",
+        "description": "Adds multiple targets to a target list. Creates target records if they don't exist, then links them to the target list. Existing targets in the list are left unchanged (skipped). Behaves the same as legacy /targets/ API. device_name should be provided for proper target run creation. device_alias can be provided as a direct property and will be stored in device_meta.",
+        "security": [
+          {
+            "SCAPIAuthToken": []
+          }
+        ],
+        "operationId": "bulkAddTargetListTargets",
+        "tags": [
+          "2_Targets"
+        ],
+        "parameters": [
+          {
+            "name": "pipeline_id",
+            "in": "path",
+            "description": "ID of the Pipeline",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "targetlist_id",
+            "in": "path",
+            "description": "ID of the Target List",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "description": "Array of device IDs (strings) or device objects with metadata",
+          "content": {
+            "application/json": {
+              "schema": {
+                "oneOf": [
+                  {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "description": "Device ID"
+                    },
+                    "example": [
+                      {
+                        "device_id": "18d21907-a3b3-491b-9237-d835de82a3ef",
+                        "device_name": "ESPR-LAB-AAA03",
+                        "device_alias": "Actineon Edge 10A"
+                      },
+                      {
+                        "device_id": "550e8400-e29b-41d4-a716-446655440002",
+                        "device_name": "ESPR-LAB-AAA04",
+                        "device_alias": "Actineon Edge 10B"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "required": [
+                        "device_id"
+                      ],
+                      "properties": {
+                        "device_id": {
+                          "type": "string",
+                          "description": "Device ID (UUID)"
+                        },
+                        "device_name": {
+                          "type": "string",
+                          "description": "Device name (should be provided for proper target run creation)"
+                        },
+                        "device_alias": {
+                          "type": "string",
+                          "description": "Device alias (optional, stored in device_meta)"
+                        },
+                        "device_meta": {
+                          "type": "object",
+                          "description": "Device metadata (optional)"
+                        },
+                        "args": {
+                          "type": "object",
+                          "description": "Custom arguments (optional)"
+                        },
+                        "is_active": {
+                          "type": "boolean",
+                          "description": "Active status (optional, defaults to true)"
+                        }
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Bulk add completed successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "integer",
+                      "example": 200
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Bulk add completed. 2 target(s) created, 5 target(s) added to list, 1 target(s) skipped."
+                    },
+                    "content": {
+                      "type": "object",
+                      "properties": {
+                        "created_count": {
+                          "type": "integer",
+                          "description": "Number of new target records created",
+                          "example": 2
+                        },
+                        "added_count": {
+                          "type": "integer",
+                          "description": "Number of targets successfully added to the list",
+                          "example": 5
+                        },
+                        "skipped_count": {
+                          "type": "integer",
+                          "description": "Number of targets that were already in the list",
+                          "example": 1
+                        },
+                        "errors": {
+                          "type": "array",
+                          "items": {
+                            "type": "object"
+                          },
+                          "description": "List of any errors encountered",
+                          "example": []
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request - invalid input",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_400_Bad_Data"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_401_Unauthorized"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_500_Internal_Server_Error"
+                }
+              }
+            }
+          }
+        },
+        "x-esper-destructive": false,
+        "x-esper-pagination": "none",
+        "x-esper-verb": "bulk-add",
+        "x-esper-noun": "target-bulk",
+        "x-esper-scope-parent": "target-list"
+      }
+    },
+    "/pipelines/v0/pipelines/{pipeline_id}/targetlists/{targetlist_id}/devicegroups/": {
+      "get": {
+        "x-badges": [
+          {
+            "name": "Stable",
+            "color": "green"
+          }
+        ],
+        "summary": "Get all Device Groups in the Target List",
+        "security": [
+          {
+            "SCAPIAuthToken": []
+          }
+        ],
+        "operationId": "getTargetListDeviceGroups",
+        "tags": [
+          "2_Device Groups"
+        ],
+        "parameters": [
+          {
+            "name": "pipeline_id",
+            "in": "path",
+            "description": "ID of the Pipeline",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "targetlist_id",
+            "in": "path",
+            "description": "ID of the Target List",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "All Device Groups in Target List",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "integer"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "content": {
+                      "type": "object",
+                      "properties": {
+                        "count": {
+                          "type": "integer"
+                        },
+                        "previous": {
+                          "type": "string"
+                        },
+                        "next": {
+                          "type": "string"
+                        },
+                        "results": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/TargetListDeviceGroup"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Target List device group get error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_401_Unauthorized"
+                }
+              }
+            }
+          }
+        },
+        "x-esper-destructive": false,
+        "x-esper-pagination": "none",
+        "x-esper-verb": "list",
+        "x-esper-noun": "device-group",
+        "x-esper-scope-parent": "target-list"
+      },
+      "post": {
+        "x-badges": [
+          {
+            "name": "Stable",
+            "color": "green"
+          }
+        ],
+        "summary": "Add a Device Group to the Target List",
+        "security": [
+          {
+            "SCAPIAuthToken": []
+          }
+        ],
+        "operationId": "addTargetListDeviceGroups",
+        "tags": [
+          "2_Device Groups"
+        ],
+        "parameters": [
+          {
+            "name": "pipeline_id",
+            "in": "path",
+            "description": "ID of the Pipeline",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "targetlist_id",
+            "in": "path",
+            "description": "ID of the Target List",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TargetListDeviceGroups_POST"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Added Device group",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "integer"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "content": {
+                      "$ref": "#/components/schemas/TargetListDeviceGroup"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Target List Device Group add error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_401_Unauthorized"
+                }
+              }
+            }
+          }
+        },
+        "x-esper-platform-source": "src/services/pipelines-api/api/domain/targets/views/target_list_devicegroup.py:38-64",
+        "x-esper-destructive": false,
+        "x-esper-pagination": "none",
+        "x-esper-verb": "add",
+        "x-esper-noun": "device-group",
+        "x-esper-scope-parent": "target-list"
+      }
+    },
+    "/pipelines/v0/pipelines/{pipeline_id}/targetlists/{targetlist_id}/devicegroups/{devicegroup_id}/": {
+      "delete": {
+        "x-badges": [
+          {
+            "name": "Stable",
+            "color": "green"
+          }
+        ],
+        "summary": "Delete Device Group from a Target List",
+        "security": [
+          {
+            "SCAPIAuthToken": []
+          }
+        ],
+        "operationId": "deleteTargetListDeviceGroup",
+        "tags": [
+          "2_Device Groups"
+        ],
+        "parameters": [
+          {
+            "name": "pipeline_id",
+            "in": "path",
+            "description": "ID of the Pipeline",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "targetlist_id",
+            "in": "path",
+            "description": "ID of the Target List",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "devicegroup_id",
+            "in": "path",
+            "description": "ID of the Device Group",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Deleted Device Group from Target List",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "integer"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "content": {
+                      "type": "object",
+                      "properties": {
+                        "target_list": {
+                          "type": "string"
+                        },
+                        "device_group": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Target List device delete error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_401_Unauthorized"
+                }
+              }
+            }
+          }
+        },
+        "x-esper-platform-source": "src/services/pipelines-api/api/domain/targets/views/target_list_devicegroup.py:66-87",
+        "x-esper-destructive": true,
+        "x-esper-pagination": "none",
+        "x-esper-verb": "delete",
+        "x-esper-noun": "device-group",
+        "x-esper-scope-parent": "target-list"
+      }
+    },
+    "/pipelines/v0/pipelines/{pipeline_id}/targetlists/{targetlist_id}/devicegroups/{device_group_id}/devices/": {
+      "get": {
+        "x-badges": [
+          {
+            "name": "Stable",
+            "color": "green"
+          }
+        ],
+        "summary": "Get all Devices in the device group",
+        "security": [
+          {
+            "SCAPIAuthToken": []
+          }
+        ],
+        "operationId": "getDeviceGroupDevices",
+        "tags": [
+          "2_Device Groups"
+        ],
+        "parameters": [
+          {
+            "name": "pipeline_id",
+            "in": "path",
+            "description": "ID of the Pipeline",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "targetlist_id",
+            "in": "path",
+            "description": "ID of the Target List",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "device_group_id",
+            "in": "path",
+            "description": "ID of the Device Group",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "All Devices in Device group",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "integer"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "content": {
+                      "type": "object",
+                      "properties": {
+                        "count": {
+                          "type": "integer"
+                        },
+                        "previous": {
+                          "type": "string"
+                        },
+                        "next": {
+                          "type": "string"
+                        },
+                        "results": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/Device"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Operation List get error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_401_Unauthorized"
+                }
+              }
+            }
+          }
+        },
+        "x-esper-destructive": false,
+        "x-esper-pagination": "none",
+        "x-esper-verb": "list",
+        "x-esper-noun": "device",
+        "x-esper-scope-parent": "device-group"
+      }
+    },
+    "/pipelines/v0/operationlists/{operationlist_id}/operations/": {
+      "get": {
+        "x-badges": [
+          {
+            "name": "Stable",
+            "color": "green"
+          }
+        ],
+        "summary": "Get all Operations in the Operation List",
+        "security": [
+          {
+            "SCAPIAuthToken": []
+          }
+        ],
+        "operationId": "getOperationListOperations",
+        "tags": [
+          "2_Operations"
+        ],
+        "parameters": [
+          {
+            "name": "operationlist_id",
+            "in": "path",
+            "description": "ID of the Operation List",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "operation_type",
+            "in": "query",
+            "description": "Operation Type to filter on as defined in Operation_POST model",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "All Operations in Operation List",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "integer"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "content": {
+                      "type": "object",
+                      "properties": {
+                        "count": {
+                          "type": "integer"
+                        },
+                        "previous": {
+                          "type": "string"
+                        },
+                        "next": {
+                          "type": "string"
+                        },
+                        "results": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/Operation"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Operation List get error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_401_Unauthorized"
+                }
+              }
+            }
+          }
+        },
+        "x-esper-destructive": false,
+        "x-esper-pagination": "apps-envelope",
+        "x-esper-verb": "list",
+        "x-esper-noun": "operation",
+        "x-esper-scope-parent": "operation-list"
+      },
+      "post": {
+        "x-badges": [
+          {
+            "name": "Stable",
+            "color": "green"
+          }
+        ],
+        "summary": "Create an Operation for Operation List",
+        "security": [
+          {
+            "SCAPIAuthToken": []
+          }
+        ],
+        "operationId": "addOperationListOperations",
+        "tags": [
+          "2_Operations"
+        ],
+        "parameters": [
+          {
+            "name": "operationlist_id",
+            "in": "path",
+            "description": "ID of the Operation List",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Operation_POST"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Created operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "integer"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "content": {
+                      "$ref": "#/components/schemas/Operation"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Operation create error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_401_Unauthorized"
+                }
+              }
+            }
+          }
+        },
+        "x-esper-destructive": false,
+        "x-esper-pagination": "none",
+        "x-esper-verb": "add",
+        "x-esper-noun": "operation",
+        "x-esper-scope-parent": "operation-list"
+      }
+    },
+    "/pipelines/v0/operationlists/{operationlist_id}/operations/{operation_id}/": {
+      "get": {
+        "x-badges": [
+          {
+            "name": "Stable",
+            "color": "green"
+          }
+        ],
+        "summary": "Get an Operation from the operation list",
+        "security": [
+          {
+            "SCAPIAuthToken": []
+          }
+        ],
+        "operationId": "getOperationListOperation",
+        "tags": [
+          "2_Operations"
+        ],
+        "parameters": [
+          {
+            "name": "operationlist_id",
+            "in": "path",
+            "description": "ID of the Operation list",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "operation_id",
+            "in": "path",
+            "description": "ID of the Operation",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Get operation from operation list",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "integer"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "content": {
+                      "$ref": "#/components/schemas/Operation"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Operation get error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_401_Unauthorized"
+                }
+              }
+            }
+          }
+        },
+        "x-esper-destructive": false,
+        "x-esper-pagination": "none",
+        "x-esper-verb": "get",
+        "x-esper-noun": "operation",
+        "x-esper-scope-parent": "operation-list"
+      },
+      "put": {
+        "x-badges": [
+          {
+            "name": "Stable",
+            "color": "green"
+          }
+        ],
+        "summary": "Update an Operation",
+        "operationId": "updateOperationListOperation",
+        "tags": [
+          "2_Operations"
+        ],
+        "security": [
+          {
+            "SCAPIAuthToken": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "operationlist_id",
+            "in": "path",
+            "description": "ID of the Operation List",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "operation_id",
+            "in": "path",
+            "description": "ID of the Operation",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Operation"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated Operation Information",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "integer"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "content": {
+                      "$ref": "#/components/schemas/Operation"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Operation update error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_400_Bad_Data"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Operation update error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_401_Unauthorized"
+                }
+              }
+            }
+          }
+        },
+        "x-esper-destructive": false,
+        "x-esper-pagination": "none",
+        "x-esper-verb": "update",
+        "x-esper-noun": "operation",
+        "x-esper-scope-parent": "operation-list"
+      },
+      "delete": {
+        "x-badges": [
+          {
+            "name": "Stable",
+            "color": "green"
+          }
+        ],
+        "summary": "Delete an Operation list operation",
+        "security": [
+          {
+            "SCAPIAuthToken": []
+          }
+        ],
+        "operationId": "deleteOperationListOperation",
+        "tags": [
+          "2_Operations"
+        ],
+        "parameters": [
+          {
+            "name": "operationlist_id",
+            "in": "path",
+            "description": "ID of the Operation List",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "operation_id",
+            "in": "path",
+            "description": "ID of the Operation",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Delete operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "integer"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "content": {
+                      "$ref": "#/components/schemas/Operation"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Operation delete error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_401_Unauthorized"
+                }
+              }
+            }
+          }
+        },
+        "x-esper-destructive": true,
+        "x-esper-pagination": "none",
+        "x-esper-verb": "delete",
+        "x-esper-noun": "operation",
+        "x-esper-scope-parent": "operation-list"
+      }
+    },
+    "/pipelines/v0/runs/": {
+      "get": {
+        "x-badges": [
+          {
+            "name": "Stable",
+            "color": "green"
+          }
+        ],
+        "summary": "Get all Runs for the Pipelines in the Enterprise",
+        "security": [
+          {
+            "SCAPIAuthToken": []
+          }
+        ],
+        "operationId": "getAllPipelineRuns",
+        "tags": [
+          "2_Pipeline Runs"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "status",
+            "description": "Filter by pipeline run status",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "pending",
+                "queued",
+                "processing",
+                "running",
+                "waiting",
+                "complete",
+                "success",
+                "failure",
+                "cancelled",
+                "invalid",
+                "timeout"
+              ]
+            }
+          },
+          {
+            "in": "query",
+            "name": "pipeline_name",
+            "description": "Filter by pipeline name",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "ordering",
+            "description": "Sorting pipelines runs based on the field name",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "run_number",
+                "-run_number",
+                "status",
+                "-status",
+                "pipeline__name",
+                "-pipeline__name",
+                "started_at",
+                "-started_at",
+                "ended_at",
+                "-ended_at"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "All Runs for the Pipelines in the Enterprise",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "integer"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "content": {
+                      "type": "object",
+                      "properties": {
+                        "count": {
+                          "type": "integer"
+                        },
+                        "previous": {
+                          "type": "string"
+                        },
+                        "next": {
+                          "type": "string"
+                        },
+                        "results": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/PipelineRun"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Pipeline run get error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_401_Unauthorized"
+                }
+              }
+            }
+          }
+        },
+        "x-esper-destructive": false,
+        "x-esper-pagination": "apps-envelope",
+        "x-esper-verb": "list",
+        "x-esper-noun": "pipeline-run"
+      }
+    },
+    "/pipelines/v0/pipelines/{pipeline_id}/runs/": {
+      "get": {
+        "x-badges": [
+          {
+            "name": "Stable",
+            "color": "green"
+          }
+        ],
+        "summary": "Get all Runs for the Pipeline",
+        "security": [
+          {
+            "SCAPIAuthToken": []
+          }
+        ],
+        "operationId": "getPipelineRuns",
+        "tags": [
+          "2_Pipeline Runs"
+        ],
+        "parameters": [
+          {
+            "name": "pipeline_id",
+            "in": "path",
+            "description": "ID of the Pipeline",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "description": "Filter by pipeline run status",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "pending",
+                "queued",
+                "processing",
+                "running",
+                "waiting",
+                "complete",
+                "success",
+                "failure",
+                "cancelled",
+                "invalid",
+                "timeout"
+              ]
+            }
+          },
+          {
+            "in": "query",
+            "name": "ordering",
+            "description": "Sorting pipelines runs based on the field name",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "run_number",
+                "-run_number",
+                "status",
+                "-status",
+                "started_at",
+                "-started_at",
+                "ended_at",
+                "-ended_at"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "All Runs for the Pipeline",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "integer"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "content": {
+                      "type": "object",
+                      "properties": {
+                        "count": {
+                          "type": "integer"
+                        },
+                        "previous": {
+                          "type": "string"
+                        },
+                        "next": {
+                          "type": "string"
+                        },
+                        "results": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/PipelineRun"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Pipeline run get error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_401_Unauthorized"
+                }
+              }
+            }
+          }
+        },
+        "x-esper-destructive": false,
+        "x-esper-pagination": "apps-envelope",
+        "x-esper-verb": "list",
+        "x-esper-noun": "pipeline-run",
+        "x-esper-scope-parent": "pipeline"
+      },
+      "post": {
+        "x-badges": [
+          {
+            "name": "Stable",
+            "color": "green"
+          }
+        ],
+        "summary": "Create a Pipeline Run",
+        "security": [
+          {
+            "SCAPIAuthToken": []
+          }
+        ],
+        "operationId": "createPipelineRun",
+        "tags": [
+          "2_Pipeline Runs"
+        ],
+        "parameters": [
+          {
+            "name": "pipeline_id",
+            "in": "path",
+            "description": "ID of the Pipeline",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PipelineRun_POST"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Created Pipeline Run",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "integer"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "content": {
+                      "$ref": "#/components/schemas/PipelineRun"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Pipeline run create error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_401_Unauthorized"
+                }
+              }
+            }
+          }
+        },
+        "x-esper-destructive": false,
+        "x-esper-pagination": "none",
+        "x-esper-verb": "create",
+        "x-esper-noun": "pipeline-run",
+        "x-esper-scope-parent": "pipeline"
+      }
+    },
+    "/pipelines/v0/pipelines/{pipeline_id}/runs/{pipeline_run_id}/": {
+      "get": {
+        "x-badges": [
+          {
+            "name": "Stable",
+            "color": "green"
+          }
+        ],
+        "summary": "Get Pipeline run by pipeline run id",
+        "security": [
+          {
+            "SCAPIAuthToken": []
+          }
+        ],
+        "operationId": "getPipelineRun",
+        "tags": [
+          "2_Pipeline Runs"
+        ],
+        "parameters": [
+          {
+            "name": "pipeline_id",
+            "in": "path",
+            "description": "ID of the Pipeline",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "pipeline_run_id",
+            "in": "path",
+            "description": "Run Id of pipeline run",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Get Pipeline run",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "integer"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "content": {
+                      "$ref": "#/components/schemas/PipelineRun"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Operation get error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_401_Unauthorized"
+                }
+              }
+            }
+          }
+        },
+        "x-esper-destructive": false,
+        "x-esper-pagination": "none",
+        "x-esper-verb": "get",
+        "x-esper-noun": "pipeline-run",
+        "x-esper-scope-parent": "pipeline"
+      },
+      "put": {
+        "x-badges": [
+          {
+            "name": "Stable",
+            "color": "green"
+          }
+        ],
+        "summary": "Update a Pipeline Run",
+        "operationId": "updatePipelineRun",
+        "tags": [
+          "2_Pipeline Runs"
+        ],
+        "security": [
+          {
+            "SCAPIAuthToken": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "pipeline_id",
+            "in": "path",
+            "description": "ID of the Pipeline",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "pipeline_run_id",
+            "in": "path",
+            "description": "Run id of pipeline run",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "$ref": "#/components/schemas/PipelineRun_PUT"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated Pipeline run information",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "integer"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "content": {
+                      "$ref": "#/components/schemas/PipelineRun"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Pipeline Run update error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_400_Bad_Data"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Pipeline Run update error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_401_Unauthorized"
+                }
+              }
+            }
+          }
+        },
+        "x-esper-destructive": false,
+        "x-esper-pagination": "none",
+        "x-esper-verb": "update",
+        "x-esper-noun": "pipeline-run",
+        "x-esper-scope-parent": "pipeline"
+      },
+      "delete": {
+        "x-badges": [
+          {
+            "name": "Stable",
+            "color": "green"
+          }
+        ],
+        "summary": "Delete a Pipeline Run",
+        "operationId": "deletePipelineRun",
+        "tags": [
+          "2_Pipeline Runs"
+        ],
+        "security": [
+          {
+            "SCAPIAuthToken": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "pipeline_id",
+            "in": "path",
+            "description": "ID of the Pipeline",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "pipeline_run_id",
+            "in": "path",
+            "description": "Run id of pipeline run",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Deleted Pipeline run information",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "integer"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "content": {
+                      "$ref": "#/components/schemas/PipelineRun"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Pipeline Run update error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_400_Bad_Data"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Pipeline Run update error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_401_Unauthorized"
+                }
+              }
+            }
+          }
+        },
+        "x-esper-destructive": true,
+        "x-esper-pagination": "none",
+        "x-esper-verb": "delete",
+        "x-esper-noun": "pipeline-run",
+        "x-esper-scope-parent": "pipeline"
+      }
+    },
+    "/pipelines/v0/runs/{pipeline_run_id}/stageruns/": {
+      "get": {
+        "x-badges": [
+          {
+            "name": "Stable",
+            "color": "green"
+          }
+        ],
+        "summary": "Get all Stage Runs for the Pipeline Run",
+        "security": [
+          {
+            "SCAPIAuthToken": []
+          }
+        ],
+        "operationId": "getPipelineRunStageRuns",
+        "tags": [
+          "2_Stage Runs"
+        ],
+        "parameters": [
+          {
+            "name": "pipeline_run_id",
+            "in": "path",
+            "description": "ID of the Pipeline Run",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "description": "Status of stage run",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "pending",
+                "queued",
+                "processing",
+                "running",
+                "complete",
+                "success",
+                "failure",
+                "cancelled",
+                "invalid",
+                "timeout"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "All Stage Runs for the Pipeline Run",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "integer"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "content": {
+                      "type": "object",
+                      "properties": {
+                        "count": {
+                          "type": "integer"
+                        },
+                        "previous": {
+                          "type": "string"
+                        },
+                        "next": {
+                          "type": "string"
+                        },
+                        "results": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/StageRun"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Stage run get error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_401_Unauthorized"
+                }
+              }
+            }
+          }
+        },
+        "x-esper-destructive": false,
+        "x-esper-pagination": "apps-envelope",
+        "x-esper-verb": "list",
+        "x-esper-noun": "stage-run",
+        "x-esper-scope-parent": "pipeline-run"
+      }
+    },
+    "/pipelines/v0/runs/{pipeline_run_id}/stageruns/{stage_run_id}/": {
+      "get": {
+        "x-badges": [
+          {
+            "name": "Stable",
+            "color": "green"
+          }
+        ],
+        "summary": "Get Pipeline Stage run by stage run Id",
+        "security": [
+          {
+            "SCAPIAuthToken": []
+          }
+        ],
+        "operationId": "getPipelineRunStageRun",
+        "tags": [
+          "2_Stage Runs"
+        ],
+        "parameters": [
+          {
+            "name": "pipeline_run_id",
+            "in": "path",
+            "description": "ID of the Pipeline Run",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "stage_run_id",
+            "in": "path",
+            "description": "ID of pipeline stage run",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Get pipeline run stage run",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "integer"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "content": {
+                      "$ref": "#/components/schemas/StageRun"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Operation get error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_401_Unauthorized"
+                }
+              }
+            }
+          }
+        },
+        "x-esper-destructive": false,
+        "x-esper-pagination": "none",
+        "x-esper-verb": "get",
+        "x-esper-noun": "stage-run",
+        "x-esper-scope-parent": "pipeline-run"
+      },
+      "put": {
+        "x-badges": [
+          {
+            "name": "Stable",
+            "color": "green"
+          }
+        ],
+        "summary": "Update a Pipeline Stage Run",
+        "operationId": "updatePipelineRunStageRun",
+        "tags": [
+          "2_Stage Runs"
+        ],
+        "security": [
+          {
+            "SCAPIAuthToken": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "pipeline_run_id",
+            "in": "path",
+            "description": "ID of the Pipeline Run",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "stage_run_id",
+            "in": "path",
+            "description": "id of pipeline stage run",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "status": {
+                    "type": "string",
+                    "enum": [
+                      "pending",
+                      "queued",
+                      "processing",
+                      "running",
+                      "complete",
+                      "success",
+                      "failure",
+                      "cancelled",
+                      "invalid",
+                      "timeout"
+                    ]
+                  }
+                },
+                "required": [
+                  "status"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated Pipeline Stage run information",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "integer"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "content": {
+                      "$ref": "#/components/schemas/StageRun"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Pipeline Stage Run update error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_400_Bad_Data"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Pipeline Stage Run update error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_401_Unauthorized"
+                }
+              }
+            }
+          }
+        },
+        "x-esper-destructive": false,
+        "x-esper-pagination": "none",
+        "x-esper-verb": "update",
+        "x-esper-noun": "stage-run",
+        "x-esper-scope-parent": "pipeline-run"
+      }
+    },
+    "/pipelines/v0/stageruns/{stage_run_id}/operations/": {
+      "get": {
+        "x-badges": [
+          {
+            "name": "Stable",
+            "color": "green"
+          }
+        ],
+        "summary": "Get all Operations for the Stage Run",
+        "security": [
+          {
+            "SCAPIAuthToken": []
+          }
+        ],
+        "operationId": "getPipelineStageRunOperations",
+        "tags": [
+          "2_Stage Runs"
+        ],
+        "parameters": [
+          {
+            "name": "stage_run_id",
+            "in": "path",
+            "description": "Stage run Id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "All Operations for the Stage Run",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "integer"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "content": {
+                      "type": "object",
+                      "properties": {
+                        "count": {
+                          "type": "integer"
+                        },
+                        "previous": {
+                          "type": "string"
+                        },
+                        "next": {
+                          "type": "string"
+                        },
+                        "results": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/StageRunOperation"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Stage run operation get error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_401_Unauthorized"
+                }
+              }
+            }
+          }
+        },
+        "x-esper-destructive": false,
+        "x-esper-pagination": "apps-envelope",
+        "x-esper-verb": "list",
+        "x-esper-noun": "operation",
+        "x-esper-scope-parent": "stage-run"
+      }
+    },
+    "/pipelines/v0/stageruns/{stage_run_id}/operations/{stage_run_operation_id}/": {
+      "get": {
+        "x-badges": [
+          {
+            "name": "Stable",
+            "color": "green"
+          }
+        ],
+        "summary": "Get single Operation for the Stage Run",
+        "security": [
+          {
+            "SCAPIAuthToken": []
+          }
+        ],
+        "operationId": "getPipelineStageRunOperation",
+        "tags": [
+          "2_Stage Runs"
+        ],
+        "parameters": [
+          {
+            "name": "stage_run_id",
+            "in": "path",
+            "description": "Stage run Id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "stage_run_operation_id",
+            "in": "path",
+            "description": "Stage run operation Id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation for the Stage Run",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "integer"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "content": {
+                      "$ref": "#/components/schemas/StageRunOperation"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Stage run operation get error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_401_Unauthorized"
+                }
+              }
+            }
+          }
+        },
+        "x-esper-destructive": false,
+        "x-esper-pagination": "none",
+        "x-esper-verb": "get",
+        "x-esper-noun": "operation",
+        "x-esper-scope-parent": "stage-run"
+      }
+    },
+    "/pipelines/v0/stageruns/{stage_run_id}/targetruns/": {
+      "get": {
+        "x-badges": [
+          {
+            "name": "Stable",
+            "color": "green"
+          }
+        ],
+        "summary": "Get all Target Runs for the Stage Run",
+        "security": [
+          {
+            "SCAPIAuthToken": []
+          }
+        ],
+        "operationId": "getPipelineStageTargetRuns",
+        "tags": [
+          "2_Target Runs"
+        ],
+        "parameters": [
+          {
+            "name": "stage_run_id",
+            "in": "path",
+            "description": "Stage run Id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "description": "Status of target run",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "pending",
+                "queued",
+                "processing",
+                "dispatched",
+                "running",
+                "complete",
+                "success",
+                "failure",
+                "cancelled",
+                "invalid",
+                "timeout"
+              ]
+            }
+          },
+          {
+            "name": "stage_run_operation_id",
+            "in": "query",
+            "description": "Stage run Operation Id to filter on",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "ordering",
+            "in": "query",
+            "description": "Sorting target runs based on status field",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "status",
+                "-status"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "All Target runs for the Stage Run",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "integer"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "content": {
+                      "type": "object",
+                      "properties": {
+                        "count": {
+                          "type": "integer"
+                        },
+                        "previous": {
+                          "type": "string"
+                        },
+                        "next": {
+                          "type": "string"
+                        },
+                        "results": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/TargetRun"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Target run get error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_401_Unauthorized"
+                }
+              }
+            }
+          }
+        },
+        "x-esper-destructive": false,
+        "x-esper-pagination": "apps-envelope",
+        "x-esper-verb": "list",
+        "x-esper-noun": "target-run",
+        "x-esper-scope-parent": "stage-run"
+      },
+      "post": {
+        "x-badges": [
+          {
+            "name": "Stable",
+            "color": "green"
+          }
+        ],
+        "summary": "Create a Target Runs for Stage Run",
+        "security": [
+          {
+            "SCAPIAuthToken": []
+          }
+        ],
+        "operationId": "createPipelineStageTargetRuns",
+        "tags": [
+          "2_Target Runs"
+        ],
+        "parameters": [
+          {
+            "name": "stage_run_id",
+            "in": "path",
+            "description": "Stage run Id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TargetRun_POST"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Created Target Runs",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "integer"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "content": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/TargetRun"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Target Run create error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_401_Unauthorized"
+                }
+              }
+            }
+          }
+        },
+        "x-esper-destructive": false,
+        "x-esper-pagination": "none",
+        "x-esper-verb": "create",
+        "x-esper-noun": "target-run",
+        "x-esper-scope-parent": "stage-run"
+      }
+    },
+    "/pipelines/v0/stageruns/{stage_run_id}/targetruns/{target_run_id}/": {
+      "get": {
+        "x-badges": [
+          {
+            "name": "Stable",
+            "color": "green"
+          }
+        ],
+        "summary": "Get Target Run by Target Run ID",
+        "security": [
+          {
+            "SCAPIAuthToken": []
+          }
+        ],
+        "operationId": "getPipelineStageTargetRun",
+        "tags": [
+          "2_Target Runs"
+        ],
+        "parameters": [
+          {
+            "name": "stage_run_id",
+            "in": "path",
+            "description": "Stage run Id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "target_run_id",
+            "in": "path",
+            "description": "Id of the Target Run",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Get target run",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "integer"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "content": {
+                      "$ref": "#/components/schemas/TargetRun"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Operation get error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_401_Unauthorized"
+                }
+              }
+            }
+          }
+        },
+        "x-esper-destructive": false,
+        "x-esper-pagination": "none",
+        "x-esper-verb": "get",
+        "x-esper-noun": "target-run",
+        "x-esper-scope-parent": "stage-run"
+      },
+      "put": {
+        "x-badges": [
+          {
+            "name": "Stable",
+            "color": "green"
+          }
+        ],
+        "summary": "Update a Target Run",
+        "operationId": "updatePipelineStageTargetRun",
+        "tags": [
+          "2_Target Runs"
+        ],
+        "security": [
+          {
+            "SCAPIAuthToken": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "stage_run_id",
+            "in": "path",
+            "description": "Stage run Id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "target_run_id",
+            "in": "path",
+            "description": "Id of the target run",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TargetRun_PUT"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated Target Run run information",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "integer"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "content": {
+                      "$ref": "#/components/schemas/TargetRun"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Target Run update error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_400_Bad_Data"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Target Run update error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_401_Unauthorized"
+                }
+              }
+            }
+          }
+        },
+        "x-esper-destructive": false,
+        "x-esper-pagination": "none",
+        "x-esper-verb": "update",
+        "x-esper-noun": "target-run",
+        "x-esper-scope-parent": "stage-run"
+      }
+    },
+    "/pipelines/v0/stageruns/{stage_run_id}/targetruns/{target_run_id}/command/": {
+      "get": {
+        "x-badges": [
+          {
+            "name": "Stable",
+            "color": "green"
+          }
+        ],
+        "summary": "Get status of the command running for Target run",
+        "security": [
+          {
+            "SCAPIAuthToken": []
+          }
+        ],
+        "operationId": "getTargetRunCommandStatus",
+        "tags": [
+          "2_Target Runs"
+        ],
+        "parameters": [
+          {
+            "name": "stage_run_id",
+            "in": "path",
+            "description": "ID of the stage run",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "target_run_id",
+            "in": "path",
+            "description": "Id of the target run",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Command processor request status",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "integer"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "content": {
+                      "$ref": "#/components/schemas/CommandResponse"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Command request create error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_401_Unauthorized"
+                }
+              }
+            }
+          }
+        },
+        "x-esper-destructive": false,
+        "x-esper-pagination": "none",
+        "x-esper-verb": "list",
+        "x-esper-noun": "command",
+        "x-esper-scope-parent": "target-run"
+      },
+      "post": {
+        "x-badges": [
+          {
+            "name": "Stable",
+            "color": "green"
+          }
+        ],
+        "summary": "Create an command processor request for Target Run",
+        "security": [
+          {
+            "SCAPIAuthToken": []
+          }
+        ],
+        "operationId": "createTargetRunCommand",
+        "tags": [
+          "2_Target Runs"
+        ],
+        "parameters": [
+          {
+            "name": "stage_run_id",
+            "in": "path",
+            "description": "ID of the stage run",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "target_run_id",
+            "in": "path",
+            "description": "Id of the target run",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AndroidCommandRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Created command processor request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "integer"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "content": {
+                      "$ref": "#/components/schemas/CommandResponse"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Command request create error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_401_Unauthorized"
+                }
+              }
+            }
+          }
+        },
+        "x-esper-destructive": false,
+        "x-esper-pagination": "none",
+        "x-esper-verb": "create",
+        "x-esper-noun": "command",
+        "x-esper-scope-parent": "target-run"
+      }
+    },
+    "/pipelines/v0/stageruns/{stage_run_id}/targetruns/{target_run_id}/command/{command_id}/": {
+      "put": {
+        "x-badges": [
+          {
+            "name": "Stable",
+            "color": "green"
+          }
+        ],
+        "summary": "Update target run command information.",
+        "security": [
+          {
+            "SCAPIAuthToken": []
+          }
+        ],
+        "operationId": "putTargetRunCommandStatus",
+        "tags": [
+          "2_Target Runs"
+        ],
+        "parameters": [
+          {
+            "name": "stage_run_id",
+            "in": "path",
+            "description": "ID of the stage run",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "target_run_id",
+            "in": "path",
+            "description": "Id of the target run",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "command_id",
+            "in": "path",
+            "description": "Id of the command",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CommandRequest_PUT"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Command processor request status",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "integer"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "content": {
+                      "$ref": "#/components/schemas/CommandResponse"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Target run command update error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_400_Bad_Data"
+                }
+              }
+            }
+          }
+        },
+        "x-esper-destructive": true,
+        "x-esper-pagination": "none",
+        "x-esper-verb": "update",
+        "x-esper-noun": "command",
+        "x-esper-scope-parent": "target-run"
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "CommandRequest_PUT": {
+        "type": "object",
+        "properties": {
+          "request_status": {
+            "type": "string",
+            "enum": [
+              "cancelled"
+            ]
+          }
+        }
+      },
+      "AndroidCommandRequest": {
+        "type": "object"
+      },
+      "CommandResponse": {
+        "type": "object",
+        "properties": {
+          "target_run_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "operation_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "enterprise_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "command": {
+            "type": "string"
+          },
+          "command_type": {
+            "type": "string",
+            "default": "DEVICE"
+          },
+          "device_type": {
+            "type": "string",
+            "default": "all"
+          },
+          "device_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "schedule": {
+            "type": "string",
+            "default": "IMMEDIATE"
+          },
+          "args": {
+            "type": "object"
+          },
+          "request_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "request_status": {
+            "type": "string"
+          },
+          "request_status_reason": {
+            "type": "string"
+          }
+        }
+      },
+      "TargetRun_PUT": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "pending",
+              "queued",
+              "processing",
+              "dispatched",
+              "running",
+              "complete",
+              "success",
+              "failure",
+              "cancelled",
+              "invalid"
+            ]
+          },
+          "device_name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "status"
+        ]
+      },
+      "TargetRun_POST": {
+        "type": "object",
+        "properties": {
+          "target_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "device_name": {
+            "type": "string"
+          },
+          "device_alias": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "target_id"
+        ]
+      },
+      "TargetRun": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "readOnly": true
+          },
+          "target_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "device_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "device_alias": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "stage_run_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "stage_run_operation_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "command_id": {
+            "type": "string"
+          },
+          "command_status": {
+            "type": "string"
+          },
+          "command_meta": {
+            "type": "object"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "pending",
+              "queued",
+              "processing",
+              "dispatched",
+              "running",
+              "complete",
+              "success",
+              "failure",
+              "cancelled",
+              "timeout",
+              "invalid"
+            ]
+          },
+          "created_by": {
+            "type": "number",
+            "format": "int32"
+          },
+          "updated_by": {
+            "type": "number",
+            "format": "int32"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "started_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "ended_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "StageRunOperation": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "readOnly": true
+          },
+          "operation_type": {
+            "type": "string"
+          },
+          "args": {
+            "type": "string"
+          },
+          "created_by": {
+            "type": "number",
+            "format": "int32"
+          },
+          "updated_by": {
+            "type": "number",
+            "format": "int32"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "StageRun": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "readOnly": true
+          },
+          "enterprise_id": {
+            "type": "string",
+            "readOnly": true
+          },
+          "pipeline_id": {
+            "type": "string"
+          },
+          "pipeline_run_id": {
+            "type": "string"
+          },
+          "stage_id": {
+            "type": "string"
+          },
+          "stage_meta": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              },
+              "created_by": {
+                "type": "number",
+                "format": "int32"
+              }
+            }
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "pending",
+              "queued",
+              "processing",
+              "running",
+              "complete",
+              "success",
+              "failure",
+              "cancelled",
+              "invalid",
+              "timeout"
+            ]
+          },
+          "created_by": {
+            "type": "number",
+            "format": "int32"
+          },
+          "updated_by": {
+            "type": "number",
+            "format": "int32"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "started_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "ended_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "PipelineRun_PUT": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "pending",
+              "queued",
+              "processing",
+              "running",
+              "waiting",
+              "complete",
+              "success",
+              "failure",
+              "cancelled",
+              "invalid",
+              "timeout"
+            ]
+          }
+        },
+        "required": [
+          "status"
+        ]
+      },
+      "PipelineRun_POST": {
+        "type": "object"
+      },
+      "PipelineRun": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "readOnly": true
+          },
+          "enterprise_id": {
+            "type": "string",
+            "readOnly": true
+          },
+          "run_number": {
+            "type": "integer",
+            "format": "int32",
+            "readOnly": true
+          },
+          "pipeline_id": {
+            "type": "string"
+          },
+          "pipeline_name": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "pending",
+              "queued",
+              "processing",
+              "running",
+              "waiting",
+              "complete",
+              "success",
+              "failure",
+              "cancelled",
+              "invalid",
+              "timeout"
+            ]
+          },
+          "status_meta": {
+            "type": "object"
+          },
+          "created_by": {
+            "type": "number",
+            "format": "int32"
+          },
+          "updated_by": {
+            "type": "number",
+            "format": "int32"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "started_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "ended_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "Operation_POST": {
+        "type": "object",
+        "properties": {
+          "args": {
+            "type": "object",
+            "description": "Arguments for the operation"
+          },
+          "operation_type": {
+            "type": "string",
+            "enum": [
+              "LOCK",
+              "REBOOT",
+              "SET_NEW_POLICY",
+              "UPDATE_HEARTBEAT",
+              "REQUEST_BUGREPORT",
+              "REQUEST_DPCLOG",
+              "ADD_TO_WHITELIST",
+              "REMOVE_FROM_WHITELIST",
+              "SET_APP_PERMISSION",
+              "WIPE",
+              "CAPTURE_SCREENSHOT",
+              "SET_WIFI_STATE",
+              "SET_BLUETOOTH_STATE",
+              "SET_ROTATION_STATE",
+              "SET_GPS_STATE",
+              "SET_BRIGHTNESS_SCALE",
+              "SET_STREAM_VOLUME",
+              "SET_SCREEN_OFF_TIMEOUT",
+              "SET_ADB_STATE",
+              "INITIATE_OFFER",
+              "INSTALL",
+              "SIMPLE_INSTALL",
+              "UNINSTALL",
+              "REFRESH_APPLIST",
+              "UPDATE_LATEST_DPC",
+              "NOTIFY_OTA",
+              "CLEAR_APP_DATA",
+              "SET_GEO_FENCE",
+              "SET_KIOSK_APP",
+              "SET_DEVICE_LOCKDOWN_STATE",
+              "SET_TIMEZONE",
+              "SET_APP_STATE",
+              "ADD_WIFI_AP",
+              "REMOVE_WIFI_AP",
+              "UPDATE_DEVICE_CONFIG",
+              "INITIATE_CONFERENCE_CALL",
+              "ADD_OVERRIDE_APN",
+              "SYNC_CONTENT",
+              "SET_WALLPAPER"
+            ]
+          }
+        }
+      },
+      "Operation": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "readOnly": true
+          },
+          "operation_list_id": {
+            "type": "string"
+          },
+          "pipeline_id": {
+            "type": "string"
+          },
+          "operation_type": {
+            "type": "string"
+          },
+          "args": {
+            "type": "string"
+          },
+          "created_by": {
+            "type": "number",
+            "format": "int32"
+          },
+          "updated_by": {
+            "type": "number",
+            "format": "int32"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "Device": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "UUID of the Device"
+          },
+          "device_name": {
+            "type": "string",
+            "description": "Name of the device"
+          },
+          "serial": {
+            "type": "string",
+            "description": "Device serial number"
+          },
+          "template_name": {
+            "type": "string",
+            "description": "Device template name"
+          },
+          "manufacturer": {
+            "type": "string",
+            "description": "Manufacturer of the Device"
+          },
+          "android_version": {
+            "type": "string",
+            "description": "Version number of android"
+          },
+          "api_level": {
+            "type": "string",
+            "description": "Device api level"
+          },
+          "is_gms": {
+            "type": "boolean",
+            "description": "Is this a gms device"
+          },
+          "is_active": {
+            "type": "boolean"
+          },
+          "model": {
+            "type": "string",
+            "description": "Device model number"
+          },
+          "alias_name": {
+            "type": "string",
+            "description": "Device alias"
+          },
+          "esper_client": {
+            "type": "string"
+          }
+        }
+      },
+      "TargetListDeviceGroups_POST": {
+        "type": "object",
+        "properties": {
+          "device_group_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "UUID of the Device Group"
+          }
+        }
+      },
+      "TargetListDeviceGroup": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "readOnly": true
+          },
+          "device_group_id": {
+            "type": "string"
+          },
+          "target_list_id": {
+            "type": "string"
+          },
+          "created_by": {
+            "type": "number",
+            "format": "int32"
+          },
+          "updated_by": {
+            "type": "number",
+            "format": "int32"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "Error_500_Internal_Server_Error": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer",
+            "format": "int32",
+            "default": 500
+          },
+          "message": {
+            "type": "string"
+          },
+          "content": {
+            "type": "object"
+          }
+        },
+        "required": [
+          "code",
+          "message"
+        ]
+      },
+      "Target_PUT": {
+        "type": "object",
+        "properties": {
+          "device_name": {
+            "type": "string"
+          },
+          "is_active": {
+            "type": "boolean"
+          }
+        }
+      },
+      "Target_POST": {
+        "type": "object",
+        "properties": {
+          "device_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "device_alias": {
+            "type": "string"
+          },
+          "device_name": {
+            "type": "string"
+          },
+          "is_active": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "device_id",
+          "device_name"
+        ]
+      },
+      "Target": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "readOnly": true
+          },
+          "pipeline_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "device_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "device_name": {
+            "type": "string"
+          },
+          "device_alias": {
+            "type": "string"
+          },
+          "is_active": {
+            "type": "boolean"
+          },
+          "created_by": {
+            "type": "number",
+            "format": "int32"
+          },
+          "updated_by": {
+            "type": "number",
+            "format": "int32"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "TargetList_POST": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "target_list_type": {
+            "type": "string",
+            "enum": [
+              "DEVICES",
+              "GROUPS",
+              "COLLECTIONS"
+            ]
+          }
+        },
+        "required": [
+          "name",
+          "target_list_type"
+        ]
+      },
+      "OperationList_POST": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "pipeline_id": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "name"
+        ]
+      },
+      "OperationList": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "readOnly": true
+          },
+          "pipeline_id": {
+            "type": "string"
+          },
+          "stage_id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "created_by": {
+            "type": "number",
+            "format": "int32"
+          },
+          "updated_by": {
+            "type": "number",
+            "format": "int32"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "StageTargetList_POST": {
+        "type": "object",
+        "properties": {
+          "target_list_id": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "target_list_id"
+        ]
+      },
+      "TargetList": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "readOnly": true
+          },
+          "pipeline_id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "target_list_type": {
+            "type": "string"
+          },
+          "created_by": {
+            "type": "number",
+            "format": "int32"
+          },
+          "updated_by": {
+            "type": "number",
+            "format": "int32"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "Stage_PUT": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "timeout_seconds": {
+            "type": "number",
+            "format": "int32"
+          }
+        }
+      },
+      "Stage_POST": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "timeout_seconds": {
+            "type": "number",
+            "format": "int32"
+          }
+        },
+        "required": [
+          "name"
+        ]
+      },
+      "Stage": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "readOnly": true
+          },
+          "enterprise_id": {
+            "type": "string",
+            "readOnly": true
+          },
+          "pipeline_id": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "timeout_seconds": {
+            "type": "number",
+            "format": "int32"
+          },
+          "created_by": {
+            "type": "number",
+            "format": "int32"
+          },
+          "updated_by": {
+            "type": "number",
+            "format": "int32"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "Pipeline_PUT": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "is_active": {
+            "type": "boolean"
+          },
+          "is_default": {
+            "type": "boolean"
+          },
+          "timeout_seconds": {
+            "type": "number",
+            "format": "int32"
+          }
+        }
+      },
+      "Error_401_Unauthorized": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer",
+            "format": "int32",
+            "default": 401
+          },
+          "message": {
+            "type": "string"
+          },
+          "content": {
+            "type": "object"
+          }
+        },
+        "required": [
+          "code",
+          "message"
+        ]
+      },
+      "Error_400_Bad_Data": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer",
+            "format": "int32",
+            "default": 400
+          },
+          "message": {
+            "type": "string"
+          },
+          "content": {
+            "type": "object"
+          }
+        },
+        "required": [
+          "code",
+          "message"
+        ]
+      },
+      "Pipeline_POST": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "is_default": {
+            "type": "boolean",
+            "default": false
+          },
+          "is_active": {
+            "type": "boolean",
+            "default": true
+          },
+          "timeout_seconds": {
+            "type": "number",
+            "format": "int32",
+            "default": 86400
+          }
+        },
+        "required": [
+          "name"
+        ]
+      },
+      "Pipeline": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "readOnly": true
+          },
+          "enterprise_id": {
+            "type": "string",
+            "readOnly": true
+          },
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "is_active": {
+            "type": "boolean"
+          },
+          "is_valid": {
+            "type": "boolean"
+          },
+          "is_visible": {
+            "type": "boolean"
+          },
+          "is_archived": {
+            "type": "boolean"
+          },
+          "is_default": {
+            "type": "boolean"
+          },
+          "timeout_seconds": {
+            "type": "number",
+            "format": "int32"
+          },
+          "created_by": {
+            "type": "number",
+            "format": "int32"
+          },
+          "updated_by": {
+            "type": "number",
+            "format": "int32"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "name",
+          "created_by",
+          "updated_by"
+        ]
+      }
+    },
+    "securitySchemes": {
+      "SCAPIAuthToken": {
+        "type": "http",
+        "scheme": "bearer"
+      }
+    }
+  }
+}

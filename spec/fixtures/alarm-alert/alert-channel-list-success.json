@@ -1,0 +1,1 @@
+{"count":2,"next":"NEXT_PAGE","previous":null,"results":[{"id":1,"enterprise":"enterprise-1","name":"mail","type":"email","properties":{"to_address":["ops@example.test"]},"linked_alerts":[{"id":"alarm-1","alarm_name":"cpu","type":"email"}]}]}

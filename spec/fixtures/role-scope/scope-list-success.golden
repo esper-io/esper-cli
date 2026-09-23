@@ -1,0 +1,9 @@
+[
+  {
+    "description": "Read devices",
+    "id": "22222222-2222-4222-8222-222222222222",
+    "name": "read:device",
+    "organization_type": 0,
+    "scope_type": 1
+  }
+]

@@ -1,0 +1,1 @@
+{"id":"alarm-1","enterprise":"enterprise-1","devices":[],"groups":[],"name":"cpu-updated","metric":"cpu","conditions":{"value":90},"alert_channels":[],"realert_interval":5}

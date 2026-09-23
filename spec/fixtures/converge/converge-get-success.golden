@@ -1,0 +1,10 @@
+{
+  "content": {
+    "converge_with_provision_option": true,
+    "device_id": "device-1",
+    "id": "converge-1",
+    "reason": "Awaiting device",
+    "schedule_type": "IMMEDIATE",
+    "status": "QUEUED"
+  }
+}

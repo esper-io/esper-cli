@@ -1,0 +1,1 @@
+{"content":{"count":2,"previous":"https://example.invalid/v2/devices/device-1/google-accounts/?offset=1","next":"","results":[{"tenant_id":"tenant-1","google_user_id":"google-user-2","device_id":"device-1","account_type":1}]}}

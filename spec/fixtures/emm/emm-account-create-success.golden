@@ -1,0 +1,16 @@
+{
+  "content": {
+    "created_at": "2026-08-24T10:00:00Z",
+    "data": "private-data-1",
+    "google_enterprise_id": "google-enterprise-1",
+    "is_active": true,
+    "is_set": true,
+    "is_synced_to_scapi": null,
+    "key_id": "key-1",
+    "name": "Fixture Service Account 1",
+    "public_data": "public-data-1",
+    "tenant_id": "tenant-1",
+    "type": 1,
+    "updated_at": "2026-08-24T11:00:00Z"
+  }
+}

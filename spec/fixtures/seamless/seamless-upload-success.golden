@@ -1,0 +1,19 @@
+{
+  "content": {
+    "count": 1,
+    "next": null,
+    "prev": null,
+    "results": [
+      {
+        "assigned_blueprint_id": "55555555-5555-4555-8555-555555555555",
+        "id": "44444444-4444-4444-8444-444444444444",
+        "meta": null,
+        "platform": "WINDOWS",
+        "status": "IN_QUEUE",
+        "tenant_id": "tenant-1",
+        "unique_id_type": "SERIAL",
+        "unique_ids": "SERIAL-UPLOAD-1"
+      }
+    ]
+  }
+}

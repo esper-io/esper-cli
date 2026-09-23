@@ -1,0 +1,19 @@
+{
+  "content": {
+    "count": 1,
+    "next": "fixture-v2-get--v2-appleappstore-success-content-next",
+    "prev": "fixture-v2-get--v2-appleappstore-success-content-prev",
+    "results": [
+      {
+        "app_store_url": "https://fixture.example.test/packet-3",
+        "bundle_id": "fixture-v2-get--v2-appleappstore-success-content-results-bundle_id",
+        "file_size_in_bytes": "fixture-v2-get--v2-appleappstore-success-content-results-file_size_in_bytes",
+        "icon": "https://fixture.example.test/packet-3",
+        "minimum_os": "fixture-v2-get--v2-appleappstore-success-content-results-minimum_os",
+        "name": "fixture-v2-get--v2-appleappstore-success-content-results-name",
+        "release_date": "2026-08-24T12:00:00Z",
+        "seller_name": "fixture-v2-get--v2-appleappstore-success-content-results-seller_name"
+      }
+    ]
+  }
+}

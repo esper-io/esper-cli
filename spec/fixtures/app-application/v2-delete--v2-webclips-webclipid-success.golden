@@ -1,0 +1,17 @@
+{
+  "content": {
+    "created_at": "2026-08-24T12:00:00Z",
+    "created_by": "fixture-v2-delete--v2-webclips-webclipid-success-content-created_by",
+    "icon_url": "https://fixture.example.test/packet-3",
+    "id": "00000000-0000-4000-8000-000000000001",
+    "is_full_screen": true,
+    "is_removable": true,
+    "label": "fixture-v2-delete--v2-webclips-webclipid-success-content-label",
+    "target_bundle_id": "fixture-v2-delete--v2-webclips-webclipid-success-content-target_bundle_id",
+    "target_bundle_name": "fixture-v2-delete--v2-webclips-webclipid-success-content-target_bundle_name",
+    "tenant_id": "00000000-0000-4000-8000-000000000001",
+    "updated_at": "2026-08-24T12:00:00Z",
+    "updated_by": "fixture-v2-delete--v2-webclips-webclipid-success-content-updated_by",
+    "url": "https://fixture.example.test/packet-3"
+  }
+}

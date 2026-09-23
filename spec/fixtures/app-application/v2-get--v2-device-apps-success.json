@@ -1,0 +1,12 @@
+{
+  "content": {
+    "count": 1,
+    "next": "NEXT_PAGE",
+    "prev": "fixture-v2-get--v2-device-apps-one-content-prev",
+    "results": [
+      {
+        "device_id": "00000000-0000-4000-8000-000000000001"
+      }
+    ]
+  }
+}
