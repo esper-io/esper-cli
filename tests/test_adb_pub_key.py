@@ -32,23 +32,42 @@ class TestLoadAdbPubKey:
         with patch("esper.ext.remoteadb_api._DEFAULT_ADB_PUB_KEY", str(default)):
             assert _load_adb_pub_key("", None) == "DEFAULT_KEY"
 
-    def test_missing_key_adb_not_installed(self, tmp_path):
+    def test_missing_key_adb_not_installed_returns_empty(self, tmp_path):
+        # Key pre-authorization is optional; hosts without adb must still work.
         missing = str(tmp_path / "adbkey.pub")
+        log = MagicMock()
         with patch("subprocess.run", side_effect=FileNotFoundError):
-            with pytest.raises(RemoteADBError, match="not installed"):
-                _load_adb_pub_key(missing, None)
+            result = _load_adb_pub_key(missing, log)
+        assert result == ""
+        log.warning.assert_called_once()
 
-    def test_missing_key_adb_start_server_times_out(self, tmp_path):
+    def test_missing_key_adb_start_server_times_out_returns_empty(self, tmp_path):
         missing = str(tmp_path / "adbkey.pub")
+        log = MagicMock()
         with patch("subprocess.run", side_effect=subprocess.TimeoutExpired("adb", 30)):
-            with pytest.raises(RemoteADBError, match="timed out"):
-                _load_adb_pub_key(missing, None)
+            result = _load_adb_pub_key(missing, log)
+        assert result == ""
+        log.warning.assert_called_once()
 
-    def test_missing_key_adb_runs_but_file_still_absent(self, tmp_path):
+    def test_missing_key_adb_runs_but_file_still_absent_returns_empty(self, tmp_path):
         missing = str(tmp_path / "adbkey.pub")
+        log = MagicMock()
         with patch("subprocess.run", return_value=MagicMock(returncode=0)):
-            with pytest.raises(RemoteADBError, match="even after"):
-                _load_adb_pub_key(missing, None)
+            result = _load_adb_pub_key(missing, log)
+        assert result == ""
+        log.warning.assert_called_once()
+
+    def test_empty_key_file_raises(self, tmp_path):
+        key = tmp_path / "adbkey.pub"
+        key.write_bytes(b"")
+        with pytest.raises(RemoteADBError, match="empty"):
+            _load_adb_pub_key(str(key), None)
+
+    def test_whitespace_only_key_file_raises(self, tmp_path):
+        key = tmp_path / "adbkey.pub"
+        key.write_text("   \n\t\n")
+        with pytest.raises(RemoteADBError, match="empty"):
+            _load_adb_pub_key(str(key), None)
 
     def test_missing_key_adb_generates_key(self, tmp_path):
         key = tmp_path / "adbkey.pub"
@@ -144,3 +163,14 @@ class TestResolveAdbPubKeyPath:
         with patch.dict(os.environ, {"ADB_VENDOR_KEYS": vendor_keys, "ESPER_ADB_PUB_KEY": ""}):
             result = _resolve_adb_pub_key_path()
         assert result == str(first_pub)
+
+    def test_second_vendor_key_used_when_first_pub_missing(self, tmp_path):
+        # /missing/key has no .pub; /valid/key.pub exists — should use the valid one.
+        missing_priv = tmp_path / "missing_key"   # no matching .pub
+        valid_priv = tmp_path / "valid_key"
+        valid_pub = tmp_path / "valid_key.pub"
+        valid_pub.write_text("VALID")
+        vendor_keys = os.pathsep.join([str(missing_priv), str(valid_priv)])
+        with patch.dict(os.environ, {"ADB_VENDOR_KEYS": vendor_keys, "ESPER_ADB_PUB_KEY": ""}):
+            result = _resolve_adb_pub_key_path()
+        assert result == str(valid_pub)

@@ -49,11 +49,12 @@ def _resolve_adb_pub_key_path() -> str:
 
     vendor_keys_env = os.environ.get("ADB_VENDOR_KEYS", "")
     if vendor_keys_env:
-        first_vendor_key = vendor_keys_env.split(os.pathsep)[0].strip()
-        if first_vendor_key:
-            vendor_pub = first_vendor_key + ".pub"
-            if os.path.exists(vendor_pub):
-                return vendor_pub
+        for entry in vendor_keys_env.split(os.pathsep):
+            entry = entry.strip()
+            if entry:
+                vendor_pub = entry + ".pub"
+                if os.path.exists(vendor_pub):
+                    return vendor_pub
 
     return os.path.expanduser("~/.android/adbkey.pub")
 
