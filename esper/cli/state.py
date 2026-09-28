@@ -25,10 +25,40 @@ CERTS_FOLDER = os.environ.get(
     "ESPER_CERTS_DIR",
     os.path.expanduser("~/.esper/certs"),
 )
-ADB_PUB_KEY = os.environ.get(
-    "ESPER_ADB_PUB_KEY",
-    os.path.expanduser("~/.android/adbkey.pub"),
-)
+def _resolve_adb_pub_key_path() -> str:
+    """
+    Return the path of the ADB public key that the local adb server will use
+    when authenticating with a device.
+
+    Resolution order:
+      1. ESPER_ADB_PUB_KEY env var – explicit user override, always wins.
+      2. ADB_VENDOR_KEYS env var   – if adb is configured to sign with a vendor
+         key the device will pre-authorize *that* identity, not the default one.
+         We take the first entry from the colon-separated list and look for its
+         matching <path>.pub file.
+      3. ~/.android/adbkey.pub     – the adb default.
+
+    If ADB_VENDOR_KEYS is set but the corresponding .pub file does not exist
+    yet (e.g. the server has never run with that key), we fall through to the
+    default; the caller will attempt 'adb start-server' to generate keys.
+    To silence a spurious warning in that case, set ESPER_ADB_PUB_KEY
+    explicitly.
+    """
+    if os.environ.get("ESPER_ADB_PUB_KEY"):
+        return os.environ["ESPER_ADB_PUB_KEY"]
+
+    vendor_keys_env = os.environ.get("ADB_VENDOR_KEYS", "")
+    if vendor_keys_env:
+        first_vendor_key = vendor_keys_env.split(os.pathsep)[0].strip()
+        if first_vendor_key:
+            vendor_pub = first_vendor_key + ".pub"
+            if os.path.exists(vendor_pub):
+                return vendor_pub
+
+    return os.path.expanduser("~/.android/adbkey.pub")
+
+
+ADB_PUB_KEY = _resolve_adb_pub_key_path()
 
 
 class EsperState:
