@@ -83,8 +83,8 @@ class TestLoadAdbPubKey:
         missing = str(tmp_path / "adbkey.pub")
         log = MagicMock()
         with patch("subprocess.run", side_effect=FileNotFoundError):
-            with pytest.raises(RemoteADBError):
-                _load_adb_pub_key(missing, log)
+            result = _load_adb_pub_key(missing, log)
+        assert result == ""
         log.debug.assert_called()
 
     def test_no_vendor_key_warning_when_adb_vendor_keys_unset(self, tmp_path):
