@@ -1,9 +1,13 @@
+import os
+import subprocess
 import time
 from logging import Logger
 from typing import Tuple
 import socket
-
+from pathlib import Path
 import requests
+
+_DEFAULT_ADB_PUB_KEY = os.path.expanduser("~/.android/adbkey.pub")
 
 
 class RemoteADBError(Exception):
@@ -172,11 +176,89 @@ def fetch_device_certificate(environment: str,
     raise RemoteADBError(f"Failed to acquire Device certificate in {timeout} secs")
 
 
+def _load_adb_pub_key(client_adb_pub_key_path: str, log: Logger) -> str:
+    """
+    Return the ADB public key contents, or "" if no key is available.
+
+    Key pre-authorization is optional: non-Foundation devices and relay-only
+    flows work fine without one.  When the key file is absent this function
+    tries 'adb start-server' once as a best-effort to generate it, then warns
+    and returns "" rather than raising — preserving the pre-PR behaviour for
+    hosts without a local adb installation.
+
+    The one hard failure is an *existing but empty* key file: that would
+    silently post adb_pub_key="" despite the file being present, so we raise
+    RemoteADBError with an actionable message instead.
+    """
+    path = Path(client_adb_pub_key_path) if client_adb_pub_key_path else Path(_DEFAULT_ADB_PUB_KEY)
+
+    if not path.exists():
+        if log:
+            log.debug(
+                f"[remoteadb-connect] ADB public key not found at '{path}'. "
+                "Trying 'adb start-server' to generate the key pair..."
+            )
+        try:
+            result = subprocess.run(
+                ["adb", "start-server"],
+                capture_output=True,
+                timeout=30,
+            )
+            if log:
+                log.debug(f"[remoteadb-connect] 'adb start-server' exited with code {result.returncode}")
+        except FileNotFoundError:
+            if log:
+                log.debug("[remoteadb-connect] 'adb' not found on PATH; proceeding without ADB public key.")
+        except subprocess.TimeoutExpired:
+            if log:
+                log.debug("[remoteadb-connect] 'adb start-server' timed out; proceeding without ADB public key.")
+
+    if not path.exists():
+        if log:
+            log.warning(
+                f"[remoteadb-connect] ADB public key not found at '{path}'. "
+                "Proceeding without key pre-authorization; Foundation devices will prompt "
+                "for manual ADB authorisation on first connect. "
+                "Run 'adb start-server' or set ESPER_ADB_PUB_KEY to pre-authorize."
+            )
+        return ""
+
+    content = path.read_bytes().decode('utf-8')
+    if not content.strip():
+        raise RemoteADBError(
+            f"ADB public key at '{path}' is empty. "
+            "Delete it and run 'adb start-server' to regenerate the key pair, "
+            "or set ESPER_ADB_PUB_KEY to point to a valid adbkey.pub file."
+        )
+
+    # Warn when ADB_VENDOR_KEYS is set but the resolved key is the default one.
+    # This means adb may authenticate with a vendor key that the device won't
+    # recognise, causing 'adb connect' to prompt for manual authorisation.
+    vendor_keys_env = os.environ.get("ADB_VENDOR_KEYS", "")
+    if vendor_keys_env and log:
+        vendor_paths = {
+            (entry.strip() + ".pub")
+            for entry in vendor_keys_env.split(os.pathsep)
+            if entry.strip()
+        }
+        if str(path) not in vendor_paths:
+            log.warning(
+                f"[remoteadb-connect] ADB_VENDOR_KEYS is set but the ADB public key being "
+                f"sent to Esper is '{path}', which does not match any vendor key. "
+                "If adb authenticates with a different identity the device will still prompt "
+                "for manual authorisation. Set the ESPER_ADB_PUB_KEY environment variable to "
+                "the .pub file that corresponds to the key adb will actually use."
+            )
+
+    return content
+
+
 def initiate_remoteadb_connection(environment: str,
                                   enterprise_id: str,
                                   device_id: str,
                                   api_key: str,
                                   client_cert_path: str,
+                                  client_adb_pub_key_path: str,
                                   log: Logger) -> str:
     """
     Create a Remote ADB session for given enterprise and device, and return its id.
@@ -197,13 +279,17 @@ def initiate_remoteadb_connection(environment: str,
     # Convert byte stream to utf-8
     client_cert = client_cert.decode('utf-8')
 
+    adb_pub_key = _load_adb_pub_key(client_adb_pub_key_path, log)
+    log.debug(f"[remoteadb-connect] ADB public key loaded ({len(adb_pub_key)} chars)")
+
     log.debug("Initiating RemoteADB connection...")
     log.debug(f"Creating RemoteADB session at {url}")
 
     response = requests.post(
         url,
         json={
-            'client_certificate': client_cert
+            'client_certificate': client_cert,
+            'adb_pub_key': adb_pub_key
         },
         headers={
             'Authorization': f'Bearer {api_key}'

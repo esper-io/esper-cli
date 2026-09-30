@@ -34,6 +34,7 @@ CONFIG['esper']['certs_folder'] = '~/.esper/certs'
 CONFIG['esper']['local_key'] = '~/.esper/certs/local.key'
 CONFIG['esper']['local_cert'] = '~/.esper/certs/local.pem'
 CONFIG['esper']['device_cert'] = '~/.esper/certs/device.pem'
+CONFIG['esper']['adb_pub_key'] = '~/.android/adbkey.pub'
 
 # meta defaults
 META = init_defaults('log.colorlog')
@@ -134,6 +135,7 @@ TEST_CONFIG['esper']['certs_folder'] = '~/.esper/certs'
 TEST_CONFIG['esper']['local_key'] = '~/.esper/certs/local.key'
 TEST_CONFIG['esper']['local_cert'] = '~/.esper/certs/local.pem'
 TEST_CONFIG['esper']['device_cert'] = '~/.esper/certs/device.pem'
+TEST_CONFIG['esper']['adb_pub_key'] = '~/.android/adbkey.pub'
 
 
 class EsperTest(TestApp, Esper):

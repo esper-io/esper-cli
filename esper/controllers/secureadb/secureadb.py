@@ -12,6 +12,7 @@ from esper.ext.relay import Relay
 from esper.ext.remoteadb_api import initiate_remoteadb_connection, fetch_device_certificate, fetch_relay_endpoint, \
     RemoteADBError
 from esper.ext.utils import validate_creds_exists
+from cement.utils import fs
 
 
 class SecureADBWorkflowError(Exception):
@@ -138,12 +139,20 @@ class SecureADB(Controller):
 
             self.app.render("\nInitiating Remote ADB Session. This may take a few seconds...\n")
 
+            # Use client's public adb key if present
+            try: 
+                client_adb_pub_key_path = fs.abspath(self.app.config.get('esper', 'adb_pub_key'))
+            except Exception as exc:
+                client_adb_pub_key_path = ""
+                self.app.log.debug(f"Exception Encountered while fetching client public adb key -> {exc}")
+
             # Call SCAPI for establish remote adb connection with device
             remoteadb_id = initiate_remoteadb_connection(environment=db.get_configure().get("environment"),
                                                          enterprise_id=enterprise_id,
                                                          device_id=device_id,
                                                          api_key=db.get_configure().get("api_key"),
                                                          client_cert_path=self.app.local_cert,
+                                                         client_adb_pub_key_path=client_adb_pub_key_path,
                                                          log=self.app.log)
 
             # Poll and fetch the TCP relay's endpoint
