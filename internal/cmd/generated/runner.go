@@ -594,7 +594,14 @@ func allPagesWithLimit(command *cobra.Command, client *esperruntime.HTTPClient, 
 			return nil, esperruntime.NewError(esperruntime.CategoryAPI, fmt.Errorf("pagination next URL repeated: %q", page.Next))
 		}
 		seenNext[nextKey] = struct{}{}
-		response, err = client.DoWithContentType(command.Context(), operation.Method, next.EscapedPath(), next.Query(), nil, "application/json")
+		nextPath := next.EscapedPath()
+		if base, parseErr := url.Parse(client.BaseURL); parseErr == nil {
+			basePath := strings.TrimRight(base.EscapedPath(), "/")
+			if basePath != "" && strings.HasPrefix(nextPath, basePath+"/") {
+				nextPath = strings.TrimPrefix(nextPath, basePath)
+			}
+		}
+		response, err = client.DoWithContentType(command.Context(), operation.Method, nextPath, next.Query(), nil, "application/json")
 		if err != nil {
 			return nil, err
 		}

@@ -3,6 +3,7 @@ package generated
 import (
 	"bytes"
 	"context"
+	"encoding/json"
 	"errors"
 	"mime"
 	"mime/multipart"
@@ -136,6 +137,36 @@ func TestBodyRejectsInvalidScalarValues(t *testing.T) {
 			_, _, err := bodyFor(command, operation)
 			if err == nil || esperruntime.ExitCode(err) != 2 {
 				t.Fatalf("bodyFor() error = %v", err)
+			}
+		})
+	}
+}
+
+func TestAllPagesHandlesBasePathInNextURL(t *testing.T) {
+	for _, nextPath := range []string{"/api/devices?offset=1", "/devices?offset=1", "https://example.com/api/devices?offset=1"} {
+		t.Run(nextPath, func(t *testing.T) {
+			requests := 0
+			server := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
+				requests++
+				if request.URL.Path != "/api/devices" || request.URL.Query().Get("offset") != "1" {
+					t.Errorf("next request = %s, want /api/devices?offset=1", request.URL)
+					writer.WriteHeader(http.StatusNotFound)
+					return
+				}
+				_, _ = writer.Write([]byte(`{"results":[{"id":"two"}],"next":null}`))
+			}))
+			defer server.Close()
+
+			client := &esperruntime.HTTPClient{BaseURL: server.URL + "/api", Client: server.Client(), Retry: esperruntime.RetryPolicy{MaxAttempts: 1}}
+			command := &cobra.Command{}
+			command.SetContext(context.Background())
+			firstPage, err := json.Marshal(map[string]any{"results": []map[string]string{{"id": "one"}}, "next": nextPath})
+			if err != nil {
+				t.Fatal(err)
+			}
+			merged, err := allPages(command, client, Operation{Method: http.MethodGet, Pagination: "limit-offset"}, firstPage)
+			if err != nil || string(merged) != `[{"id":"one"},{"id":"two"}]` || requests != 1 {
+				t.Fatalf("allPages() = %s, %v; requests = %d", merged, err, requests)
 			}
 		})
 	}

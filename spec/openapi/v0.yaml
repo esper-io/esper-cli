@@ -516,7 +516,7 @@
         "x-esper-scope-parent": "emm"
       }
     },
-    "/v0/enterprise/{enterprise_id}/emm/{emm_id}/webtoken/{webtoken_id}": {
+    "/v0/enterprise/{enterprise_id}/emm/{emm_id}/webtoken/{webtoken_id}/": {
       "get": {
         "x-badges": [
           {
