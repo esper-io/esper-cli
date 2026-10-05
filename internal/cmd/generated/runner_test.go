@@ -17,6 +17,30 @@ import (
 	"github.com/spf13/cobra"
 )
 
+func TestLegacyCommandGuardCoversAllReviewedDSOTypes(t *testing.T) {
+	var types []string
+	for _, operation := range Operations() {
+		if operation.Method != http.MethodPost || operation.Path != "/v0/operations/" || operation.Body == nil {
+			continue
+		}
+		for _, property := range operation.Body.Properties {
+			if property.Name == "operation_type" {
+				types = property.Enum
+			}
+		}
+	}
+	if len(types) != 92 {
+		t.Fatalf("reviewed DSO types = %d, want 92; reconcile spec and guard", len(types))
+	}
+	for _, name := range append(types, "UPDATE_WIFI_AP", "CLEAR_APP_CACHE", "UPDATE_HEARTBEAT", "DEVICE_INFORMATION", "START_BACKGROUND_SCRIPT", "STOP_BACKGROUND_SCRIPT", "ADD_BACKGROUND_SCRIPT", "REMOVE_BACKGROUND_SCRIPT") {
+		for _, path := range []string{"/v0/enterprise/{enterprise_id}/command/", "/commands/v0/commands/"} {
+			if err := guardLegacyCommandSubmission(Operation{Method: http.MethodPost, Path: path}, []byte(`{"command":"`+name+`"}`)); err == nil || esperruntime.ExitCode(err) != 2 {
+				t.Errorf("%s on %s passed legacy guard: %v", name, path, err)
+			}
+		}
+	}
+}
+
 func TestScopedCollectionUsesParentFlag(t *testing.T) {
 	operations := []Operation{
 		{Path: "/pipelines/v0/runs/", ScopeParent: ""},

@@ -32,7 +32,7 @@ type commandOperationFixture struct {
 func commandOperationFixtures() []commandOperationFixture {
 	return []commandOperationFixture{
 		{"v0 GET /v0/enterprise/{enterprise_id}/command/", "command-list", "GET", "/v0/enterprise/tenant-1/command/", "", []string{"api", "v0", "command", "list", "--enterprise", "tenant-1", "--limit", "1", "--offset", "0", "--all", "--json"}, url.Values{"limit": {"1"}, "offset": {"0"}}, 200, 400, "limit-offset", false},
-		{"v0 POST /v0/enterprise/{enterprise_id}/command/", "command-create", "POST", "/v0/enterprise/tenant-1/command/", `{"command":"REBOOT"}`, []string{"command", "create", "--enterprise", "tenant-1", "--command", "REBOOT", "--json"}, nil, 201, 400, "", false},
+		{"v0 POST /v0/enterprise/{enterprise_id}/command/", "command-create", "POST", "/v0/enterprise/tenant-1/command/", `{"command":"UPDATE_LATEST_DPC"}`, []string{"command", "create", "--enterprise", "tenant-1", "--command", "UPDATE_LATEST_DPC", "--json"}, nil, 201, 400, "", false},
 		{"v0 GET /v0/enterprise/{enterprise_id}/command/{request_id}/status/", "status-get", "GET", "/v0/enterprise/tenant-1/command/request-1/status/", "", []string{"status", "get", "tenant-1", "request-1", "--all", "--json"}, nil, 200, 400, "limit-offset", false},
 		{"v0 GET /v0/enterprise/{enterprise_id}/device/{device_id}/command-history/", "command-history-get", "GET", "/v0/enterprise/tenant-1/device/device-1/command-history/", "", []string{"command-history", "get", "tenant-1", "device-1", "--all", "--json"}, nil, 200, 400, "limit-offset", false},
 		{"v0 GET /v0/operations/", "operation-list-list", "GET", "/v0/operations/", "", []string{"operation-list", "list", "--limit", "1", "--offset", "0", "--all", "--json"}, url.Values{"limit": {"1"}, "offset": {"0"}}, 200, 400, "apps-envelope", false},
@@ -43,12 +43,11 @@ func commandOperationFixtures() []commandOperationFixture {
 		{"v0 GET /v0/operations/{operationsId}/devices/{deviceId}/", "device-operation-get", "GET", "/v0/operations/operation-1/devices/device-1/", "", []string{"device-operation", "get", "operation-1", "device-1", "--json"}, nil, 200, 400, "", false},
 		{"v0 PUT /v0/operations/{operationsId}/devices/{deviceId}/", "device-operation-update", "PUT", "/v0/operations/operation-1/devices/device-1/", `{"state":"CANCELLATION_REQUESTED"}`, []string{"device-operation", "update", "operation-1", "device-1", "--state", "CANCELLATION_REQUESTED", "--yes", "--json"}, nil, 200, 400, "", true},
 		{"v0 GET /commands/v0/commands/", "command-request-list", "GET", "/commands/v0/commands/", "", []string{"command-request", "list", "--limit", "1", "--offset", "0", "--all", "--json"}, url.Values{"limit": {"1"}, "offset": {"0"}}, 200, 400, "apps-envelope", false},
-		{"v0 POST /commands/v0/commands/", "command-request-create", "POST", "/commands/v0/commands/", `{"command":"REBOOT"}`, []string{"command-request", "create", "--command", "REBOOT", "--json"}, nil, 201, 400, "", false},
+		{"v0 POST /commands/v0/commands/", "command-request-create", "POST", "/commands/v0/commands/", `{"command":"REMOVE_PROFILE"}`, []string{"command-request", "create", "--command", "REMOVE_PROFILE", "--json"}, nil, 201, 400, "", false},
 		{"v0 GET /commands/v0/commands/{id}/", "command-request-get", "GET", "/commands/v0/commands/request-1/", "", []string{"command-request", "get", "request-1", "--json"}, nil, 200, 400, "", false},
 		{"v0 GET /commands/v0/commands/{id}/stats/", "stat-list", "GET", "/commands/v0/commands/request-1/stats/", "", []string{"stat", "list", "--command", "request-1", "--json"}, nil, 200, 400, "", false},
 		{"v0 GET /commands/v0/status/", "command-request-status-list", "GET", "/commands/v0/status/", "", []string{"command-request-status", "list", "--device", "device-1", "--limit", "1", "--offset", "0", "--all", "--json"}, url.Values{"device": {"device-1"}, "limit": {"1"}, "offset": {"0"}}, 200, 400, "apps-envelope", false},
 		{"v0 GET /commands/v0/status/{id}/", "command-status-get", "GET", "/commands/v0/status/status-1/", "", []string{"command-status", "get", "status-1", "--json"}, nil, 200, 400, "", false},
-		{"v0 PUT /commands/v0/status/{id}/", "command-status-update", "PUT", "/commands/v0/status/status-1/", `{"state":"Command Cancelled"}`, []string{"command-status", "update", "status-1", "--state", "Command Cancelled", "--yes", "--json"}, nil, 200, 400, "", true},
 		{"v2 GET /v2/command-inbox/", "command-inbox-get", "GET", "/v2/command-inbox/", "", []string{"command-inbox", "get", "--device-id", "device-1", "--json"}, url.Values{"device_id": {"device-1"}}, 200, 400, "", false},
 		{"v2 GET /v2/converge/{id}/commands", "converge-command-list", "GET", "/v2/converge/converge-1/commands", "", []string{"command", "list", "--converge", "converge-1", "--limit", "1", "--offset", "0", "--all", "--json"}, url.Values{"limit": {"1"}, "offset": {"0"}}, 200, 400, "apps-envelope", false},
 		{"legacy GET /enterprise/{enterprise_id}/device/{device_id}/status/", "legacy-status-get", "GET", "/enterprise/tenant-1/device/device-1/status/", "", []string{"api", "legacy", "status", "get", "tenant-1", "device-1", "--latest-event", "true", "--all", "--json"}, url.Values{"latest_event": {"true"}}, 200, 400, "limit-offset", false},
@@ -64,8 +63,6 @@ func commandOperationFixtures() []commandOperationFixture {
 		{"pipelines-v0 GET /pipelines/v0/stageruns/{stage_run_id}/operations/", "pipeline-operation-stage-run-list", "GET", "/pipelines/v0/stageruns/stage-run-1/operations/", "", []string{"pipeline-operation", "list", "--stage-run", "stage-run-1", "--all", "--json"}, nil, 200, 400, "apps-envelope", false},
 		{"pipelines-v0 GET /pipelines/v0/stageruns/{stage_run_id}/operations/{stage_run_operation_id}/", "pipeline-operation-stage-run-get", "GET", "/pipelines/v0/stageruns/stage-run-1/operations/operation-1/", "", []string{"pipeline-operation", "get", "operation-1", "--stage-run", "stage-run-1", "--json"}, nil, 200, 400, "", false},
 		{"pipelines-v0 GET /pipelines/v0/stageruns/{stage_run_id}/targetruns/{target_run_id}/command/", "pipeline-command-list", "GET", "/pipelines/v0/stageruns/stage-run-1/targetruns/target-run-1/command/", "", []string{"pipeline-command", "list", "--stage-run", "stage-run-1", "--target-run", "target-run-1", "--json"}, nil, 200, 400, "", false},
-		{"pipelines-v0 POST /pipelines/v0/stageruns/{stage_run_id}/targetruns/{target_run_id}/command/", "pipeline-command-create", "POST", "/pipelines/v0/stageruns/stage-run-1/targetruns/target-run-1/command/", `{}`, []string{"pipeline-command", "create", "--stage-run", "stage-run-1", "--target-run", "target-run-1", "--json"}, nil, 200, 400, "", false},
-		{"pipelines-v0 PUT /pipelines/v0/stageruns/{stage_run_id}/targetruns/{target_run_id}/command/{command_id}/", "pipeline-command-update", "PUT", "/pipelines/v0/stageruns/stage-run-1/targetruns/target-run-1/command/command-1/", `{"request_status":"cancelled"}`, []string{"pipeline-command", "update", "command-1", "--stage-run", "stage-run-1", "--target-run", "target-run-1", "--request-status", "cancelled", "--yes", "--json"}, nil, 200, 400, "", true},
 	}
 }
 
@@ -77,8 +74,8 @@ func TestCommandOperationCoverage(t *testing.T) {
 		}
 		want[row.key] = true
 	}
-	if len(want) != 35 {
-		t.Fatalf("fixture rows = %d, want 35", len(want))
+	if len(want) != 32 {
+		t.Fatalf("fixture rows = %d, want 32", len(want))
 	}
 	nouns := map[string]bool{
 		"command": true, "command-history": true, "command-inbox": true,
@@ -92,8 +89,43 @@ func TestCommandOperationCoverage(t *testing.T) {
 			got[operation.Generation+" "+operation.Method+" "+operation.Path] = true
 		}
 	}
-	if len(got) != 35 || !reflect.DeepEqual(want, got) {
+	if len(got) != 32 || !reflect.DeepEqual(want, got) {
 		t.Fatalf("packet operation keys mismatch: rows=%d generated=%d", len(want), len(got))
+	}
+}
+
+func TestRetiredCommandRoutesAbsent(t *testing.T) {
+	retired := map[string]bool{
+		"POST /v2/converge": false,
+		"POST /pipelines/v0/stageruns/{stage_run_id}/targetruns/{target_run_id}/command/":             false,
+		"PUT /pipelines/v0/stageruns/{stage_run_id}/targetruns/{target_run_id}/command/{command_id}/": false,
+		"PUT /commands/v0/status/{id}/": false,
+	}
+	retained := map[string]bool{
+		"POST /v0/operations/":              false,
+		"PUT /v0/operations/{operationId}/": false,
+		"GET /v2/converge":                  false,
+		"GET /pipelines/v0/stageruns/{stage_run_id}/targetruns/{target_run_id}/command/": false,
+		"GET /commands/v0/status/{id}/": false,
+	}
+	for _, operation := range generated.Operations() {
+		key := operation.Method + " " + operation.Path
+		if _, ok := retired[key]; ok {
+			retired[key] = true
+		}
+		if _, ok := retained[key]; ok {
+			retained[key] = true
+		}
+	}
+	for key, present := range retired {
+		if present {
+			t.Errorf("retired route remains generated: %s", key)
+		}
+	}
+	for key, present := range retained {
+		if !present {
+			t.Errorf("retained route is missing: %s", key)
+		}
 	}
 }
 
@@ -213,6 +245,81 @@ func TestCommandOperationInputValidation(t *testing.T) {
 	}
 }
 
+func TestLegacyCommandSubmissionOnlyAllowsUnsupportedTypes(t *testing.T) {
+	defer esperruntime.SetApprovalOverrideForTesting(func(esperruntime.ApprovalSpec) error { return nil })()
+	requests := 0
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		requests++
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusCreated)
+		_, _ = w.Write([]byte(`{}`))
+	}))
+	defer server.Close()
+
+	file := filepath.Join(t.TempDir(), "command.json")
+	if err := os.WriteFile(file, []byte(`{"command":"REBOOT"}`), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	for _, test := range []struct {
+		name, body string
+		args       []string
+		allowed    bool
+	}{
+		{name: "legacy scalar supported", args: []string{"command", "create", "--enterprise", "tenant-1", "--command", "REBOOT"}},
+		{name: "legacy body supported", args: []string{"command", "create", "--enterprise", "tenant-1", "--body", `{"command":"REBOOT"}`}},
+		{name: "CnC scalar supported", args: []string{"command-request", "create", "--command", "CONVERGE"}},
+		{name: "CnC file supported", args: []string{"command-request", "create", "--body", "@" + file}},
+		{name: "CnC stdin supported", body: `{"command":"SET_ADB_STATE"}`, args: []string{"command-request", "create", "--body", "-"}},
+		{name: "CnC backend-only supported", args: []string{"command-request", "create", "--command", "DEVICE_INFORMATION"}},
+		{name: "CnC unknown", args: []string{"command-request", "create", "--command", "NOT_A_COMMAND"}},
+		{name: "CnC missing type", args: []string{"command-request", "create", "--body", `{}`}},
+		{name: "CnC nonstring type", args: []string{"command-request", "create", "--body", `{"command":42}`}},
+		{name: "legacy unsupported", args: []string{"command", "create", "--enterprise", "tenant-1", "--command", "UPDATE_LATEST_DPC"}, allowed: true},
+		{name: "CnC unsupported", args: []string{"command-request", "create", "--command", "REMOVE_PROFILE"}, allowed: true},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			before := requests
+			command := configuredCommandOperationCommand(t, server.URL)
+			command.SetIn(strings.NewReader(test.body))
+			command.SetArgs(test.args)
+			err := command.Execute()
+			if test.allowed {
+				if err != nil || requests != before+1 {
+					t.Fatalf("allowed submission: requests=%d, error=%v", requests-before, err)
+				}
+			} else if err == nil || esperruntime.ExitCode(err) != 2 || requests != before {
+				t.Fatalf("blocked submission: requests=%d, error=%v", requests-before, err)
+			}
+		})
+	}
+}
+
+func TestConvergeSubmissionUsesDSO(t *testing.T) {
+	requests := 0
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		requests++
+		if r.Method != http.MethodPost || r.URL.Path != "/v0/operations/" {
+			t.Errorf("request = %s %s", r.Method, r.URL.Path)
+		}
+		body, err := io.ReadAll(r.Body)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if string(body) != `{"operation_type":"CONVERGE","schedule_type":"IMMEDIATE","operation_device_query":{"device_ids":"device-1"}}` {
+			t.Errorf("body = %s", body)
+		}
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusCreated)
+		_, _ = w.Write([]byte(`{}`))
+	}))
+	defer server.Close()
+	command := configuredCommandOperationCommand(t, server.URL)
+	command.SetArgs([]string{"operation", "create", "--body", `{"operation_type":"CONVERGE","schedule_type":"IMMEDIATE","operation_device_query":{"device_ids":"device-1"}}`, "--json"})
+	if err := command.Execute(); err != nil || requests != 1 {
+		t.Fatalf("DSO converge: requests=%d, error=%v", requests, err)
+	}
+}
+
 func TestCommandOperationBodyFileAndStdin(t *testing.T) {
 	file := filepath.Join(t.TempDir(), "body.json")
 	if err := os.WriteFile(file, []byte(`{"operation_type":"REBOOT"}`), 0o600); err != nil {
@@ -265,18 +372,6 @@ func TestCommandOperationCancellation(t *testing.T) {
 	command.SetArgs([]string{"operation", "get", "operation-1", "--json"})
 	if err := command.Execute(); err == nil || !errors.Is(err, context.Canceled) {
 		t.Fatalf("cancelled command error = %v", err)
-	}
-}
-
-func TestCommandOperationBodyless304(t *testing.T) {
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) { w.WriteHeader(http.StatusNotModified) }))
-	defer server.Close()
-	command := configuredCommandOperationCommand(t, server.URL)
-	command.SetArgs([]string{"command-status", "update", "status-1", "--state", "Command Cancelled", "--yes", "--json"})
-	err := command.Execute()
-	var value *esperruntime.APIError
-	if !errors.As(err, &value) || value.StatusCode != http.StatusNotModified || len(value.Body) != 0 {
-		t.Fatalf("bodyless 304 error = %#v", err)
 	}
 }
 

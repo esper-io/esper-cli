@@ -30,7 +30,7 @@ func TestCommittedSkillCurrent(t *testing.T) {
 	}
 }
 
-func TestRenderSkillIncludesGeneratedAndHandWrittenCommands(t *testing.T) {
+func TestRenderSkillIncludesGeneratedAndManuallyAddedCommands(t *testing.T) {
 	content := string(renderSkill([]generated.Operation{
 		{Command: []string{"device", "list"}, Summary: "List devices"},
 		{Command: []string{"device", "delete"}, Summary: "Delete device", Destructive: true},
@@ -48,6 +48,9 @@ func TestRenderSkillIncludesGeneratedAndHandWrittenCommands(t *testing.T) {
 		"`espercli secureadb connect --device <id>`",
 		"`espercli version`",
 		"For Linux, iOS, and Windows devices, use current `device` commands and `device-app list`.",
+		"Submit DSO-supported device commands with `espercli operation create`",
+		"`command create` and `command-request create` only accept confirmed public types unsupported by DSO",
+		"## Manually Added Commands",
 		"Never run approval approve yourself",
 		"`espercli device list` - List devices",
 		"`espercli device delete` - Delete device **destructive**",

@@ -204,10 +204,10 @@ func runConnect(command *cobra.Command, options *esperruntime.GlobalOptions, dev
 		return fmt.Errorf("write device certificate: %w", err)
 	}
 	if forceEnable {
-		if err := sendEnableADBCommand(command.Context(), client, credentials, enterpriseID, deviceID, session, detailPath); err != nil {
+		if err := sendEnableADBOperation(command.Context(), client, credentials, deviceID, session, detailPath); err != nil {
 			return err
 		}
-		if _, err := fmt.Fprintln(command.OutOrStdout(), "Remote ADB enable command sent to device."); err != nil {
+		if _, err := fmt.Fprintln(command.OutOrStdout(), "Remote ADB enable operation queued for device."); err != nil {
 			return err
 		}
 	}
@@ -259,12 +259,12 @@ func secureADBApprovalSpec(credentials esperruntime.Credentials, enterpriseID, d
 	}
 	spec := esperruntime.ApprovalSpec{BaseURL: credentials.BaseURL(), Method: http.MethodPost, Path: requestPath, ContentType: "application/json", Body: body}
 	if forceEnable {
-		spec.AdditionalTargets = []esperruntime.ApprovalTarget{{Method: http.MethodPost, Path: enableADBCommandPath(enterpriseID)}}
+		spec.AdditionalTargets = []esperruntime.ApprovalTarget{{Method: http.MethodPost, Path: "/v0/operations/"}}
 	}
 	return spec, nil
 }
 
-func sendEnableADBCommand(ctx context.Context, client *esperruntime.HTTPClient, credentials esperruntime.Credentials, enterpriseID, deviceID string, session remoteADBSession, detailPath string) error {
+func sendEnableADBOperation(ctx context.Context, client *esperruntime.HTTPClient, credentials esperruntime.Credentials, deviceID string, session remoteADBSession, detailPath string) error {
 	devicePort := session.DevicePort
 	if devicePort == "" {
 		devicePort = session.ClientPort
@@ -287,24 +287,18 @@ func sendEnableADBCommand(ctx context.Context, client *esperruntime.HTTPClient, 
 		commandArgs["remoteadb_host"] = session.RemoteADBHost
 	}
 	body, err := esperruntime.EncodeBody(map[string]any{
-		"command_type": "DEVICE",
-		"devices":      []string{deviceID},
-		"command":      "SET_ADB_STATE",
-		"command_args": commandArgs,
-		"schedule":     "IMMEDIATE",
+		"operation_type":         "SET_ADB_STATE",
+		"operation_device_query": map[string]any{"device_ids": deviceID},
+		"arguments":              commandArgs,
+		"schedule_type":          "IMMEDIATE",
 	})
 	if err != nil {
 		return err
 	}
-	path := enableADBCommandPath(enterpriseID)
-	if _, err := client.Do(ctx, http.MethodPost, path, nil, body); err != nil {
-		return fmt.Errorf("send Remote ADB enable command: %w", err)
+	if _, err := client.Do(ctx, http.MethodPost, "/v0/operations/", nil, body); err != nil {
+		return fmt.Errorf("send Remote ADB enable operation: %w", err)
 	}
 	return nil
-}
-
-func enableADBCommandPath(enterpriseID string) string {
-	return fmt.Sprintf("/v0/enterprise/%s/command/", url.PathEscape(enterpriseID))
 }
 
 func defaultCertificatesDirectory() (string, error) {

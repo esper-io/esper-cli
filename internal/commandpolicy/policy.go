@@ -16,6 +16,10 @@ func Replacement(method, path string) string {
 // Keep this list explicit so other public routes remain generated.
 func Excluded(method, path string) bool {
 	switch path {
+	case "/v2/converge", "/pipelines/v0/stageruns/{stage_run_id}/targetruns/{target_run_id}/command/":
+		return method == "POST"
+	case "/pipelines/v0/stageruns/{stage_run_id}/targetruns/{target_run_id}/command/{command_id}/", "/commands/v0/status/{id}/":
+		return method == "PUT"
 	case "/v0/enterprise/{enterprise_id}/content/remote-file/generate_download_url/":
 		return method == "POST" // Unavailable on the deployed API; see .spec/retire-download-generate.
 	case "/enterprise/{enterprise_id}/application/":

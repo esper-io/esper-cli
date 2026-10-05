@@ -80,9 +80,9 @@ func TestConnectHelpDocumentsADBHostAuthorization(t *testing.T) {
 	}
 }
 
-func TestSendEnableADBCommand(t *testing.T) {
+func TestSendEnableADBOperation(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
-		if request.Method != http.MethodPost || request.URL.Path != "/v0/enterprise/enterprise-1/command/" {
+		if request.Method != http.MethodPost || request.URL.Path != "/v0/operations/" {
 			t.Errorf("request = %s %s", request.Method, request.URL.Path)
 		}
 		if request.Header.Get("Authorization") != "Bearer fixture-key" {
@@ -92,10 +92,14 @@ func TestSendEnableADBCommand(t *testing.T) {
 		if err := json.NewDecoder(request.Body).Decode(&body); err != nil {
 			t.Fatal(err)
 		}
-		if body["command"] != "SET_ADB_STATE" || body["command_type"] != "DEVICE" {
+		if body["operation_type"] != "SET_ADB_STATE" || body["schedule_type"] != "IMMEDIATE" {
 			t.Fatalf("body = %#v", body)
 		}
-		arguments := body["command_args"].(map[string]any)
+		deviceQuery := body["operation_device_query"].(map[string]any)
+		if deviceQuery["device_ids"] != "device-1" {
+			t.Fatalf("device query = %#v", deviceQuery)
+		}
+		arguments := body["arguments"].(map[string]any)
 		if arguments["adb_state"] != "ENABLED" || arguments["remoteadb_ip"] != "127.0.0.1" || arguments["remoteadb_device_port"] != "5555" {
 			t.Fatalf("command args = %#v", arguments)
 		}
@@ -104,18 +108,18 @@ func TestSendEnableADBCommand(t *testing.T) {
 	}))
 	defer server.Close()
 	client := &esperruntime.HTTPClient{BaseURL: server.URL, APIKey: "fixture-key", Client: server.Client(), Retry: esperruntime.RetryPolicy{MaxAttempts: 1}}
-	err := sendEnableADBCommand(context.Background(), client, esperruntime.Credentials{Environment: server.URL, APIKey: "fixture-key"}, "enterprise-1", "device-1", remoteADBSession{IP: "127.0.0.1", DevicePort: "5555", ClientPort: "4444"}, "/v0/enterprise/enterprise-1/device/device-1/remoteadb/session-1/")
+	err := sendEnableADBOperation(context.Background(), client, esperruntime.Credentials{Environment: server.URL, APIKey: "fixture-key"}, "device-1", remoteADBSession{IP: "127.0.0.1", DevicePort: "5555", ClientPort: "4444"}, "/v0/enterprise/enterprise-1/device/device-1/remoteadb/session-1/")
 	if err != nil {
 		t.Fatal(err)
 	}
 }
 
-func TestSecureADBApprovalSpecIncludesEnableCommandTarget(t *testing.T) {
+func TestSecureADBApprovalSpecIncludesEnableOperationTarget(t *testing.T) {
 	spec, err := secureADBApprovalSpec(esperruntime.Credentials{Environment: "https://example.test"}, "enterprise-1", "device-1", true, "/v0/enterprise/enterprise-1/device/device-1/remoteadb/")
 	if err != nil || spec.Method != http.MethodPost || spec.Path == "" || !strings.Contains(string(spec.Body), `"force_enable":true`) || strings.Contains(string(spec.Body), "certificate") {
 		t.Fatalf("approval spec = %#v, %v", spec, err)
 	}
-	if len(spec.AdditionalTargets) != 1 || spec.AdditionalTargets[0] != (esperruntime.ApprovalTarget{Method: http.MethodPost, Path: "/v0/enterprise/enterprise-1/command/"}) {
+	if len(spec.AdditionalTargets) != 1 || spec.AdditionalTargets[0] != (esperruntime.ApprovalTarget{Method: http.MethodPost, Path: "/v0/operations/"}) {
 		t.Fatalf("additional approval targets = %#v", spec.AdditionalTargets)
 	}
 }

@@ -29,8 +29,9 @@ espercli device list --limit 5 --json
 6. Do not call an API operation merely to discover whether it is safe. Use help and the command reference.
 
 7. For Linux, iOS, and Windows devices, use current `device` commands and `device-app list`. Do not fall back to `api legacy app list`, `api legacy status get`, or `device-app get` when a current device API returns an error; those legacy routes are Android compatibility surfaces.
+8. Submit DSO-supported device commands with `espercli operation create`, using `operation_type`, `operation_device_query` (device IDs or filters), `arguments`, and scheduling fields. This includes CONVERGE and SET_ADB_STATE. Use `operation get` to inspect asynchronous status and `operation update` to request cancellation. `command create` and `command-request create` only accept confirmed public types unsupported by DSO: UPDATE_LATEST_DPC on both, and LIST_INSTALLED_PROFILES or REMOVE_PROFILE on `command-request create`. Do not use legacy command IDs as operation IDs. See the README migration guide.
 
-## Hand-Written Commands
+## Manually Added Commands
 
 - `espercli configure [--environment <name>] [--api-key <key>]` - Store Esper credentials.
 - `espercli configure show` - Show the environment and redacted API key.
@@ -174,7 +175,6 @@ All API writes require a one-time human approval. Commands marked **destructive*
 ### command-status
 
 - `espercli command-status get` - Get a command status
-- `espercli command-status update` - Update command status **destructive**
 
 ### connection
 
@@ -190,7 +190,6 @@ All API writes require a one-time human approval. Commands marked **destructive*
 
 ### converge
 
-- `espercli converge create` - Create a converge action
 - `espercli converge get` - Get converge action
 - `espercli converge list` - List converge action
 
@@ -484,9 +483,7 @@ All API writes require a one-time human approval. Commands marked **destructive*
 
 ### pipeline-command
 
-- `espercli pipeline-command create` - Create an command processor request for Target Run
 - `espercli pipeline-command list` - Get status of the command running for Target run
-- `espercli pipeline-command update` - Update target run command information. **destructive**
 
 ### pipeline-operation
 

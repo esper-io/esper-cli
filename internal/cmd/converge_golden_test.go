@@ -28,38 +28,14 @@ func TestConvergeCommandsGoldenFixtures(t *testing.T) {
 		all       bool
 	}{
 		{name: "converge list success", arguments: []string{"converge", "list", "--device-ids", "device-1,device-2", "--limit", "1", "--offset", "0", "--all", "--json"}, method: http.MethodGet, path: "/v2/converge", query: url.Values{"device_ids": {"device-1,device-2"}, "limit": {"1"}, "offset": {"0"}}, fixture: "converge-list-success.json", golden: "converge-list-success.golden", status: http.StatusOK, all: true},
-		{name: "converge create success", arguments: []string{"converge", "create", "--device-id", "device-1", "--converge-with-provision-option", "true", "--schedule-type", "IMMEDIATE", "--json"}, method: http.MethodPost, path: "/v2/converge", body: `{"converge_with_provision_option":true,"device_id":"device-1","schedule_type":"IMMEDIATE"}`, fixture: "converge-create-success.json", golden: "converge-create-success.golden", status: http.StatusCreated},
 		{name: "converge get success", arguments: []string{"converge", "get", "converge-1", "--json"}, method: http.MethodGet, path: "/v2/converge/converge-1", fixture: "converge-get-success.json", golden: "converge-get-success.golden", status: http.StatusOK},
 		{name: "converge list API error", arguments: []string{"converge", "list", "--json"}, method: http.MethodGet, path: "/v2/converge", fixture: "converge-list-api-error.json", status: http.StatusUnauthorized},
-		{name: "converge create API error", arguments: []string{"converge", "create", "--device-id", "device-1", "--converge-with-provision-option", "true", "--json"}, method: http.MethodPost, path: "/v2/converge", body: `{"converge_with_provision_option":true,"device_id":"device-1"}`, fixture: "converge-create-api-error.json", status: http.StatusBadRequest},
 		{name: "converge get API error", arguments: []string{"converge", "get", "converge-1", "--json"}, method: http.MethodGet, path: "/v2/converge/converge-1", fixture: "converge-get-api-error.json", status: http.StatusNotFound},
 	}
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			executeConvergeFixture(t, test.arguments, test.method, test.path, test.query, test.body, test.fixture, test.golden, test.status, test.all)
-		})
-	}
-}
-
-func TestConvergeCommandInputValidation(t *testing.T) {
-	tests := []struct {
-		name      string
-		arguments []string
-	}{
-		{name: "converge create requires device ID", arguments: []string{"converge", "create", "--converge-with-provision-option", "true"}},
-		{name: "converge create requires provision option", arguments: []string{"converge", "create", "--device-id", "device-1"}},
-		{name: "converge create body cannot combine property flags", arguments: []string{"converge", "create", "--body", `{}`, "--device-id", "device-1"}},
-	}
-
-	for _, test := range tests {
-		t.Run(test.name, func(t *testing.T) {
-			command := NewRootCommand()
-			command.SetArgs(test.arguments)
-			err := command.Execute()
-			if err == nil || esperruntime.ExitCode(err) != 2 {
-				t.Fatalf("Execute() error = %v", err)
-			}
 		})
 	}
 }

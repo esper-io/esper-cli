@@ -403,6 +403,9 @@ func run(command *cobra.Command, args []string, operations []Operation, options 
 	if err != nil {
 		return err
 	}
+	if err := guardLegacyCommandSubmission(operation, body); err != nil {
+		return err
+	}
 	query := make(map[string][]string)
 	headers := make(map[string][]string)
 	for _, parameter := range operation.Parameters {
@@ -465,6 +468,53 @@ func run(command *cobra.Command, args []string, operations []Operation, options 
 		return esperruntime.NewError(esperruntime.CategoryAPI, err)
 	}
 	return esperruntime.WriteHuman(command.OutOrStdout(), response)
+}
+
+func guardLegacyCommandSubmission(operation Operation, body []byte) error {
+	if operation.Method != "POST" {
+		return nil
+	}
+	switch operation.Path {
+	case "/v0/enterprise/{enterprise_id}/command/", "/commands/v0/commands/":
+	default:
+		return nil
+	}
+	var request map[string]json.RawMessage
+	if err := json.Unmarshal(body, &request); err != nil || request == nil {
+		return esperruntime.NewError(esperruntime.CategoryUsage, fmt.Errorf("legacy command request needs a JSON object with a command type"))
+	}
+	var commandType string
+	if err := json.Unmarshal(request["command"], &commandType); err != nil || strings.TrimSpace(commandType) == "" {
+		return esperruntime.NewError(esperruntime.CategoryUsage, fmt.Errorf("legacy command request needs a string command type"))
+	}
+	commandType = strings.ToUpper(strings.TrimSpace(commandType))
+	if supportedDSOType(commandType) {
+		return esperruntime.NewError(esperruntime.CategoryUsage, fmt.Errorf("%s is supported by DSO; use espercli operation create --operation-type %s", commandType, commandType))
+	}
+	if commandType == "UPDATE_LATEST_DPC" || operation.Path == "/commands/v0/commands/" && (commandType == "LIST_INSTALLED_PROFILES" || commandType == "REMOVE_PROFILE") {
+		return nil
+	}
+	return esperruntime.NewError(esperruntime.CategoryUsage, fmt.Errorf("%s is not a confirmed public command type unsupported by DSO", commandType))
+}
+
+func supportedDSOType(commandType string) bool {
+	// These backend-supported types have not yet reached the reviewed public spec.
+	switch commandType {
+	case "UPDATE_WIFI_AP", "CLEAR_APP_CACHE", "UPDATE_HEARTBEAT", "DEVICE_INFORMATION",
+		"START_BACKGROUND_SCRIPT", "STOP_BACKGROUND_SCRIPT", "ADD_BACKGROUND_SCRIPT", "REMOVE_BACKGROUND_SCRIPT":
+		return true
+	}
+	for _, operation := range generatedOperations {
+		if operation.Method != "POST" || operation.Path != "/v0/operations/" || operation.Body == nil {
+			continue
+		}
+		for _, property := range operation.Body.Properties {
+			if property.Name == "operation_type" {
+				return contains(property.Enum, commandType)
+			}
+		}
+	}
+	return false
 }
 
 func isWriteOperation(operation Operation) bool {
