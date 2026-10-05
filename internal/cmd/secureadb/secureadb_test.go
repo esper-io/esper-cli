@@ -290,6 +290,7 @@ func TestPinnedTLSConfig(t *testing.T) {
 }
 
 func TestPinnedTLSConfigRejectsNegativeSerialCertificate(t *testing.T) {
+	t.Setenv("GODEBUG", "x509negativeserial=0")
 	clientCertificatePEM, clientKeyPEM, err := generateClientCertificate(time.Now(), cryptorand.Reader)
 	if err != nil {
 		t.Fatal(err)
@@ -307,6 +308,108 @@ func TestPinnedTLSConfigRejectsNegativeSerialCertificate(t *testing.T) {
 	}
 	if _, err := pinnedTLSConfig(clientCertificate, serverCertificatePEM); err == nil || !strings.Contains(err.Error(), "negative serial device certificates are not supported") {
 		t.Fatalf("pinnedTLSConfig() error = %v", err)
+	}
+}
+
+func TestPinnedTLSConfigNegativeSerialCompatibility(t *testing.T) {
+	// Match the executable's go:debug default, without weakening verification.
+	t.Setenv("GODEBUG", "x509negativeserial=1")
+	clientPEM, clientKey, err := generateClientCertificate(time.Now(), cryptorand.Reader)
+	if err != nil {
+		t.Fatal(err)
+	}
+	client, err := tls.X509KeyPair(clientPEM, clientKey)
+	if err != nil {
+		t.Fatal(err)
+	}
+	server, trustedPEM := newNegativeSerialServerCertificate(t)
+	config, err := pinnedTLSConfig(client, trustedPEM)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := localTLSHandshake(config, server); err != nil {
+		t.Fatalf("trusted negative-serial handshake: %v", err)
+	}
+	untrusted, _ := newNegativeSerialServerCertificate(t)
+	if err := localTLSHandshake(config, untrusted); err == nil {
+		t.Fatal("accepted an unrelated negative-serial certificate")
+	}
+	tampered := server
+	tampered.Certificate = [][]byte{append([]byte(nil), server.Certificate[0]...)}
+	tampered.Certificate[0][len(tampered.Certificate[0])-1] ^= 1
+	if err := localTLSHandshake(config, tampered); err == nil {
+		t.Fatal("accepted a certificate with a changed signature")
+	}
+}
+
+func TestPinnedTLSConfigCertificateChains(t *testing.T) {
+	t.Setenv("GODEBUG", "x509negativeserial=1")
+	clientPEM, clientKey, err := generateClientCertificate(time.Now(), cryptorand.Reader)
+	if err != nil {
+		t.Fatal(err)
+	}
+	client, err := tls.X509KeyPair(clientPEM, clientKey)
+	if err != nil {
+		t.Fatal(err)
+	}
+	root, rootPEM := newServerCertificate(t, "root.invalid")
+	sign := func(parent tls.Certificate, name string, ca, expired bool) tls.Certificate {
+		t.Helper()
+		issuer, err := x509.ParseCertificate(parent.Certificate[0])
+		if err != nil {
+			t.Fatal(err)
+		}
+		key, err := rsa.GenerateKey(cryptorand.Reader, 2048)
+		if err != nil {
+			t.Fatal(err)
+		}
+		now := time.Now()
+		end := now.Add(time.Hour)
+		if expired {
+			end = now.Add(-time.Hour)
+		}
+		template := &x509.Certificate{
+			SerialNumber: big.NewInt(now.UnixNano()), Subject: pkix.Name{CommonName: name},
+			NotBefore: now.Add(-2 * time.Hour), NotAfter: end,
+			BasicConstraintsValid: true, IsCA: ca,
+			KeyUsage:    x509.KeyUsageDigitalSignature | x509.KeyUsageKeyEncipherment,
+			ExtKeyUsage: []x509.ExtKeyUsage{x509.ExtKeyUsageServerAuth},
+		}
+		if ca {
+			template.KeyUsage |= x509.KeyUsageCertSign
+		}
+		der, err := x509.CreateCertificate(cryptorand.Reader, template, issuer, &key.PublicKey, parent.PrivateKey)
+		if err != nil {
+			t.Fatal(err)
+		}
+		return tls.Certificate{Certificate: [][]byte{der}, PrivateKey: key}
+	}
+	intermediate := sign(root, "intermediate.invalid", true, false)
+	leaf := sign(intermediate, "leaf.invalid", false, false)
+	chain := leaf
+	chain.Certificate = [][]byte{leaf.Certificate[0], intermediate.Certificate[0]}
+	bundle := append(append([]byte(nil), rootPEM...), pem.EncodeToMemory(&pem.Block{Type: "CERTIFICATE", Bytes: intermediate.Certificate[0]})...)
+	for _, test := range []struct {
+		name   string
+		server tls.Certificate
+		trust  []byte
+		accept bool
+	}{
+		{"complete chain", chain, rootPEM, true},
+		{"missing intermediate", leaf, rootPEM, false},
+		{"intermediate in device bundle", leaf, bundle, true},
+		{"expired leaf", sign(root, "expired.invalid", false, true), rootPEM, false},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			config, err := pinnedTLSConfig(client, test.trust)
+			if err != nil {
+				t.Fatal(err)
+			}
+			err = localTLSHandshake(config, test.server)
+			if (err == nil) != test.accept {
+				t.Fatalf("handshake = %v, want accepted=%v", err, test.accept)
+			}
+		})
 	}
 }
 

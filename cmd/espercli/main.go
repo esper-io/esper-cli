@@ -1,3 +1,7 @@
+// Existing Secure ADB device certificates can have negative serial numbers.
+// Keep Python/OpenSSL compatibility without changing chain verification.
+//go:debug x509negativeserial=1
+
 package main
 
 import (
