@@ -66,6 +66,9 @@ func runConfigure(command *cobra.Command, options *esperruntime.GlobalOptions) e
 	if err != nil {
 		return err
 	}
+	if state.Config.Environment != tenantName || state.Config.EnterpriseID != enterpriseID {
+		state.Active = esperruntime.ActiveContext{}
+	}
 	state.Config.Environment = tenantName
 	state.Config.EnterpriseID = enterpriseID
 	state.Config.APIKey = apiKey

@@ -3,6 +3,7 @@ package configure
 import (
 	"bytes"
 	"path/filepath"
+	"reflect"
 	"strings"
 	"testing"
 
@@ -53,6 +54,59 @@ func TestConfigurePromptsForMissingValues(t *testing.T) {
 	}
 	if state.Config.Environment != "staging" || state.Config.EnterpriseID != "enterprise-1" || state.Config.APIKey != "prompted-key" {
 		t.Fatalf("config = %#v", state.Config)
+	}
+}
+
+func TestConfigureContextOnTenantSwitch(t *testing.T) {
+	active := esperruntime.ActiveContext{
+		Enterprise:  &esperruntime.ActiveResource{ID: "enterprise-1"},
+		Device:      &esperruntime.ActiveResource{ID: "device-1"},
+		Application: &esperruntime.ActiveResource{ID: "app-1"},
+		Group:       &esperruntime.ActiveResource{ID: "group-1"},
+	}
+	for _, test := range []struct {
+		name       string
+		tenant     string
+		enterprise string
+		keep       bool
+	}{
+		{"different tenant and enterprise", "microtouch", "enterprise-2", false},
+		{"different tenant with same enterprise", "microtouch", "enterprise-1", false},
+		{"same tenant with different enterprise", "rjhlf", "enterprise-2", false},
+		{"same tenant and enterprise with new API key", "rjhlf", "enterprise-1", true},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			path := filepath.Join(t.TempDir(), "creds.json")
+			t.Setenv(esperruntime.CredentialsFileEnvironment, path)
+			store := &esperruntime.StateStore{Path: path}
+			if err := store.Save(esperruntime.State{
+				Config: esperruntime.Config{Environment: "rjhlf", EnterpriseID: "enterprise-1", APIKey: "old-key"},
+				Active: active,
+			}); err != nil {
+				t.Fatal(err)
+			}
+			command := &cobra.Command{}
+			command.SetIn(strings.NewReader(test.enterprise + "\n"))
+			command.SetOut(&bytes.Buffer{})
+			command.SetErr(&bytes.Buffer{})
+			if err := runConfigure(command, &esperruntime.GlobalOptions{Environment: test.tenant, APIKey: "new-key"}); err != nil {
+				t.Fatal(err)
+			}
+			state, err := store.Load()
+			if err != nil {
+				t.Fatal(err)
+			}
+			want := esperruntime.ActiveContext{}
+			if test.keep {
+				want = active
+			}
+			if !reflect.DeepEqual(state.Active, want) {
+				t.Fatalf("active context = %#v, want %#v", state.Active, want)
+			}
+			if state.Config.Environment != test.tenant || state.Config.EnterpriseID != test.enterprise || state.Config.APIKey != "new-key" {
+				t.Fatal("configuration was not saved")
+			}
+		})
 	}
 }
 
