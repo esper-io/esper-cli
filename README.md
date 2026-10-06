@@ -71,6 +71,9 @@ espercli geofence list --limit 20
 
 ## Install
 
+This branch contains the Go CLI only. Install a release binary or use `go install`;
+the legacy Python CLI and `pip install .` packaging have been removed.
+
 ### Release artifacts
 
 GitHub releases contain archives for Linux, macOS, and Windows on amd64 and
