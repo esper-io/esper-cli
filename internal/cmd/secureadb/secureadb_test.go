@@ -19,6 +19,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strings"
 	"testing"
@@ -115,12 +116,183 @@ func TestSendEnableADBOperation(t *testing.T) {
 }
 
 func TestSecureADBApprovalSpecIncludesEnableOperationTarget(t *testing.T) {
-	spec, err := secureADBApprovalSpec(esperruntime.Credentials{Environment: "https://example.test"}, "enterprise-1", "device-1", true, "/v0/enterprise/enterprise-1/device/device-1/remoteadb/")
+	spec, err := secureADBApprovalSpec(esperruntime.Credentials{Environment: "https://example.test"}, "enterprise-1", "device-1", true, "/v0/enterprise/enterprise-1/device/device-1/remoteadb/", "fixture-adb-key")
 	if err != nil || spec.Method != http.MethodPost || spec.Path == "" || !strings.Contains(string(spec.Body), `"force_enable":true`) || strings.Contains(string(spec.Body), "certificate") {
 		t.Fatalf("approval spec = %#v, %v", spec, err)
 	}
 	if len(spec.AdditionalTargets) != 1 || spec.AdditionalTargets[0] != (esperruntime.ApprovalTarget{Method: http.MethodPost, Path: "/v0/operations/"}) {
 		t.Fatalf("additional approval targets = %#v", spec.AdditionalTargets)
+	}
+	if !strings.Contains(string(spec.Body), `"adb_pub_key":"fixture-adb-key"`) {
+		t.Fatalf("approval does not bind the ADB key: %s", spec.Body)
+	}
+}
+
+func TestADBPublicKeySelection(t *testing.T) {
+	for _, scenario := range []string{"explicit", "later vendor", "default", "vendor fallback"} {
+		t.Run(scenario, func(t *testing.T) {
+			home := t.TempDir()
+			t.Setenv("HOME", home)
+			t.Setenv("USERPROFILE", home)
+			t.Setenv("ESPER_ADB_PUB_KEY", "")
+			t.Setenv("ADB_VENDOR_KEYS", "")
+			defaultPath := filepath.Join(home, ".android", "adbkey.pub")
+			if err := os.MkdirAll(filepath.Dir(defaultPath), 0o700); err != nil {
+				t.Fatal(err)
+			}
+			explicit := filepath.Join(home, "explicit.pub")
+			vendor := filepath.Join(home, "vendor")
+			for path, key := range map[string]string{defaultPath: "default-key", explicit: "explicit-key\n", vendor + ".pub": "vendor-key"} {
+				if err := os.WriteFile(path, []byte(key), 0o600); err != nil {
+					t.Fatal(err)
+				}
+			}
+			expected := "default-key"
+			switch scenario {
+			case "explicit":
+				t.Setenv("ESPER_ADB_PUB_KEY", explicit)
+				t.Setenv("ADB_VENDOR_KEYS", vendor)
+				expected = "explicit-key\n"
+			case "later vendor":
+				t.Setenv("ADB_VENDOR_KEYS", filepath.Join(home, "missing")+string(os.PathListSeparator)+"  "+vendor+"  ")
+				expected = "vendor-key"
+			case "vendor fallback":
+				t.Setenv("ADB_VENDOR_KEYS", filepath.Join(home, "missing"))
+			}
+			var warnings bytes.Buffer
+			key, err := loadADBPublicKey(context.Background(), &warnings, func(context.Context) error {
+				t.Fatal("adb should not be started when a key exists")
+				return nil
+			})
+			if err != nil || key != expected {
+				t.Fatalf("key = %q, error = %v", key, err)
+			}
+			mismatch := scenario == "explicit" || scenario == "vendor fallback"
+			if strings.Contains(warnings.String(), "does not match ADB_VENDOR_KEYS") != mismatch {
+				t.Fatalf("warnings = %q", warnings.String())
+			}
+		})
+	}
+}
+
+func TestADBPublicKeyInitialization(t *testing.T) {
+	for _, scenario := range []string{"generated", "missing adb", "timeout", "empty", "unreadable", "invalid UTF-8"} {
+		t.Run(scenario, func(t *testing.T) {
+			path := filepath.Join(t.TempDir(), "host.pub")
+			t.Setenv("ESPER_ADB_PUB_KEY", path)
+			t.Setenv("ADB_VENDOR_KEYS", "")
+			if scenario == "empty" {
+				if err := os.WriteFile(path, []byte(" \n\t"), 0o600); err != nil {
+					t.Fatal(err)
+				}
+			}
+			if scenario == "unreadable" {
+				if err := os.Mkdir(path, 0o700); err != nil {
+					t.Fatal(err)
+				}
+			}
+			if scenario == "invalid UTF-8" {
+				if err := os.WriteFile(path, []byte{0xff}, 0o600); err != nil {
+					t.Fatal(err)
+				}
+			}
+			started := 0
+			var warnings bytes.Buffer
+			key, err := loadADBPublicKey(context.Background(), &warnings, func(ctx context.Context) error {
+				started++
+				if deadline, ok := ctx.Deadline(); !ok || time.Until(deadline) > 30*time.Second {
+					t.Fatal("adb initialization must have a 30-second deadline")
+				}
+				switch scenario {
+				case "generated":
+					return os.WriteFile(path, []byte("generated-key\n"), 0o600)
+				case "timeout":
+					return context.DeadlineExceeded
+				default:
+					return exec.ErrNotFound
+				}
+			})
+			invalid := scenario == "empty" || scenario == "unreadable" || scenario == "invalid UTF-8"
+			if invalid {
+				if err == nil || started != 0 {
+					t.Fatalf("invalid key error = %v, starts = %d", err, started)
+				}
+			} else if err != nil || started != 1 {
+				t.Fatalf("error = %v, starts = %d", err, started)
+			}
+			if scenario == "generated" && key != "generated-key\n" {
+				t.Fatalf("key = %q", key)
+			}
+			if !invalid && scenario != "generated" && (key != "" || !strings.Contains(warnings.String(), "continuing without host pre-authorization")) {
+				t.Fatalf("key = %q, warnings = %q", key, warnings.String())
+			}
+		})
+	}
+}
+
+func TestConnectValidatesHostKeyBeforeApproval(t *testing.T) {
+	directory := t.TempDir()
+	keyPath := filepath.Join(directory, "host.pub")
+	t.Setenv("ESPER_ADB_PUB_KEY", keyPath)
+	t.Setenv(esperruntime.CredentialsFileEnvironment, filepath.Join(directory, "creds.json"))
+	store, err := esperruntime.NewStateStore()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := store.Save(esperruntime.State{Config: esperruntime.Config{Environment: "https://example.test", APIKey: "fixture", EnterpriseID: "enterprise-1"}}); err != nil {
+		t.Fatal(err)
+	}
+	approvals := 0
+	defer esperruntime.SetApprovalOverrideForTesting(func(spec esperruntime.ApprovalSpec) error {
+		approvals++
+		if !strings.Contains(string(spec.Body), `"adb_pub_key":"fixture-host-key"`) {
+			t.Errorf("approval body = %s", spec.Body)
+		}
+		return fmt.Errorf("stop before session creation")
+	})()
+	command := NewCommand(&esperruntime.GlobalOptions{})
+	for _, key := range []string{" \n", "fixture-host-key"} {
+		if err := os.WriteFile(keyPath, []byte(key), 0o600); err != nil {
+			t.Fatal(err)
+		}
+		err := runConnect(command, &esperruntime.GlobalOptions{}, "device-1", false)
+		if err == nil {
+			t.Fatal("connect unexpectedly continued")
+		}
+		if key == " \n" && (approvals != 0 || !strings.Contains(err.Error(), "is empty")) {
+			t.Fatalf("empty key reached approval: %v", err)
+		}
+	}
+	if approvals != 1 {
+		t.Fatalf("approvals = %d, want 1", approvals)
+	}
+}
+
+func TestRemoteADBSessionIncludesHostPublicKey(t *testing.T) {
+	for _, key := range []string{"fixture-host-key\n", ""} {
+		t.Run(fmt.Sprintf("key length %d", len(key)), func(t *testing.T) {
+			server := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
+				var body map[string]string
+				if err := json.NewDecoder(request.Body).Decode(&body); err != nil {
+					t.Fatal(err)
+				}
+				value, present := body["adb_pub_key"]
+				if body["client_certificate"] != "fixture-certificate" || !present || value != key {
+					t.Errorf("session body = %#v", body)
+				}
+				writer.WriteHeader(http.StatusCreated)
+				_, _ = writer.Write([]byte(`{"id":"session-1"}`))
+			}))
+			defer server.Close()
+			body, err := remoteADBSessionBody([]byte("fixture-certificate"), key)
+			if err != nil {
+				t.Fatal(err)
+			}
+			client := &esperruntime.HTTPClient{BaseURL: server.URL, Client: server.Client(), Retry: esperruntime.RetryPolicy{MaxAttempts: 1}}
+			if _, err := createRemoteADBSession(context.Background(), client, "/session/", body); err != nil {
+				t.Fatal(err)
+			}
+		})
 	}
 }
 

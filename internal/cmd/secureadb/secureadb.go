@@ -18,11 +18,13 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"os/exec"
 	"os/signal"
 	"path/filepath"
 	"strconv"
 	"strings"
 	"time"
+	"unicode/utf8"
 
 	esperruntime "github.com/esper-io/esper-cli/internal/runtime"
 	"github.com/spf13/cobra"
@@ -89,8 +91,11 @@ func NewCommand(options *esperruntime.GlobalOptions) *cobra.Command {
 
 The relay forwards raw ADB protocol bytes; the local adb client still performs
 normal RSA host authorization with the device. Esper Foundation devices
-auto-authorize the session key. On non-EEA or stock Android devices, unlock the
-device and accept the one-time "Allow USB debugging?" RSA fingerprint prompt,
+can auto-authorize the local ADB public key sent with the session request.
+The key is selected from ESPER_ADB_PUB_KEY, then ADB_VENDOR_KEYS, then
+~/.android/adbkey.pub. If absent, adb start-server is tried once; pre-authorization
+remains optional when no key can be obtained. On non-EEA or stock Android devices,
+unlock the device and accept the one-time "Allow USB debugging?" RSA fingerprint prompt,
 then run the printed adb connect command again while this relay remains open.
 Remote ADB cannot start when device policy disables debugging features.`,
 		Args: cobra.NoArgs,
@@ -142,7 +147,13 @@ func runConnect(command *cobra.Command, options *esperruntime.GlobalOptions, dev
 		return esperruntime.NewError(esperruntime.CategoryAuth, fmt.Errorf("enterprise ID is not configured (run espercli context set enterprise <id>)"))
 	}
 	requestPath := remoteADBCollectionPath(enterpriseID, deviceID)
-	approvalSpec, err := secureADBApprovalSpec(credentials, enterpriseID, deviceID, forceEnable, requestPath)
+	adbPublicKey, err := loadADBPublicKey(command.Context(), command.ErrOrStderr(), func(ctx context.Context) error {
+		return exec.CommandContext(ctx, "adb", "start-server").Run()
+	})
+	if err != nil {
+		return esperruntime.NewError(esperruntime.CategoryUsage, err)
+	}
+	approvalSpec, err := secureADBApprovalSpec(credentials, enterpriseID, deviceID, forceEnable, requestPath, adbPublicKey)
 	if err != nil {
 		return esperruntime.NewError(esperruntime.CategoryUsage, err)
 	}
@@ -162,7 +173,7 @@ func runConnect(command *cobra.Command, options *esperruntime.GlobalOptions, dev
 	if err != nil {
 		return fmt.Errorf("prepare secure ADB certificates: %w", err)
 	}
-	sessionBody, err := remoteADBSessionBody(clientCertificatePEM)
+	sessionBody, err := remoteADBSessionBody(clientCertificatePEM, adbPublicKey)
 	if err != nil {
 		return err
 	}
@@ -252,8 +263,8 @@ func runConnect(command *cobra.Command, options *esperruntime.GlobalOptions, dev
 	return nil
 }
 
-func secureADBApprovalSpec(credentials esperruntime.Credentials, enterpriseID, deviceID string, forceEnable bool, requestPath string) (esperruntime.ApprovalSpec, error) {
-	body, err := esperruntime.EncodeBody(map[string]any{"enterprise_id": enterpriseID, "device_id": deviceID, "force_enable": forceEnable})
+func secureADBApprovalSpec(credentials esperruntime.Credentials, enterpriseID, deviceID string, forceEnable bool, requestPath, adbPublicKey string) (esperruntime.ApprovalSpec, error) {
+	body, err := esperruntime.EncodeBody(map[string]any{"enterprise_id": enterpriseID, "device_id": deviceID, "force_enable": forceEnable, "adb_pub_key": adbPublicKey})
 	if err != nil {
 		return esperruntime.ApprovalSpec{}, err
 	}
@@ -382,8 +393,77 @@ func remoteADBCollectionPath(enterpriseID, deviceID string) string {
 	return fmt.Sprintf("/v0/enterprise/%s/device/%s/remoteadb/", url.PathEscape(enterpriseID), url.PathEscape(deviceID))
 }
 
-func remoteADBSessionBody(clientCertificate []byte) ([]byte, error) {
-	return esperruntime.EncodeBody(map[string]string{"client_certificate": string(clientCertificate)})
+func remoteADBSessionBody(clientCertificate []byte, adbPublicKey string) ([]byte, error) {
+	return esperruntime.EncodeBody(map[string]string{"client_certificate": string(clientCertificate), "adb_pub_key": adbPublicKey})
+}
+
+func resolveADBPublicKeyPath() (string, error) {
+	if path := os.Getenv("ESPER_ADB_PUB_KEY"); path != "" {
+		return path, nil
+	}
+	for _, vendorKey := range filepath.SplitList(os.Getenv("ADB_VENDOR_KEYS")) {
+		if vendorKey = strings.TrimSpace(vendorKey); vendorKey != "" {
+			path := vendorKey + ".pub"
+			if info, err := os.Stat(path); err == nil && !info.IsDir() {
+				return path, nil
+			}
+		}
+	}
+	home, err := os.UserHomeDir()
+	if err != nil {
+		return "", fmt.Errorf("resolve ADB key home directory: %w", err)
+	}
+	return filepath.Join(home, ".android", "adbkey.pub"), nil
+}
+
+func loadADBPublicKey(ctx context.Context, warnings io.Writer, startServer func(context.Context) error) (string, error) {
+	path, err := resolveADBPublicKeyPath()
+	if err != nil {
+		return "", err
+	}
+	key, err := os.ReadFile(path)
+	if errors.Is(err, os.ErrNotExist) {
+		startContext, cancel := context.WithTimeout(ctx, 30*time.Second)
+		startErr := startServer(startContext)
+		cancel()
+		if ctx.Err() != nil {
+			return "", ctx.Err()
+		}
+		if startErr != nil {
+			_, _ = fmt.Fprintf(warnings, "warning: adb start-server could not initialize a public key: %v\n", startErr)
+		}
+		path, err = resolveADBPublicKeyPath()
+		if err != nil {
+			return "", err
+		}
+		key, err = os.ReadFile(path)
+	}
+	if errors.Is(err, os.ErrNotExist) {
+		_, _ = fmt.Fprintf(warnings, "warning: ADB public key unavailable at %s; continuing without host pre-authorization. Set ESPER_ADB_PUB_KEY or run adb start-server.\n", path)
+		return "", nil
+	}
+	if err != nil {
+		return "", fmt.Errorf("read ADB public key %s: %w", path, err)
+	}
+	if !utf8.Valid(key) {
+		return "", fmt.Errorf("ADB public key %s is not UTF-8 text", path)
+	}
+	if strings.TrimSpace(string(key)) == "" {
+		return "", fmt.Errorf("ADB public key %s is empty; configure a non-empty ESPER_ADB_PUB_KEY", path)
+	}
+	if vendorKeys := os.Getenv("ADB_VENDOR_KEYS"); strings.TrimSpace(vendorKeys) != "" {
+		matches := false
+		for _, vendorKey := range filepath.SplitList(vendorKeys) {
+			vendorKey = strings.TrimSpace(vendorKey)
+			if vendorKey != "" && filepath.Clean(vendorKey+".pub") == filepath.Clean(path) {
+				matches = true
+			}
+		}
+		if !matches {
+			_, _ = fmt.Fprintln(warnings, "warning: the selected ADB public key does not match ADB_VENDOR_KEYS; host authorization may fail. Set ESPER_ADB_PUB_KEY to the key used by your local adb server.")
+		}
+	}
+	return string(key), nil
 }
 
 func createRemoteADBSession(ctx context.Context, client *esperruntime.HTTPClient, path string, body []byte) (remoteADBSession, error) {

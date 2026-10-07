@@ -143,6 +143,22 @@ espercli api v1 --help
 Newer APIs own the standard command name. Legacy routes with a newer replacement
 are removed instead of preserved as compatibility aliases.
 
+## Secure ADB Host Authorization
+
+`espercli secureadb connect` includes the local ADB public key in the session
+request so supported Esper Foundation devices can pre-authorize the host.
+Key selection follows this order:
+
+1. `ESPER_ADB_PUB_KEY`, if set, points directly to a public-key file.
+2. `ADB_VENDOR_KEYS`, searched in order, supplies private-key paths; the CLI
+   reads the first existing matching `.pub` file.
+3. `~/.android/adbkey.pub` is the fallback.
+
+If no key exists, the CLI tries `adb start-server` once, with a 30-second timeout.
+If a key remains unavailable, it warns and continues without pre-authorization.
+An existing empty or unreadable key fails before session creation. The selected
+public key is included in the human approval; changing it requires new approval.
+
 ## Agent Guidance
 
 [`SKILL.md`](SKILL.md) is the generated, agent-agnostic Esper CLI guide. It
