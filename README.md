@@ -133,30 +133,6 @@ An operation that can delete data or reset a device needs a second target confir
 Use `--yes` to omit only this second confirmation. It does not give human approval
 or remove the approval requirement.
 
-## API Coverage
-
-Use the installed CLI to see the available commands:
-
-```bash
-espercli --help
-espercli <resource> --help
-espercli <resource> <operation> --help
-```
-
-Use `--json` to read responses in scripts. For lists that support pages, use
-`--all --json` to combine all pages into one result array.
-
-Some commands use older APIs because they have functions that newer APIs do not
-replace. To see these commands, use:
-
-```bash
-espercli api legacy --help
-espercli api v1 --help
-```
-
-When a newer API replaces an older API, the standard command uses the newer API.
-The CLI removes the old command instead of keeping an alias.
-
 ## Agent Guidance
 
 [`SKILL.md`](SKILL.md) gives AI agents instructions for the CLI. It explains how
@@ -164,47 +140,6 @@ to select commands, read JSON, and get human approval. Automation generates this
 file from the same command data as the CLI. Automated checks find differences
 between the guide and the command data.
 
-## Shell Completion
-
-The CLI writes completion scripts to standard output. It does not change shell
-startup files.
-
-```bash
-source <(espercli completion bash)
-source <(espercli completion zsh)
-espercli completion fish | source
-```
-
-```powershell
-espercli completion powershell | Out-String | Invoke-Expression
-```
-
-Run `espercli completion <shell> --help` for installation instructions for your
-shell. These instructions explain how to keep completion after you close the shell.
-
-## Development
-
-Automation generates commands from OpenAPI specifications and Esper annotations.
-Do not manually change the generated command data.
-
-```bash
-go run ./tools/codegen
-go run ./tools/contractcheck
-go test ./...
-go vet ./...
-go build ./...
-```
-
-The contract checker makes sure each supported public API operation has a command.
-It also checks flags, resource scopes, list pages, and confirmation requirements
-against the specifications. Automated checks make sure generation gives the same
-result for the same input. They also check the agent guide.
-
 ## License
 
 Apache-2.0. See [LICENSE](LICENSE).
-
-## Tagline Credit
-
-"Give your Agent a Helper Andi" is inspired by DataDog's
-[Pup CLI](https://github.com/DataDog/pup) tagline, "Give Your Agent a Puppy."
