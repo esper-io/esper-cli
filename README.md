@@ -70,31 +70,38 @@ espercli application upload <enterprise-id> --app-file ./app.apk
 espercli geofence list --limit 20
 ```
 
+## Migration from the Python CLI
+
+This Go CLI is a brand-new implementation. It is not an update to the Python CLI.
+There is no migration path from the Python CLI to this version. Do not assume
+that existing commands or scripts work without changes.
+
+The Python CLI is not abandoned. You can continue to use the
+[Python version on `develop`](https://github.com/esper-io/esper-cli/tree/develop).
+You do not need to switch to the Go CLI.
+
 ## Install
 
-This branch contains only the Go CLI. Install a release file or use `go install`.
-Do not use `pip install .`.
+Release files are available for Linux, macOS, and Windows on amd64 and arm64.
 
-### Release Files
+### macOS
 
-GitHub releases contain archives for Linux, macOS, and Windows on amd64 and arm64.
+Homebrew installation instructions will be added here.
 
-1. Download the `espercli_<version>_<os>_<arch>` archive for your computer.
+You can also download a macOS release archive from GitHub releases. Extract the
+archive. Put `espercli` in a directory on `PATH`.
+
+### Linux
+
+1. Download the `espercli_<version>_linux_<arch>` archive from GitHub releases.
 2. Extract the archive.
 3. Put `espercli` in a directory on `PATH`.
 
-For a test build, download the `espercli-snapshot` artifact from a GitHub Actions
-run. Test builds are not releases.
+### Windows
 
-### Homebrew
-
-Release automation generates a Homebrew formula for `esper-io/homebrew-tap`.
-The tap is not yet published. After publication, use these commands:
-
-```bash
-brew tap esper-io/tap
-brew install espercli
-```
+1. Download the `espercli_<version>_windows_<arch>.zip` archive from GitHub releases.
+2. Extract the archive.
+3. Put `espercli.exe` in a directory on `PATH`.
 
 ### Go install
 
@@ -149,25 +156,6 @@ espercli api v1 --help
 
 When a newer API replaces an older API, the standard command uses the newer API.
 The CLI removes the old command instead of keeping an alias.
-
-## Secure ADB Host Authorization
-
-`espercli secureadb connect` sends the local ADB public key in the session request.
-Supported Esper Foundation devices can use this key to approve the ADB host.
-The CLI selects the key in this order:
-
-1. If `ESPER_ADB_PUB_KEY` is set, use the public-key file at that path.
-2. Otherwise, examine the private-key paths in `ADB_VENDOR_KEYS` in order. Use
-   the first available matching `.pub` file.
-3. If no matching file is available, use `~/.android/adbkey.pub`.
-
-If the key file is missing, the CLI tries `adb start-server` once. This step has
-a 30-second timeout. If the key is still missing, the CLI gives a warning. It
-continues without sending a host public key.
-
-If the key file is empty or cannot be read, the CLI stops before it creates a
-session. Human approval includes the selected public key. If you change the key,
-get new approval.
 
 ## Agent Guidance
 
