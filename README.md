@@ -20,13 +20,13 @@ Also ships a **Claude Code skill** (`/esper`) so you can manage your fleet in pl
 **Recommended — pipx** (isolated, no venv management needed):
 
 ```sh
-pipx install git+https://github.com/avidan/esper-cli.git
+pipx install git+https://github.com/esper-io/esper-cli.git
 ```
 
 **From source:**
 
 ```sh
-git clone https://github.com/avidan/esper-cli.git
+git clone https://github.com/esper-io/esper-cli.git
 cd esper-cli
 pipx install -e .
 ```
@@ -34,7 +34,7 @@ pipx install -e .
 **Plain pip** (inside a virtualenv):
 
 ```sh
-pip install git+https://github.com/avidan/esper-cli.git
+pip install git+https://github.com/esper-io/esper-cli.git
 ```
 
 ---
