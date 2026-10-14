@@ -1,3 +1,11 @@
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="assets/esper-logo-dark.svg">
+    <source media="(prefers-color-scheme: light)" srcset="assets/esper-logo-light.svg">
+    <img src="assets/esper-logo-light.svg" alt="Esper" width="252" height="80">
+  </picture>
+</p>
+
 # espercli
 
 ## Give your Agent a Helper Andi
