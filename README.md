@@ -97,7 +97,18 @@ Release files are available for Linux, macOS, and Windows on amd64 and arm64.
 
 ### macOS
 
-Homebrew installation instructions will be added here.
+After the first tagged release, install with Homebrew:
+
+```bash
+brew install esper-io/tap/espercli
+```
+
+To update an existing installation:
+
+```bash
+brew update
+brew upgrade espercli
+```
 
 You can also download a macOS release archive from GitHub releases. Extract the
 archive. Put `espercli` in a directory on `PATH`.
@@ -150,6 +161,13 @@ or remove the approval requirement.
 to select commands, read JSON, and get human approval. Automation generates this
 file from the same command data as the CLI. Automated checks find differences
 between the guide and the command data.
+
+## Releases
+
+Push a stable version tag, such as `v2.0.1`, from a commit on `main` to publish
+a release. Do not use leading zeros in release tags. The release workflow runs
+the Go tests and checks before it publishes the platform archives, checksums,
+and Homebrew formula. Main-branch CI builds remain Actions artifacts.
 
 ## License
 

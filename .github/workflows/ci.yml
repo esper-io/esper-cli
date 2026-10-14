@@ -4,6 +4,7 @@ on:
   push:
     branches: [main]
   pull_request:
+  workflow_call:
 
 permissions:
   contents: read
@@ -47,6 +48,7 @@ jobs:
         run: go run ./tools/command-harness --mode offline --report dist/command-harness-offline.json
 
   snapshot:
+    if: github.ref_type != 'tag'
     needs: [verify, test]
     runs-on: ubuntu-latest
     steps:
