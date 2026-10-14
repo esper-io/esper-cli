@@ -2,13 +2,25 @@ name: CI
 
 on:
   push:
-    branches: [go-rewrite]
+    branches: [main]
   pull_request:
 
 permissions:
   contents: read
 
 jobs:
+  test:
+    name: Go tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # v5
+        with:
+          go-version: "1.23.x"
+          check-latest: true
+      - name: Run Go tests
+        run: go test ./...
+
   verify:
     runs-on: ubuntu-latest
     steps:
@@ -29,15 +41,13 @@ jobs:
         run: go build ./...
       - name: Vet
         run: go vet ./...
-      - name: Test
-        run: go test ./...
       - name: Check spec-to-command contract
         run: go run ./tools/contractcheck
       - name: Check command harness
         run: go run ./tools/command-harness --mode offline --report dist/command-harness-offline.json
 
   snapshot:
-    needs: verify
+    needs: [verify, test]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
@@ -47,6 +57,19 @@ jobs:
         with:
           go-version: "1.23.x"
           check-latest: true
+      - name: Set CI build version
+        env:
+          RUN_NUMBER: ${{ github.run_number }}
+          # Run 68 was the last build before versioned CI artifacts.
+          RUN_OFFSET: ${{ vars.ESPER_VERSION_RUN_OFFSET || '68' }}
+        run: |
+          build_number=$((RUN_NUMBER - RUN_OFFSET))
+          if [ "$build_number" -lt 1 ]; then
+            echo "ESPER_VERSION_RUN_OFFSET must be less than the workflow run number." >&2
+            exit 1
+          fi
+          printf 'CI_VERSION=2.0.%02d\n' "$build_number" >> "$GITHUB_ENV"
+          printf 'CI_SNAPSHOT_VERSION=2.0.%d\n' "$build_number" >> "$GITHUB_ENV"
       - name: Build snapshot artifacts
         uses: goreleaser/goreleaser-action@f06c13b6b1a9625abc9e6e439d9c05a8f2190e94 # v7
         with:
@@ -58,6 +81,6 @@ jobs:
       - name: Upload snapshot artifacts
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
-          name: espercli-snapshot
+          name: espercli-${{ env.CI_VERSION }}
           path: dist/
           if-no-files-found: error

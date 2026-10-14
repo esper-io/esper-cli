@@ -13,7 +13,7 @@ builds:
     ldflags:
       - >-
         -s -w
-        -X github.com/esper-io/esper-cli/internal/version.Version={{.Version}}
+        -X github.com/esper-io/esper-cli/internal/version.Version={{ if .Env.CI_VERSION }}{{ .Env.CI_VERSION }}{{ else }}{{ .Version }}{{ end }}
         -X github.com/esper-io/esper-cli/internal/version.Commit={{.Commit}}
         -X github.com/esper-io/esper-cli/internal/version.Date={{.CommitDate}}
     goos:
@@ -41,7 +41,7 @@ checksum:
   name_template: checksums.txt
 
 snapshot:
-  version_template: "0.0.0-{{ .ShortCommit }}"
+  version_template: "{{ if .Env.CI_SNAPSHOT_VERSION }}{{ .Env.CI_SNAPSHOT_VERSION }}{{ else }}2.0.0-{{ .ShortCommit }}{{ end }}"
 
 changelog:
   sort: asc
