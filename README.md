@@ -115,15 +115,36 @@ archive. Put `espercli` in a directory on `PATH`.
 
 ### Linux
 
-1. Download the `espercli_<version>_linux_<arch>` archive from GitHub releases.
-2. Extract the archive.
-3. Put `espercli` in a directory on `PATH`.
+```bash
+curl -fsSL https://raw.githubusercontent.com/esper-io/esper-cli/main/install.sh | sh
+```
+
+The script detects amd64 or arm64, verifies the release checksum, and installs
+to `~/.local/bin`. Add this directory to `PATH` if it is not already there.
+Run the same command to update.
 
 ### Windows
 
-1. Download the `espercli_<version>_windows_<arch>.zip` archive from GitHub releases.
-2. Extract the archive.
-3. Put `espercli.exe` in a directory on `PATH`.
+Run in PowerShell:
+
+```powershell
+Invoke-RestMethod https://raw.githubusercontent.com/esper-io/esper-cli/main/install.ps1 | Invoke-Expression
+```
+
+The script detects amd64 or arm64, verifies the release checksum, and installs
+to `%LOCALAPPDATA%\Programs\espercli`. It adds this directory to your user `PATH`.
+Run the same command to update.
+
+### Installer options
+
+Set `ESPERCLI_VERSION` to a stable version such as `2.0.1` to install that release.
+Set `ESPERCLI_INSTALL_DIR` to change the install directory. Set these variables
+in the shell that runs the script, not just the `curl` command.
+
+The shell script also supports macOS and Windows through Git Bash. On macOS,
+it uses Homebrew only when neither override is set. Explicit version or directory
+settings always use a direct download. You can download and review either script
+before you run it.
 
 ### Go install
 

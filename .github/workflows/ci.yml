@@ -22,6 +22,22 @@ jobs:
       - name: Run Go tests
         run: go test ./...
 
+  installers:
+    name: Installers (${{ matrix.os }})
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - name: Check shell installer
+        if: runner.os != 'Windows'
+        run: sh scripts/test-install.sh
+      - name: Check PowerShell installer
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: ./scripts/test-install.ps1
+
   verify:
     runs-on: ubuntu-latest
     steps:
@@ -49,7 +65,7 @@ jobs:
 
   snapshot:
     if: github.ref_type != 'tag'
-    needs: [verify, test]
+    needs: [verify, test, installers]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
