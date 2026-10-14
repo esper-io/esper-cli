@@ -155,17 +155,6 @@ The script detects x86 or arm64, verifies the release checksum, and installs
 to `%LOCALAPPDATA%\Programs\espercli`. It adds this directory to your user `PATH`.
 Run the same command to update.
 
-### Installer options
-
-Set `ESPERCLI_VERSION` to a stable version such as `2.0.1` to install that release.
-Set `ESPERCLI_INSTALL_DIR` to change the install directory. Set these variables
-in the shell that runs the script, not just the `curl` command.
-
-The shell script also supports macOS and Windows through Git Bash. On macOS,
-it uses Homebrew only when neither override is set. Explicit version or directory
-settings always use a direct download. You can download and review either script
-before you run it.
-
 ### Go install
 
 Install Go 1.23 or a later version.
