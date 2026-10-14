@@ -98,7 +98,26 @@ and arm64.
 
 ### macOS
 
-After the first tagged release, install with Homebrew:
+Use the install script on Apple Silicon or Intel Macs:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/esper-io/esper-cli/main/install.sh | sh
+```
+
+The script uses Homebrew if it is available. Otherwise, it downloads the correct
+Mac binary, verifies its checksum, and installs to `~/.local/bin`.
+
+To download directly without Homebrew, set the install directory first:
+
+```bash
+export ESPERCLI_INSTALL_DIR="$HOME/.local/bin"
+curl -fsSL https://raw.githubusercontent.com/esper-io/esper-cli/main/install.sh | sh
+```
+
+Add `~/.local/bin` to `PATH` if needed. The direct download does not require Xcode
+or Apple's Command Line Tools.
+
+You can also install with Homebrew directly:
 
 ```bash
 brew install esper-io/tap/espercli
