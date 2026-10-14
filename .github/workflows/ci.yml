@@ -37,7 +37,11 @@ jobs:
       - name: Check shell installer
         if: runner.os != 'Windows'
         run: sh scripts/test-install.sh
-      - name: Check PowerShell installer
+      - name: Check Windows PowerShell 5.1 installer
+        if: runner.os == 'Windows'
+        shell: powershell
+        run: ./scripts/test-install.ps1
+      - name: Check PowerShell 7 installer
         if: runner.os == 'Windows'
         shell: pwsh
         run: ./scripts/test-install.ps1

@@ -6,6 +6,8 @@ $oldUserPath = [Environment]::GetEnvironmentVariable('Path', 'User')
 $oldLocal = $env:LOCALAPPDATA
 $oldVersion = $env:ESPERCLI_VERSION
 $oldDir = $env:ESPERCLI_INSTALL_DIR
+$oldArch = $env:PROCESSOR_ARCHITECTURE
+$oldNativeArch = $env:PROCESSOR_ARCHITEW6432
 function Invoke-RestMethod { param($Uri) $script:lookups++; return @{ tag_name = 'v2.0.1' } }
 function Invoke-WebRequest {
     param($Uri, $OutFile, [switch]$UseBasicParsing)
@@ -26,17 +28,36 @@ try {
     $env:LOCALAPPDATA = $root
     $env:ESPERCLI_VERSION = ''
     $env:ESPERCLI_INSTALL_DIR = ''
-    . "$PSScriptRoot/../install.ps1"
+    $env:PROCESSOR_ARCHITECTURE = 'AMD64'
+    $env:PROCESSOR_ARCHITEW6432 = ''
+    Invoke-Expression (Get-Content -Raw "$PSScriptRoot/../install.ps1")
     if (-not (Test-Path "$root/Programs/espercli/espercli.exe") -or $script:lookups -ne 1) { throw 'Latest/default install failed' }
-    $expectedArch = if ([System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture.ToString() -eq 'X64') { 'x86' } else { 'arm64' }
-    if ($script:asset -ne "espercli_2.0.1_windows_$expectedArch.zip") { throw 'Incorrect release architecture label' }
+    if ($script:asset -ne 'espercli_2.0.1_windows_x86.zip') { throw 'Incorrect release architecture label' }
+    foreach ($case in @(
+        @{ Process = 'ARM64'; Native = ''; Expected = 'arm64' },
+        @{ Process = 'x86'; Native = 'AMD64'; Expected = 'x86' },
+        @{ Process = 'AMD64'; Native = 'ARM64'; Expected = 'arm64' }
+    )) {
+        $env:PROCESSOR_ARCHITECTURE = $case.Process
+        $env:PROCESSOR_ARCHITEW6432 = $case.Native
+        Invoke-Expression (Get-Content -Raw "$PSScriptRoot/../install.ps1")
+        if ($script:asset -ne "espercli_2.0.1_windows_$($case.Expected).zip") { throw 'Incorrect native OS architecture' }
+    }
+    $lookups = $script:lookups
     $env:ESPERCLI_VERSION = 'v2.0.2'
     $env:ESPERCLI_INSTALL_DIR = "$root/custom bin"
     . "$PSScriptRoot/../install.ps1"
-    if (-not (Test-Path "$root/custom bin/espercli.exe") -or $script:lookups -ne 1 -or $script:asset -notlike 'espercli_2.0.2_*') { throw 'Explicit overrides were ignored' }
+    if (-not (Test-Path "$root/custom bin/espercli.exe") -or $script:lookups -ne $lookups -or $script:asset -notlike 'espercli_2.0.2_*') { throw 'Explicit overrides were ignored' }
     $env:ESPERCLI_VERSION = 'v3.0.0'
     . "$PSScriptRoot/../install.ps1"
     if ($script:asset -notlike 'espercli_3.0.0_*') { throw 'Future major release was rejected' }
+    $env:PROCESSOR_ARCHITEW6432 = ''
+    foreach ($unsupported in @('x86', '')) {
+        $env:PROCESSOR_ARCHITECTURE = $unsupported
+        try { . "$PSScriptRoot/../install.ps1"; throw 'Expected architecture rejection' }
+        catch { if ($_.Exception.Message -notlike '*Unsupported architecture*') { throw } }
+    }
+    $env:PROCESSOR_ARCHITECTURE = 'AMD64'
     $script:hash = '0' * 64
     $env:ESPERCLI_INSTALL_DIR = "$root/rejected"
     try { . "$PSScriptRoot/../install.ps1"; throw 'Expected checksum rejection' }
@@ -49,5 +70,7 @@ try {
     $env:LOCALAPPDATA = $oldLocal
     $env:ESPERCLI_VERSION = $oldVersion
     $env:ESPERCLI_INSTALL_DIR = $oldDir
+    $env:PROCESSOR_ARCHITECTURE = $oldArch
+    $env:PROCESSOR_ARCHITEW6432 = $oldNativeArch
     Remove-Item $root -Recurse -Force
 }
