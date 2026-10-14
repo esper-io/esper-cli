@@ -72,7 +72,7 @@ espercli geofence list --limit 20
 
 ## Migration from the Python CLI
 
-This Go CLI is a brand-new implementation. It is not an update to the Python CLI.
+This Go CLI is a brand-new implementation. It is not an update from the Python CLI.
 There is no migration path from the Python CLI to this version. Do not assume
 that existing commands or scripts work without changes.
 
