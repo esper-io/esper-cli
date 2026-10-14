@@ -2,52 +2,53 @@
 
 ## Give your Agent a Helper Andi
 
-`espercli` gives people and AI agents a practical command-line interface for
-Esper. It turns the public Esper API surface into discoverable commands with
-structured JSON output, stable exit codes, shell completion, and generated
-agent guidance.
+`espercli` is a command-line interface (CLI) for Esper. People and AI agents can
+use it to send requests to the public Esper API.
 
 ## What Is espercli?
 
-Esper CLI is a Go client generated from Esper's canonical API specifications.
-Run it directly from a terminal, use it in scripts, or let an agent discover
-commands with `--help` before it acts.
+Esper CLI uses Go. Automation generates its commands from the public Esper API
+specifications. Use the CLI in a terminal or a script. Use `--help` to examine a
+command before you run it.
 
-The command tree is checked against the public API specification so command
-names, flags, scopes, pagination, and destructive-operation metadata stay in
-sync with the supported API surface.
+Automated checks compare the commands with the API specifications. The checks
+include command names, flags, resource IDs, and list pages.
 
-## Why Your Agent Will Like It
+## Features
 
-- **Discoverable**: Every resource and operation has built-in help.
-- **Structured**: `--json` preserves the raw API response for reliable parsing.
-- **Scoped**: Commands use explicit resource scope flags such as `--enterprise`,
-  `--device`, and `--pipeline`.
-- **Guarded**: API writes require human approval, and destructive operations
-  require a separate confirmation.
-- **Current**: Newer API generations own the default command names; retained
-  legacy routes are explicit rather than silent fallbacks.
+- Use `--help` to see the available commands and flags.
+- Use `--json` to get the full API response as JSON.
+- Use flags such as `--enterprise`, `--device`, and `--pipeline` to select resources.
+- Get human approval before a command changes data through the API.
+- Give a second confirmation before an operation that can delete data or reset a device.
+- Use shell completion to enter commands.
+- Use exit codes to check the result in a script.
 
 ## Try It
 
-Create an Esper account at [esper.io/signup](https://www.esper.io/signup), then
-configure the CLI with a tenant name, enterprise ID, and API key. Running
-`configure` without flags prompts for each value.
+Create an Esper account at [esper.io/signup](https://www.esper.io/signup).
+Run `configure` without flags. Enter the tenant name, enterprise ID, and API key
+when the CLI asks for them.
 
 ```bash
 espercli configure
 espercli configure show
 ```
 
-Ask the CLI what it can do, then fetch a small set of devices as JSON:
+Show the device commands:
 
 ```bash
 espercli device --help
+```
+
+Get up to five devices as JSON. Use `jq` to select the fields:
+
+```bash
 espercli device list --limit 5 --json |
   jq '.content.results[] | {id, name, state}'
 ```
 
-Set context when several commands should operate on the same resources:
+Set the active enterprise and device to use them in later commands:
 
 ```bash
 espercli context set enterprise <enterprise-id>
@@ -55,7 +56,7 @@ espercli context set device <device-id>
 espercli context get
 ```
 
-The normal command form is:
+Use this command format:
 
 ```text
 espercli <singular-noun> <verb> [positional IDs] [flags]
@@ -71,22 +72,24 @@ espercli geofence list --limit 20
 
 ## Install
 
-This branch contains the Go CLI only. Install a release binary or use `go install`;
-the legacy Python CLI and `pip install .` packaging have been removed.
+This branch contains only the Go CLI. Install a release file or use `go install`.
+Do not use `pip install .`.
 
-### Release artifacts
+### Release Files
 
-GitHub releases contain archives for Linux, macOS, and Windows on amd64 and
-arm64. Download the matching `espercli_<version>_<os>_<arch>` archive, extract
-it, and place `espercli` on `PATH`.
+GitHub releases contain archives for Linux, macOS, and Windows on amd64 and arm64.
 
-CI snapshot builds are available from their GitHub Actions run as the
-`espercli-snapshot` artifact. Snapshots are not published as releases.
+1. Download the `espercli_<version>_<os>_<arch>` archive for your computer.
+2. Extract the archive.
+3. Put `espercli` in a directory on `PATH`.
+
+For a test build, download the `espercli-snapshot` artifact from a GitHub Actions
+run. Test builds are not releases.
 
 ### Homebrew
 
-The release configuration generates an `espercli` formula for the
-`esper-io/homebrew-tap` repository. After the tap is published:
+Release automation generates a Homebrew formula for `esper-io/homebrew-tap`.
+The tap is not yet published. After publication, use these commands:
 
 ```bash
 brew tap esper-io/tap
@@ -95,7 +98,7 @@ brew install espercli
 
 ### Go install
 
-Go 1.23 or newer is required.
+Install Go 1.23 or a later version.
 
 ```bash
 go install github.com/esper-io/esper-cli/cmd/espercli@latest
@@ -103,8 +106,8 @@ go install github.com/esper-io/esper-cli/cmd/espercli@latest
 
 ## Safe Writes
 
-Reads run normally. Before an API write, the CLI stops and prints an approval
-ID without making the request:
+Read commands do not need approval. Before an API write, the CLI stops and shows
+an approval ID. It does not send the write request:
 
 ```text
 approval required for POST /v2/blueprints/
@@ -112,17 +115,20 @@ review: espercli approval show <id>
 human approval: espercli approval approve <id>
 ```
 
-A human reviews the sanitized request in an interactive terminal, then approves
-that exact request. The original command must be retried unchanged. Approval is
-bound to the method, target, query, body, and environment; it expires after 15
-minutes and is consumed once.
+1. Run `espercli approval show <id>` to examine the request. The CLI hides secret values.
+2. Run `espercli approval approve <id>` in an interactive terminal. A human must give the approval.
+3. Run the original command again without changes.
 
-Destructive operations require a second target confirmation after approval.
-`--yes` skips only that confirmation. It never creates or bypasses approval.
+Approval applies only to that request method, target, query, body, and environment.
+Approval expires after 15 minutes. You can use it only once.
+
+An operation that can delete data or reset a device needs a second target confirmation.
+Use `--yes` to omit only this second confirmation. It does not give human approval
+or remove the approval requirement.
 
 ## API Coverage
 
-The live command tree is the canonical command reference:
+Use the installed CLI to see the available commands:
 
 ```bash
 espercli --help
@@ -130,46 +136,50 @@ espercli <resource> --help
 espercli <resource> <operation> --help
 ```
 
-Use `--json` for machine-readable responses. For supported paginated lists,
-`--all --json` writes one merged result array.
+Use `--json` to read responses in scripts. For lists that support pages, use
+`--all --json` to combine all pages into one result array.
 
-Older API generations are available only where their behavior remains distinct:
+Some commands use older APIs because they have functions that newer APIs do not
+replace. To see these commands, use:
 
 ```bash
 espercli api legacy --help
 espercli api v1 --help
 ```
 
-Newer APIs own the standard command name. Legacy routes with a newer replacement
-are removed instead of preserved as compatibility aliases.
+When a newer API replaces an older API, the standard command uses the newer API.
+The CLI removes the old command instead of keeping an alias.
 
 ## Secure ADB Host Authorization
 
-`espercli secureadb connect` includes the local ADB public key in the session
-request so supported Esper Foundation devices can pre-authorize the host.
-Key selection follows this order:
+`espercli secureadb connect` sends the local ADB public key in the session request.
+Supported Esper Foundation devices can use this key to approve the ADB host.
+The CLI selects the key in this order:
 
-1. `ESPER_ADB_PUB_KEY`, if set, points directly to a public-key file.
-2. `ADB_VENDOR_KEYS`, searched in order, supplies private-key paths; the CLI
-   reads the first existing matching `.pub` file.
-3. `~/.android/adbkey.pub` is the fallback.
+1. If `ESPER_ADB_PUB_KEY` is set, use the public-key file at that path.
+2. Otherwise, examine the private-key paths in `ADB_VENDOR_KEYS` in order. Use
+   the first available matching `.pub` file.
+3. If no matching file is available, use `~/.android/adbkey.pub`.
 
-If no key exists, the CLI tries `adb start-server` once, with a 30-second timeout.
-If a key remains unavailable, it warns and continues without pre-authorization.
-An existing empty or unreadable key fails before session creation. The selected
-public key is included in the human approval; changing it requires new approval.
+If the key file is missing, the CLI tries `adb start-server` once. This step has
+a 30-second timeout. If the key is still missing, the CLI gives a warning. It
+continues without sending a host public key.
+
+If the key file is empty or cannot be read, the CLI stops before it creates a
+session. Human approval includes the selected public key. If you change the key,
+get new approval.
 
 ## Agent Guidance
 
-[`SKILL.md`](SKILL.md) is the generated, agent-agnostic Esper CLI guide. It
-maps natural-language requests to the CLI, uses JSON for parsing, and follows
-the same approval boundaries. It is generated from the same operation metadata
-as the CLI and checked for drift in CI.
+[`SKILL.md`](SKILL.md) gives AI agents instructions for the CLI. It explains how
+to select commands, read JSON, and get human approval. Automation generates this
+file from the same command data as the CLI. Automated checks find differences
+between the guide and the command data.
 
 ## Shell Completion
 
-Completion scripts are written to stdout. The CLI does not edit shell startup
-files.
+The CLI writes completion scripts to standard output. It does not change shell
+startup files.
 
 ```bash
 source <(espercli completion bash)
@@ -181,13 +191,13 @@ espercli completion fish | source
 espercli completion powershell | Out-String | Invoke-Expression
 ```
 
-Run `espercli completion <shell> --help` for shell-specific persistent install
-instructions.
+Run `espercli completion <shell> --help` for installation instructions for your
+shell. These instructions explain how to keep completion after you close the shell.
 
 ## Development
 
-The OpenAPI specifications and Esper overlay annotations drive code generation.
-Do not edit generated command metadata by hand.
+Automation generates commands from OpenAPI specifications and Esper annotations.
+Do not manually change the generated command data.
 
 ```bash
 go run ./tools/codegen
@@ -197,10 +207,10 @@ go vet ./...
 go build ./...
 ```
 
-The contract checker verifies that every supported public API operation remains
-reachable and that flags, scopes, pagination, and destructive-operation metadata
-match the specification. CI also checks deterministic code generation and
-generated agent guidance.
+The contract checker makes sure each supported public API operation has a command.
+It also checks flags, resource scopes, list pages, and confirmation requirements
+against the specifications. Automated checks make sure generation gives the same
+result for the same input. They also check the agent guide.
 
 ## License
 
