@@ -7,12 +7,15 @@ use it to send requests to the public Esper API.
 
 ## What Is espercli?
 
-Esper CLI uses Go. Automation generates its commands from the public Esper API
-specifications. Use the CLI in a terminal or a script. Use `--help` to examine a
-command before you run it.
+Esper CLI is an AI-agent-ready command-line interface for device management.
+It gives people and agents access to Esper APIs for devices, apps, blueprints,
+and pipelines. Your agents can check device state, manage apps, run operations,
+and find issues without working out each API request.
 
-Automated checks compare the commands with the API specifications. The checks
-include command names, flags, resource IDs, and list pages.
+AI agents need clear commands and results to manage devices. Esper CLI lets
+agents find the right command, read results as JSON, and use them in workflows.
+Built-in help explains each command. Human approval keeps you in control of
+changes to your devices and data.
 
 ## Features
 
