@@ -28,6 +28,8 @@ try {
     $env:ESPERCLI_INSTALL_DIR = ''
     . "$PSScriptRoot/../install.ps1"
     if (-not (Test-Path "$root/Programs/espercli/espercli.exe") -or $script:lookups -ne 1) { throw 'Latest/default install failed' }
+    $expectedArch = if ([System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture.ToString() -eq 'X64') { 'x86' } else { 'arm64' }
+    if ($script:asset -ne "espercli_2.0.1_windows_$expectedArch.zip") { throw 'Incorrect release architecture label' }
     $env:ESPERCLI_VERSION = 'v2.0.2'
     $env:ESPERCLI_INSTALL_DIR = "$root/custom bin"
     . "$PSScriptRoot/../install.ps1"

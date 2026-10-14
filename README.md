@@ -93,7 +93,8 @@ You do not need to switch to the Go CLI.
 
 ## Install
 
-Release files are available for Linux, macOS, and Windows on amd64 and arm64.
+Release files are available for Linux, macOS, and Windows on x86 (64-bit Intel/AMD)
+and arm64.
 
 ### macOS
 
@@ -119,7 +120,7 @@ archive. Put `espercli` in a directory on `PATH`.
 curl -fsSL https://raw.githubusercontent.com/esper-io/esper-cli/main/install.sh | sh
 ```
 
-The script detects amd64 or arm64, verifies the release checksum, and installs
+The script detects x86 or arm64, verifies the release checksum, and installs
 to `~/.local/bin`. Add this directory to `PATH` if it is not already there.
 Run the same command to update.
 
@@ -131,7 +132,7 @@ Run in PowerShell:
 Invoke-RestMethod https://raw.githubusercontent.com/esper-io/esper-cli/main/install.ps1 | Invoke-Expression
 ```
 
-The script detects amd64 or arm64, verifies the release checksum, and installs
+The script detects x86 or arm64, verifies the release checksum, and installs
 to `%LOCALAPPDATA%\Programs\espercli`. It adds this directory to your user `PATH`.
 Run the same command to update.
 

@@ -41,8 +41,8 @@ esac
 SH
 chmod +x "$tmp/bin/"*
 export TEST_ROOT="$tmp" TEST_HASH="$hash" PATH="$tmp/bin:$PATH"
-for platform in linux-amd64 linux-arm64 darwin-version darwin-directory; do
-    export TEST_OS=Linux TEST_ARCH=x86_64 TEST_ASSET_OS=linux TEST_ASSET_ARCH=amd64 TEST_ASSET_VERSION=2.0.1
+for platform in linux-x86 linux-arm64 darwin-version darwin-directory; do
+    export TEST_OS=Linux TEST_ARCH=x86_64 TEST_ASSET_OS=linux TEST_ASSET_ARCH=x86 TEST_ASSET_VERSION=2.0.1
     unset ESPERCLI_VERSION ESPERCLI_INSTALL_DIR
     export HOME="$tmp/$platform"
     case "$platform" in
@@ -60,7 +60,7 @@ done
 unset ESPERCLI_VERSION ESPERCLI_INSTALL_DIR
 sh "$repo/install.sh"
 test "$(cat "$tmp/brew-called")" = 'install esper-io/tap/espercli'
-export TEST_OS=Linux TEST_ASSET_OS=linux TEST_ASSET_ARCH=amd64 TEST_HASH=bad ESPERCLI_INSTALL_DIR="$tmp/rejected"
+export TEST_OS=Linux TEST_ASSET_OS=linux TEST_ASSET_ARCH=x86 TEST_HASH=bad ESPERCLI_INSTALL_DIR="$tmp/rejected"
 if sh "$repo/install.sh"; then echo 'Expected checksum rejection' >&2; exit 1; fi
 test ! -e "$tmp/rejected/espercli"
 export ESPERCLI_VERSION=../../invalid

@@ -4,8 +4,8 @@ $ErrorActionPreference = 'Stop'
 
 function Install-EsperCLI {
     $arch = [System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture.ToString().ToLowerInvariant()
-    if ($arch -eq 'x64') { $arch = 'amd64' }
-    if ($arch -notin @('amd64', 'arm64')) { throw "Unsupported architecture: $arch" }
+    if ($arch -eq 'x64') { $arch = 'x86' }
+    if ($arch -notin @('x86', 'arm64')) { throw "Unsupported architecture: $arch" }
     $version = $env:ESPERCLI_VERSION
     if (-not $version) {
         $release = Invoke-RestMethod -Uri 'https://api.github.com/repos/esper-io/esper-cli/releases/latest'

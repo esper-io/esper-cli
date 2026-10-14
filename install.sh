@@ -19,11 +19,11 @@ main() {
         return
     fi
     case "$(uname -m)" in
-        x86_64|amd64) arch=amd64 ;;
+        x86_64|amd64) arch=x86 ;;
         aarch64|arm64) arch=arm64 ;;
         *) fail "Unsupported architecture: $(uname -m)" ;;
     esac
-    if [ "$os" = darwin ] && [ "$arch" = amd64 ] &&
+    if [ "$os" = darwin ] && [ "$arch" = x86 ] &&
         [ "$(sysctl -n sysctl.proc_translated 2>/dev/null || true)" = 1 ]; then
         arch=arm64
     fi
