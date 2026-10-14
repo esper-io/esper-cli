@@ -34,6 +34,9 @@ try {
     $env:ESPERCLI_INSTALL_DIR = "$root/custom bin"
     . "$PSScriptRoot/../install.ps1"
     if (-not (Test-Path "$root/custom bin/espercli.exe") -or $script:lookups -ne 1 -or $script:asset -notlike 'espercli_2.0.2_*') { throw 'Explicit overrides were ignored' }
+    $env:ESPERCLI_VERSION = 'v3.0.0'
+    . "$PSScriptRoot/../install.ps1"
+    if ($script:asset -notlike 'espercli_3.0.0_*') { throw 'Future major release was rejected' }
     $script:hash = '0' * 64
     $env:ESPERCLI_INSTALL_DIR = "$root/rejected"
     try { . "$PSScriptRoot/../install.ps1"; throw 'Expected checksum rejection' }

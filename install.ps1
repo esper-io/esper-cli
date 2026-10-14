@@ -12,7 +12,7 @@ function Install-EsperCLI {
         $version = $release.tag_name
     }
     $version = $version -replace '^v', ''
-    if ($version -notmatch '^2\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$') { throw 'Expected a stable version such as 2.0.1.' }
+    if ($version -notmatch '^[1-9][0-9]*\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$') { throw 'Expected a stable version such as 2.0.1.' }
     $dir = $env:ESPERCLI_INSTALL_DIR
     if (-not $dir) { $dir = Join-Path $env:LOCALAPPDATA 'Programs\espercli' }
     $dir = [IO.Path]::GetFullPath($dir)

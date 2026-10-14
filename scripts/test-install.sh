@@ -35,18 +35,19 @@ done
 case "$url" in
     */latest) echo latest >> "$TEST_ROOT/lookups"; printf 'https://github.com/esper-io/esper-cli/releases/tag/v2.0.1' ;;
     */checksums.txt) printf '%s  espercli_%s_%s_%s.tar.gz\n' "$TEST_HASH" "$TEST_ASSET_VERSION" "$TEST_ASSET_OS" "$TEST_ASSET_ARCH" > "$out" ;;
-    */espercli_2.*) cp "$TEST_ROOT/archive.tar.gz" "$out" ;;
+    */espercli_*) cp "$TEST_ROOT/archive.tar.gz" "$out" ;;
     *) exit 1 ;;
 esac
 SH
 chmod +x "$tmp/bin/"*
 export TEST_ROOT="$tmp" TEST_HASH="$hash" PATH="$tmp/bin:$PATH"
-for platform in linux-x86 linux-arm64 darwin-version darwin-directory; do
+for platform in linux-x86 linux-arm64 linux-major darwin-version darwin-directory; do
     export TEST_OS=Linux TEST_ARCH=x86_64 TEST_ASSET_OS=linux TEST_ASSET_ARCH=x86 TEST_ASSET_VERSION=2.0.1
     unset ESPERCLI_VERSION ESPERCLI_INSTALL_DIR
     export HOME="$tmp/$platform"
     case "$platform" in
         linux-arm64) export TEST_ARCH=aarch64 TEST_ASSET_ARCH=arm64 ;;
+        linux-major) export ESPERCLI_VERSION=3.0.0 TEST_ASSET_VERSION=3.0.0 ;;
         darwin-*) export TEST_OS=Darwin TEST_ASSET_OS=darwin ;;
     esac
     case "$platform" in

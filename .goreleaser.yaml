@@ -57,7 +57,7 @@ brews:
     repository:
       owner: esper-io
       name: homebrew-tap
-      token: '{{ with index .Env "HOMEBREW_TAP_TOKEN" }}{{ . }}{{ end }}'
+      token: '{{ .Env.HOMEBREW_TAP_TOKEN }}'
     directory: Formula
     homepage: https://github.com/esper-io/esper-cli
     description: Command-line interface for the Esper device management API

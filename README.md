@@ -186,10 +186,18 @@ between the guide and the command data.
 
 ## Releases
 
-Push a stable version tag, such as `v2.0.1`, from a commit on `main` to publish
-a release. Do not use leading zeros in release tags. The release workflow runs
-the Go tests and checks before it publishes the platform archives, checksums,
-and Homebrew formula. Main-branch CI builds remain Actions artifacts.
+The version in `internal/version/version.go` sets the release line. Increase its
+major or minor number on `main`, such as `2.0.0` to `2.1.0`, to publish `v2.1.0`
+automatically. Ordinary CI builds increment only the last number, such as
+`2.1.01`, and remain Actions artifacts. They do not publish releases.
+
+To publish manually, open **Actions > GitHub release > Run workflow**, select
+`main`, and enter a stable version such as `2.1.1` on the current release line.
+You can also push that version tag from a commit on `main`. Do not use leading
+zeros in release tags. All release paths run the Go tests, verification checks,
+and installer tests before they publish the platform archives, checksums, and
+Homebrew formula. Automatic and UI releases create their tag after checks pass.
+The Actions UI requires `main` to be the repository's default branch.
 
 ## License
 

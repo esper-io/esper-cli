@@ -39,7 +39,7 @@ main() {
         esac
     fi
     version=${version#v}
-    printf '%s\n' "$version" | awk '/^2\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$/ { ok=1 } END { exit !ok }' || fail "Expected a stable version such as 2.0.1."
+    printf '%s\n' "$version" | awk '/^[1-9][0-9]*\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$/ { ok=1 } END { exit !ok }' || fail "Expected a stable version such as 2.0.1."
     ext=tar.gz
     binary=espercli
     if [ "$os" = windows ]; then ext=zip; binary=espercli.exe; fi

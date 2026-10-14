@@ -2,22 +2,84 @@ name: GitHub release
 
 on:
   push:
+    branches: [main]
+    paths: [internal/version/version.go]
     tags:
-      - "v2.*.*"
+      - "v*.*.*"
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Stable version on the current release line, such as 2.0.2 or 2.1.0'
+        required: true
+        type: string
 
 permissions:
   contents: read
 
 concurrency:
-  group: release-${{ github.ref }}
+  group: github-release
   cancel-in-progress: false
 
 jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    outputs:
+      publish: ${{ steps.version.outputs.publish }}
+      tag: ${{ steps.version.outputs.tag }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          fetch-depth: 0
+      - name: Select release version
+        id: version
+        env:
+          EVENT: ${{ github.event_name }}
+          REF: ${{ github.ref }}
+          BEFORE: ${{ github.event.before }}
+          REQUESTED_VERSION: ${{ inputs.version }}
+        run: |
+          source_version=$(sh scripts/release-version.sh source)
+          if [[ "$REF" == refs/tags/* ]]; then
+            version=${REF#refs/tags/v}
+          elif [[ "$REF" != refs/heads/main ]]; then
+            echo 'Publish only from main or a version tag.' >&2
+            exit 1
+          elif [[ "$EVENT" == workflow_dispatch ]]; then
+            version=${REQUESTED_VERSION#v}
+          else
+            version=$(sh scripts/release-version.sh bump "$BEFORE")
+            if [ -z "$version" ]; then
+              echo 'No major/minor increase. This push is a CI build only.'
+              exit 0
+            fi
+          fi
+          if [[ ! "$version" =~ ^[1-9][0-9]*\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$ ]]; then
+            echo 'Use a stable version without leading zeros, such as 2.1.0.' >&2
+            exit 1
+          fi
+          if [ "${version%.*}" != "${source_version%.*}" ]; then
+            echo 'The release major/minor must match internal/version/version.go.' >&2
+            exit 1
+          fi
+          git merge-base --is-ancestor HEAD origin/main
+          tag="v$version"
+          if git rev-parse --verify "refs/tags/$tag" >/dev/null 2>&1 &&
+             [ "$(git rev-list -n 1 "$tag")" != "$(git rev-parse HEAD)" ]; then
+            echo "$tag already points to another commit." >&2
+            exit 1
+          fi
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+          echo 'publish=true' >> "$GITHUB_OUTPUT"
+
   checks:
+    needs: prepare
+    if: needs.prepare.outputs.publish == 'true'
     uses: ./.github/workflows/ci.yml
+    with:
+      skip_snapshot: true
 
   release:
-    needs: checks
+    needs: [prepare, checks]
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -27,17 +89,19 @@ jobs:
           fetch-depth: 0
       - name: Check release prerequisites
         env:
-          TAG: ${{ github.ref_name }}
           HOMEBREW_TAP_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}
         run: |
-          if [[ ! "$TAG" =~ ^v2\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$ ]]; then
-            echo "Use a stable version tag such as v2.0.1, without leading zeros." >&2
-            exit 1
-          fi
-          git merge-base --is-ancestor HEAD origin/main
           if [ -z "$HOMEBREW_TAP_TOKEN" ]; then
             echo "Set HOMEBREW_TAP_TOKEN with Contents write access to esper-io/homebrew-tap." >&2
             exit 1
+          fi
+      - name: Create release tag after checks pass
+        env:
+          TAG: ${{ needs.prepare.outputs.tag }}
+        run: |
+          if ! git rev-parse --verify "refs/tags/$TAG" >/dev/null 2>&1; then
+            git tag "$TAG"
+            git push origin "refs/tags/$TAG"
           fi
       - uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # v5
         with:
@@ -52,3 +116,4 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           HOMEBREW_TAP_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}
+          GORELEASER_CURRENT_TAG: ${{ needs.prepare.outputs.tag }}
