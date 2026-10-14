@@ -6,7 +6,7 @@
   </picture>
 </p>
 
-# espercli
+# Esper CLI 2.0
 
 ## Give your Agent a Helper Andi
 
