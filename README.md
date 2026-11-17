@@ -165,7 +165,7 @@ go install github.com/esper-io/esper-cli/cmd/espercli@latest
 
 ## Safe Writes
 
-Read commands do not need approval. Before an API write, the CLI stops and shows
+Read commands do not need approval. By default, before an API write, the CLI stops and shows
 an approval ID. It does not send the write request:
 
 ```text
@@ -184,6 +184,51 @@ Approval expires after 15 minutes. You can use it only once.
 An operation that can delete data or reset a device needs a second target confirmation.
 Use `--yes` to omit only this second confirmation. It does not give human approval
 or remove the approval requirement.
+
+### Human-started 15-minute window
+
+A person can start a fixed approval window from their terminal:
+
+```bash
+espercli --dangerously-skip-permissions
+espercli approval window status --json
+espercli approval window stop
+```
+
+The standalone flag requires a real terminal and typing `start unrestricted window`.
+It skips all API-write approvals and destructive confirmations, including Secure ADB,
+across all tenants using the same local approval store. It cannot be combined with
+a write command. `--yes` and agent mode cannot replace the typed confirmation.
+
+The window expires exactly 15 minutes after its saved start time. Activity, status,
+and repeated flag invocations never extend it. Stop is idempotent. Expiry/stop affect
+subsequent authorization checks, not running commands or existing ADB sessions.
+Pending exact-request approvals remain unchanged and keep their original expiry.
+Tenant reconfiguration and `--environment` overrides do not end the window.
+Separate approval-store directories selected through `ESPER_CREDS_FILE` stay separate.
+Credentials, required-input questions, command restrictions, and API permissions still apply.
+
+### Inline agent approval
+
+An agent can obtain permission for the intended command through its own chat or
+tool-approval UI, then run that exact command with `--approval-mode=agent`:
+
+```bash
+espercli blueprint delete <blueprint-id> --approval-mode=agent
+```
+
+This skips terminal approval and destructive confirmation only for that invocation,
+including composite Secure ADB writes. It creates no reusable permission, consumes
+no pending approvals, and never starts or extends a window. The default is
+`--approval-mode=request`; there is no environment/config switch for agent mode.
+
+**Trust boundary:** Anyone who can invoke agent mode can bypass the terminal gate.
+The CLI trusts the agent to obtain permission; it does not verify human approval.
+The local terminal/file model is not OS-authenticated human identity either.
+Agents must obtain permission before using agent mode and must never invoke
+`--dangerously-skip-permissions` or start, restart, or renew a window themselves.
+An active window removes CLI approval prompts, not the obligation to stay within
+the user's requested task.
 
 ## Agent Guidance
 

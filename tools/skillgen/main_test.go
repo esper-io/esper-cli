@@ -52,6 +52,13 @@ func TestRenderSkillIncludesGeneratedAndManuallyAddedCommands(t *testing.T) {
 		"`command create` and `command-request create` only accept confirmed public types unsupported by DSO",
 		"## Manually Added Commands",
 		"Never run approval approve yourself",
+		"obtain human permission for the exact command",
+		"`--approval-mode=agent`",
+		"The CLI trusts this assertion; it does not verify human approval",
+		"Never invoke `--dangerously-skip-permissions`",
+		"Status, writes, and repeated starts never extend it",
+		"`espercli approval window status [--json]`",
+		"`espercli approval window stop`",
 		"`espercli device list` - List devices",
 		"`espercli device delete` - Delete device **destructive**",
 	} {

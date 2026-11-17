@@ -423,17 +423,20 @@ func run(command *cobra.Command, args []string, operations []Operation, options 
 			}
 		}
 	}
+	skipDestructiveConfirmation := false
 	if isWriteOperation(operation) {
-		request, approved, err := esperruntime.RequireApproval(esperruntime.ApprovalSpec{BaseURL: credentials.BaseURL(), Method: operation.Method, Path: requestPath, ContentType: contentType, Query: query, Headers: headers, Body: body})
+		decision, err := esperruntime.RequireApproval(esperruntime.ApprovalSpec{BaseURL: credentials.BaseURL(), Method: operation.Method, Path: requestPath, ContentType: contentType, Query: query, Headers: headers, Body: body}, options.ApprovalMode)
 		if err != nil {
 			return esperruntime.NewError(esperruntime.CategoryAuth, err)
 		}
-		if !approved {
+		if !decision.Approved {
+			request := decision.Request
 			return esperruntime.NewError(esperruntime.CategoryUsage, fmt.Errorf("approval required for %s %s\nreview: espercli approval show %s\nhuman approval: espercli approval approve %s", operation.Method, requestPath, request.ID, request.ID))
 		}
+		skipDestructiveConfirmation = decision.SkipDestructiveConfirmation
 	}
 	if operation.Destructive {
-		ok, err := esperruntime.Confirm(command.InOrStdin(), command.ErrOrStderr(), requestPath, 1, options.Yes)
+		ok, err := esperruntime.Confirm(command.InOrStdin(), command.ErrOrStderr(), requestPath, 1, options.Yes || skipDestructiveConfirmation)
 		if err != nil {
 			return err
 		}

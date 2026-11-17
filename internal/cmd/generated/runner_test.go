@@ -493,6 +493,67 @@ func TestWriteRequiresApprovalEvenWithYes(t *testing.T) {
 	}
 }
 
+func TestWriteApprovalModesSkipDestructivePrompt(t *testing.T) {
+	for _, mode := range []string{"agent", "window"} {
+		t.Run(mode, func(t *testing.T) {
+			requests := 0
+			server := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
+				requests++
+				_, _ = writer.Write([]byte(`{}`))
+			}))
+			defer server.Close()
+			t.Setenv(esperruntime.CredentialsFileEnvironment, filepath.Join(t.TempDir(), "creds.json"))
+			store, _ := esperruntime.NewStateStore()
+			if err := store.Save(esperruntime.State{Config: esperruntime.Config{Environment: server.URL, APIKey: "fixture-key"}}); err != nil {
+				t.Fatal(err)
+			}
+			approvals, _ := esperruntime.NewApprovalStore()
+			if mode == "window" {
+				if _, err := approvals.StartWindow(); err != nil {
+					t.Fatal(err)
+				}
+			}
+			run := func(approvalMode, method string) error {
+				root := &cobra.Command{Use: "espercli", SilenceErrors: true, SilenceUsage: true}
+				options := &esperruntime.GlobalOptions{JSON: true, ApprovalMode: approvalMode}
+				operation := Operation{Command: []string{"thing", "write"}, Method: method, Path: "/things", Destructive: true, SuccessMedia: "application/json"}
+				addCommand(root, operation.Command, []Operation{operation}, options)
+				var stdout, stderr bytes.Buffer
+				root.SetOut(&stdout)
+				root.SetErr(&stderr)
+				root.SetIn(strings.NewReader(""))
+				root.SetArgs(operation.Command)
+				err := root.Execute()
+				if stderr.Len() != 0 || options.Yes {
+					t.Fatalf("prompted or mutated --yes: stderr=%q yes=%v", stderr.String(), options.Yes)
+				}
+				if err == nil && !json.Valid(stdout.Bytes()) {
+					t.Fatalf("invalid JSON stdout: %q", stdout.String())
+				}
+				return err
+			}
+			approvalMode := "agent"
+			if mode == "window" {
+				approvalMode = "request"
+			}
+			for _, method := range []string{http.MethodPost, http.MethodDelete} {
+				if err := run(approvalMode, method); err != nil {
+					t.Fatal(err)
+				}
+			}
+			if err := run("invalid", http.MethodPost); err == nil || requests != 2 {
+				t.Fatalf("invalid mode error=%v requests=%d", err, requests)
+			}
+			if _, err := approvals.StopWindow(); err != nil {
+				t.Fatal(err)
+			}
+			if err := run("request", http.MethodPost); err == nil || requests != 2 {
+				t.Fatalf("unflagged write error=%v requests=%d", err, requests)
+			}
+		})
+	}
+}
+
 func TestNonJSONOutput(t *testing.T) {
 	command := &cobra.Command{Use: "get"}
 	command.Flags().String("output", "", "")

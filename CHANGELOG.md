@@ -28,6 +28,12 @@ unchanged.
   and environment, expires after 15 minutes, and can be used only once.
 - A separate confirmation for destructive operations. `--yes` skips that
   confirmation only; it does not replace human approval.
+- Human-started, tenant-agnostic 15-minute approval windows through standalone
+  `--dangerously-skip-permissions`, with `approval window status/stop`. A real
+  terminal and typed confirmation are required; activity never renews the window.
+- Invocation-only `--approval-mode=agent`, trusting permission obtained in the
+  agent's own UI. Both modes skip write approvals and destructive confirmations,
+  including Secure ADB, without changing API permissions or pending approvals.
 - Secure ADB relay setup and local ADB public-key submission for host
   pre-authorization on supported devices. Key selection supports
   `ESPER_ADB_PUB_KEY`, `ADB_VENDOR_KEYS`, and the default Android host key.

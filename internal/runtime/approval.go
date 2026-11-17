@@ -55,6 +55,7 @@ type ApprovalRequest struct {
 
 type approvalDocument struct {
 	Requests []ApprovalRequest `json:"requests"`
+	Window   *ApprovalWindow   `json:"window,omitempty"`
 }
 
 type ApprovalStore struct {
@@ -156,26 +157,48 @@ func (store *ApprovalStore) Consume(spec ApprovalSpec) (ApprovalRequest, bool, e
 	})
 }
 
-func RequireApproval(spec ApprovalSpec) (ApprovalRequest, bool, error) {
+type ApprovalDecision struct {
+	Request                     ApprovalRequest
+	Approved                    bool
+	SkipDestructiveConfirmation bool
+}
+
+func RequireApproval(spec ApprovalSpec, mode string) (ApprovalDecision, error) {
+	if mode == "" {
+		mode = "request"
+	}
+	if err := ValidateApprovalMode(mode); err != nil {
+		return ApprovalDecision{}, err
+	}
+	if mode == "agent" {
+		return ApprovalDecision{Approved: true, SkipDestructiveConfirmation: true}, nil
+	}
 	approvalOverrideMu.Lock()
 	override := approvalOverride
 	approvalOverrideMu.Unlock()
 	if override != nil {
 		if err := override(spec); err != nil {
-			return ApprovalRequest{}, false, err
+			return ApprovalDecision{}, err
 		}
-		return ApprovalRequest{}, true, nil
+		return ApprovalDecision{Approved: true}, nil
 	}
 	store, err := NewApprovalStore()
 	if err != nil {
-		return ApprovalRequest{}, false, err
+		return ApprovalDecision{}, err
+	}
+	status, err := store.WindowStatus()
+	if err != nil {
+		return ApprovalDecision{}, err
+	}
+	if status.Active {
+		return ApprovalDecision{Approved: true, SkipDestructiveConfirmation: true}, nil
 	}
 	request, approved, err := store.Consume(spec)
 	if err != nil || approved {
-		return request, approved, err
+		return ApprovalDecision{Request: request, Approved: approved}, err
 	}
 	request, _, err = store.Request(spec)
-	return request, false, err
+	return ApprovalDecision{Request: request}, err
 }
 
 // SetApprovalOverrideForTesting bypasses approval persistence only for in-process tests.

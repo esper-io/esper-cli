@@ -128,6 +128,61 @@ func TestSecureADBApprovalSpecIncludesEnableOperationTarget(t *testing.T) {
 	}
 }
 
+func TestConnectApprovalModes(t *testing.T) {
+	for _, mode := range []string{"agent", "window"} {
+		t.Run(mode, func(t *testing.T) {
+			directory := t.TempDir()
+			t.Setenv(esperruntime.CredentialsFileEnvironment, filepath.Join(directory, "creds.json"))
+			t.Setenv(CertificatesDirectoryEnvironment, filepath.Join(directory, "certs"))
+			keyPath := filepath.Join(directory, "host.pub")
+			if err := os.WriteFile(keyPath, []byte("fixture-host-key"), 0o600); err != nil {
+				t.Fatal(err)
+			}
+			t.Setenv("ESPER_ADB_PUB_KEY", keyPath)
+			t.Setenv("ADB_VENDOR_KEYS", strings.TrimSuffix(keyPath, ".pub"))
+			requests := 0
+			server := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
+				requests++
+				if request.Method != http.MethodPost || !strings.HasSuffix(request.URL.Path, "/remoteadb/") {
+					t.Errorf("unexpected request: %s %s", request.Method, request.URL.Path)
+				}
+				// Stop after proving session creation passed the approval gate.
+				http.Error(writer, "fixture reached session creation", http.StatusBadRequest)
+			}))
+			defer server.Close()
+			store, _ := esperruntime.NewStateStore()
+			if err := store.Save(esperruntime.State{Config: esperruntime.Config{Environment: server.URL, APIKey: "fixture-key", EnterpriseID: "enterprise-1"}}); err != nil {
+				t.Fatal(err)
+			}
+			options := &esperruntime.GlobalOptions{ApprovalMode: "agent"}
+			approvals, _ := esperruntime.NewApprovalStore()
+			if mode == "window" {
+				options.ApprovalMode = "request"
+				if _, err := approvals.StartWindow(); err != nil {
+					t.Fatal(err)
+				}
+			}
+			command := NewCommand(options)
+			command.SetContext(context.Background())
+			var stderr bytes.Buffer
+			command.SetErr(&stderr)
+			command.SetIn(strings.NewReader(""))
+			err := runConnect(command, options, "device-1", true)
+			if err == nil || !strings.Contains(err.Error(), "fixture reached session creation") || requests != 1 || stderr.Len() != 0 {
+				t.Fatalf("connect error=%v requests=%d stderr=%q", err, requests, stderr.String())
+			}
+			if _, err := approvals.StopWindow(); err != nil {
+				t.Fatal(err)
+			}
+			options.ApprovalMode = "request"
+			err = runConnect(command, options, "device-1", true)
+			if err == nil || !strings.Contains(err.Error(), "approval required") || requests != 1 {
+				t.Fatalf("unflagged connect error=%v requests=%d", err, requests)
+			}
+		})
+	}
+}
+
 func TestADBPublicKeySelection(t *testing.T) {
 	for _, scenario := range []string{"explicit", "later vendor", "default", "vendor fallback"} {
 		t.Run(scenario, func(t *testing.T) {

@@ -2,9 +2,12 @@ package cmd
 
 import (
 	"bytes"
+	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 
+	esperruntime "github.com/esper-io/esper-cli/internal/runtime"
 	"github.com/esper-io/esper-cli/internal/version"
 )
 
@@ -22,11 +25,55 @@ func TestSecureADBCommandRegistered(t *testing.T) {
 }
 
 func TestStateCommandsRegistered(t *testing.T) {
-	for _, path := range [][]string{{"configure"}, {"configure", "show"}, {"context", "set"}, {"context", "get"}, {"context", "clear"}, {"approval", "show"}, {"approval", "approve"}, {"discover"}} {
+	for _, path := range [][]string{{"configure"}, {"configure", "show"}, {"context", "set"}, {"context", "get"}, {"context", "clear"}, {"approval", "show"}, {"approval", "approve"}, {"approval", "window", "status"}, {"approval", "window", "stop"}, {"discover"}} {
 		command, _, err := NewRootCommand().Find(path)
 		if err != nil || command.CommandPath() != "espercli "+strings.Join(path, " ") {
 			t.Fatalf("find %v = %q, %v", path, command.CommandPath(), err)
 		}
+	}
+}
+
+func TestApprovalFlagsRejectNonterminalAndInvalidUse(t *testing.T) {
+	t.Setenv(esperruntime.CredentialsFileEnvironment, filepath.Join(t.TempDir(), "creds.json"))
+	for _, args := range [][]string{
+		{"--dangerously-skip-permissions"},
+		{"--dangerously-skip-permissions", "--yes", "--approval-mode=agent", "--json"},
+		{"--dangerously-skip-permissions", "version"},
+		{"version", "--dangerously-skip-permissions"},
+		{"configure", "--approval-mode=invalid"},
+		{"configure", "--approval-mode="},
+	} {
+		command := NewRootCommand()
+		var stdout, stderr bytes.Buffer
+		command.SetOut(&stdout)
+		command.SetErr(&stderr)
+		command.SetIn(strings.NewReader("start unrestricted window\n"))
+		command.SetArgs(args)
+		if err := command.Execute(); err == nil {
+			t.Fatalf("accepted invalid invocation %v", args)
+		}
+		if stdout.Len() != 0 {
+			t.Fatalf("failed invocation wrote stdout: %q", stdout.String())
+		}
+	}
+	// Character devices are not necessarily real terminals.
+	file, err := os.Open(os.DevNull)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer file.Close()
+	command := NewRootCommand()
+	command.SetIn(file)
+	command.SetArgs([]string{"--dangerously-skip-permissions"})
+	if err := command.Execute(); err == nil {
+		t.Fatal("accepted a non-terminal character device")
+	}
+	path, _ := esperruntime.DefaultApprovalPath()
+	if _, err := os.Stat(path); !os.IsNotExist(err) {
+		t.Fatalf("failed invocation saved a window: %v", err)
+	}
+	if command.PersistentFlags().Lookup("approval-mode").DefValue != "request" || command.Flags().Lookup("dangerously-skip-permissions") == nil {
+		t.Fatal("approval flags missing or default changed")
 	}
 }
 
@@ -50,6 +97,9 @@ func TestGeneratedDiscoveryAndHelpContext(t *testing.T) {
 		heading string
 	}{
 		{[]string{"--help"}, "Command groups:"},
+		{[]string{"--help"}, "--dangerously-skip-permissions"},
+		{[]string{"blueprint", "delete", "--help"}, "--approval-mode"},
+		{[]string{"approval", "window", "--help"}, "status"},
 		{[]string{"api", "--help"}, "API generations:"},
 		{[]string{"geofence", "--help"}, "Operations:"},
 		{[]string{"report-status", "create", "--help"}, "filters.platform (array) [values: Android, Apple, Linux, Windows]"},

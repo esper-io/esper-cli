@@ -23,13 +23,15 @@ espercli device list --limit 5 --json
 
 1. Run `espercli <command> --help` before execution when required arguments or flags are not explicit below. Never invent flags.
 2. Use `--json` when parsing output. Keep stdout machine-readable and use exit codes to detect failure.
-3. For every API write, wait for the user to run `espercli approval approve <id>` from their terminal. Never run approval approve yourself; `--yes` does not bypass human approval.
+3. Before an API write, obtain human permission for the exact command in your chat/tool-approval UI, then invoke it with `--approval-mode=agent` to avoid a separate terminal approval and destructive confirmation. The CLI trusts this assertion; it does not verify human approval. This permission lasts only for that invocation and creates no reusable state. Alternatively, wait for the user to run `espercli approval approve <id>` from their terminal. Never run approval approve yourself; `--yes` alone does not bypass human approval.
 4. Prefer `--all` only when the user asks for complete paginated results.
 5. Use `--environment` and `--api-key` only when the user explicitly supplies overrides; otherwise rely on the configured environment.
 6. Do not call an API operation merely to discover whether it is safe. Use help and the command reference.
 
 7. For Linux, iOS, and Windows devices, use current `device` commands and `device-app list`. Do not fall back to `api legacy app list`, `api legacy status get`, or `device-app get` when a current device API returns an error; those legacy routes are Android compatibility surfaces.
 8. Submit DSO-supported device commands with `espercli operation create`, using `operation_type`, `operation_device_query` (device IDs or filters), `arguments`, and scheduling fields. This includes CONVERGE and SET_ADB_STATE. Use `operation get` to inspect asynchronous status and `operation update` to request cancellation. `command create` and `command-request create` only accept confirmed public types unsupported by DSO: UPDATE_LATEST_DPC on both, and LIST_INSTALLED_PROFILES or REMOVE_PROFILE on `command-request create`. Do not use legacy command IDs as operation IDs. See the README migration guide.
+
+9. Never invoke `--dangerously-skip-permissions` or start, restart, or renew an approval window yourself. Only a person may start the fixed 15-minute window in their terminal. An active window skips CLI approval prompts across all tenants in the same local store, including Secure ADB, but never changes API permissions or the scope of the user's task. Status, writes, and repeated starts never extend it; expiry/stop do not cancel running work.
 
 ## Manually Added Commands
 
@@ -40,6 +42,9 @@ espercli device list --limit 5 --json
 - `espercli context clear <device|app|group|enterprise>|--all` - Clear active context.
 - `espercli approval show <id>` - Show a sanitized pending API write.
 - `espercli approval approve <id>` - Human-only terminal approval for one pending API write.
+- `espercli --dangerously-skip-permissions` - Human-only standalone start of a fixed 15-minute approval window; never invoke this as an agent.
+- `espercli approval window status [--json]` - Inspect the shared local approval window.
+- `espercli approval window stop` - Stop the window for subsequent authorization checks.
 - `espercli discover <query-or-docs-url>` - Find commands by name, request fields, OpenAPI metadata, or an api.esper.io documentation URL.
 - `espercli secureadb connect --device <id>` - Open a pinned mutual-TLS ADB relay.
 - `espercli completion <bash|fish|powershell|zsh>` - Write a shell completion script to stdout.
@@ -47,7 +52,7 @@ espercli device list --limit 5 --json
 
 ## Spec-Generated Operations
 
-All API writes require a one-time human approval. Commands marked **destructive** also require confirmation unless `--yes` is supplied after approval. Use each command's `--help` for positional arguments, request-body flags, nested body fields, scope flags, and pagination options. `espercli api <generation> ...` accesses older colliding API generations; it is not a general API escape hatch.
+By default (`--approval-mode=request`), API writes require a one-time exact-request human approval and commands marked **destructive** also require confirmation unless `--yes` is supplied. Explicit `--approval-mode=agent` after human permission, or an active human-started window, skips both prompts without consuming pending approvals. Neither mode changes credentials, required inputs, command restrictions, or server permissions. Use each command's `--help` for positional arguments, request-body flags, nested body fields, scope flags, and pagination options. `espercli api <generation> ...` accesses older colliding API generations; it is not a general API escape hatch.
 
 ### alarm-history
 

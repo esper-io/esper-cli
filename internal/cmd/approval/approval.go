@@ -13,6 +13,7 @@ import (
 
 func NewCommand(options *esperruntime.GlobalOptions) *cobra.Command {
 	command := &cobra.Command{Use: "approval", Short: "Review and approve pending API writes"}
+	command.AddCommand(newWindowCommand(options))
 	command.AddCommand(&cobra.Command{
 		Use:   "show <approval-id>",
 		Short: "Show a sanitized pending approval request",
