@@ -57,6 +57,35 @@ func TestApprovalWindowFixedLifetime(t *testing.T) {
 	}
 }
 
+func TestExpiredApprovalWindowStaysInactiveAfterClockRollback(t *testing.T) {
+	for _, offset := range []time.Duration{0, time.Minute} {
+		t.Run(offset.String(), func(t *testing.T) {
+			now := time.Date(2026, time.November, 17, 12, 0, 0, 0, time.UTC)
+			store := &ApprovalStore{Path: filepath.Join(t.TempDir(), "approvals.json"), Now: func() time.Time { return now }}
+			started, err := store.StartWindow()
+			if err != nil || !started.Active {
+				t.Fatalf("start = %+v, %v", started, err)
+			}
+			now = started.Window.ExpiresAt.Add(offset)
+			status, err := store.WindowStatus()
+			if err != nil || status.Active {
+				t.Fatalf("expired status = %+v, %v", status, err)
+			}
+			// A new process must not revive the persisted window after rollback.
+			now = started.Window.StartedAt.Add(10 * time.Minute)
+			reopened := &ApprovalStore{Path: store.Path, Now: store.Now}
+			status, err = reopened.WindowStatus()
+			if err != nil || status.Active {
+				t.Fatalf("status after rollback = %+v, %v", status, err)
+			}
+			document, err := reopened.load()
+			if err != nil || document.Window != nil {
+				t.Fatalf("expired window persisted: %+v, %v", document.Window, err)
+			}
+		})
+	}
+}
+
 func TestApprovalModesPreservePendingRequestsAndWindow(t *testing.T) {
 	t.Setenv(CredentialsFileEnvironment, filepath.Join(t.TempDir(), "creds.json"))
 	store, err := NewApprovalStore()

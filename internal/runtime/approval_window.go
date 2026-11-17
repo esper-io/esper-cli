@@ -22,7 +22,11 @@ func windowStatus(window *ApprovalWindow, now time.Time) ApprovalWindowStatus {
 func (store *ApprovalStore) WindowStatus() (ApprovalWindowStatus, error) {
 	var status ApprovalWindowStatus
 	_, _, err := store.withLock(func(document *approvalDocument) (ApprovalRequest, bool, error) {
-		status = windowStatus(document.Window, store.now())
+		now := store.now()
+		if document.Window != nil && !document.Window.ExpiresAt.After(now) {
+			document.Window = nil
+		}
+		status = windowStatus(document.Window, now)
 		return ApprovalRequest{}, false, nil
 	})
 	return status, err
