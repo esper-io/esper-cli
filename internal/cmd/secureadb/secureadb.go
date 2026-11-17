@@ -157,11 +157,12 @@ func runConnect(command *cobra.Command, options *esperruntime.GlobalOptions, dev
 	if err != nil {
 		return esperruntime.NewError(esperruntime.CategoryUsage, err)
 	}
-	approval, approved, err := esperruntime.RequireApproval(approvalSpec)
+	decision, err := esperruntime.RequireApproval(approvalSpec, options.ApprovalMode)
 	if err != nil {
 		return esperruntime.NewError(esperruntime.CategoryAuth, err)
 	}
-	if !approved {
+	if !decision.Approved {
+		approval := decision.Request
 		return esperruntime.NewError(esperruntime.CategoryUsage, fmt.Errorf("approval required for secureadb connect\nreview: espercli approval show %s\nhuman approval: espercli approval approve %s", approval.ID, approval.ID))
 	}
 
