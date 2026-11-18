@@ -1,7 +1,7 @@
 -r requirements.txt
 
 coverage==4.5.3
-pytest==4.4.1
+pytest==9.0.3
 pytest-cov==2.6.1
 setuptools>=38.6.0
 twine>=1.11.0
